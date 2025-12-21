@@ -186,15 +186,15 @@ def search(query):
 ## Integration
 
 This skill connects to:
-- [context-fundamentals](skills/context-fundamentals/) - How tools interact with context
-- [multi-agent-patterns](skills/multi-agent-patterns/) - Specialized tools per agent
-- [evaluation](skills/evaluation/) - Evaluating tool effectiveness
+- [context-fundamentals](skills/context-fundamentals/SKILL.md) - How tools interact with context
+- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Specialized tools per agent
+- [evaluation](skills/evaluation/SKILL.md) - Evaluating tool effectiveness
 
 ## References
 
 Internal skills:
-- [context-fundamentals](skills/context-fundamentals/) - Tool context interactions
-- [evaluation](skills/evaluation/) - Tool testing patterns
+- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Tool context interactions
+- [evaluation](skills/evaluation/SKILL.md) - Tool testing patterns
 
 External resources:
 - MCP (Model Context Protocol) documentation

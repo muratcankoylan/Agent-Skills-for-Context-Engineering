@@ -63,13 +63,13 @@ This collection integrates with itself—skills reference each other and build o
 ## References
 
 Internal skills in this collection:
-- [context-fundamentals](skills/context-fundamentals/)
-- [context-degradation](skills/context-degradation/)
-- [multi-agent-patterns](skills/multi-agent-patterns/)
-- [memory-systems](skills/memory-systems/)
-- [tool-design](skills/tool-design/)
-- [context-optimization](skills/context-optimization/)
-- [evaluation](skills/evaluation/)
+- [context-fundamentals](skills/context-fundamentals/SKILL.md)
+- [context-degradation](skills/context-degradation/SKILL.md)
+- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md)
+- [memory-systems](skills/memory-systems/SKILL.md)
+- [tool-design](skills/tool-design/SKILL.md)
+- [context-optimization](skills/context-optimization/SKILL.md)
+- [evaluation](skills/evaluation/SKILL.md)
 
 External resources on context engineering:
 - Research on attention mechanisms and context window limitations

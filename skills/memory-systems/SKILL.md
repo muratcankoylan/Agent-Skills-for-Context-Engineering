@@ -176,17 +176,17 @@ def query_address_at_time(user_id, query_time):
 
 ## Integration
 
-This skill builds on [context-fundamentals](skills/context-fundamentals/). It connects to:
+This skill builds on [context-fundamentals](skills/context-fundamentals/SKILL.md). It connects to:
 
-- [multi-agent-patterns](skills/multi-agent-patterns/) - Shared memory across agents
-- [context-optimization](skills/context-optimization/) - Memory-based context loading
-- [evaluation](skills/evaluation/) - Evaluating memory quality
+- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Shared memory across agents
+- [context-optimization](skills/context-optimization/SKILL.md) - Memory-based context loading
+- [evaluation](skills/evaluation/SKILL.md) - Evaluating memory quality
 
 ## References
 
 Internal skills:
-- [context-fundamentals](skills/context-fundamentals/) - Context basics
-- [multi-agent-patterns](skills/multi-agent-patterns/) - Cross-agent memory
+- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Context basics
+- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Cross-agent memory
 
 External resources:
 - Graph database documentation (Neo4j, etc.)

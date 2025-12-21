@@ -188,18 +188,18 @@ def handle_customer_request(request):
 
 ## Integration
 
-This skill builds on [context-fundamentals](skills/context-fundamentals/) and [context-degradation](skills/context-degradation/). It connects to:
+This skill builds on [context-fundamentals](skills/context-fundamentals/SKILL.md) and [context-degradation](skills/context-degradation/SKILL.md). It connects to:
 
-- [memory-systems](skills/memory-systems/) - Shared state management across agents
-- [tool-design](skills/tool-design/) - Tool specialization per agent
-- [context-optimization](skills/context-optimization/) - Context partitioning strategies
+- [memory-systems](skills/memory-systems/SKILL.md) - Shared state management across agents
+- [tool-design](skills/tool-design/SKILL.md) - Tool specialization per agent
+- [context-optimization](skills/context-optimization/SKILL.md) - Context partitioning strategies
 
 ## References
 
 Internal skills:
-- [context-fundamentals](skills/context-fundamentals/) - Context basics
-- [memory-systems](skills/memory-systems/) - Cross-agent memory
-- [context-optimization](skills/context-optimization/) - Partitioning strategies
+- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Context basics
+- [memory-systems](skills/memory-systems/SKILL.md) - Cross-agent memory
+- [context-optimization](skills/context-optimization/SKILL.md) - Partitioning strategies
 
 External resources:
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Multi-agent patterns and state management

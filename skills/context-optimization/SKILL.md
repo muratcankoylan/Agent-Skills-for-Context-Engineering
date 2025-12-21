@@ -148,18 +148,18 @@ context += [unique_content]  # Unique
 
 ## Integration
 
-This skill builds on [context-fundamentals](skills/context-fundamentals/) and [context-degradation](skills/context-degradation/). It connects to:
+This skill builds on [context-fundamentals](skills/context-fundamentals/SKILL.md) and [context-degradation](skills/context-degradation/SKILL.md). It connects to:
 
-- [multi-agent-patterns](skills/multi-agent-patterns/) - Partitioning as isolation
-- [evaluation](skills/evaluation/) - Measuring optimization effectiveness
-- [memory-systems](skills/memory-systems/) - Offloading context to memory
+- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Partitioning as isolation
+- [evaluation](skills/evaluation/SKILL.md) - Measuring optimization effectiveness
+- [memory-systems](skills/memory-systems/SKILL.md) - Offloading context to memory
 
 ## References
 
 Internal skills:
-- [context-fundamentals](skills/context-fundamentals/) - Context basics
-- [context-degradation](skills/context-degradation/) - Understanding when to optimize
-- [evaluation](skills/evaluation/) - Measuring optimization
+- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Context basics
+- [context-degradation](skills/context-degradation/SKILL.md) - Understanding when to optimize
+- [evaluation](skills/evaluation/SKILL.md) - Measuring optimization
 
 External resources:
 - Research on context window limitations

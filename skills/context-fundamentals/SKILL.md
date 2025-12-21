@@ -156,16 +156,16 @@ docs/api/authentication.md   # Only when auth context needed
 
 This skill provides foundational context that all other skills build upon. It should be studied first before exploring:
 
-- [context-degradation](skills/context-degradation/) - Understanding how context fails
-- [context-optimization](skills/context-optimization/) - Techniques for extending context capacity
-- [multi-agent-patterns](skills/multi-agent-patterns/) - How context isolation enables multi-agent systems
-- [tool-design](skills/tool-design/) - How tool definitions interact with context
+- [context-degradation](skills/context-degradation/SKILL.md) - Understanding how context fails
+- [context-optimization](skills/context-optimization/SKILL.md) - Techniques for extending context capacity
+- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - How context isolation enables multi-agent systems
+- [tool-design](skills/tool-design/SKILL.md) - How tool definitions interact with context
 
 ## References
 
 Internal skills:
-- [context-degradation](skills/context-degradation/) - Understanding context failure patterns
-- [context-optimization](skills/context-optimization/) - Techniques for efficient context use
+- [context-degradation](skills/context-degradation/SKILL.md) - Understanding context failure patterns
+- [context-optimization](skills/context-optimization/SKILL.md) - Techniques for efficient context use
 
 External resources:
 - Research on transformer attention mechanisms

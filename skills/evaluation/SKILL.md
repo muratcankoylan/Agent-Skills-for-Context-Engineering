@@ -185,12 +185,12 @@ test_set = [
 
 This skill connects to all other skills as a cross-cutting concern:
 
-- [context-fundamentals](skills/context-fundamentals/) - Evaluating context usage
-- [context-degradation](skills/context-degradation/) - Detecting degradation
-- [context-optimization](skills/context-optimization/) - Measuring optimization effectiveness
-- [multi-agent-patterns](skills/multi-agent-patterns/) - Evaluating coordination
-- [tool-design](skills/tool-design/) - Evaluating tool effectiveness
-- [memory-systems](skills/memory-systems/) - Evaluating memory quality
+- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Evaluating context usage
+- [context-degradation](skills/context-degradation/SKILL.md) - Detecting degradation
+- [context-optimization](skills/context-optimization/SKILL.md) - Measuring optimization effectiveness
+- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Evaluating coordination
+- [tool-design](skills/tool-design/SKILL.md) - Evaluating tool effectiveness
+- [memory-systems](skills/memory-systems/SKILL.md) - Evaluating memory quality
 
 ## References
 

@@ -162,18 +162,18 @@ turn_30: 90000 tokens (significant degradation)
 
 ## Integration
 
-This skill builds on [context-fundamentals](skills/context-fundamentals/) and should be studied after understanding basic context concepts. It connects to:
+This skill builds on [context-fundamentals](skills/context-fundamentals/SKILL.md) and should be studied after understanding basic context concepts. It connects to:
 
-- [context-optimization](skills/context-optimization/) - Techniques for mitigating degradation
-- [multi-agent-patterns](skills/multi-agent-patterns/) - Using isolation to prevent degradation
-- [evaluation](skills/evaluation/) - Measuring and detecting degradation in production
+- [context-optimization](skills/context-optimization/SKILL.md) - Techniques for mitigating degradation
+- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Using isolation to prevent degradation
+- [evaluation](skills/evaluation/SKILL.md) - Measuring and detecting degradation in production
 
 ## References
 
 Internal skills:
-- [context-fundamentals](skills/context-fundamentals/) - Context basics
-- [context-optimization](skills/context-optimization/) - Mitigation techniques
-- [evaluation](skills/evaluation/) - Detection and measurement
+- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Context basics
+- [context-optimization](skills/context-optimization/SKILL.md) - Mitigation techniques
+- [evaluation](skills/evaluation/SKILL.md) - Detection and measurement
 
 External resources:
 - Research on attention mechanisms and context window limitations
