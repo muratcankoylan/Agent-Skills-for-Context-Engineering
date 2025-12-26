@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "context-engineering",
-      "description": "Fundamental Agent Skills for context engineering. Includes strategies for context window management, multi-agent orchestration, memory systems, and advanced LLM-as-a-Judge evaluation frameworks.",
+      "description": "Production-grade Agent Skills for context engineering. Includes strategies for context window management, multi-agent orchestration, memory systems, and advanced LLM-as-a-Judge evaluation frameworks.",
       "version": "1.0.0",
       "source": "./skills",
       "strict": false,
