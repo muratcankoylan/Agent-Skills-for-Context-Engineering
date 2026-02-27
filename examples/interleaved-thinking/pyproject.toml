@@ -51,7 +51,7 @@ rto = "reasoning_trace_optimizer.cli:main"
 [project.urls]
 Homepage = "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering"
 Repository = "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering"
-Documentation = "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/main/examples/interleaved_thinking"
+Documentation = "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/main/examples/interleaved-thinking"
 
 [tool.setuptools.packages.find]
 where = ["."]

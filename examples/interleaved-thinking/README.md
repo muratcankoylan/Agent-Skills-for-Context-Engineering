@@ -93,7 +93,7 @@ Each detected pattern includes:
 ### Installation
 
 ```bash
-cd examples/interleaved_thinking
+cd examples/interleaved-thinking
 pip install -e .
 ```
 
