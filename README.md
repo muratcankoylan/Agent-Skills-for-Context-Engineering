@@ -66,6 +66,16 @@ These skills cover formal cognitive modeling for rational agent systems.
 |-------|-------------|
 | [bdi-mental-states](skills/bdi-mental-states/) | **NEW** Transform external RDF context into agent mental states (beliefs, desires, intentions) using formal BDI ontology patterns for deliberative reasoning and explainability |
 
+### Protocol & Network Architecture Skills
+
+These skills cover protocol design review and implementation patterns for decentralized network architectures.
+
+| Skill | Description |
+|-------|-------------|
+| [lightning-factory-explainer](skills/lightning-factory-explainer/) | Explain Bitcoin Lightning channel factories and the SuperScalar protocol — scalable onboarding using shared UTXOs, Decker-Wattenhofer trees, and MuSig2 |
+| [lightning-channel-factories](skills/lightning-channel-factories/) | Technical reference on Lightning Network channel factories, multi-party channels, LSP architectures, and Layer 2 scaling without soft forks |
+| [lightning-architecture-review](skills/lightning-architecture-review/) | Review Lightning protocol designs, compare channel factory approaches, and analyze Layer 2 scaling tradeoffs |
+
 ## Design Philosophy
 
 ### Progressive Disclosure
@@ -141,6 +151,9 @@ Option B - Direct install via command:
 | `advanced-evaluation` | "implement LLM-as-judge", "compare model outputs", "mitigate bias" |
 | `project-development` | "start LLM project", "design batch pipeline", "evaluate task-model fit" |
 | `bdi-mental-states` | "model agent mental states", "implement BDI architecture", "transform RDF to beliefs", "build cognitive agent" |
+| `lightning-factory-explainer` | "explain Lightning channel factories", "describe SuperScalar protocol", "understand shared UTXOs" |
+| `lightning-channel-factories` | "implement channel factories", "build Lightning multi-party channels", "design LSP architectures" |
+| `lightning-architecture-review` | "review Lightning protocol designs", "compare channel factory approaches", "analyze Layer 2 scaling tradeoffs" |
 
 <img width="1014" height="894" alt="Screenshot 2025-12-26 at 12 34 47 PM" src="https://github.com/user-attachments/assets/f79aaf03-fd2d-4c71-a630-7027adeb9bfe" />
 
