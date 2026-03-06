@@ -47,6 +47,7 @@ These skills address the ongoing operation and optimization of agent systems.
 | Skill | Description |
 |-------|-------------|
 | [context-optimization](skills/context-optimization/) | Apply compaction, masking, and caching strategies |
+| [context-benchmarking](skills/context-benchmarking/) | Set up benchmarking feedback loops, prevent recall regressions, operationalize evaluation in CI |
 | [evaluation](skills/evaluation/) | Build evaluation frameworks for agent systems |
 | [advanced-evaluation](skills/advanced-evaluation/) | Master LLM-as-a-Judge techniques: direct scoring, pairwise comparison, rubric generation, and bias mitigation |
 
@@ -120,7 +121,7 @@ Option B - Direct install via command:
 |--------|-----------------|
 | `context-engineering-fundamentals` | context-fundamentals, context-degradation, context-compression, context-optimization |
 | `agent-architecture` | multi-agent-patterns, memory-systems, tool-design, filesystem-context, hosted-agents |
-| `agent-evaluation` | evaluation, advanced-evaluation |
+| `agent-evaluation` | evaluation, advanced-evaluation, context-benchmarking |
 | `agent-development` | project-development |
 | `cognitive-architecture` | bdi-mental-states |
 
@@ -139,6 +140,7 @@ Option B - Direct install via command:
 | `hosted-agents` | "build background agent", "create hosted coding agent", "sandboxed execution", "multiplayer agent", "Modal sandboxes" |
 | `evaluation` | "evaluate agent performance", "build test framework", "measure quality" |
 | `advanced-evaluation` | "implement LLM-as-judge", "compare model outputs", "mitigate bias" |
+| `context-benchmarking` | "set up benchmarking", "prevent context regression", "automate evaluation", "CI benchmark", "measure recall degradation" |
 | `project-development` | "start LLM project", "design batch pipeline", "evaluate task-model fit" |
 | `bdi-mental-states` | "model agent mental states", "implement BDI architecture", "transform RDF to beliefs", "build cognitive agent" |
 
@@ -162,6 +164,7 @@ The [examples](examples/) folder contains complete system designs that demonstra
 | [x-to-book-system](examples/x-to-book-system/) | Multi-agent system that monitors X accounts and generates daily synthesized books | multi-agent-patterns, memory-systems, context-optimization, tool-design, evaluation |
 | [llm-as-judge-skills](examples/llm-as-judge-skills/) | Production-ready LLM evaluation tools with TypeScript implementation, 19 passing tests | advanced-evaluation, tool-design, context-fundamentals, evaluation |
 | [book-sft-pipeline](examples/book-sft-pipeline/) | Train models to write in any author's style. Includes Gertrude Stein case study with 70% human score on Pangram, $2 total cost | project-development, context-compression, multi-agent-patterns, evaluation |
+| [automated-benchmarking](examples/automated-benchmarking/) | Working example of context-benchmarking. Runs test set against agent config using LLM-as-Judge scoring, checks for recall regressions against stored baseline. CI-ready with cost-safe triggers | context-benchmarking, advanced-evaluation, context-compression |
 
 Each example includes:
 - Complete PRD with architecture decisions
@@ -198,6 +201,38 @@ The [book-sft-pipeline](examples/book-sft-pipeline/) example demonstrates traini
 - **Validation Methodology**: Modern scenario testing proves style transfer vs content memorization
 
 Integrates with context engineering skills: project-development, context-compression, multi-agent-patterns, evaluation.
+
+### Automated Benchmarking Pipeline Example
+
+The [automated-benchmarking](examples/automated-benchmarking/) example is a working implementation of the `context-benchmarking` skill. It runs a test set against an agent configuration using LLM-as-Judge scoring and checks for recall regressions against a stored baseline — blocking CI merges on failure.
+
+**What it does:**
+1. Loads test cases from `test-cases.json`
+2. Runs each case through an agent (context → question → answer)
+3. Scores each answer using an LLM judge (did the expected facts survive?)
+4. Compares overall recall against a stored baseline
+5. Exits with code 1 (failure) if a regression is detected
+
+**Skills applied:** context-benchmarking (feedback loop, regression check), advanced-evaluation (LLM-as-Judge scoring), context-compression (what the pipeline validates)
+
+**Setup:**
+```bash
+pip install anthropic
+export ANTHROPIC_API_KEY=your-key-here
+```
+
+**Usage:**
+```bash
+# First run — establish a baseline
+python skills/context-benchmarking/scripts/run-benchmark.py --test-set examples/automated-benchmarking/test-cases.json --update-baseline
+
+# Subsequent runs — check for regressions
+python skills/context-benchmarking/scripts/run-benchmark.py --test-set examples/automated-benchmarking/test-cases.json --baseline examples/automated-benchmarking/baseline.json
+```
+
+**Cost:** Each test case makes 2 API calls (agent + judge) using `claude-haiku-4-5-20251001`. The included 3-case test set costs approximately $0.001 per run.
+
+**CI integration:** The example supports GitHub Actions with cost-safe triggers — manual `workflow_dispatch` or PR label `run-benchmark` only. Never runs automatically on push or PR.
 
 ## Star History
 <img width="3664" height="2648" alt="star-history-2026224" src="https://github.com/user-attachments/assets/b3bdbf23-4b6a-4774-ae85-42ef4d9b2d79" />

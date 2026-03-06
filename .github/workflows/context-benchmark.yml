@@ -1,0 +1,119 @@
+# Context Benchmarking
+# Cost safety: never runs automatically on push or PR.
+# Two safe triggers only:
+#   1. Manual trigger via GitHub UI (workflow_dispatch)
+#   2. PR label "run-benchmark" added by a maintainer
+on:
+  workflow_dispatch:
+    inputs:
+      test_set:
+        description: "Path to test cases file"
+        required: false
+        default: "examples/automated-benchmarking/test-cases.json"
+      update_baseline:
+        description: "Update baseline after run? (true/false)"
+        required: false
+        default: "false"
+
+  pull_request:
+    types: [labeled]
+
+jobs:
+  # Gate: only run on PR if the exact label "run-benchmark" was just added
+  check-label:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'run-benchmark')
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.gate.outputs.should_run }}
+    steps:
+      - id: gate
+        run: echo "should_run=true" >> $GITHUB_OUTPUT
+
+  benchmark:
+    needs: check-label
+    if: needs.check-label.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install anthropic
+
+      - name: Restore baseline (if exists)
+        uses: actions/cache@v4
+        with:
+          path: examples/automated-benchmarking/baseline.json
+          key: benchmark-baseline-v1
+          restore-keys: benchmark-baseline-
+
+      - name: Run benchmark
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          TEST_SET="${{ github.event.inputs.test_set || 'examples/automated-benchmarking/test-cases.json' }}"
+          UPDATE_BASELINE="${{ github.event.inputs.update_baseline || 'false' }}"
+
+          CMD="python skills/context-benchmarking/scripts/run-benchmark.py \
+            --test-set $TEST_SET \
+            --baseline examples/automated-benchmarking/baseline.json \
+            --output benchmark_results.json"
+
+          if [ "$UPDATE_BASELINE" = "true" ]; then
+            CMD="$CMD --update-baseline"
+          fi
+
+          echo "Running: $CMD"
+          $CMD
+
+      - name: Save updated baseline
+        if: github.event.inputs.update_baseline == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: examples/automated-benchmarking/baseline.json
+          key: benchmark-baseline-v1
+
+      - name: Upload results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.run_id }}
+          path: benchmark_results.json
+          retention-days: 30
+
+      - name: Post results summary to PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '## Context Benchmark Results\n\n';
+            try {
+              const results = JSON.parse(fs.readFileSync('benchmark_results.json', 'utf8'));
+              const status = results.passed ? '✅ PASSED' : '❌ FAILED';
+              body += `**Status:** ${status}\n`;
+              body += `**Overall Recall:** ${(results.overall_recall * 100).toFixed(1)}%\n`;
+              body += `**Avg Latency:** ${results.avg_latency_s}s\n\n`;
+              body += '### Per-Case Results\n\n';
+              body += '| Test Case | Recall | Latency |\n|---|---|---|\n';
+              for (const c of results.cases) {
+                const icon = c.recall >= 0.80 ? '✅' : '❌';
+                body += `| ${icon} ${c.id} | ${(c.recall * 100).toFixed(0)}% | ${c.latency_s}s |\n`;
+              }
+            } catch (e) {
+              body += '⚠️ Could not parse benchmark results. Check the workflow logs.\n';
+            }
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
