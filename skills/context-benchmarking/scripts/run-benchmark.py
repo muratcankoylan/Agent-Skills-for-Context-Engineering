@@ -118,8 +118,8 @@ def run_benchmark(test_cases: list[dict], client: anthropic.Anthropic) -> dict:
             "agent_output": agent_output
         })
 
-        status = "✓" if score["recall"] >= RECALL_THRESHOLD else "✗"
-        print(f"{status} recall={score['recall']:.2f} latency={latency:.2f}s")
+        status = "PASS" if score["recall"] >= RECALL_THRESHOLD else "FAIL"
+        print(f"[{status}] recall={score['recall']:.2f} latency={latency:.2f}s")
 
     overall_recall = sum(r["recall"] for r in results) / len(results)
     avg_latency = total_latency / len(results)
@@ -223,7 +223,7 @@ def main():
     print(f"\n{'='*50}")
     print(f"Overall recall : {results['overall_recall']:.4f}")
     print(f"Avg latency    : {results['avg_latency_s']:.3f}s")
-    print(f"Status         : {'PASSED ✓' if results['passed'] else 'FAILED ✗'}")
+    print(f"Status         : {'PASSED' if results['passed'] else 'FAILED'}")
     print(f"{'='*50}\n")
 
     if not results["passed"]:
