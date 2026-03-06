@@ -98,18 +98,18 @@ jobs:
             let body = '## Context Benchmark Results\n\n';
             try {
               const results = JSON.parse(fs.readFileSync('benchmark_results.json', 'utf8'));
-              const status = results.passed ? '✅ PASSED' : '❌ FAILED';
+              const status = results.passed ? 'PASSED' : 'FAILED';
               body += `**Status:** ${status}\n`;
               body += `**Overall Recall:** ${(results.overall_recall * 100).toFixed(1)}%\n`;
               body += `**Avg Latency:** ${results.avg_latency_s}s\n\n`;
               body += '### Per-Case Results\n\n';
               body += '| Test Case | Recall | Latency |\n|---|---|---|\n';
               for (const c of results.cases) {
-                const icon = c.recall >= 0.80 ? '✅' : '❌';
+                const icon = c.recall >= 0.80 ? 'Passed' : 'Failed';
                 body += `| ${icon} ${c.id} | ${(c.recall * 100).toFixed(0)}% | ${c.latency_s}s |\n`;
               }
             } catch (e) {
-              body += '⚠️ Could not parse benchmark results. Check the workflow logs.\n';
+              body += 'Could not parse benchmark results. Check the workflow logs.\n';
             }
             github.rest.issues.createComment({
               issue_number: context.issue.number,
