@@ -515,7 +515,7 @@ class AgentSession:
             # Queue the write
             self.pending_writes.append((path, content))
             await self._wait_for_sync()
-
+            return
         await self.sandbox.write_file(path, content)
 
     def mark_sync_complete(self) -> None:
