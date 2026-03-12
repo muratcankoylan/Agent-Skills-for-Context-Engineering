@@ -211,12 +211,16 @@ class AgentEvaluator:
             if task.get("requires_citations"):
                 # Look for citation patterns like [1], [Author 2024], [source]
                 # Avoid false positives from code brackets or JSON
-                citation_pattern = r'\[\d+\]|\[[A-Z][a-z]+(?:\s+(?:et al\.?|&)\s+[A-Z][a-z]+)?\s*[\d,]+\]|\[(?:source|ref|cite)[^\]]*\]'
+                citation_pattern = r"\[\d+\]|\[[A-Z][a-z]+(?:\s+(?:et al\.?|&)\s+[A-Z][a-z]+)?\s*[\d,]+\]|\[(?:source|ref|cite)[^\]]*\]"
                 import re as _re
+
                 citations_found = _re.findall(citation_pattern, output)
                 if len(citations_found) >= 1:
                     return 1.0
-                elif any(marker in output_lower for marker in ["according to", "cited in", "reported by"]):
+                elif any(
+                    marker in output_lower
+                    for marker in ["according to", "cited in", "reported by"]
+                ):
                     return 0.7
                 return 0.4
             return 0.8  # Citations not required
