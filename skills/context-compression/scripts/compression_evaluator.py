@@ -397,10 +397,52 @@ class CompressionEvaluator:
         if any(ext in response for ext in [".ts", ".py", ".js", ".md"]):
             score += 0.5  # Contains file references
         
-        if ground_truth and ground_truth in response:
-            score += 1.0  # Contains ground truth
+        overlap_ratio = self._ground_truth_overlap_ratio(response, ground_truth)
+        if overlap_ratio >= 0.75:
+            score += 1.0
+        elif overlap_ratio >= 0.4:
+            score += 0.5
+        elif ground_truth:
+            score -= 0.5
         
         return min(5.0, max(0.0, score))
+
+    def _ground_truth_overlap_ratio(self,
+                                    response: str,
+                                    ground_truth: Optional[str]) -> float:
+        if not ground_truth:
+            return 0.0
+
+        terms = self._extract_ground_truth_terms(ground_truth)
+        if not terms:
+            return 1.0 if ground_truth.lower() in response.lower() else 0.0
+
+        response_lower = response.lower()
+        matches = sum(1 for term in terms if term in response_lower)
+        return matches / len(terms)
+
+    def _extract_ground_truth_terms(self, ground_truth: str) -> List[str]:
+        try:
+            parsed = json.loads(ground_truth)
+        except json.JSONDecodeError:
+            return [ground_truth.lower()] if ground_truth.strip() else []
+
+        terms: List[str] = []
+
+        def collect(value) -> None:
+            if isinstance(value, str):
+                normalized = value.strip().lower()
+                if normalized:
+                    terms.append(normalized)
+            elif isinstance(value, dict):
+                for nested in value.values():
+                    collect(nested)
+            elif isinstance(value, list):
+                for nested in value:
+                    collect(nested)
+
+        collect(parsed)
+        return list(dict.fromkeys(terms))
     
     def _calculate_dimension_scores(self, 
                                     criterion_results: List[CriterionResult]) -> Dict[str, float]:
