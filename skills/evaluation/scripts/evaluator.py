@@ -129,7 +129,7 @@ class AgentEvaluator:
         
         # Calculate weighted overall
         overall = sum(
-            s["score"] * self.rubric[k]["weight"]
+            s["score"] * self.rubric[k].weight
             for k, s in scores.items()
         )
         
