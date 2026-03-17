@@ -16,6 +16,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: tesslio/skill-review-and-optimize@e2bc05fb20a1eedc89a58a60a599c10e5544615c # main
+      - uses: tesslio/skill-review-and-optimize@e31f0626a207c365ccaf1cf3c4dca6ec8ad290ac # main
         with:
           mode: apply
