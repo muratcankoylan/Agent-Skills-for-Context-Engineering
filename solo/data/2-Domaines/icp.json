@@ -1,0 +1,58 @@
+{
+  "ideal_client_profile": {
+    "version": "1.0",
+    "last_updated": "",
+    "_note": "Created by /solo:start. Shared with sales and copywriter addons when installed.",
+    "demographics": {
+      "age_range": "",
+      "gender": "",
+      "location": "",
+      "income_level": "",
+      "education": ""
+    },
+    "professional_profile": {
+      "job_titles": [],
+      "industries": [],
+      "company_size": "",
+      "experience_level": "",
+      "decision_making_power": ""
+    },
+    "psychographics": {
+      "values": [],
+      "beliefs": [],
+      "personality_traits": []
+    },
+    "problems_and_pain_points": {
+      "primary_problems": [],
+      "frustrations": [],
+      "fears": [],
+      "failed_solutions": []
+    },
+    "goals_and_desires": {
+      "immediate_goals": [],
+      "long_term_aspirations": [],
+      "dream_outcome": ""
+    },
+    "language_patterns": {
+      "words_they_use": [],
+      "phrases_they_say": [],
+      "questions_they_ask": [],
+      "jargon_they_know": []
+    },
+    "content_consumption": {
+      "platforms": [],
+      "content_formats": [],
+      "consumption_time": "",
+      "attention_span": ""
+    },
+    "objections": {
+      "common_objections": [],
+      "trust_barriers": []
+    },
+    "buying_triggers": {
+      "emotional_triggers": [],
+      "logical_triggers": [],
+      "timing_triggers": []
+    }
+  }
+}

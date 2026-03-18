@@ -1,0 +1,14 @@
+frameworks:
+  - name: "STRUCTURED_INTERVIEW"
+    description: "Using standardized questions and rubrics to ensure fairness"
+    principles:
+      - "Same questions for every candidate"
+      - "Defined scoring rubric for each question"
+      - "Independent evaluation before panel discussion"
+    scaling: "1-5 scale (1: Does not meet, 3: Proficiency, 5: Exceptional)"
+
+  - name: "CULTURAL_ADD_VS_FIT"
+    description: "Shifting from 'Fit' (similarity) to 'Add' (diversity)"
+    assessment:
+      - "What new perspective does this person bring?"
+      - "What gap in our current team's thinking do they fill?"

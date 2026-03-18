@@ -1,0 +1,371 @@
+# Comprehensive Fallacy Patterns (Extended)
+# Based on Argumentum catalogue and classical logic
+
+patterns:
+  # CAUSAL FALLACIES
+  - id: C1
+    name: "Post hoc ergo propter hoc"
+    category: "Causal"
+    description: "Assumes causation from temporal sequence (A happened before B, so A caused B)"
+    triggers:
+      - "since then"
+      - "after that"
+      - "right after"
+      - "following which"
+      - "therefore caused"
+    severity: MEDIUM
+    test_positive: "We hired a new CEO and sales dropped. The CEO caused the decline."
+    test_negative: "Sales dropped 6 months after hiring a new CEO, but industry-wide trends suggest broader factors."
+
+  - id: C2
+    name: "Cum hoc ergo propter hoc"
+    category: "Causal"
+    description: "Correlation implies causation"
+    triggers:
+      - "correlates with"
+      - "associated with"
+      - "linked to"
+      - "related to"
+      - "happens alongside"
+    severity: HIGH
+    test_positive: "Ice cream sales correlate with drowning deaths, so ice cream causes drowning."
+
+  - id: C3
+    name: "Reversed causality"
+    category: "Causal"
+    description: "Confusing cause and effect direction"
+    triggers:
+      - "because of"
+      - "due to"
+      - "caused by"
+    severity: MEDIUM
+    check: "Could B cause A instead of A causing B?"
+
+  - id: C4
+    name: "Single cause fallacy"
+    category: "Causal"
+    description: "Attributing complex outcome to single cause"
+    triggers:
+      - "the reason"
+      - "the cause"
+      - "because of this one thing"
+    severity: MEDIUM
+
+  # EVIDENTIAL FALLACIES
+  - id: E1
+    name: "Cherry picking"
+    category: "Evidential"
+    description: "Selecting only confirming evidence while ignoring disconfirming"
+    triggers:
+      - "for example"
+      - "such as"
+      - "like when"
+    severity: HIGH
+    check: "Are counter-examples systematically ignored?"
+
+  - id: E2
+    name: "False dilemma"
+    category: "Evidential"
+    description: "Presents only two options when more exist"
+    triggers:
+      - "either...or"
+      - "only two options"
+      - "choose between"
+      - "must decide"
+    severity: MEDIUM
+    test_positive: "Either we cut costs or go bankrupt."
+    test_negative: "We could cut costs, raise prices, find new revenue, or restructure debt."
+
+  - id: E3
+    name: "Hasty generalization"
+    category: "Evidential"
+    description: "Drawing broad conclusion from small sample"
+    triggers:
+      - "always"
+      - "never"
+      - "every time"
+      - "all [group]"
+    severity: MEDIUM
+    check: "Sample size >= 30? Representative sample?"
+
+  - id: E4
+    name: "Anecdotal evidence"
+    category: "Evidential"
+    description: "Using personal anecdote as sufficient evidence"
+    triggers:
+      - "I know someone who"
+      - "in my experience"
+      - "this one time"
+    severity: LOW
+    check: "Is systematic data available?"
+
+  - id: E5
+    name: "Burden of proof reversal"
+    category: "Evidential"
+    description: "Asking others to disprove rather than proving claim"
+    triggers:
+      - "prove me wrong"
+      - "show me evidence it's not"
+      - "can you disprove"
+    severity: MEDIUM
+
+  - id: E6
+    name: "Moving goalposts"
+    category: "Evidential"
+    description: "Changing evidence requirements after initial criteria met"
+    triggers:
+      - "but also"
+      - "that's not enough"
+      - "still need to show"
+    severity: MEDIUM
+
+  # LOGICAL STRUCTURE FALLACIES
+  - id: L1
+    name: "Circular reasoning"
+    category: "Logical"
+    description: "Conclusion assumes the premise (begging the question)"
+    triggers:
+      - "because it is"
+      - "obviously"
+      - "clearly"
+    severity: HIGH
+    check: "Does the premise rely on the conclusion being true?"
+
+  - id: L2
+    name: "Non sequitur"
+    category: "Logical"
+    description: "Conclusion doesn't follow from premises"
+    triggers:
+      - "therefore"
+      - "thus"
+      - "so"
+    severity: HIGH
+    check: "Does conclusion logically follow? Are there hidden premises?"
+
+  - id: L3
+    name: "Affirming the consequent"
+    category: "Logical"
+    description: "If A then B. B is true, therefore A (invalid)"
+    pattern: "If A then B. B. Therefore A."
+    severity: MEDIUM
+    test_positive: "If it rains, streets are wet. Streets are wet, so it rained."
+
+  - id: L4
+    name: "Denying the antecedent"
+    category: "Logical"
+    description: "If A then B. Not A, therefore not B (invalid)"
+    pattern: "If A then B. Not A. Therefore not B."
+    severity: MEDIUM
+
+  - id: L5
+    name: "Equivocation"
+    category: "Logical"
+    description: "Using a word with multiple meanings inconsistently"
+    triggers:
+      - "is"
+      - "means"
+      - "refers to"
+    severity: MEDIUM
+    check: "Are key terms used consistently?"
+
+  # RHETORICAL FALLACIES
+  - id: R1
+    name: "Ad hominem"
+    category: "Rhetorical"
+    description: "Attacking person instead of argument"
+    triggers:
+      - "you are"
+      - "people like you"
+      - "they're just"
+    severity: MEDIUM
+    test_positive: "You can't trust his economic analysis because he's rich."
+
+  - id: R2
+    name: "Appeal to authority"
+    category: "Rhetorical"
+    description: "Claiming truth because authority says so (in wrong domain)"
+    triggers:
+      - "experts say"
+      - "according to [authority]"
+      - "scientists claim"
+    severity: LOW
+    check: "Is authority in relevant domain? Consensus vs. single expert?"
+
+  - id: R3
+    name: "Appeal to popularity"
+    category: "Rhetorical"
+    description: "True because many believe it (argumentum ad populum)"
+    triggers:
+      - "everyone knows"
+      - "most people"
+      - "popular opinion"
+    severity: LOW
+
+  - id: R4
+    name: "Appeal to emotion"
+    category: "Rhetorical"
+    description: "Manipulating emotions instead of logic"
+    triggers:
+      - "think of the"
+      - "how would you feel"
+      - "imagine if"
+    severity: LOW
+    check: "Does argument work without emotional language?"
+
+  - id: R5
+    name: "Appeal to tradition"
+    category: "Rhetorical"
+    description: "Right because we've always done it this way"
+    triggers:
+      - "always done"
+      - "traditional"
+      - "historically"
+    severity: LOW
+
+  - id: R6
+    name: "Appeal to novelty"
+    category: "Rhetorical"
+    description: "Better because it's new"
+    triggers:
+      - "new approach"
+      - "modern way"
+      - "innovative"
+    severity: LOW
+
+  - id: R7
+    name: "Strawman"
+    category: "Rhetorical"
+    description: "Misrepresenting opponent's position to attack easier version"
+    triggers:
+      - "so you're saying"
+      - "your position is"
+      - "you believe"
+    severity: HIGH
+    check: "Would opponent agree this is their position?"
+
+  - id: R8
+    name: "Red herring"
+    category: "Rhetorical"
+    description: "Introducing irrelevant topic to distract"
+    severity: MEDIUM
+    check: "Is this point relevant to the original question?"
+
+  - id: R9
+    name: "Tu quoque"
+    category: "Rhetorical"
+    description: "You too / hypocrisy accusation (doesn't address argument)"
+    triggers:
+      - "but you also"
+      - "you do the same"
+      - "hypocrite"
+    severity: LOW
+
+  # PROBABILISTIC FALLACIES
+  - id: P1
+    name: "Base rate neglect"
+    category: "Probabilistic"
+    description: "Ignoring prior probabilities"
+    severity: HIGH
+    check: "What's the base rate? Is specific evidence weighted against it?"
+
+  - id: P2
+    name: "Gambler's fallacy"
+    category: "Probabilistic"
+    description: "Independent events aren't independent"
+    triggers:
+      - "due for"
+      - "overdue"
+      - "streak"
+    severity: MEDIUM
+    test_positive: "I've flipped heads 5 times, so tails is due next."
+
+  - id: P3
+    name: "Conjunction fallacy"
+    category: "Probabilistic"
+    description: "Thinking specific scenario more likely than general"
+    triggers:
+      - "both"
+      - "and also"
+    severity: MEDIUM
+    check: "Is P(A and B) presented as > P(A)?"
+
+  - id: P4
+    name: "Regression to the mean ignored"
+    category: "Probabilistic"
+    description: "Attributing mean reversion to intervention"
+    triggers:
+      - "improved after"
+      - "got better when"
+    severity: MEDIUM
+
+  # SLIPPERY SLOPE
+  - id: S1
+    name: "Slippery slope"
+    category: "Consequential"
+    description: "A will inevitably lead to Z without justifying intermediate steps"
+    triggers:
+      - "lead to"
+      - "open the door"
+      - "next thing"
+      - "before you know it"
+    severity: LOW
+    check: "Are intermediate steps actually inevitable?"
+
+  # COMPOSITION/DIVISION
+  - id: D1
+    name: "Fallacy of composition"
+    category: "Part-whole"
+    description: "What's true of parts must be true of whole"
+    severity: MEDIUM
+    test_positive: "Each player is good, so the team must be good."
+
+  - id: D2
+    name: "Fallacy of division"
+    category: "Part-whole"
+    description: "What's true of whole must be true of parts"
+    severity: MEDIUM
+    test_positive: "The company is profitable, so every division must be profitable."
+
+# CRITICAL COMBINATIONS (multiple fallacies compound)
+critical_combinations:
+  - ids: ["C1", "E1"]
+    name: "Post hoc + cherry picking"
+    multiplier: 2.0
+    warning: "Selecting only cases where temporal sequence matches claimed causation"
+
+  - ids: ["E2", "R4"]
+    name: "False dilemma + emotional appeal"
+    multiplier: 1.8
+    warning: "Forcing binary choice while manipulating emotions"
+
+  - ids: ["C2", "P1"]
+    name: "Correlation-causation + base rate neglect"
+    multiplier: 2.0
+    warning: "Ignoring prior probability while inferring causation"
+
+  - ids: ["L1", "R7"]
+    name: "Circular reasoning + strawman"
+    multiplier: 1.9
+    warning: "Assuming conclusion while misrepresenting opposition"
+
+# DETECTION ALGORITHMS
+detection_rules:
+  temporal_sequence:
+    description: "Detect temporal language without causal justification"
+    patterns: ["after", "since", "following", "then"]
+    requires_check: "Is causal mechanism explained?"
+
+  universal_quantifiers:
+    description: "Detect overgeneralization"
+    patterns: ["all", "every", "always", "never", "none"]
+    requires_check: "Is universal claim justified by evidence?"
+
+  binary_framings:
+    description: "Detect false dichotomies"
+    patterns: ["either...or", "only two", "must choose"]
+    requires_check: "Are other options acknowledged?"
+
+  emotional_language:
+    description: "Detect emotion manipulation"
+    patterns: ["imagine", "think of", "how would you feel"]
+    requires_check: "Does argument work without emotional framing?"

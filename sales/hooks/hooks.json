@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "outbound-sequence|proposal-builder|linkedin-creator|linkedin-engager",
+        "condition": "solo_not_installed",
+        "hooks": [{ "type": "skill", "skill": "antislop-expert", "timeout": 60 }],
+        "_note": "Standalone mode only. When Solo is installed, antislop is managed centrally in Solo hooks.json."
+      },
+      {
+        "matcher": "rfp-shredder",
+        "condition": "sentinel_installed",
+        "hooks": [{ "type": "agent", "agent": "reality-checker", "agent_path": "../sentinel-v8/agents/reality-checker.md", "timeout": 90 }],
+        "_note": "When Sentinel installed, auto-runs reality-checker after GO/borderline RFP score."
+      },
+      {
+        "matcher": "win-loss-analyzer",
+        "hooks": [{ "type": "agent", "agent": "win-loss-analyst-agent", "timeout": 120 }],
+        "_note": "Auto-triggers full post-mortem agent after win-loss-analyzer skill completes."
+      }
+    ],
+    "Schedule": [
+      {
+        "cron": "0 8 * * 1",
+        "hooks": [{ "type": "agent", "agent": "pipeline-guardian-agent" }],
+        "_note": "Weekly pipeline health audit every Monday morning."
+      },
+      {
+        "cron": "0 7 * * *",
+        "hooks": [{ "type": "agent", "agent": "signal-trapper-agent", "condition": "exa_installed" }],
+        "_note": "Daily market signal scan — requires Exa search tool."
+      }
+    ]
+  }
+}

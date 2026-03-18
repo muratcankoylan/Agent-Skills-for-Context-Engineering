@@ -1,0 +1,288 @@
+# Inhibition Strategies (Houde System 3)
+# One strategy per heuristic with alternatives and message templates
+
+strategies:
+  FIRST_NUMBER_ANCHORING:
+    houde_difficulty: 2
+    
+    alternatives:
+      - method: INDEPENDENT_ESTIMATION
+        description: Generate estimate without seeing anchor
+        instructions:
+          - Cover/ignore the anchor value
+          - Generate estimate from first principles
+          - Write down BEFORE comparing
+        difficulty: 2
+        effectiveness: 0.75
+        
+      - method: MULTIPLE_ANCHORS
+        description: Use 3-5 references and aggregate
+        instructions:
+          - Find 3-5 different reference points
+          - Calculate median or weighted average
+          - Use aggregated value as baseline
+        difficulty: 3
+        effectiveness: 0.85
+        
+      - method: REFERENCE_CLASS_FORECASTING
+        description: Use base rates (Kahneman outside view)
+        instructions:
+          - Identify reference class (similar cases)
+          - Gather statistical data
+          - Start with base rate, adjust for specifics
+        difficulty: 4
+        effectiveness: 0.90
+    
+    messages:
+      STRONG: |
+         INHIBITION ACTIVATED (STRONG)
+        
+        Heuristic: FIRST_NUMBER_ANCHORING
+        Anchor: {anchor}
+        Appropriateness: {score}% (INAPPROPRIATE)
+        
+         BLOCKED: Cannot proceed with this anchor.
+        
+        Why:
+        {reasons}
+        
+        REQUIRED: Use alternative method.
+        1. Independent Estimation (easy, 2/5)
+        2. Multiple Anchors (moderate, 3/5)
+        3. Reference Class Forecasting (rigorous, 4/5)
+        
+        Basis: Tversky & Kahneman (1974) - Anchoring bias +/-20%.
+        Houde (2000) - DLPFC must block parietal encoding.
+      
+      MODERATE: |
+         INHIBITION NOTICE (MODERATE)
+        
+        Anchor: {anchor}
+        Appropriateness: {score}%
+        
+        PAUSE: Generate independent estimate first.
+        
+        Recommended: {primary_alternative}
+      
+      WEAK: |
+        i Anchoring detected on {anchor}.
+        Consider independent estimation to verify.
+
+  LOSS_AVERSION:
+    houde_difficulty: 5  # Hardest (emotional)
+    
+    alternatives:
+      - method: REFRAME_AS_GAIN
+        description: Flip loss frame to gain frame
+        instructions:
+          - Identify loss framing
+          - Rewrite as gains/opportunities
+          - Evaluate in neutral frame
+          - Check if preference changes
+        difficulty: 3
+        effectiveness: 0.70
+        
+      - method: EXPECTED_VALUE_CALCULATION
+        description: Calculate objective EV (ignore framing)
+        instructions:
+          - List outcomes with probabilities
+          - Assign monetary values (neutral)
+          - Calculate EV = (prob x value)
+          - Choose higher EV
+        difficulty: 2
+        effectiveness: 0.80
+        
+      - method: PORTFOLIO_PERSPECTIVE
+        description: View as one of many decisions
+        instructions:
+          - Consider "If I made 100 similar..."
+          - Calculate aggregate EV
+          - Accept variance on individual
+          - Focus on long-term average
+        difficulty: 4
+        effectiveness: 0.85
+        
+      - method: PRECOMMITMENT
+        description: Decide rules in advance (cold state)
+        instructions:
+          - Before emotional situation, set rule
+          - Example "Accept any EV > $X"
+          - When decision comes, follow mechanically
+          - Don't renegotiate in hot state
+        difficulty: 5
+        effectiveness: 0.95
+    
+    messages:
+      ABSOLUTE: |
+         CRITICAL INHIBITION (ABSOLUTE)
+        
+        Heuristic: LOSS_AVERSION (Amygdala-driven)
+        Appropriateness: {score}% (INAPPROPRIATE)
+        
+         EXTREME RISK: Decision dominated by loss aversion.
+        
+         CANNOT PROCEED in emotional state.
+        
+        REQUIRED:
+        1. Take 10-minute cool-down break
+        2. Calculate expected value objectively
+        3. Reframe in gain domain
+        4. Then decide
+        
+        Why: Houde (2019) - Loss aversion hardest to inhibit.
+        Amygdala + Insula override DLPFC. Need emotional cool-down.
+      
+      STRONG: |
+         STRONG INHIBITION
+        
+        Loss framing detected.
+        Appropriateness: {score}%
+        
+        Questions:
+        - Weighting losses >2x gains?
+        - Objectively high risk, or just "feels" bad?
+        
+        BLOCKED: Complete reframing first.
+        {alternatives}
+
+  SUNK_COST:
+    houde_difficulty: 3
+    
+    alternatives:
+      - method: INCREMENTAL_ANALYSIS
+        description: Only consider future costs/benefits
+        instructions:
+          - Ignore all past costs (sunk)
+          - List only future costs
+          - List only future benefits
+          - Decision = future benefits > future costs?
+        difficulty: 2
+        effectiveness: 0.90
+        
+      - method: ZERO_BASED_DECISION
+        description: Pretend sunk costs don't exist
+        instructions:
+          - Imagine you haven't invested anything
+          - Would you START this now?
+          - If no -> stop
+          - If yes -> continue
+        difficulty: 3
+        effectiveness: 0.85
+        
+      - method: OPPORTUNITY_COST_FRAMING
+        description: What else could we do?
+        instructions:
+          - List alternative uses of resources
+          - Compare EV of continuing vs alternatives
+          - Choose highest EV
+        difficulty: 3
+        effectiveness: 0.80
+    
+    messages:
+      STRONG: |
+         SUNK COST FALLACY DETECTED
+        
+        You cited past investments as justification.
+        
+         This is ALWAYS incorrect reasoning.
+        
+        Past costs are SUNK (unrecoverable).
+        Only future matters.
+        
+        BLOCKED: Use incremental analysis.
+        
+        Exercise:
+        1. Cross out all past cost mentions
+        2. Only consider: future costs vs future benefits
+        3. Decide based on that alone
+
+  AVAILABILITY_HEURISTIC:
+    houde_difficulty: 3
+    
+    alternatives:
+      - method: BASE_RATE_LOOKUP
+      description: Find statistical frequencies
+      instructions:
+        - Ignore vivid example
+        - Look up actual base rates
+        - Use statistical frequency
+        - Adjust minimally for specifics
+      difficulty: 3
+      effectiveness: 0.85
+      
+      - method: SYSTEMATIC_SAMPLE
+      description: Gather representative data
+      instructions:
+        - Don't rely on single vivid case
+        - Collect systematic sample
+        - Calculate frequencies
+        - Use data, not anecdote
+      difficulty: 4
+      effectiveness: 0.90
+  
+  messages:
+    STRONG: |
+       AVAILABILITY BIAS DETECTED
+      
+      Vivid/recent example dominating judgment.
+      
+      Your mind weighs this case too heavily because:
+      - It's recent
+      - It's vivid/emotional
+      - Easy to recall
+      
+      BLOCKED: Look up base rates first.
+      
+      {alternatives}
+
+# Thresholds by Houde difficulty
+thresholds:
+  difficulty_1:
+    weak: 0.3
+    moderate: 0.5
+    strong: 0.7
+    absolute: 0.9
+  
+  difficulty_2:  # Anchoring
+    weak: 0.4
+    moderate: 0.6
+    strong: 0.8
+    absolute: 0.95
+  
+  difficulty_3:  # Sunk Cost, Availability
+    weak: 0.5
+    moderate: 0.7
+    strong: 0.85
+    absolute: 0.97
+  
+  difficulty_4:
+    weak: 0.6
+    moderate: 0.75
+    strong: 0.9
+    absolute: 0.98
+  
+  difficulty_5:  # Loss Aversion (hardest)
+    weak: 0.7
+    moderate: 0.8
+    strong: 0.92
+    absolute: 0.99
+
+# Context modifiers
+modifiers:
+  stakes:
+    CRITICAL: 0.2
+    HIGH: 0.1
+    MEDIUM: 0.0
+    LOW: -0.1
+  
+  time_pressure:
+    EMERGENCY: -0.3
+    URGENT: -0.15
+    NORMAL: 0.0
+    STRATEGIC: 0.1
+  
+  expertise:
+    EXPERT: -0.2
+    INTERMEDIATE: -0.1
+    NOVICE: 0.0
+    NEW: 0.15

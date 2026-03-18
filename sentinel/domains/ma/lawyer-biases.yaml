@@ -1,0 +1,193 @@
+# Cognitive biases - M&A Business Lawyers
+# Extension of the MA domain (MA1-MA8)
+# Added to Sentinel v8 when legal context is detected
+
+# Sources: Moorhead & Sherr (2003), Guthrie et al. (2001 & 2007 - "Inside the Judicial Mind"),
+#          Kiser et al. (2008 - "Let's Not Make a Deal"), Simon (2004),
+#          Rachlinski et al. (2006), Silver (2002 - "Markovits and the Lawyer's Role")
+
+domain: ma-legal
+
+# Auto-load when context mentions:
+# lawyer, counsel, legal, due diligence, reps & warranties,
+# closing conditions, SPA, SHA, disclosure letter,
+# legal opinion, share purchase agreement
+
+biases:
+  - id: LA1
+    name: Risk Identification Without Probability
+    alias: ["risk inflation", "legal exhaustion", "zero-probability risk listing", "risk menu"]
+    description: >
+      Lawyers are trained to IDENTIFY risks, not to assess their probability
+      or expected impact. A risk with 0.1% probability and a risk with 40%
+      probability receive similar treatment in a legal memo - they both get
+      a paragraph. This systematic failure to weight risks produces memos that
+      are formally complete and practically useless for decision-making.
+      The client cannot distinguish deal-breaking risks from theoretical ones.
+      The result: either everything is escalated (decision paralysis) or
+      everything is normalized (real risks disappear in the noise).
+      Guthrie et al. (2001): judges - professionals trained in probabilistic
+      reasoning - still exhibit strong anchoring and framing effects.
+      Lawyers are not immune.
+    detection_questions:
+      - "For each legal risk identified: what is your honest probability estimate
+        that it materializes? If you haven't assigned a probability - your memo
+        is a risk list, not a risk assessment."
+      - "Of the risks in your DD report, how many are above 10% probability?
+        5%? 1%? If you don't have these numbers - how is the client supposed
+        to prioritize?"
+      - "What is the single risk most likely to actually affect this deal?
+        Is it the one with the most pages in your report?"
+    typical_context: "The due diligence report lists 47 legal risks of varying severity"
+
+  - id: LA2
+    name: Precedent Anchoring
+    alias: ["prior deal anchoring", "template lock-in", "boilerplate inertia", "we always do it this way"]
+    description: >
+      Lawyers systematically anchor to prior transaction documents. Clauses
+      designed for a different deal, a different jurisdiction, or a different
+      risk allocation are copy-pasted with minor modifications into new contexts.
+      The prior document becomes the anchor - negotiations focus on deltas from
+      the anchor rather than on what the clause should optimally achieve.
+      This produces deals where the documentation reflects precedent practice
+      rather than the actual risk allocation that makes sense for THIS transaction.
+      The most dangerous form: using a seller-friendly SPA template as starting
+      point in a buyer-represents situation, or vice versa, because "we have one."
+    detection_questions:
+      - "Which prior deal was used as the template for this document? How similar
+        is that deal to this one in terms of deal type, sector, jurisdiction,
+        and risk profile?"
+      - "For each non-standard clause negotiated: are you negotiating toward
+        what's right for this deal, or away from what the other side wants
+        relative to the anchor document?"
+      - "If you built this document from first principles for this specific
+        deal - what would be different? Is anything in the current draft
+        there purely because of precedent?"
+    typical_context: "We're using the SPA from the [prior deal] as the base"
+
+  - id: LA3
+    name: Professional Liability Anchoring
+    alias: ["CYA drafting", "liability-driven advice", "defensive opinion", "lawyer protection bias"]
+    description: >
+      Lawyers write opinions, memos, and contracts with significant weight on
+      their own professional exposure. The advice that is safest for the lawyer
+      (conservative, comprehensive, heavily qualified) is not necessarily the
+      advice that is most useful for the client. This creates systematic bias
+      toward over-qualification ("subject to the foregoing"), excessive carve-outs,
+      and conservative positions on risk that protect the adviser more than
+      the client's interests. Kiser et al. (2008): lawyers systematically
+      recommended settlement at amounts that proved disadvantageous - motivated
+      reasoning about their own exposure influenced their advice.
+    detection_questions:
+      - "Is this opinion or recommendation the advice you would give if you
+        had zero professional liability exposure? If it's different - what's
+        the actual advice?"
+      - "How many of the qualifications in this memo are there to protect
+        the client vs. to protect the firm? Would the client benefit from
+        a less qualified, more direct version?"
+      - "Is your advice on this risk point driven by what you believe is
+        likely, or by what you need to have documented if it goes wrong?"
+    typical_context: "Our advice is qualified by the standard limitations in our engagement letter"
+
+  - id: LA4
+    name: Adversarial Escalation
+    alias: ["negotiation as combat", "winning over closing", "principle over pragmatism", "deal-killing perfectionism"]
+    description: >
+      M&A lawyers are trained as adversaries. In deal negotiations, this
+      adversarial framing can replace the value-creation framing that should
+      govern M&A. Lawyers fight for positions on principle long after the
+      commercial value of those positions is near zero. The "win" is defined
+      as extracting a better clause, not as getting the best deal closed.
+      Deals are killed or delayed over points that represent a fraction of
+      the deal value, because the lawyer's professional identity is invested
+      in not losing the negotiation. Silver (2002): the lawyer's role often
+      creates a principal-agent problem - the lawyer's interests (clean
+      outcome, no surprises, professional reputation) diverge from the
+      client's interests (deal done at the right value).
+    detection_questions:
+      - "For each currently open negotiation point: what is the commercial
+        value to the client of winning this point? Compare it to the cost
+        of delay and relationship damage. Is this point worth the fight?"
+      - "Is there any point in the current negotiation where the lawyer's
+        professional interest in 'winning' diverges from the client's
+        commercial interest in 'closing'?"
+      - "Which open points are actually important to the client vs. important
+        to you as their lawyer? Have you had that conversation explicitly?"
+    typical_context: "We're not moving on this clause - it sets a bad precedent"
+
+  - id: LA5
+    name: Disclosure Letter Normalization
+    alias: ["disclosure fatigue", "materiality creep", "disclosure letter underweighting", "buried disclosure"]
+    description: >
+      In SPA transactions, the seller's disclosure letter contains exceptions
+      to representations and warranties. These disclosures are often detailed,
+      lengthy, and written to minimize their apparent significance. Lawyers
+      reviewing disclosure letters suffer two related biases: (1) volume
+      normalization - after reviewing 200 disclosures, each individual one
+      seems less significant, (2) deal narrative anchoring - disclosures
+      that contradict the deal thesis are unconsciously underweighted.
+      A disclosure letter can materially change the deal's risk profile
+      while generating no change in price or structure.
+    detection_questions:
+      - "Is there any disclosure in this letter that, if disclosed BEFORE
+        the deal was negotiated, would have changed the price or structure?
+        If yes - why hasn't it changed the price or structure now?"
+      - "Which 3 disclosures in this letter are the most materially adverse?
+        Have you briefed the client on these specifically, outside the
+        context of the full letter?"
+      - "Has anyone on the deal team read the disclosure letter fresh,
+        without the deal thesis in mind, asking 'what would I think of
+        this business if this were my first look at it?'"
+    typical_context: "The disclosure letter has been reviewed - there are no show-stoppers"
+
+  - id: LA6
+    name: Completeness Over Clarity
+    alias: ["legal perfectionism", "comprehensive at the cost of usable", "document complexity bias"]
+    description: >
+      Lawyers optimize for completeness - covering every conceivable contingency -
+      over clarity and usability. This produces contracts and memos that are
+      formally exhaustive but practically unnavigable. The completeness bias
+      creates several downstream problems: (1) parties don't understand what
+      they've agreed to, creating disputes later; (2) transaction complexity
+      delays closing and increases cost; (3) the most important provisions are
+      buried in the body of a 300-page document that no one re-reads.
+      The paradox: a more complete contract often creates more litigation
+      risk because the more you specify, the more you create arguable gaps
+      in what you haven't specified.
+    detection_questions:
+      - "Can the CEO of the acquiring company explain in plain language what
+        the top 5 obligations they're taking on under this SPA?
+        If not - the document has failed its primary purpose."
+      - "Which provisions of this contract are genuinely novel to this deal
+        vs. standard? Are the novel provisions clearly flagged for client attention,
+        or buried in the general body?"
+      - "What is the one scenario most likely to create a dispute under this
+        contract? Is that scenario addressed clearly and unambiguously?"
+    typical_context: "The SPA covers all conceivable scenarios"
+
+  - id: LA7
+    name: Reps and Warranties Ritualism
+    alias: ["R&W theater", "negotiation for its own sake", "warranty inflation", "coverage maximalism"]
+    description: >
+      Reps and warranties negotiations often become ritualized - both sides
+      know the approximate final position but spend significant time and
+      cost getting there. Buyers push for comprehensive reps; sellers push
+      back with qualifiers. The negotiation follows predictable patterns
+      regardless of the actual risk profile of the specific transaction.
+      This ritualism is expensive (legal fees, time), and produces outcomes
+      that don't reflect careful risk allocation - they reflect negotiating
+      leverage and precedent. The rise of R&W insurance has not eliminated
+      this pattern; it has added a third party to the ritual.
+      The result: the reps and warranties in the final document may not
+      accurately reflect the actual risks identified in due diligence.
+    detection_questions:
+      - "For each rep being heavily negotiated: what is the probability
+        it is breached? What is the damages exposure? Is the negotiation
+        cost proportionate to the risk exposure?"
+      - "Is R&W insurance available for this deal? If yes, at what cost?
+        Compare the insurance cost to the legal cost of negotiating the
+        disputed reps. Often insurance is cheaper."
+      - "Which reps are being negotiated purely out of precedent ('we always
+        push for this') vs. because of specific DD findings that make this
+        rep material for this deal?"
+    typical_context: "We're pushing back on the knowledge qualifier on all business reps"

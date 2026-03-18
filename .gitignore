@@ -58,5 +58,8 @@ Private/
 # Cursor IDE
 .cursor/
 
+# Claude Code local settings
+.claude/
+
 # Local history
 .specstory/

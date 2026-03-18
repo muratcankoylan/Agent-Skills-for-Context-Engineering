@@ -1,0 +1,45 @@
+{
+  "voice_dna": {
+    "version": "1.0",
+    "last_updated": "",
+    "_setup_note": "This file is empty. Run /copywriter:start or ask 'create my voice DNA' to complete setup by submitting writing samples.",
+    "core_essence": {
+      "identity": "",
+      "primary_role": "",
+      "unique_angle": ""
+    },
+    "personality_traits": {
+      "primary": [],
+      "how_it_shows": {}
+    },
+    "emotional_palette": {
+      "dominant_emotions": [],
+      "emotional_range": {},
+      "energy_level": ""
+    },
+    "communication_style": {
+      "formality": "",
+      "complexity": "",
+      "sentence_structure": {},
+      "paragraph_style": ""
+    },
+    "language_patterns": {
+      "signature_phrases": [],
+      "power_words": [],
+      "words_to_avoid": [],
+      "transitions": []
+    },
+    "never_say": {
+      "phrases": [],
+      "tones": [],
+      "approaches": []
+    },
+    "formatting_preferences": {},
+    "content_philosophy": {},
+    "voice_examples": {
+      "opening_lines": [],
+      "closing_lines": [],
+      "transitional_phrases": []
+    }
+  }
+}

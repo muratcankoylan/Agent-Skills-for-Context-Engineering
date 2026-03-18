@@ -1,0 +1,241 @@
+{
+  "_comment": "Diagnostic Definition Schema — save as [slug].json in data/2-Domaines/diagnostics/",
+  "_version": "1.0.0",
+
+  "id": "lead-qualifier-v1",
+  "name": "Lead Qualifier",
+  "type": "lead",
+  "subtype": "qualification",
+  "purpose": "Determine if a prospect is ready for a proposal or needs nurture first",
+  "created": "YYYY-MM-DD",
+  "updated": "YYYY-MM-DD",
+  "active": true,
+
+  "delivery": {
+    "mode": "conversational",
+    "_mode_options": "conversational | self-service | both",
+    "estimated_duration_minutes": 8,
+    "intro_message": "I'm going to ask you a few questions to understand where you are right now. No right answers — just where things actually stand. Takes about 8 minutes.",
+    "completion_message": "All done. Let me put your results together."
+  },
+
+  "dimensions": [
+    {
+      "id": "problem_clarity",
+      "name": "Problem Clarity",
+      "weight": 0.20,
+      "description": "How clearly the prospect has defined the problem they need solved",
+      "questions": [
+        {
+          "id": "q1",
+          "text": "How would you describe the problem you're trying to solve right now?",
+          "type": "multiple_choice",
+          "options": [
+            { "label": "I have a general sense something isn't working but can't fully articulate it", "score": 0 },
+            { "label": "I know what the problem is but I'm not sure it's the right priority", "score": 1 },
+            { "label": "I can describe the problem clearly — I just need help solving it", "score": 3 },
+            { "label": "I've already diagnosed the root cause and I know what a solution looks like", "score": 4 }
+          ]
+        },
+        {
+          "id": "q2",
+          "text": "How long has this problem been affecting your business?",
+          "type": "multiple_choice",
+          "options": [
+            { "label": "I'm not sure it's actually a problem yet — still figuring that out", "score": 0 },
+            { "label": "It's come up recently, within the last few months", "score": 1 },
+            { "label": "It's been a recurring issue for 6–12 months", "score": 3 },
+            { "label": "It's been a known issue for over a year and we've lived with the cost of it", "score": 4 }
+          ]
+        }
+      ],
+      "max_points": 8
+    },
+    {
+      "id": "pain_acuity",
+      "name": "Pain Acuity",
+      "weight": 0.25,
+      "description": "How much the problem is costing them and how urgent solving it feels",
+      "questions": [
+        {
+          "id": "q3",
+          "text": "What happens if this problem isn't solved in the next 6 months?",
+          "type": "multiple_choice",
+          "options": [
+            { "label": "Probably not much — it's more of an irritation than a crisis", "score": 0 },
+            { "label": "Things stay suboptimal — we lose time or money but the business survives", "score": 1 },
+            { "label": "Growth stalls or a specific opportunity closes that I don't want to miss", "score": 3 },
+            { "label": "The business hits a real ceiling or I lose something I can't get back", "score": 4 }
+          ]
+        },
+        {
+          "id": "q4",
+          "text": "How much is this problem costing you right now?",
+          "type": "multiple_choice",
+          "options": [
+            { "label": "I haven't quantified it — it's more of a nagging feeling", "score": 0 },
+            { "label": "Some cost, but I haven't attached a number to it", "score": 1 },
+            { "label": "I have a rough estimate — it's significant enough to justify solving", "score": 3 },
+            { "label": "I know exactly what it costs — I've done the math and it's substantial", "score": 4 }
+          ]
+        },
+        {
+          "id": "q5",
+          "text": "How high is solving this on your priority list right now?",
+          "type": "multiple_choice",
+          "options": [
+            { "label": "It's on the backlog — we have more pressing things to handle first", "score": 0 },
+            { "label": "It's important but not the top priority this quarter", "score": 1 },
+            { "label": "It's a top-3 priority for my business this quarter", "score": 3 },
+            { "label": "It's the #1 thing I need to solve right now — everything else depends on it", "score": 4 }
+          ]
+        }
+      ],
+      "max_points": 12
+    },
+    {
+      "id": "decision_readiness",
+      "name": "Decision Readiness",
+      "weight": 0.30,
+      "description": "Whether the right stakeholders are involved and motivated to act",
+      "questions": [
+        {
+          "id": "q6",
+          "text": "Who else needs to be involved in a decision to work together?",
+          "type": "multiple_choice",
+          "options": [
+            { "label": "Several people — I'm not the decision-maker, just exploring", "score": 0 },
+            { "label": "One other person, but I'm not sure they're aligned on this priority yet", "score": 1 },
+            { "label": "One other person who's already aware and supportive", "score": 3 },
+            { "label": "I'm the decision-maker — no one else needs to approve", "score": 4 }
+          ]
+        },
+        {
+          "id": "q7",
+          "text": "Where are you in evaluating solutions?",
+          "type": "multiple_choice",
+          "options": [
+            { "label": "Just starting to look — not sure what I need yet", "score": 0 },
+            { "label": "Comparing different approaches, no timeline to decide", "score": 1 },
+            { "label": "Narrowing down — looking to decide in the next 4–6 weeks", "score": 3 },
+            { "label": "Ready to move — looking for the right partner with a timeline in mind", "score": 4 }
+          ]
+        }
+      ],
+      "max_points": 8
+    },
+    {
+      "id": "budget_reality",
+      "name": "Budget Reality",
+      "weight": 0.25,
+      "description": "Whether budget exists and is allocated for this",
+      "questions": [
+        {
+          "id": "q8",
+          "text": "How is budget for this handled in your business?",
+          "type": "multiple_choice",
+          "options": [
+            { "label": "No budget allocated — this would be new spend I'd need to justify", "score": 0 },
+            { "label": "Budget exists in theory but hasn't been formally approved", "score": 1 },
+            { "label": "Budget is set aside and approved for the right solution", "score": 3 },
+            { "label": "Budget is ready — I'm looking to commit when I find the right fit", "score": 4 }
+          ]
+        }
+      ],
+      "max_points": 4
+    }
+  ],
+
+  "scoring": {
+    "method": "weighted_sum",
+    "formula": "score = sum( (dim_raw_score / dim_max_points) * dim_weight ) * 100",
+    "max_score": 100,
+    "bands": [
+      {
+        "id": "low",
+        "label": "Not yet ready",
+        "range_min": 0,
+        "range_max": 35,
+        "color": "red"
+      },
+      {
+        "id": "medium",
+        "label": "Worth a conversation",
+        "range_min": 36,
+        "range_max": 65,
+        "color": "yellow"
+      },
+      {
+        "id": "high",
+        "label": "Ready to move",
+        "range_min": 66,
+        "range_max": 100,
+        "color": "green"
+      }
+    ]
+  },
+
+  "recommendations": {
+    "low": {
+      "headline": "Not yet ready",
+      "insight": "Based on where you are right now, jumping into a formal engagement would be premature — not because the problem isn't real, but because a few foundational things need to fall into place first. The work would be harder and slower than it needs to be.",
+      "priority_action": "Get clear on what success looks like and get the right stakeholder aligned before evaluating solutions. That conversation will make everything downstream easier.",
+      "cta_text": "I put together a short guide on how to build that internal case →",
+      "cta_url": "[your-resource-link]"
+    },
+    "medium": {
+      "headline": "Worth a conversation",
+      "insight": "You have a real problem and real motivation to solve it. What's missing is full readiness to move — whether that's timeline clarity, stakeholder alignment, or budget confirmation. A short conversation would help us figure out whether now is the right moment or what would make it so.",
+      "priority_action": "Have a 30-minute conversation to assess fit and timing. No commitment — just whether the pieces are in place to make this worthwhile for both of us.",
+      "cta_text": "Book a quick alignment call →",
+      "cta_url": "[your-booking-link]"
+    },
+    "high": {
+      "headline": "Ready to move",
+      "insight": "You've done the hard work of defining the problem, securing alignment, and getting serious about solving it. That puts you in a small minority of people who are actually ready to make progress — not just thinking about it.",
+      "priority_action": "Let's look at your specific situation and build out what a proposal would look like. You're ready; the next step is making sure the fit and scope are right.",
+      "cta_text": "Schedule a proposal conversation →",
+      "cta_url": "[your-booking-link]"
+    }
+  },
+
+  "dimension_feedback": {
+    "problem_clarity": {
+      "low_feedback": "The problem isn't fully defined yet — which means solutions will feel vague too. Getting precise on the root cause is the highest-leverage first step.",
+      "high_feedback": "Clear problem definition. You know what you're solving for, which makes everything else faster."
+    },
+    "pain_acuity": {
+      "low_feedback": "The urgency isn't there yet. This will likely stay on the backlog until something forces it to the top.",
+      "high_feedback": "Real urgency and clear cost awareness. You're not exploring — you're solving."
+    },
+    "decision_readiness": {
+      "low_feedback": "The decision process isn't clear yet. There are stakeholders or approval steps that haven't been navigated.",
+      "high_feedback": "You have the authority and motivation to move. No internal gatekeepers to work around."
+    },
+    "budget_reality": {
+      "low_feedback": "Budget isn't in place yet — which means any proposal would require internal justification work first.",
+      "high_feedback": "Budget is allocated. The financial side won't be the obstacle."
+    }
+  },
+
+  "routing": {
+    "on_complete": "create_lead_card",
+    "pipeline_stage_on_high": "Proposal",
+    "pipeline_stage_on_medium": "Discovery",
+    "pipeline_stage_on_low": null,
+    "alert_monday_agent": true,
+    "alert_client_lifecycle_agent": false,
+    "save_response_to": "data/1-Projets/diagnostics/lead-qualifier-v1/responses/"
+  },
+
+  "tally_export": {
+    "form_title": "Is Now the Right Time?",
+    "form_description": "8 minutes. Honest answers. A clear picture of where things stand.",
+    "collect_fields": ["name", "email", "company"],
+    "form_id": null,
+    "form_url": null,
+    "published_at": null,
+    "last_synced_at": null,
+    "submission_count": 0
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "solo-maker",
+  "version": "1.0.0",
+  "description": "AI-powered prototype studio for solopreneurs. Build stunning websites, landing pages, pitch decks, brand identities, and everything needed to launch. Includes a design and prototyping toolkit (Figma, Stitch, Remotion, Voiceover, Storyboard, etc.).",
+  "author": {
+    "name": "Solo Maker & Anthropic"
+  },
+  "keywords": [
+    "solopreneur",
+    "landing-page",
+    "pitch-deck",
+    "website",
+    "prototype",
+    "brand",
+    "copywriting",
+    "startup",
+    "frontend-design",
+    "launch",
+    "figma",
+    "stitch",
+    "remotion",
+    "storyboard"
+  ],
+  "skills_loading": "progressive",
+  "default_bundle": "core-design",
+  "bundles": {
+    "core-design": {
+      "load_priority": 1,
+      "description": "Foundation design skills — frontend design, copywriting, UX writing. Pre-loaded every session.",
+      "skills": ["frontend-design", "copywriting", "ux-writing"]
+    },
+    "prototyping": {
+      "load_priority": 2,
+      "description": "Interactive prototyping — Figma, Stitch loop, prompt enhancement, design system extraction.",
+      "skills": ["figma-prototype", "stitch-loop", "stitch-enhance-prompt", "stitch-design-md"]
+    },
+    "landing-conversion": {
+      "load_priority": 2,
+      "description": "Conversion-focused outputs — landing pages, pitch decks, storyboards.",
+      "skills": ["landing-page", "pitch-deck", "storyboard"]
+    },
+    "video-media": {
+      "load_priority": 3,
+      "description": "Video and media generation — prototype-to-video, voiceover, Remotion, Stitch asset bridge.",
+      "skills": ["prototype-to-video", "voiceover-generator", "remotion-video-generator", "stitch-asset-bridge"]
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "linkedin-post|twitter-thread|newsletter-writer|seo-blog-writer|video-script-generator|sales-email-sequence",
+        "condition": "solo_not_installed",
+        "hooks": [{ "type": "skill", "skill": "antislop-expert", "timeout": 60 }],
+        "_note": "Standalone mode only. When Solo is installed, antislop is managed centrally in Solo hooks.json."
+      },
+      {
+        "matcher": "seo-blog-writer",
+        "condition": "wordpress_mcp_installed",
+        "hooks": [{ "type": "skill", "skill": "wordpress-publisher", "action": "offer_publish", "timeout": 30 }],
+        "_note": "After blog post written, offer to publish to WordPress if MCP is connected."
+      },
+      {
+        "matcher": "content-calendar-planner",
+        "condition": "sentinel_installed",
+        "hooks": [{ "type": "agent", "agent": "reality-checker", "agent_path": "../sentinel-v8/agents/reality-checker.md", "timeout": 90 }],
+        "_note": "When Sentinel installed, runs reality-checker on content strategy before finalizing calendar."
+      }
+    ],
+    "Schedule": [
+      {
+        "cron": "0 9 * * 1",
+        "hooks": [{ "type": "agent", "agent": "blog-agent", "condition": "has_content_calendar" }],
+        "_note": "Weekly content calendar check — blog-agent reviews upcoming schedule every Monday."
+      },
+      {
+        "cron": "0 8 * * 5",
+        "hooks": [{ "type": "agent", "agent": "social-agent", "condition": "has_content_calendar" }],
+        "_note": "Friday social content prep — social-agent reviews next week's social posts."
+      }
+    ]
+  }
+}

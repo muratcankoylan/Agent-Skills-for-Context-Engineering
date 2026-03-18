@@ -1,0 +1,94 @@
+# Domain-specific cognitive biases - Marketing & Communication Strategy
+# Added to the 35 core biases
+
+domain: strategy-marketing
+
+biases:
+  - id: SM1
+    name: Shiny Object Syndrome
+    alias: ["new channel", "trend", "marketing fad"]
+    description: >
+      Disproportionate attraction to new channels, formats, or technologies
+      at the expense of proven ones. Amplified by trade press and marketing FOMO.
+    detection_questions:
+      - "What is the proven ROI of [existing channel] vs the estimated ROI of [new channel]?"
+      - "Where does the performance estimate for the new channel come from?"
+      - "How many comparable companies have succeeded on this channel?"
+    typical_context: "We should be on [TikTok/Threads/AI content/...]"
+
+  - id: SM2
+    name: Attribution Fallacy
+    alias: ["attribution", "correlation", "last touch"]
+    description: >
+      Attributing campaign success to a channel or creative when correlation !=
+      causation. Amplified by last-touch attribution models and vanity dashboards.
+    detection_questions:
+      - "Without this campaign, how many of those conversions would have happened anyway?"
+      - "What attribution model is used? Last-touch, multi-touch, incrementality?"
+      - "Was a holdout test run to measure true incrementality?"
+
+  - id: SM3
+    name: Sunflower Bias (HiPPO)
+    alias: ["HiPPO", "CMO alignment", "boss opinion", "leader's vision"]
+    description: >
+      Team aligns with leader's opinion without challenge. Plan reflects
+      what the CMO WANTS to hear, not what data shows.
+    detection_questions:
+      - "Who has expressed disagreement with this plan? If nobody - why?"
+      - "Was the CMO/CEO's opinion shared before or after the analysis?"
+      - "Did each team member submit their evaluation independently?"
+
+  - id: SM4
+    name: Narrative Fallacy (brand storytelling)
+    alias: ["brand DNA", "storytelling", "brand purpose"]
+    description: >
+      A coherent brand story becomes a rigid constraint. "We can't do X
+      because it's not our DNA." Narrative replaces analysis.
+    detection_questions:
+      - "Brand identity is a choice - what would a competitor without this story do?"
+      - "Is this brand story validated by customers or by the internal team?"
+      - "When did you last test whether customers perceive your DNA as you describe it?"
+
+  - id: SM5
+    name: Budget Anchoring
+    alias: ["N-1 budget", "budget evolution", "+X%", "incremental budget"]
+    description: >
+      Previous year's budget anchors this year's. Allocations are incremental
+      adjustments, not strategic decisions. Prevents radical reallocation.
+    detection_questions:
+      - "If you started from zero (zero-based), how would you allocate?"
+      - "What share of budget is allocated by habit vs proven performance?"
+      - "Which channel would you stop tomorrow if you had to cut one?"
+
+  - id: SM6
+    name: Survivorship Bias (case studies)
+    alias: ["best practice", "benchmark", "case study"]
+    description: >
+      Studying campaigns that succeeded without counting those that failed
+      with the same approach.
+    detection_questions:
+      - "For each success case study, how many tried the same approach and failed?"
+      - "Do the success conditions of this case study exist in your context?"
+      - "What's the base rate of success for this approach, not just the highlights?"
+
+  - id: SM7
+    name: Vanity Metrics Bias
+    alias: ["impressions", "reach", "engagement", "followers"]
+    description: >
+      Optimizing for visible, flattering metrics (impressions, likes, reach)
+      rather than business metrics (pipeline, revenue, retention).
+    detection_questions:
+      - "What's the correlation between this metric and revenue?"
+      - "If you doubled impressions, what business impact would that have?"
+      - "What are your 3 metrics that actually predict revenue?"
+
+  - id: SM8
+    name: Creative Sunk Cost
+    alias: ["already invested", "can't go back", "agency work"]
+    description: >
+      Continuing a campaign/strategy because time, money, or creative energy
+      has already been invested. "We can't throw away 3 months of agency work."
+    detection_questions:
+      - "If this work didn't exist, would you launch this campaign?"
+      - "Is the cost of a bad launch greater than what you've already invested?"
+      - "Is the team attached to the output or to the result?"

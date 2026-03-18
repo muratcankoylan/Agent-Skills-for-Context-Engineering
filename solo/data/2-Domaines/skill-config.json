@@ -1,0 +1,13 @@
+{
+  "profile": null,
+  "enabled_skills": [],
+  "onboarding_complete": false,
+  "onboarding_date": null,
+  "version": "2.0.0",
+  "language": "en",
+  "settings": {
+    "default_currency": "USD",
+    "timezone": "UTC",
+    "auto_archive_complete": true
+  }
+}

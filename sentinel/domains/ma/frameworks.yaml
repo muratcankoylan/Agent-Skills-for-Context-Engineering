@@ -1,0 +1,244 @@
+# Evaluation Frameworks - M&A and Due Diligence
+# Structured MAP scoring for acquisition targets and investment decisions
+
+domain: ma
+
+frameworks:
+  - id: MAP_MA
+    name: "MAP M&A - Target Evaluation (6 dimensions)"
+    description: >
+      6 independent dimensions for evaluating any acquisition target.
+      Scored INDEPENDENTLY by each evaluator before any discussion.
+      Designed to prevent the Halo Effect (MA7) and deal completion bias (MA1)
+      from contaminating independent dimensions.
+      Each dimension has a confidence score (0-100%) in addition to the
+      performance score (0-10), to surface hidden uncertainty.
+    dimensions:
+      - name: "Strategic fit"
+        scale: "0-3: tangential or contradicts strategy | 4-6: supports strategy | 7-10: directly on the critical path of the #1 strategic priority"
+        question: "Which specific strategic objective does this acquisition advance? Is it the top priority, or a secondary one? What would you have done instead without this acquisition?"
+        confidence_probe: "How confident are you in this score? What would change it?"
+
+      - name: "Market and competitive position"
+        scale: "0-3: declining or undifferentiated market | 4-6: stable market, moderate position | 7-10: growing market, defensible moat, durable competitive advantage"
+        question: "What is the target's competitive moat in specific, mechanical terms - not 'great team' or 'brand'? What prevents a competitor from replicating their position in 3 years?"
+        confidence_probe: "What market data did you use? How reliable is it? What are you assuming?"
+
+      - name: "Financial quality"
+        scale: "0-3: declining revenue, unprofitable, or opaque financials | 4-6: stable, visible, with some concerns | 7-10: growing, profitable, clean financials, recurring revenue"
+        question: "What percentage of revenue is recurring vs. transactional? What is the customer churn rate? Are the financials GAAP-audited or management accounts?"
+        confidence_probe: "Which financial items have you not fully diligenced? What could be hidden?"
+
+      - name: "Synergy credibility"
+        scale: "0-3: vague or revenue synergies only | 4-6: cost synergies with some specificity | 7-10: synergies line-by-line with owner, timeline, and P&L entry point identified"
+        question: "For each synergy line: who is specifically responsible for execution? When does it appear in P&L? What does executing it require? If any synergy can't be described at this level - score it zero."
+        confidence_probe: "What % of synergies are cost vs. revenue? Revenue synergies should have a higher discount rate."
+
+      - name: "Integration feasibility"
+        scale: "0-3: complex integration, cultural mismatch, no integration plan | 4-6: manageable with significant effort | 7-10: simple integration, cultural alignment, detailed plan with named owners"
+        question: "Who runs the integration? Do they have direct experience with integrations of this complexity? What are the top 3 cultural friction points between the two organizations?"
+        confidence_probe: "Have you spoken to below-C-suite employees in the target? What did you find?"
+
+      - name: "Valuation relative to value"
+        scale: "0-3: significant premium with weak justification | 4-6: fair value with moderate upside | 7-10: clear upside case, conservative base case, stress-tested downside"
+        question: "What are the comparable transaction multiples in this sector? What premium are you paying? In a downside scenario where synergies deliver at 50% - does the deal still create value?"
+        confidence_probe: "What is your downside case, specifically? At what price would you walk away?"
+
+    scoring:
+      note: >
+        Score each dimension independently. Do NOT discuss scores with other
+        committee members before all scores are submitted. This is the MAP
+        protocol's core requirement - independent evaluation prevents the
+        Halo Effect from spreading across dimensions.
+      total_threshold:
+        strong_proceed: 42  # Average 7/10 across 6 dimensions
+        conditional: 30     # Average 5/10 - requires specific risk mitigations
+        reconsider: 24      # Average 4/10 - fundamental concerns
+        do_not_proceed: 18  # Average 3/10 or lower
+
+  - id: NOISE_AUDIT_COMMITTEE
+    name: "Committee Noise Audit"
+    description: >
+      The flagship commercial application of Sentinel in M&A.
+      Measures judgment variance between committee members on the same
+      target or decision. The result - often a CV of 35-60% - is
+      the most powerful demonstration that the committee is not
+      evaluating, it is negotiating.
+      Based on Kahneman (Noise, 2021): "The first step is a noise audit."
+    protocol:
+      phase_1:
+        name: "Independent scoring"
+        instructions: >
+          Each committee member scores all 6 MAP_MA dimensions independently,
+          in writing, WITHOUT seeing or hearing other members' scores.
+          The senior-most member scores LAST (prevents seniority anchoring).
+          Time allocation: 20-30 minutes per target.
+        critical_rule: "No verbal discussion until ALL scores are submitted. No exceptions."
+
+      phase_2:
+        name: "Noise measurement"
+        instructions: >
+          Sentinel runs noise.py on each dimension across all evaluators.
+          Reports: CV per dimension, overall CV, and the dimension with
+          maximum disagreement.
+        script_call: >
+          python3 ${SENTINEL_ROOT}/skills/decision-hygiene/scripts/noise.py
+          --json '{"algorithm": "cv", "data": [member1_score, member2_score, ...]}'
+        interpretation:
+          cv_below_15: "LOW noise - genuine agreement on this dimension"
+          cv_15_to_30: "MODERATE - worth discussing what's driving the difference"
+          cv_30_to_50: "HIGH - significant disagreement. Discuss before deciding."
+          cv_above_50: "VERY HIGH - committee is not evaluating, it is negotiating. This dimension is not ready for a decision."
+
+      phase_3:
+        name: "Structured discussion"
+        instructions: >
+          ONLY discuss the highest-noise dimensions. Do NOT average scores.
+          Goal: understand WHAT is driving the disagreement, not who is right.
+          Two sources of noise: information difference (one evaluator has data
+          others don't) vs. interpretation difference (same data, different
+          weighting). These require different responses.
+        facilitation_questions:
+          - "What specific evidence drove your score? Not your conclusion - your evidence."
+          - "Did anyone have information the others didn't? If yes - share the information, not the conclusion."
+          - "After hearing the evidence: would anyone change their score? Why or why not?"
+
+      phase_4:
+        name: "Reporting"
+        output: >
+          Noise Audit Report per target:
+          - Overall committee noise (CV)
+          - Per-dimension noise with highest/lowest scores
+          - Dimensions with CV > 30% flagged for further due diligence
+          - Information gaps identified during discussion
+
+  - id: BASE_RATES_MA
+    name: "M&A Base Rates"
+    description: >
+      Reference class statistics for M&A outcomes. The outside view
+      that inside-view optimism systematically ignores.
+      Use these to calibrate projections and stress-test the deal thesis.
+    statistics:
+      deal_success:
+        - stat: "70% of M&A deals fail to create value for the acquirer (McKinsey, multiple studies)"
+          source: "McKinsey Global Institute, various"
+          implication: "Your prior on this deal should be 30% success, not 70%. Adjust."
+
+        - stat: "Acquirer stock price falls an average of 1-3% on deal announcement"
+          source: "Andrade et al., Journal of Finance, 2001"
+          implication: "Markets immediately discount most acquisitions. Why is your deal different?"
+
+        - stat: "Only 23% of acquisitions recover their cost of capital within 10 years (KPMG)"
+          source: "KPMG Unlocking Shareholder Value, 1999"
+          implication: "The downside scenario is not the exception - it is the median outcome."
+
+      synergies:
+        - stat: "Revenue synergies are achieved at 30-40% of projected levels in median deal"
+          source: "Deloitte M&A Trends Report, 2022"
+          implication: "Discount all revenue synergies by 60-70% for base case modeling."
+
+        - stat: "Cost synergies are achieved at 60-70% of projected levels in median deal"
+          source: "McKinsey, The Art of Synergies"
+          implication: "Even cost synergies - the 'easy' kind - underperform by 30-40%."
+
+        - stat: "Integration costs average 25% higher than projected"
+          source: "BCG M&A Integration Study, 2020"
+          implication: "Add 25% to your integration cost estimate before presenting to the board."
+
+      integration:
+        - stat: "Integration takes 40-60% longer than initially projected in most deals"
+          source: "Bain & Company, Mastering the Art of M&A"
+          implication: "Your 18-month integration plan should be modeled as a 27-month plan."
+
+        - stat: "Key talent attrition in acquired companies averages 25-30% in year 1"
+          source: "Willis Towers Watson, M&A integration survey"
+          implication: "Model the cost of losing 1 in 4 key employees in the acquired company."
+
+      premiums:
+        - stat: "Average control premium paid: 30-40% above pre-announcement stock price"
+          source: "Mergerstat Review, historical data"
+          implication: "You are starting 30-40% in the hole. Your synergies must be real enough to overcome this."
+
+  - id: INTEGRATION_PREMORTEM_FRAMEWORK
+    name: "Integration Pre-mortem - 7 Failure Modes"
+    description: >
+      Pre-mortem focused specifically on post-acquisition integration.
+      The deal failing is less common than the integration failing.
+      These are the 7 most documented integration failure modes,
+      not the deal failure modes.
+    premise: >
+      "It's 24 months after close. The acquisition is considered a failure.
+      Not the deal terms - the integration. What happened?"
+    failure_modes:
+      - id: INT1
+        name: "Key talent exodus"
+        description: >
+          The target's best people left in months 3-9. They joined competitors.
+          The acquirer's culture, compensation structure, or bureaucracy drove them out.
+          The IP, relationships, and institutional knowledge left with them.
+        early_warning: "Multiple LinkedIn updates from target employees in months 1-3"
+        prevention: "Named retention plan for top 20 people in the target, before close"
+
+      - id: INT2
+        name: "IT integration paralysis"
+        description: >
+          The two IT systems were incompatible at a deeper level than the
+          integration plan anticipated. The estimated 6-month integration
+          became 30 months. During that period, the business ran on two systems,
+          creating data inconsistencies, customer service failures, and
+          integration team burnout.
+        early_warning: "Integration timeline slips by > 20% in first 90 days"
+        prevention: "Independent IT architecture review before close, by someone with no skin in the deal"
+
+      - id: INT3
+        name: "Culture conflict at scale"
+        description: >
+          Cultural friction was identified in due diligence but labeled
+          as "manageable." It proved unmanageable at scale. The target's
+          autonomy culture collided with the acquirer's process culture.
+          Middle management in the target became passive-aggressive resistors.
+          The integration plan assumed cooperation that never materialized.
+        early_warning: "Middle manager turnover in target exceeds 15% in first year"
+        prevention: "Skip-level conversations with 10+ non-C-suite employees in target before LOI"
+
+      - id: INT4
+        name: "Customer attrition"
+        description: >
+          The target's customers were loyal to the company's independence,
+          team, or brand positioning. Post-acquisition, they churned at
+          rates 2-3x historical. Some explicitly cited the acquisition as
+          the reason. The acquirer's brand either commoditized the offering
+          or created competitive concerns.
+        early_warning: "Target's NPS drops > 10 points in first 6 months"
+        prevention: "Direct interviews with target's top 10 customers before close"
+
+      - id: INT5
+        name: "Synergy execution collapse"
+        description: >
+          The synergy owners were named in the integration plan but had
+          no authority, budget, or organizational support to execute.
+          Synergies required cooperation between departments that had
+          conflicting incentives. The $50M synergy plan delivered $8M.
+        early_warning: "Synergy tracker shows < 30% on plan at 12 months"
+        prevention: "For each synergy line: name the owner, their budget authority, and the cross-functional dependencies"
+
+      - id: INT6
+        name: "Management distraction"
+        description: >
+          The integration consumed 40-60% of senior management attention
+          for 18+ months. Core business metrics deteriorated because the
+          leadership team was in integration meetings. The acquirer's
+          business underperformed while chasing the acquisition thesis.
+        early_warning: "Acquirer's organic growth rate falls > 15% relative to pre-deal trend"
+        prevention: "Dedicated integration PMO with CEO-level sponsor. Integration management is not a side project."
+
+      - id: INT7
+        name: "Regulatory and contractual landmines"
+        description: >
+          Post-close review revealed contracts, customer agreements, or
+          regulatory obligations that weren't fully surfaced during due
+          diligence. Change-of-control provisions triggered. Government
+          contracts required re-bidding. Key partnerships were at-will
+          and walked away post-announcement.
+        early_warning: "Legal review flags unresolved items > 30 days after close"
+        prevention: "Dedicated legal due diligence pass specifically on change-of-control provisions, government contracts, and partnership agreements"

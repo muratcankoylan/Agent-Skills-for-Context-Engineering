@@ -1,0 +1,23 @@
+{
+  "name": "sentinel",
+  "version": "8.0.0",
+  "description": "Structured decision protocol. Forces the questions you would skip, the perspectives you would miss, and the math you would approximate. Based on Kahneman (MAP), Klein (pre-mortem), Tetlock (calibration).",
+  "author": {
+    "name": "Manuel"
+  },
+  "keywords": ["decision", "strategy", "bias", "kahneman", "premortem", "calibration"],
+  "skills_loading": "progressive",
+  "default_bundle": "core-decision",
+  "bundles": {
+    "core-decision": {
+      "load_priority": 1,
+      "description": "Base decision hygiene skill — triage, noise audit, calibration scripts. Pre-loaded every session.",
+      "skills": ["decision-hygiene"]
+    },
+    "domain-hygiene": {
+      "load_priority": 2,
+      "description": "Domain-specific decision hygiene overlays — hiring, M&A, product, retrospective, strategy/marketing.",
+      "skills": ["hiring", "ma", "product-management", "retrospective", "strategy-marketing"]
+    }
+  }
+}

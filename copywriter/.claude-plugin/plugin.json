@@ -1,0 +1,43 @@
+{
+  "name": "copywriter",
+  "version": "1.1.0",
+  "description": "Copywriting studio for solopreneurs. Blog, newsletter, LinkedIn, sales copy — all in your Voice DNA. Pair with solo for business operations.",
+  "author": {
+    "name": "Antigravity Factory"
+  },
+  "keywords": ["copywriting", "content", "blog", "newsletter", "linkedin", "voice-dna", "seo"],
+  "skills_loading": "progressive",
+  "default_bundle": "identity-core",
+  "bundles": {
+    "identity-core": {
+      "load_priority": 1,
+      "description": "Identity foundation — business profile, voice DNA, ICP. Pre-loaded every session.",
+      "skills": ["business-profile-creator", "voice-dna-creator", "icp-creator"]
+    },
+    "content-strategy": {
+      "load_priority": 2,
+      "description": "Plan and optimize content — calendar, LinkedIn analytics, SEO blog, headline generation.",
+      "skills": ["content-calendar-planner", "linkedin-analytics", "seo-blog-writer", "title-brain"]
+    },
+    "social-content": {
+      "load_priority": 2,
+      "description": "Social media content — LinkedIn posts, scheduling, Twitter threads, video scripts.",
+      "skills": ["linkedin-post", "linkedin-scheduler", "twitter-thread", "video-script-generator"]
+    },
+    "long-form-conversion": {
+      "load_priority": 3,
+      "description": "Long-form and conversion copy — newsletters, email sequences, landing pages.",
+      "skills": ["newsletter-writer", "sales-email-sequence", "landing-page-copy"]
+    },
+    "research-tools": {
+      "load_priority": 3,
+      "description": "Research and intelligence — Exa search, Reddit insights, quote extraction.",
+      "skills": ["exa-search-expert", "reddit-research-insights", "quote-extractor"]
+    },
+    "content-ops": {
+      "load_priority": 4,
+      "description": "Content operations — anti-slop audits, bio generation, WordPress publishing.",
+      "skills": ["antislop-expert", "social-media-bio-generator", "wordpress-publisher"]
+    }
+  }
+}

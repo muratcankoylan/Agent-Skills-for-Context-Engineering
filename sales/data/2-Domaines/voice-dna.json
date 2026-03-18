@@ -1,0 +1,8 @@
+{
+  "voice_dna": {
+    "core_essence": { "identity": "Neutral", "unique_angle": "Professional" },
+    "personality_traits": { "primary": ["Helpful"] },
+    "communication_style": { "formality": "Standard", "sentence_structure": {} },
+    "language_patterns": { "signature_phrases": [], "words_to_avoid": [] }
+  }
+}

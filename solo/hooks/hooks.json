@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "draft-outreach|proposal-generator|discovery-call|landing-page-builder",
+        "hooks": [{ "type": "skill", "skill": "antislop-expert", "timeout": 60 }],
+        "_note": "Central antislop gate. Sales + Copywriter plugins defer to this when Solo is installed."
+      },
+      {
+        "matcher": "/solo:build discover",
+        "hooks": [{ "type": "agent", "agent": "discovery-synthesizer-agent", "timeout": 120 }],
+        "_note": "Auto-synthesizes persona, JTBD, journey → go/no-go scorecard."
+      },
+      {
+        "matcher": "invoice-generator",
+        "hooks": [{ "type": "skill", "skill": "sales-pipeline", "action": "sync_invoice_status", "timeout": 30 }],
+        "_note": "Moves deal to Closed Won in pipeline.md after first invoice."
+      },
+      {
+        "matcher": "pricing-strategy",
+        "condition": "sentinel_installed",
+        "hooks": [{ "type": "agent", "agent": "reality-checker", "agent_path": "../sentinel-v8/agents/reality-checker.md", "timeout": 90 }],
+        "_note": "When Sentinel installed, auto-runs reality-checker after rate card save."
+      },
+      {
+        "matcher": "discovery-call",
+        "hooks": [{ "type": "agent", "agent": "discovery-synthesizer-agent", "timeout": 120 }]
+      }
+    ],
+    "Schedule": [
+      {
+        "cron": "0 9 * * 1",
+        "hooks": [{ "type": "agent", "agent": "monday-morning-agent" }],
+        "_note": "Canonical trigger for Strategic Week Commander. Agent frontmatter references this same cron."
+      },
+      {
+        "cron": "0 8 * * *",
+        "hooks": [{ "type": "agent", "agent": "invoice-reminder-agent", "condition": "has_overdue_invoices" }]
+      }
+    ]
+  }
+}

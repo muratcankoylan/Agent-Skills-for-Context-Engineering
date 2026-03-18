@@ -1,0 +1,48 @@
+{
+  "name": "sales",
+  "version": "2.1.0",
+  "description": "Sales OS for solopreneurs and small teams. Prospecting, pipeline management, deal coaching, call prep, and outreach — standalone or supercharged with CRM and enrichment tools.",
+  "author": {
+    "name": "Antigravity Factory"
+  },
+  "keywords": ["sales", "crm", "pipeline", "outreach", "prospecting", "linkedin", "deal-coaching"],
+  "skills_loading": "progressive",
+  "default_bundle": "identity-tools",
+  "bundles": {
+    "identity-tools": {
+      "load_priority": 1,
+      "description": "Identity passthroughs — ICP, Voice DNA, file organization. Pre-loaded every session.",
+      "skills": ["icp-creator", "voice-dna-creator", "para-organizer"]
+    },
+    "prospecting": {
+      "load_priority": 2,
+      "description": "Find and engage prospects — account research, competitive intel, LinkedIn, outbound sequences.",
+      "skills": ["account-research", "competitive-intelligence", "exa-search-expert", "linkedin-prospector", "outbound-sequence"]
+    },
+    "pipeline-ops": {
+      "load_priority": 2,
+      "description": "Manage your pipeline — clients, daily briefing, HubSpot sync, territory planning.",
+      "skills": ["client-management", "daily-briefing", "hubspot-sync", "territory-planner"]
+    },
+    "deal-execution": {
+      "load_priority": 3,
+      "description": "Execute deals — call prep, assets, discovery, proposals, RFP analysis.",
+      "skills": ["call-prep", "create-an-asset", "discovery-interview-prep", "proposal-builder", "rfp-shredder"]
+    },
+    "deal-strategy": {
+      "load_priority": 3,
+      "description": "Win deals — champion building, negotiation, objection handling, QBR prep.",
+      "skills": ["champion-builder", "negotiation-advisor", "objection-library", "qbr-builder"]
+    },
+    "linkedin-social": {
+      "load_priority": 3,
+      "description": "LinkedIn presence — create posts, engage prospects, orchestrate a full LinkedIn strategy.",
+      "skills": ["linkedin-creator", "linkedin-engager", "linkedin-orchestrator"]
+    },
+    "coaching-quality": {
+      "load_priority": 4,
+      "description": "Improve quality — anti-slop audits, email coaching, win/loss analysis.",
+      "skills": ["antislop-expert", "email-coach", "win-loss-analyzer"]
+    }
+  }
+}

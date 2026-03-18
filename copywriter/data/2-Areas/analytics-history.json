@@ -1,0 +1,11 @@
+{
+  "total_words_generated": 0,
+  "slop_scores_log": [],
+  "content_types_breakdown": {
+    "blog": 0,
+    "linkedin": 0,
+    "newsletter": 0,
+    "sales": 0
+  },
+  "last_session": null
+}

@@ -1,0 +1,12 @@
+{
+  "plugin_name": "copywriter",
+  "version": "2.0.0",
+  "language_mode": "bilingual",
+  "onboarding_complete": false,
+  "last_used_voice": null,
+  "settings": {
+    "default_model": "sonnet",
+    "auto_publish": false,
+    "check_slop": true
+  }
+}

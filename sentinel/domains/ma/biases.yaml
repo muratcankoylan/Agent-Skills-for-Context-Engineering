@@ -1,0 +1,189 @@
+# Domain-specific cognitive biases - M&A and Due Diligence
+# Added to the 35 core biases of Sentinel v8
+# Source: Lovallo et al. (HBR, 2007), Aschbacher & Kroon (2025),
+#         Kahneman (Noise, 2021), March & Shapira (1987)
+
+domain: ma
+
+biases:
+  - id: MA1
+    name: Deal Completion Bias
+    alias: ["closing imperative", "deal fever", "process momentum", "sunk cost deal"]
+    description: >
+      Teams working a deal for months develop a strong psychological and
+      professional investment in closing it. The due diligence process itself
+      creates commitment escalation - every consultant hour, every management
+      presentation, every board update makes the deal harder to kill.
+      The people most capable of identifying fatal flaws are the people most
+      motivated to overlook them. This is the most dangerous bias in M&A
+      because it operates silently and is reinforced by everyone in the room.
+    detection_questions:
+      - "If this deal appeared on your desk today with no prior work done,
+        would you still pursue it at the current price and terms? If you're
+        hesitating - the sunk cost is distorting your judgment."
+      - "Who in the process has explicitly argued against closing?
+        If no one has, why not? Is it because the deal is genuinely solid,
+        or because dissent has been implicitly discouraged?"
+      - "What would have to be true for you to walk away from this deal
+        at this stage? Write that down. Now check if those conditions exist."
+    typical_context: "We've spent 6 months on this - we can't stop now"
+
+  - id: MA2
+    name: Synergy Theater
+    alias: ["synergy inflation", "optimistic synergy", "pro forma synergies", "synergy gap"]
+    description: >
+      Projected synergies in M&A are systematically and significantly
+      overestimated. The bias operates in two directions simultaneously:
+      cost synergies are underestimated in execution difficulty, and revenue
+      synergies are estimated with near-zero historical base rate support.
+      McKinsey research: 70% of deals fail to achieve projected synergies
+      within the announced timeline. The team that projects synergies is
+      the team most emotionally invested in the deal - creating a direct
+      conflict of interest in the estimation process.
+    detection_questions:
+      - "What percentage of synergies projected in deals of similar type
+        in your sector were actually achieved within the announced timeline?
+        If you don't have this number - your projection has no base rate."
+      - "Who built the synergy model? Were they also involved in sourcing
+        the deal? If yes - they have a conflict of interest that affects
+        every number in the model."
+      - "Line by line: for each synergy, what is the specific execution
+        action required, who owns it, and what's the earliest realistic date
+        it appears in P&L? If any synergy can't be described at this level
+        of specificity - treat it as zero."
+    typical_context: "The synergy model shows $50M in Year 2 cost savings"
+
+  - id: MA3
+    name: Integration Optimism
+    alias: ["integration underestimation", "soft factors neglect", "cultural fit assumption"]
+    description: >
+      Deal teams consistently underestimate integration complexity because
+      integration is invisible during due diligence. The data room contains
+      financials, contracts, and IP - not cultural friction, IT architecture
+      complexity, or middle management resistance. These invisible factors
+      are the primary drivers of integration failure. Teams that have never
+      run an integration are systematically overconfident about running one.
+      The 2-year integration estimate is almost always wrong by 50-100%.
+    detection_questions:
+      - "Who on the deal team has directly managed a post-acquisition
+        integration of comparable scale? If the answer is 'no one' -
+        your timeline and cost estimates need an external reference class."
+      - "What are the 3 most likely points of cultural friction between
+        the two organizations? Have you spoken to anyone below C-suite
+        in the target to understand actual working culture?"
+      - "What happens to the target's key people in months 3-6 post-close?
+        What's the retention plan? What's the cost of losing the top 10%
+        of performers in the target?"
+    typical_context: "Integration will be complete in 18 months" (with no integration PMO named)
+
+  - id: MA4
+    name: Artificial Timeline Pressure
+    alias: ["deal urgency", "competitive bidding pressure", "FOMO deal", "fake deadline"]
+    description: >
+      M&A processes are often structured to create time pressure that
+      benefits the seller: compressed due diligence windows, artificial
+      auction deadlines, and "other bidders" signals. This pressure
+      deliberately prevents the independent, unhurried evaluation that
+      good decisions require. Buyers who accept artificial timelines as
+      real constraints are systematically disadvantaged.
+      The most dangerous version: the timeline is internally generated
+      ("we must close before Q4") rather than externally imposed.
+    detection_questions:
+      - "Who set this timeline and why? Is the deadline externally imposed
+        by the seller, or internally generated by our own process?
+        What happens concretely if we take 4 more weeks?"
+      - "What due diligence items were deferred or abbreviated because of
+        time pressure? Are any of these items deal-material?"
+      - "If this deal takes 6 months longer than planned, what is the
+        actual cost? Often the answer is 'not much' - and the real
+        pressure is social, not economic."
+    typical_context: "We need to sign by end of month or we lose the deal"
+
+  - id: MA5
+    name: Reference Class Neglect
+    alias: ["inside view M&A", "this deal is different", "uniqueness bias", "base rate blindness"]
+    description: >
+      Deal teams analyze each acquisition from the inside view - this target,
+      this market, this management team, this set of synergies. They systematically
+      fail to consult the outside view: what happens to deals like this?
+      The outside view in M&A is brutal. 70% of deals fail to create value
+      (McKinsey). Premium paid above market averages 30-40% - almost always
+      destroying acquirer shareholder value in the long run.
+      These are not rare failure cases. They are the modal outcome.
+    detection_questions:
+      - "What is the historical track record of similar deals (same deal type,
+        same sector, same size range) in terms of value creation for the acquirer?
+        Has anyone pulled this data?"
+      - "What premium are you paying vs. the sector average? What is the historical
+        correlation between deal premium and acquirer value creation in this sector?"
+      - "If you had to bet on this deal creating value based solely on the
+        statistical base rate - not your specific thesis - would you still do it?"
+    typical_context: "This situation is unique because [specific thesis]" (without comparing to base rate)
+
+  - id: MA6
+    name: Advisor Alignment Distortion
+    alias: ["banker incentive bias", "fee-driven advice", "sell-side perspective", "advisor pressure"]
+    description: >
+      Investment bankers, lawyers, and consultants in an M&A process are paid
+      when the deal closes - not when the acquirer creates value. This creates
+      a structural conflict of interest that systematically biases advice toward
+      deal completion. Aschbacher & Kroon (2025): advisor-client relationships
+      generate additional biases through time pressure, standardization of
+      analysis, and emotional dynamics in the process.
+      The advisor who raises a fatal flaw late in the process loses the deal
+      and their fee - creating strong incentives to frame issues as "manageable."
+    detection_questions:
+      - "What is the total fee structure for each advisor, and how much of it
+        is contingent on deal closing? The proportion of success fee vs.
+        retainer tells you something about their incentives."
+      - "Have any advisors explicitly recommended walking away from a deal
+        before? If you can't name an instance - they may be structurally
+        unable to give you that advice."
+      - "On the key risk areas: are you getting the advisor's real view
+        or their managed view? What would they say differently if they
+        were paid a flat fee regardless of outcome?"
+    typical_context: "Our advisors have reviewed everything and are comfortable"
+
+  - id: MA7
+    name: Halo Effect (Deal)
+    alias: ["product halo", "team halo", "market halo", "one-dimension contamination"]
+    description: >
+      A single outstanding dimension of the target contaminates the evaluation
+      of all other dimensions. A great product makes the team seem stronger.
+      A strong market makes the execution risk seem smaller. A charismatic
+      founder makes the integration seem simpler. In M&A, the halo effect
+      operates across the entire deal narrative - the thesis that justified
+      pursuing the deal becomes the lens through which every subsequent
+      piece of information is interpreted.
+    detection_questions:
+      - "What is the one thing that makes this deal exciting? Now score
+        ONLY the other dimensions - without mentioning that one thing.
+        Do the scores change?"
+      - "If the target's strongest dimension (product/team/market) were
+        average instead of exceptional, would you still be pursuing the deal?
+        At the same valuation?"
+      - "List the three biggest problems with this target. Were these
+        problems discovered before or after the deal thesis was formed?
+        If after - they may have been systematically underweighted."
+    typical_context: "Their product is exceptional, the team must be great too"
+
+  - id: MA8
+    name: Winner's Curse Blindspot
+    alias: ["auction winner's curse", "competitive bidding bias", "overbidding pressure"]
+    description: >
+      In any competitive M&A process, the winner is systematically the party
+      that made the most optimistic assessment of the target. This is not
+      a sign of superior insight - it is a statistical artifact of the
+      auction process. Winning a competitive bid is Bayesian evidence that
+      you overestimated the target's value relative to every other informed
+      party who also reviewed the data room and chose not to bid at your price.
+    detection_questions:
+      - "How many other parties were in this process? What does their
+        decision not to bid at your price tell you? Have you updated
+        your valuation based on this information?"
+      - "If you win this auction, what does winning tell you about whether
+        you paid the right price?"
+      - "What information did you have that the other bidders didn't?
+        If the answer is 'nothing significant' - your superior bid
+        is Bayesian evidence of overestimation."
+    typical_context: "We won the process against 4 other bidders" (presented as positive signal)

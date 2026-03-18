@@ -1,0 +1,105 @@
+{
+  "name": "solo",
+  "version": "2.5.0",
+  "description": "Solopreneur OS. Manage clients, create content, track revenue, build products, and qualify leads with scored diagnostics — from discovery to validated design. Built on PARA methodology.",
+  "author": {
+    "name": "Antigravity Factory"
+  },
+  "keywords": ["solopreneur", "clients", "pipeline", "para", "revenue", "content"],
+  "skills_loading": "progressive",
+  "default_bundle": "core-identity",
+  "bundles": {
+    "core-identity": {
+      "load_priority": 1,
+      "description": "Business identity foundations — profile, voice, ICP, positioning, and file organisation. Always pre-loaded.",
+      "skills": [
+        "business-profile-creator",
+        "voice-dna-creator",
+        "icp-creator",
+        "positioning-statement",
+        "para-organizer"
+      ]
+    },
+    "client-work": {
+      "load_priority": 2,
+      "description": "Full client lifecycle — onboarding, discovery, proposals, scope management, and contracts.",
+      "skills": [
+        "client-management",
+        "client-onboarding",
+        "discovery-call",
+        "proposal-generator",
+        "scope-management",
+        "contract-templates"
+      ]
+    },
+    "revenue-ops": {
+      "load_priority": 2,
+      "description": "Financial operations — invoicing, expenses, financial health, retainers, and pricing.",
+      "skills": [
+        "invoice-generator",
+        "expense-tracker",
+        "financial-health",
+        "retainer-manager",
+        "pricing-strategy",
+        "product-pricing-model"
+      ]
+    },
+    "sales-growth": {
+      "load_priority": 3,
+      "description": "Lead generation and sales — pipeline, outreach, company research, competitive analysis, and landing pages.",
+      "skills": [
+        "sales-pipeline",
+        "draft-outreach",
+        "company-research",
+        "competitive-analyzer",
+        "exa-search-expert",
+        "reddit-research-insights",
+        "landing-page-builder"
+      ]
+    },
+    "product-build": {
+      "load_priority": 3,
+      "description": "Product development — orchestration, PRDs, user stories, design briefs, problem statements, and personas.",
+      "skills": [
+        "pipeline-orchestrator",
+        "prd-development",
+        "user-story",
+        "design-brief-generator",
+        "problem-statement",
+        "proto-persona"
+      ]
+    },
+    "research-validate": {
+      "load_priority": 3,
+      "description": "Market research and validation — user discovery, market sizing, journey mapping, and idea testing.",
+      "skills": [
+        "user-discovery",
+        "tam-sam-som-calculator",
+        "customer-journey-map",
+        "idea-test"
+      ]
+    },
+    "diagnostics": {
+      "load_priority": 4,
+      "description": "Scored diagnostic assessments — build, run, and analyze diagnostics with Tally integration.",
+      "skills": [
+        "diagnostic-builder",
+        "diagnostic-runner",
+        "diagnostic-analyzer",
+        "tally-integration"
+      ]
+    },
+    "operations": {
+      "load_priority": 4,
+      "description": "Business operations — weekly reviews, project management, capacity planning, health advisors, and launch planning.",
+      "skills": [
+        "weekly-review",
+        "project-management",
+        "capacity-planner",
+        "business-health-advisor",
+        "launch-planner",
+        "antislop-expert"
+      ]
+    }
+  }
+}

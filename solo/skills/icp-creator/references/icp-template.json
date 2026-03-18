@@ -1,0 +1,47 @@
+{
+  "icp_name": "",
+  "created": "",
+  "last_updated": "",
+  "demographics": {
+    "age_range": "",
+    "location": [],
+    "income": "",
+    "education": ""
+  },
+  "professional_profile": {
+    "job_titles": [],
+    "industries": [],
+    "company_size": "",
+    "years_experience": ""
+  },
+  "psychographics": {
+    "values": [],
+    "beliefs": [],
+    "personality_traits": [],
+    "motivations": []
+  },
+  "pain_points": [
+    {
+      "pain": "",
+      "description": "",
+      "severity": ""
+    }
+  ],
+  "goals": {
+    "short_term": [],
+    "long_term": [],
+    "success_definition": ""
+  },
+  "language_patterns": {
+    "frequent_words": [],
+    "common_questions": [],
+    "jargon": [],
+    "problem_descriptions": []
+  },
+  "content_behavior": {
+    "online_hangouts": [],
+    "content_consumed": [],
+    "buying_process": [],
+    "purchase_triggers": []
+  }
+}

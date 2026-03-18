@@ -1,0 +1,75 @@
+# Evaluation Frameworks - Marketing & Communication Strategy
+
+domain: strategy-marketing
+
+frameworks:
+  - id: MAP_MARKETING
+    name: "MAP Marketing Strategy"
+    description: "6 independent dimensions for evaluating any marketing initiative"
+    dimensions:
+      - name: "Measurable business impact"
+        scale: "0-3: not measurable | 4-6: correlated | 7-10: causally proven"
+        question: "How much pipeline/revenue/retention does this produce?"
+      - name: "True total cost"
+        scale: "0-3: over budget | 4-6: within budget | 7-10: proven positive ROI"
+        question: "Budget + team time + opportunity cost - not just media spend"
+      - name: "Proven audience alignment"
+        scale: "0-3: assumed (invented persona) | 4-6: indirectly validated | 7-10: tested"
+        question: "Has the target audience been VALIDATED or ASSUMED?"
+      - name: "Competitive differentiation"
+        scale: "0-3: me-too | 4-6: twist | 7-10: unique"
+        question: "Are 10 competitors doing the same thing?"
+      - name: "Executability"
+        scale: "0-3: critical gap | 4-6: stretch | 7-10: within capability"
+        question: "Does the team have the skills, time, and tools?"
+      - name: "Reversibility"
+        scale: "0-3: 12-month commitment | 4-6: pivot possible | 7-10: quick test"
+        question: "If it doesn't work, can we stop quickly and reallocate?"
+
+  - id: PREMORTEM_CAMPAGNE
+    name: "Campaign Pre-mortem"
+    description: "7 marketing-specific failure modes"
+    premise: "The campaign launched 6 months ago. It's a total failure. What happened?"
+    failure_modes:
+      - "Message doesn't resonate with REAL audience (vs invented persona)"
+      - "Channel reaches influencers, not buyers/decision-makers"
+      - "Bad timing (competition, seasonality, news cycle)"
+      - "Creative execution diluted by internal iterations"
+      - "Budget consumed in setup, nothing left for optimization"
+      - "Wrong KPIs (vanity metrics vs business metrics)"
+      - "Team overloaded, quality drops after launch"
+
+  - id: NOISE_AUDIT_BUDGET
+    name: "Noise Audit - Budget Allocation"
+    description: "Measures noise in budget allocation decisions"
+    protocol:
+      step_1: "Each team member independently allocates a budget of 100 across channels"
+      step_2: "Nobody shares allocations until everyone has submitted"
+      step_3: "Sentinel measures CV between allocations"
+      step_4: "Discussion on gaps > 20 points"
+
+  - id: REFRAME_MARKETING
+    name: "6 Marketing Reframes"
+    techniques:
+      - name: "Departing customer"
+        prompt: "Someone leaving your product: what do they read in your comms? What's missing?"
+      - name: "Copying competitor"
+        prompt: "If a competitor copied your strategy tomorrow, what would they lack? That's your real differentiator."
+      - name: "Budget / 10"
+        prompt: "With only 10% of the budget, what would you do? That's probably what has the most value."
+      - name: "Horizon x 5"
+        prompt: "This 1-year plan - impact in 5 years? Are you building a lasting asset or buying ephemeral visibility?"
+      - name: "Total stop"
+        prompt: "What if you stopped ALL communication for 3 months? What would actually happen? That's your floor."
+      - name: "New employee"
+        prompt: "Someone starting tomorrow: is this plan understandable in 5 minutes? If not, it's too complex for the market."
+
+  - id: ZERO_BASED_BUDGET
+    name: "Zero-Based Budget Challenge"
+    protocol:
+      step_1: "List ALL current channels/initiatives with their budget"
+      step_2: "For each, note the PROVEN ROI (not estimated - proven)"
+      step_3: "Set entire budget to zero"
+      step_4: "Reallocate starting with highest proven ROI"
+      step_5: "Compare zero-based allocation to current allocation"
+      step_6: "The gap = your tradition budget, not your performance budget"

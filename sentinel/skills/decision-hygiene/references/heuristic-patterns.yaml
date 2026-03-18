@@ -1,0 +1,201 @@
+# Heuristic Patterns (Houde System 1)
+# Detection rules and appropriateness contexts
+
+heuristics:
+  - id: H1
+    name: FIRST_NUMBER_ANCHORING
+    system: S1
+
+    neural_basis:
+      region: Parietal_Inferior
+      process: Numerical encoding
+      speed_ms: 150
+
+    houde_difficulty: 2 # 1-5 scale
+
+    detection:
+      triggers:
+        - "starting with $"
+        - "price at $"
+        - "around $"
+        - "initial estimate"
+
+      patterns:
+        - first_number_mentioned
+        - round_number_indicator
+        - adjustment_language
+
+      confidence:
+        high: "First number + no context + round"
+        medium: "First number with some context"
+        low: "Multiple numbers present"
+
+    appropriateness:
+      appropriate:
+        - context: negotiation
+          condition: market_reference_exists
+          score: 0.8
+
+        - context: competitive_pricing
+          condition: competitor_data_available
+          score: 0.75
+
+      inappropriate:
+        - context: novel_estimation
+          condition: no_prior_reference
+          score: 0.1
+
+        - context: scientific_measurement
+          score: 0.05
+
+        - characteristic: round_number
+          condition: arbitrary_anchor
+          score: 0.2
+
+  - id: H4
+    name: LOSS_AVERSION
+    system: S1
+
+    neural_basis:
+      region: Amygdala + Insula
+      process: Emotional loss processing
+      speed_ms: 120
+
+    houde_difficulty: 5 # Very hard (emotional)
+
+    detection:
+      triggers:
+        - "can't afford to lose"
+        - "risk losing"
+        - "avoid loss"
+        - "don't want to lose"
+
+      emotional_markers:
+        - fear
+        - anxiety
+        - worry
+
+      framing:
+        - loss_dominant
+        - gain_absent
+
+      confidence:
+        high: "Loss frame + emotion"
+        medium: "Loss frame only"
+        low: "Neutral frame"
+
+    appropriateness:
+      appropriate:
+        - context: safety_critical
+          condition: irreversible_harm_possible
+          score: 0.9
+
+        - context: irreversible_decision
+          condition: stakes_critical
+          score: 0.7
+
+      inappropriate:
+        - context: symmetric_gamble
+          score: 0.2
+
+        - context: portfolio_decision
+          score: 0.3
+
+        - context: long_term_investment
+          score: 0.25
+
+  - id: H6
+    name: SUNK_COST
+    system: S1
+
+    neural_basis:
+      region: Striatum_Ventral + ACC
+      process: Reward + conflict
+      speed_ms: 200
+
+    houde_difficulty: 3
+
+    detection:
+      triggers:
+        - "already invested"
+        - "we've spent"
+        - "too late to turn back"
+        - "waste what we invested"
+
+      patterns:
+        - past_costs_mentioned
+        - costs_as_justification
+
+      confidence:
+        high: "Explicit past cost justification"
+        medium: "Past costs mentioned"
+        low: "Past costs acknowledged but ignored"
+
+    appropriateness:
+      # Sunk cost is NEVER appropriate
+      appropriate: []
+      inappropriate:
+        - context: any
+          score: 0.0
+
+  - id: H2
+    name: AVAILABILITY_HEURISTIC
+    system: S1
+
+    neural_basis:
+      region: Hippocampus
+      process: Episodic memory retrieval
+      speed_ms: 180
+
+    houde_difficulty: 3
+
+    detection:
+      triggers:
+        - "recently"
+        - "I just saw"
+        - "remember when"
+        - "last time"
+
+      characteristics:
+        - vivid_example
+        - recent_event
+        - emotional_salience
+
+      confidence:
+        high: "Recent + vivid + emotional"
+        medium: "Recent + vivid"
+        low: "Mentioned in passing"
+
+    appropriateness:
+      appropriate:
+        - context: personal_safety
+          condition: recent_danger_relevant
+          score: 0.8
+
+      inappropriate:
+        - context: statistical_prediction
+          condition: base_rates_needed
+          score: 0.1
+
+        - context: rare_event_estimation
+          score: 0.15
+
+# Interaction patterns
+interactions:
+  - heuristics: [H1, H4] # Anchoring + Loss Aversion
+    name: STICKY_ANCHOR
+    effect: "Loss aversion makes anchor extremely sticky"
+    severity_multiplier: 1.8
+    combined_difficulty: 5
+
+  - heuristics: [H6, H4] # Sunk Cost + Loss Aversion
+    name: THROWING_GOOD_MONEY_AFTER_BAD
+    effect: "Fear of realizing loss drives continued investment"
+    severity_multiplier: 2.0
+    combined_difficulty: 5
+
+  - heuristics: [H1, H2] # Anchoring + Availability
+    name: VIVID_ANCHOR
+    effect: "Vivid recent example serves as anchor"
+    severity_multiplier: 1.5
+    combined_difficulty: 4

@@ -1,0 +1,169 @@
+# Legal Frameworks - M&A Business Lawyers
+# Extension of ma/frameworks.yaml for legal counsel
+
+domain: ma-legal
+
+frameworks:
+  - id: LEGAL_RISK_MATRIX
+    name: "Legal Risk Prioritization Matrix"
+    description: >
+      Forces probability x impact scoring on legal risks.
+      Addresses LA1 (Risk Identification Without Probability) directly.
+      A DD report without this matrix is a list, not an assessment.
+      The matrix forces the lawyer to commit to probability estimates -
+      uncomfortable, professionally exposed, and essential.
+    dimensions:
+      probability:
+        scale:
+          - level: "Remote"
+            range: "< 5%"
+            description: "Theoretical risk - document but do not escalate"
+          - level: "Possible"
+            range: "5-25%"
+            description: "Warrants a specific clause or disclosure request"
+          - level: "Probable"
+            range: "25-60%"
+            description: "Requires price adjustment, indemnity, or escrow"
+          - level: "Likely"
+            range: "> 60%"
+            description: "Deal-material - changes deal structure or kills deal"
+      impact:
+        scale:
+          - level: "Negligible"
+            range: "< 0.5% of deal value"
+            description: "Standard clause treatment"
+          - level: "Moderate"
+            range: "0.5-2% of deal value"
+            description: "Specific indemnity or price reduction"
+          - level: "Significant"
+            range: "2-5% of deal value"
+            description: "Escrow, deferred consideration, or renegotiation"
+          - level: "Severe"
+            range: "> 5% of deal value"
+            description: "Condition precedent to closing or deal-breaker"
+    output_format: >
+      For each legal risk:
+      | Risk | Probability | Impact | Priority | Treatment |
+      | [Risk description] | [Remote/Possible/Probable/Likely] | [Negligible/Moderate/Significant/Severe] | [1-4] | [Clause/Indemnity/Price/Structure/Kill] |
+
+      Priority = Probability tier x Impact tier (1 = lowest, 4 = highest)
+      Only Priority 3-4 risks require immediate client escalation.
+
+  - id: MAP_LEGAL_DD
+    name: "MAP Legal DD - 5 Independent Dimensions"
+    description: >
+      Structured evaluation of the legal quality of a target.
+      Scored independently before synthesis to prevent the deal narrative
+      from contaminating the legal assessment.
+    dimensions:
+      - name: "Title and ownership clarity"
+        scale: "0-3: material gaps, disputed ownership, or encumbrances | 4-6: minor issues, addressable | 7-10: clean title, fully documented, no disputes"
+        question: "Is the ownership of all material assets (IP, real estate, key contracts) fully documented and uncontested? Are there any encumbrances, pledges, or third-party claims?"
+
+      - name: "Contractual risk concentration"
+        scale: "0-3: key contracts have change-of-control provisions, CAN terminate, or have been triggered | 4-6: some change-of-control risk, manageable | 7-10: no material change-of-control provisions in key contracts"
+        question: "What % of revenue is under contracts with change-of-control provisions? Have any been waived? What is the risk of customers or partners exercising these rights?"
+
+      - name: "Regulatory and compliance posture"
+        scale: "0-3: open investigations, material non-compliance, or regulatory exposure | 4-6: minor compliance gaps, addressable pre-close | 7-10: clean regulatory history, no open matters"
+        question: "Are there any open regulatory investigations, pending enforcement actions, or known compliance gaps? What is the cost and timeline to remediate?"
+
+      - name: "Litigation exposure"
+        scale: "0-3: material active litigation or credible threat | 4-6: minor disputes or disclosed contingencies | 7-10: clean litigation history, no credible threats"
+        question: "What is the total claimed or reasonably estimated litigation exposure? What is the probability of adverse outcomes? Has outside counsel's assessment been compared to management's?"
+
+      - name: "Employment and social risk"
+        scale: "0-3: material labor claims, undisclosed arrangements, or collective agreement issues | 4-6: manageable issues with specific remedies | 7-10: clean employment posture, no material exposure"
+        question: "Are there undisclosed golden parachutes, side arrangements, or phantom equity? What is the status of any collective bargaining agreements? Are there material underfunded pension obligations?"
+
+  - id: DISCLOSURE_LETTER_PROTOCOL
+    name: "Disclosure Letter Review Protocol"
+    description: >
+      Structured approach to disclosure letter review that combats LA5
+      (Disclosure Letter Normalization). Forces the reviewer to evaluate
+      each disclosure against the deal model, not against the prior disclosure.
+    protocol:
+      step_1:
+        name: "Materiality screen"
+        instructions: >
+          Before reading the disclosure letter, write down the top 5 assumptions
+          underlying the deal valuation. These are your materiality anchors.
+          Any disclosure that touches these assumptions is automatically elevated.
+      step_2:
+        name: "Fresh reader test"
+        instructions: >
+          Have one team member read the disclosure letter who has NOT been
+          involved in the deal. Their job: flag anything that would be surprising
+          to a first-time reader of this business. This combats volume normalization.
+      step_3:
+        name: "Price impact assessment"
+        instructions: >
+          For each disclosure that touches a valuation assumption:
+          Calculate the range of financial impact if the disclosed fact
+          were fully material. Even a rough estimate ($500K to $2M impact)
+          enables a rational decision about whether to renegotiate.
+      step_4:
+        name: "Deal narrative stress test"
+        instructions: >
+          Ask: "If I had known about each of these disclosures before
+          the LOI was signed, would I have signed the same LOI at the same price?"
+          If the answer is "no" for any material disclosure - renegotiation
+          or a purchase price adjustment is warranted.
+      output: >
+        Disclosure Letter Summary:
+        - Total number of disclosures: ___
+        - Disclosures touching valuation assumptions: ___
+        - Disclosures flagged by fresh reader: ___
+        - Estimated financial impact range of material disclosures: $___ to $___
+        - Recommendation: [No change / Price adjustment / Specific indemnity / Renegotiate]
+
+  - id: NEGOTIATION_PRIORITY_FILTER
+    name: "Negotiation Point Triage"
+    description: >
+      Prevents LA4 (Adversarial Escalation) by forcing a commercial value
+      assessment of each open negotiation point before continuing to fight for it.
+      Every contested clause is worth a specific dollar amount to the client.
+      If the legal cost of negotiating it exceeds that amount - stop negotiating.
+    protocol:
+      for_each_open_point:
+        - question: "What is the maximum financial exposure if we LOSE this point?"
+        - question: "What is the probability this point is ever invoked?"
+        - question: "Expected value of this point = exposure x probability. What is it?"
+        - question: "What is the legal cost (time x rate) of continuing to negotiate this point for one more week?"
+        - question: "If expected value < legal cost of negotiation - this point should be conceded."
+    triage_output:
+      fight: "Expected value > 3x legal cost of negotiation - fight"
+      negotiate: "Expected value 1-3x legal cost - negotiate, don't fight"
+      concede: "Expected value < legal cost - concede, document the concession"
+      escalate: "Expected value > 1% of deal value - escalate to client for commercial decision"
+    note: >
+      The client should make the decision on all points above the escalation threshold.
+      The lawyer's job is to calculate the expected value, not to fight on principle.
+
+  - id: RW_INSURANCE_ANALYSIS
+    name: "R&W Insurance vs. Negotiation Cost Analysis"
+    description: >
+      Combats LA7 (Reps and Warranties Ritualism) by forcing a cost
+      comparison between R&W insurance and continued negotiation.
+      In many deals, R&W insurance is cheaper than the legal fees
+      required to negotiate the same protection contractually.
+    inputs:
+      - "Total legal fees spent on R&W negotiation to date: $___"
+      - "Estimated additional legal fees to reach agreement: $___"
+      - "Total contested rep exposure: $___"
+      - "R&W insurance premium quote (if obtained): $___"
+    analysis:
+      threshold: >
+        If R&W insurance premium < remaining negotiation cost + probability-adjusted
+        exposure not covered by negotiated reps -> insurance is the efficient solution.
+      typical_outcome: >
+        R&W insurance typically costs 1-3% of coverage amount.
+        For a $50M deal with $10M in contested reps, insurance might cost
+        $100-300K - often less than the legal fees to negotiate the same protection.
+    output: >
+      R&W Insurance Decision:
+      - Contested rep exposure: $___
+      - Insurance cost: $___
+      - Remaining negotiation cost estimate: $___
+      - Recommendation: [Negotiate / Insure / Hybrid]
+      - Rationale: ___

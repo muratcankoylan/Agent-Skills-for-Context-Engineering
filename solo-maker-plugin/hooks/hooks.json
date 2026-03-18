@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "landing|pitch|website",
+        "hooks": [{ "type": "agent", "agent": "copy-reviewer", "timeout": 60 }],
+        "_note": "After landing page, pitch deck, or website generated — auto-offer copy review."
+      },
+      {
+        "matcher": "prototype",
+        "hooks": [{ "type": "agent", "agent": "conversion-optimizer", "timeout": 90 }],
+        "_note": "After prototype built, run conversion-optimizer to surface CRO improvements."
+      },
+      {
+        "matcher": "bridge",
+        "hooks": [{ "type": "agent", "agent": "prototype-launch-agent", "timeout": 120 }],
+        "_note": "After bridge/video build, trigger prototype-launch-agent."
+      }
+    ]
+  }
+}

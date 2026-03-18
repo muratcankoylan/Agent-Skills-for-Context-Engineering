@@ -1,0 +1,23 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "failure-finder|questioner",
+        "hooks": [{ "type": "agent", "agent": "calibration-coach", "timeout": 60 }],
+        "_note": "After pre-mortem or questioning session, auto-log prediction to calibration coach."
+      },
+      {
+        "matcher": "structure-builder",
+        "hooks": [{ "type": "agent", "agent": "reality-checker", "timeout": 90 }],
+        "_note": "After MAP protocol completes, run reality-checker for base-rate validation."
+      }
+    ],
+    "Schedule": [
+      {
+        "cron": "0 9 * * 1",
+        "hooks": [{ "type": "agent", "agent": "calibration-coach" }],
+        "_note": "Weekly prediction review every Monday — surfaces unresolved forecasts."
+      }
+    ]
+  }
+}

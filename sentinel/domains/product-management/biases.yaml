@@ -1,0 +1,127 @@
+# Domain-specific cognitive biases - Product Management
+# Added to the 35 core biases of Sentinel v8
+
+domain: product-management
+
+biases:
+  - id: PM1
+    name: RICE Laundering
+    alias: ["RICE gaming", "WSJF gaming", "framework theatre", "reverse scoring"]
+    description: >
+      PMs reverse-engineer RICE, WSJF, or ICE inputs to produce a score that
+      justifies a decision already made. The framework provides the illusion of
+      objectivity while the decision remains purely subjective. Kahneman calls
+      this "decorative analysis."
+    detection_questions:
+      - "What would the RICE score be if someone who DISAGREES with shipping
+        this filled in the inputs?"
+      - "Were the RICE inputs estimated before or after you decided you wanted
+        to build this?"
+      - "If you changed Reach from 1,000 to 500, does the decision change?"
+    typical_context: "The RICE score came out to 24, so we should prioritize it"
+
+  - id: PM2
+    name: HiPPO Prioritization
+    alias: ["HiPPO", "CEO feature", "executive override", "stakeholder pressure"]
+    description: >
+      The roadmap is determined by the opinion of the highest-paid person in the
+      room, not by data or structured analysis. Junior PMs align to avoid conflict.
+      The feature gets built because someone important wants it, not because users
+      need it or business metrics support it.
+    detection_questions:
+      - "If the CPO/CEO had no opinion on this feature, what would the data say
+        the priority is?"
+      - "Did each team member score this feature independently BEFORE hearing
+        the executive's opinion?"
+      - "Is there a single person whose opinion can unilaterally change the roadmap?
+        That's your HiPPO."
+    typical_context: "The CEO saw a competitor feature and wants it on the roadmap"
+
+  - id: PM3
+    name: Planning Fallacy (Estimation)
+    alias: ["optimistic estimate", "t-shirt sizing fantasy", "sprint overcommitment"]
+    description: >
+      Systematic underestimation of time, complexity, and effort. Engineers and PMs
+      estimate best-case scenarios, not median or realistic cases. Kahneman (1993):
+      projects routinely take 2-3x estimated time even when the estimator knows the
+      base rate. The inside view always dominates.
+    detection_questions:
+      - "What's the median delivery time for features of similar scope in the
+        last 12 months? How does this estimate compare?"
+      - "What's the longest comparable feature has taken? What's the shortest?
+        Are you estimating near the short end?"
+      - "Does your estimate include: design iterations, QA cycles, stakeholder review,
+        edge cases, and post-launch fixes?"
+    typical_context: "We can ship this in 2 weeks" / "It's just a small change"
+
+  - id: PM4
+    name: Discovery Theater
+    alias: ["confirmation research", "fake discovery", "validation bias"]
+    description: >
+      User research is conducted to validate a pre-decided solution, not to discover
+      real problems. Interview questions are leading. Research findings that contradict
+      the hypothesis are discounted as "edge cases." The output is a deck that says
+      "users love this" regardless of what was found.
+    detection_questions:
+      - "Did your research sessions start with the proposed solution, or with
+        the problem space?"
+      - "What would have happened if 80% of users had rejected the proposed solution?"
+      - "What's the most uncomfortable thing users told you that didn't make it
+        into the final report?"
+    typical_context: "We ran user interviews and they validated the concept"
+
+  - id: PM5
+    name: Sunk Cost Roadmap
+    alias: ["partially built", "can't stop now", "feature debt"]
+    description: >
+      A feature that is partially built, partially funded, or partially committed
+      to stakeholders is continued because of what's already invested, not because
+      of future value. "We're 60% done, we can't stop now" is the classic signal.
+    detection_questions:
+      - "If this feature didn't exist at all today, would you start building it?"
+      - "What's the cost of finishing vs. the expected value generated?"
+      - "Is the team continuing because of future value or because of past investment?"
+    typical_context: "We're already 60% done, no point stopping"
+
+  - id: PM6
+    name: Scope Optimism
+    alias: ["MVP creep", "scope inflation", "feature bloat"]
+    description: >
+      The initial scope is always labeled "MVP" but expands to include "must-haves"
+      from every stakeholder before launch. Each addition seems small; the aggregate
+      is catastrophic to delivery dates. The real MVP is never shipped.
+    detection_questions:
+      - "What is the minimum scope that delivers value to ONE user segment?
+        Have you actually tested that it's the minimum?"
+      - "What's the scope after ALL stakeholder feedback is incorporated?
+        What would you cut if you had to reduce effort by 50%?"
+      - "Is each addition labeled 'MVP' or 'nice-to-have'? Who decided which is which?"
+    typical_context: "We just need to add X and Y before launch, it's still MVP"
+
+  - id: PM7
+    name: Invisible Opportunity Cost
+    alias: ["free addition", "it's just one feature", "capacity illusion"]
+    description: >
+      Features are evaluated in isolation for their value, without accounting for
+      what else the engineering team could build with the same time and resources.
+      Adding a feature is always "free" because the opportunity cost is invisible.
+    detection_questions:
+      - "What are the 3 best things the engineering team could build instead of this?
+        How does this feature compare on impact?"
+      - "What DOESN'T get built this quarter if this gets built?"
+      - "Is this feature being evaluated on its own merits or against its best alternative?"
+    typical_context: "Let's just add this, it won't take long"
+
+  - id: PM8
+    name: Retention Recency Bias
+    alias: ["squeaky wheel", "Slack-driven roadmap", "sales blocker", "loud minority"]
+    description: >
+      Recent, loud, or high-status feedback (an angry customer, a sales blocker, a
+      Slack message from a VIP) dominates prioritization decisions over systematic
+      data or research. The roadmap reflects who complained last week, not what the
+      majority of users need.
+    detection_questions:
+      - "Is this priority driven by one loud complaint or by systematic usage data?"
+      - "How many users are actually affected by this issue vs. how loud the complaint was?"
+      - "What does the actual product analytics say about this pain point?"
+    typical_context: "Enterprise client X is blocked on this, we need to ship it ASAP"

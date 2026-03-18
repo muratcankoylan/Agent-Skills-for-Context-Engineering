@@ -1,0 +1,53 @@
+{
+  "business_profile": {
+    "version": "1.0",
+    "last_updated": "",
+    "language_preference": "en",
+    "locale": "en-US",
+    "currency": "USD",
+    "date_format": "MM/DD/YYYY",
+    "_note": "Created by /solo:start. Shared with sales and copywriter addons when installed.",
+    "company_overview": {
+      "name": "",
+      "tagline": "",
+      "mission": "",
+      "vision": ""
+    },
+    "value_proposition": {
+      "primary_value": "",
+      "unique_mechanism": "",
+      "key_differentiators": []
+    },
+    "offerings": {
+      "products": [],
+      "services": [],
+      "free_resources": []
+    },
+    "positioning": {
+      "market_position": "",
+      "competitor_comparison": "",
+      "category": "",
+      "niche_focus": ""
+    },
+    "brand_voice_summary": {
+      "personality": "",
+      "tone": "",
+      "values_demonstrated": []
+    },
+    "social_proof": {
+      "key_metrics": [],
+      "testimonial_themes": [],
+      "notable_clients_or_features": []
+    },
+    "content_pillars": {
+      "primary_topics": [],
+      "content_mission": "",
+      "content_style": ""
+    },
+    "calls_to_action": {
+      "primary_cta": {},
+      "secondary_ctas": []
+    },
+    "platforms": {}
+  }
+}

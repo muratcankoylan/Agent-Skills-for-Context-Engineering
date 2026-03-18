@@ -1,0 +1,24 @@
+domain_biases:
+  - id: H1
+    name: "HALO_EFFECT"
+    description: "One positive trait (e.g., prestigious university) influences overall perception"
+    detection_questions:
+      - "Are we over-valuing a single achievement or trait?"
+      - "If the candidate didn't have [X], would we still be as excited?"
+    mitigation: "Use structured scorecards for each skill independently"
+
+  - id: H2
+    name: "SIMILARITY_BIAS"
+    description: "Favoring candidates who share traits, background, or hobbies with the interviewer"
+    detection_questions:
+      - "What qualities does this candidate have that are DIFFERENT from our team?"
+      - "Are we confusing 'likability' with 'capability'?"
+    mitigation: "Diverse interview panel with independent scoring before discussion"
+
+  - id: H3
+    name: "CONTRAST_EFFECT"
+    description: "Evaluating a candidate in comparison to the previous one rather than absolute standards"
+    detection_questions:
+      - "Is this candidate truly exceptional, or just better than the last bad one?"
+      - "Does this candidate meet the absolute bar defined in the job spec?"
+    mitigation: "Review the absolute rubric before every interview session"

@@ -1,0 +1,25 @@
+{
+  "team_name": "~~TeamName",
+  "selling_methodology": "~~SellingMethodology",
+  "pricing_model": "~~PricingModel",
+  "target_geography": ["~~TargetGeography"],
+  "competitors": [
+    "~~Competitor1",
+    "~~Competitor2",
+    "~~Competitor3"
+  ],
+  "icp": {
+    "role_keywords": ["~~ICPRole1", "~~ICPRole2"],
+    "company_size": "~~ICPCompanySize",
+    "pain_points": [
+      "~~PainPoint1",
+      "~~PainPoint2",
+      "~~PainPoint3"
+    ]
+  },
+  "hubspot": {
+    "api_key": "~~HubSpotKey",
+    "pipeline_id": "~~PipelineID"
+  },
+  "language_preference": "~~LanguagePreference" 
+}

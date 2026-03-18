@@ -1,0 +1,134 @@
+# Evaluation Frameworks - Product Management
+# Replaces/extends RICE, WSJF, ICE with structured MAP scoring
+
+domain: product-management
+
+frameworks:
+  - id: MAP_PRODUCT
+    name: "MAP Product - Feature Scoring"
+    description: >
+      6 independent dimensions for evaluating any feature, initiative, or
+      product decision. Evaluated SEPARATELY before aggregation to prevent
+      halo effect. Replaces RICE/WSJF with explicit uncertainty tracking.
+    dimensions:
+      - name: "Evidence of user pain"
+        scale: "0-3: anecdotal (one user said) | 4-6: pattern (multiple signals) | 7-10: quantified at scale (usage data, survey N>50, validated)"
+        question: "How many users have this problem? How do you know? What's the evidence?"
+      - name: "Business impact"
+        scale: "0-3: assumed / no model | 4-6: correlated (indirect) | 7-10: causally modeled (A/B proven or strong proxy)"
+        question: "Revenue, retention, or activation - how much, how do you know, and is the model causal or wishful?"
+      - name: "Effort accuracy"
+        scale: "0-3: estimated blind (no comparable) | 4-6: similar scope estimated | 7-10: near-identical feature shipped before"
+        question: "What's the comparable feature you've built? What did it actually take?"
+      - name: "Strategic alignment"
+        scale: "0-3: tangential to current strategy | 4-6: supports it | 7-10: directly on the critical path of the #1 OKR"
+        question: "Which specific OKR or strategic bet does this advance? Is it the top priority or a secondary one?"
+      - name: "Reversibility"
+        scale: "0-3: permanent tech debt, hard to undo | 4-6: can be modified | 7-10: can ship/kill in one sprint, no lock-in"
+        question: "If this feature underperforms, what does it take to kill or pivot it? What debt does it create?"
+      - name: "Opportunity cost"
+        scale: "0-3: blocks 3+ competing high-priority items | 4-6: delays 1-2 items | 7-10: net additive (parallel or low competition)"
+        question: "What 3 things WON'T be built if this is built? Are any of them higher value?"
+
+  - id: PREMORTEM_FEATURE
+    name: "Feature Pre-mortem"
+    description: "7 product-specific failure modes for any feature or initiative"
+    premise: >
+      "The feature launched 6 months ago. Adoption is near zero. Engineering
+      regrets building it. Sales is ignoring it. What happened?"
+    failure_modes:
+      - "Built for a vocal minority - the users who asked loudest were not representative
+        of the actual user base; most users had no need for it"
+      - "Solved a fake problem - discovery was confirmation, not exploration;
+        the problem we thought existed was an artifact of our interview framing"
+      - "Scope crept past viability - the 'MVP' accumulated so many requirements
+        that the thing we shipped was too complex to understand or adopt"
+      - "Shipped without activation loop - the feature exists but users never
+        discover it; no onboarding, no trigger, no habit formation"
+      - "Underestimated effort, overestimated quality - we shipped fast,
+        but shipped broken; the tech debt made iteration impossible"
+      - "Wrong metric success criteria - we hit our KPI (feature adoption %)
+        but it had zero correlation with retention or revenue"
+      - "Killed by internal competition - a higher-priority initiative consumed
+        the team's attention post-launch; the feature was abandoned before it could grow"
+
+  - id: ESTIMATION_NOISE_AUDIT
+    name: "Estimation Noise Audit"
+    description: >
+      Measures noise in effort estimation and impact scoring within a PM/engineering
+      team. CV > 40% on estimation = no one actually knows. This is signal.
+    protocol:
+      step_1: "Each participant estimates independently, in writing, WITHOUT discussion"
+      step_2: "No anchoring - do not reveal any estimates until all are submitted"
+      step_3: "PM lead submits LAST (prevents anchoring from experience authority)"
+      step_4: "Sentinel calculates CV (Standard Deviation / Mean x 100)"
+      step_5: "Discussion of outliers - not to converge, but to surface assumptions"
+    estimation_dimensions:
+      - "Story points / effort (engineering)"
+      - "Time to ship (weeks)"
+      - "Expected impact on target metric (%)"
+      - "Number of users impacted (absolute)"
+      - "Confidence in estimate (0-100%)"
+
+  - id: ROADMAP_REFRAMES
+    name: "6 Roadmap Reframes"
+    description: >
+      Force alternative perspectives on the roadmap before committing.
+      Run BEFORE the roadmap review, not during. Each perspective takes 10 minutes.
+    techniques:
+      - name: "Churned user"
+        prompt: >
+          Someone just cancelled their subscription. They never asked for a single feature
+          on your roadmap. What problem did they actually have? Does your roadmap solve it?
+      - name: "Competitor shipping first"
+        prompt: >
+          Your main competitor ships every feature on your roadmap in 3 months.
+          Your users have exactly what you were going to build. What do you do next?
+          What on your roadmap had no real moat?
+      - name: "Cut 50% of scope"
+        prompt: >
+          Engineering capacity just got cut in half. You must achieve the same outcomes
+          with half the features. What do you keep? That list is probably your real roadmap.
+      - name: "User who never asked for this"
+        prompt: >
+          Your median user has never requested any of your planned features. What do
+          they actually do with your product every day? Does your roadmap serve them?
+      - name: "Kill the roadmap"
+        prompt: >
+          The roadmap is gone. Engineering gets 3 sprints to work on whatever they think
+          will most improve user outcomes. What do they build? Why aren't you building that?
+      - name: "Rebuild from first principles"
+        prompt: >
+          You're building this product from scratch today, with what you now know about
+          your users. What does v1 look like? How much of your current roadmap would
+          be in that v1?
+
+  - id: OPPORTUNITY_COST_MATRIX
+    name: "Opportunity Cost Matrix"
+    description: >
+      Map all backlog items by impact vs effort BEFORE committing to any.
+      Forces explicit tradeoff decisions. No feature is "free."
+    protocol:
+      step_1: "List ALL candidate features for the quarter (no filtering yet)"
+      step_2: "Score each on: Impact (1-10) x Confidence in impact (%) = Adjusted impact"
+      step_3: "Score each on: Effort (weeks) x Uncertainty multiplier (1.5 if no comparable) = Adjusted effort"
+      step_4: "Plot on 2x2 matrix: High impact/Low effort -> ship. High impact/High effort -> break down.
+               Low impact/Low effort -> do only if zero opportunity cost. Low impact/High effort -> kill."
+      step_5: "For every item added to sprint: explicitly name ONE item that is delayed as a result"
+    quadrants:
+      - name: "Quick wins"
+        impact: "High"
+        effort: "Low"
+        action: "Ship - but verify impact estimate isn't inflated"
+      - name: "Strategic bets"
+        impact: "High"
+        effort: "High"
+        action: "Break down - are there smaller versions that validate the impact hypothesis first?"
+      - name: "Fill-ins"
+        impact: "Low"
+        effort: "Low"
+        action: "Only if genuinely zero opportunity cost - treat with skepticism"
+      - name: "Traps"
+        impact: "Low"
+        effort: "High"
+        action: "Kill immediately - this is where sunk cost lives"

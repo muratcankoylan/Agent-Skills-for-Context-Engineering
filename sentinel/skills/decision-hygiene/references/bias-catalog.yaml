@@ -1,0 +1,1069 @@
+# Comprehensive Cognitive Bias Checks
+# Based on Kahneman, Tversky, Thaler, and CVF (Comprehensive Verification Framework)
+
+bias_checks:
+  # HEURISTICS AND BIASES (Kahneman & Tversky)
+  - id: 1
+    name: "ANCHORING"
+    category: "Heuristics"
+    description: "Overweighting initial numbers, reference points, or first impressions"
+    detection_questions:
+      - "Was an initial number mentioned that could serve as anchor?"
+      - "Are adjustments from this anchor insufficient?"
+      - "Would a different starting point change the estimate?"
+    mitigation: "Generate estimate independently before seeing anchors. Use multiple anchors."
+    severity_indicators:
+      high: "Initial number mentioned explicitly; final estimate within 20% of anchor"
+      medium: "Implicit anchor present; moderate adjustment"
+      low: "Multiple reference points considered"
+
+  - id: 2
+    name: "AVAILABILITY_HEURISTIC"
+    category: "Heuristics"
+    description: "Judging frequency/probability by ease of recall (vivid, recent, emotional events)"
+    detection_questions:
+      - "Is estimate based on easily recalled examples?"
+      - "Are recent/dramatic events driving the judgment?"
+      - "Is systematic data being ignored in favor of anecdotes?"
+    mitigation: "Use base rates and statistical data. Check for recency bias."
+    test: "Would conclusion change if asked to think of opposite examples?"
+
+  - id: 3
+    name: "REPRESENTATIVENESS_HEURISTIC"
+    category: "Heuristics"
+    description: "Judging probability by similarity to stereotype while ignoring base rates"
+    detection_questions:
+      - "Is judgment based on matching to typical case?"
+      - "Are base rates mentioned? If yes, are they weighted properly?"
+      - "Is sample size being ignored?"
+    mitigation: "Start with base rates. Apply Bayes' theorem explicitly."
+
+  - id: 4
+    name: "AFFECT_HEURISTIC"
+    category: "Heuristics"
+    description: "Letting emotional feelings guide judgment instead of analysis"
+    detection_questions:
+      - "Is there strong emotional language in the reasoning?"
+      - "Would the conclusion change if emotional stakes were removed?"
+    mitigation: "Separate emotional reaction from probabilistic assessment."
+
+  # FRAMING EFFECTS
+  - id: 5
+    name: "FRAMING_ASYMMETRY"
+    category: "Framing"
+    description: "Preference reversal based on gain vs. loss framing of same option"
+    detection_questions:
+      - "Is decision framed only as gain or only as loss?"
+      - "Would reframing change preference?"
+      - "Is reference point arbitrary?"
+    mitigation: "Present both gain and loss frames. Test for invariance."
+    classic_example: "90% survival rate vs. 10% mortality rate"
+
+  - id: 6
+    name: "NARROW_FRAMING"
+    category: "Framing"
+    description: "Evaluating decisions in isolation rather than in portfolio/broader context"
+    detection_questions:
+      - "Is decision considered in isolation?"
+      - "Are interactions with other decisions ignored?"
+      - "Is total risk portfolio considered?"
+    mitigation: "Aggregate narrow frames into broader decision context."
+
+  - id: 7
+    name: "SUNK_COST"
+    category: "Framing"
+    description: "Continuing investment due to past costs rather than future prospects"
+    detection_questions:
+      - "Are past expenditures mentioned as justification?"
+      - "Would decision change if costs were already sunk?"
+      - "Is 'we've come this far' used as reason?"
+    mitigation: "Ignore sunk costs. Focus only on incremental costs/benefits."
+    triggers: ["already invested", "we've spent", "too late to turn back"]
+
+  # OVERCONFIDENCE CLUSTER
+  - id: 8
+    name: "OVERCONFIDENCE"
+    category: "Confidence"
+    description: "Overestimating accuracy of judgments and predictions"
+    detection_questions:
+      - "Are confidence intervals too narrow?"
+      - "Is uncertainty acknowledged?"
+      - "Have predictions been calibrated against past accuracy?"
+    mitigation: "Widen confidence intervals. Track calibration over time."
+    test: "What would it take to be wrong? What's the opposite case?"
+
+  - id: 9
+    name: "PLANNING_FALLACY"
+    category: "Confidence"
+    description: "Underestimating time, costs, and risks of future actions (inside view bias)"
+    detection_questions:
+      - "Is estimate based on best-case scenario?"
+      - "Is outside view (base rates for similar projects) used?"
+      - "Are obstacles and delays accounted for?"
+    mitigation: "Reference class forecasting. Use historical data from similar cases."
+
+  - id: 10
+    name: "ILLUSION_OF_CONTROL"
+    category: "Confidence"
+    description: "Overestimating ability to control outcomes driven by chance"
+    detection_questions:
+      - "Are random factors acknowledged?"
+      - "Is luck attributed to skill?"
+      - "Could success be explained by chance alone?"
+    mitigation: "Identify genuinely controllable vs. random factors."
+
+  - id: 11
+    name: "HINDSIGHT_BIAS"
+    category: "Confidence"
+    description: "I knew it all along - after outcome is known, believing it was predictable"
+    detection_questions:
+      - "Is prediction being evaluated after outcome known?"
+      - "Could the opposite outcome have seemed equally obvious?"
+    mitigation: "Evaluate decisions based on information available at the time."
+
+  # CONFIRMATION CLUSTER
+  - id: 12
+    name: "CONFIRMATION_BIAS"
+    category: "Information Processing"
+    description: "Seeking, interpreting, and remembering information that confirms existing beliefs"
+    detection_questions:
+      - "Is contradictory evidence actively sought?"
+      - "Are alternative hypotheses tested?"
+      - "Is information interpreted to fit preexisting conclusion?"
+    mitigation: "Generate alternative hypotheses. Actively seek disconfirming evidence."
+    severity: HIGH
+
+  - id: 13
+    name: "MOTIVATED_REASONING"
+    category: "Information Processing"
+    description: "Reasoning to reach predetermined conclusion (directional bias)"
+    detection_questions:
+      - "Is there a desired outcome influencing analysis?"
+      - "Are standards of evidence different for favored vs. unfavored options?"
+      - "Would opposite conclusion be accepted with same evidence?"
+    mitigation: "Consider advocate-adversary pairs. Red team the recommendation."
+
+  - id: 14
+    name: "OUTCOME_BIAS"
+    category: "Information Processing"
+    description: "Judging decision quality by outcome rather than by decision process quality"
+    detection_questions:
+      - "Is bad outcome equated with bad decision?"
+      - "Is good outcome equated with good decision?"
+      - "Were uncertainties properly handled at decision time?"
+    mitigation: "Separate decision quality from outcome luck."
+
+  # SOCIAL BIASES
+  - id: 15
+    name: "GROUPTHINK"
+    category: "Social"
+    description: "Pressure for consensus suppresses dissent and alternative views"
+    detection_questions:
+      - "Is there apparent unanimity without rigorous debate?"
+      - "Are dissenters present? Are they encouraged?"
+      - "Is criticism interpreted as disloyalty?"
+    mitigation: "Assign devil's advocate. Encourage pre-mortem analysis."
+
+  - id: 16
+    name: "AUTHORITY_BIAS"
+    category: "Social"
+    description: "Overweighting opinions of high-status individuals"
+    detection_questions:
+      - "Are arguments evaluated on merit vs. speaker status?"
+      - "Would same argument from junior person be dismissed?"
+    mitigation: "Anonymous proposal evaluation. Separate idea from source."
+
+  - id: 17
+    name: "HALO_EFFECT"
+    category: "Social"
+    description: "Positive impression in one area influences judgment in unrelated areas"
+    detection_questions:
+      - "Are unrelated positive attributes influencing judgment?"
+      - "Is 'successful in X therefore good at Y' reasoning used?"
+    mitigation: "Evaluate dimensions independently."
+
+  # PROBABILITY MISJUDGMENTS
+  - id: 18
+    name: "NEGLECT_OF_PROBABILITY"
+    category: "Probability"
+    description: "Focusing on possibility rather than probability (vividness over frequency)"
+    detection_questions:
+      - "Is rare but vivid event treated as likely?"
+      - "Are actual probabilities stated?"
+      - "Is 'could happen' conflated with 'will happen'?"
+    mitigation: "Quantify probabilities explicitly. Compare to base rates."
+
+  - id: 19
+    name: "ZERO_RISK_BIAS"
+    category: "Probability"
+    description: "Preferring elimination of small risk over larger reduction of bigger risk"
+    detection_questions:
+      - "Is 'zero risk' option preferred despite worse expected value?"
+      - "Is certainty over-valued?"
+    mitigation: "Compare expected values. Acknowledge that zero risk is often impossible."
+
+  - id: 20
+    name: "CONJUNCTION_FALLACY"
+    category: "Probability"
+    description: "Rating specific conjunction as more probable than general constituent"
+    detection_questions:
+      - "Is a detailed scenario rated more likely than simpler one?"
+      - "Is narrative coherence mistaken for probability?"
+    mitigation: "Decompose conjunctions. Check: P(A and B) <= P(A)"
+
+  # COMPARISON AND EVALUATION BIASES
+  - id: 21
+    name: "STATUS_QUO_BIAS"
+    category: "Preference"
+    description: "Preferring current state; seeing change as risky"
+    detection_questions:
+      - "Is current option rated highly because it's current?"
+      - "Are switching costs exaggerated?"
+      - "Would you choose current option if starting fresh?"
+    mitigation: "Evaluate all options as if starting from neutral position."
+    triggers: ["if it ain't broke", "always done this way", "why change"]
+
+  - id: 22
+    name: "ENDOWMENT_EFFECT"
+    category: "Preference"
+    description: "Valuing owned items more than identical items not owned"
+    detection_questions:
+      - "Is willingness to pay < willingness to accept for same item?"
+      - "Is ownership creating value difference?"
+    mitigation: "Evaluate as if you don't own it. What would you pay to acquire?"
+
+  - id: 23
+    name: "LOSS_AVERSION"
+    category: "Preference"
+    description: "Losses loom larger than equivalent gains (asymmetric value function). General tendency to avoid losses."
+    detection_questions:
+      - "Is loss given >2x weight of equivalent gain?"
+      - "Is risk-avoidance extreme relative to expected value?"
+    mitigation: "Quantify gains and losses symmetrically. Aggregate over multiple decisions."
+
+  - id: 31
+    name: "RISK_AVERSION_GAIN"
+    category: "Preference"
+    description: "Preference for a certain gain over a risky prospect with equal or higher expected value. Choosing the 'sure thing' in a gain frame."
+    detection_questions:
+      - "Did the subject choose the lower variance/certain option when facing gains?"
+      - "Was a higher expected value gambled away for a smaller sure gain?"
+    mitigation: "Calculate expected value (EV) for all options. Acknowledge that playing it safe can have a high opportunity cost."
+
+  - id: 32
+    name: "RISK_SEEKING_GAIN"
+    category: "Preference"
+    description: "Preference for a risky prospect over a certain gain of equal or lower expected value. Gambling for a 'jackpot' even when the odds are poor."
+    detection_questions:
+      - "Did the subject choose the high-variance/risky option in a gain frame?"
+      - "Is the decision driven by the allure of a large but unlikely win?"
+
+  - id: 33
+    name: "RISK_AVERSION_LOSS"
+    category: "Preference"
+    description: "Preference for a certain loss over a risky prospect that could result in a larger loss. Accepting a sure loss to avoid a 'catastrophe'."
+    detection_questions:
+      - "Did the subject choose a smaller certain loss to avoid a larger probable loss?"
+
+  - id: 34
+    name: "RISK_SEEKING_LOSS"
+    category: "Preference"
+    description: "Preference for a risky prospect over a certain loss of equal or higher expected value. Gambling to 'get back to even' or avoid a certain loss."
+    detection_questions:
+      - "Did the subject choose the risky option (gamble) when facing a certain loss?"
+      - "Is the subject 'doubling down' on a losing position?"
+
+  - id: 24
+    name: "PEAK_END_RULE"
+    category: "Memory"
+    description: "Judging experiences by peak and end, ignoring duration and total"
+    detection_questions:
+      - "Is evaluation based on memorable moments rather than total?"
+      - "Is duration neglected in satisfaction judgment?"
+    mitigation: "Consider total experience. Weight all moments appropriately."
+
+  # TEMPORAL BIASES
+  - id: 25
+    name: "PRESENT_BIAS"
+    category: "Temporal"
+    description: "Overweighting immediate payoffs relative to delayed ones (hyperbolic discounting)"
+    detection_questions:
+      - "Are immediate costs/benefits weighted more than delayed?"
+      - "Would you make same choice if both options delayed by 1 year?"
+    mitigation: "Use consistent discount rate. Precommit to future actions."
+
+  - id: 26
+    name: "RECENCY_BIAS"
+    category: "Temporal"
+    description: "Overweighting recent information while underweighting historical patterns"
+    detection_questions:
+      - "Is recent data driving conclusion more than long-term trends?"
+      - "Is 'this time is different' assumed?"
+    mitigation: "Compare recent data to historical baseline. Test for regime change explicitly."
+
+  # ATTRIBUTION ERRORS
+  - id: 27
+    name: "FUNDAMENTAL_ATTRIBUTION_ERROR"
+    category: "Attribution"
+    description: "Overweighting dispositional factors, underweighting situational factors"
+    detection_questions:
+      - "Is failure attributed to character rather than circumstances?"
+      - "Would situational constraints explain the behavior?"
+    mitigation: "Consider situational factors explicitly. Avoid personality-based explanations."
+
+  - id: 28
+    name: "SELF_SERVING_BIAS"
+    category: "Attribution"
+    description: "Attributing success to self, failure to external factors"
+    detection_questions:
+      - "Are different standards used for own success vs. failure?"
+      - "Is luck acknowledged when it benefits you?"
+    mitigation: "Apply consistent attribution framework. Acknowledge role of luck."
+
+  - id: 29
+    name: "HOT_HAND"
+    category: "Probability"
+    description: "Believing that a series of success events will continue (hot hand)"
+    detection_questions:
+      - "Is it assumed that a winning streak will continue?"
+      - "Is success attributed to a 'roll' or momentum rather than chance?"
+    mitigation: "Acknowledge independent trials in random processes."
+
+  - id: 30
+    name: "GAMBLERS_FALLACY"
+    category: "Probability"
+    description: "Believing that if an event happened more frequently than normal in the past, it will happen less frequently in the future (or vice versa)"
+    detection_questions:
+      - "Is it assumed that an outcome is 'due' because it hasn't happened recently?"
+      - "Is random variance mistaken for a self-correcting process?"
+    mitigation: "Identify independent events. Use statistical base rates."
+
+# BIAS INTERACTION PATTERNS
+interaction_patterns:
+  - biases: ["CONFIRMATION_BIAS", "OVERCONFIDENCE"]
+    effect: "Reinforcing loop: confident people seek less contradictory evidence"
+    multiplier: 1.8
+
+  - biases: ["ANCHORING", "AVAILABILITY_HEURISTIC"]
+    effect: "Vivid anchor becomes easily recalled, driving future estimates"
+    multiplier: 1.5
+
+  - biases: ["LOSS_AVERSION", "SUNK_COST"]
+    effect: "Throwing good money after bad to avoid realizing loss"
+    multiplier: 2.0
+
+  - biases: ["GROUPTHINK", "AUTHORITY_BIAS"]
+    effect: "Consensus pressure amplified by deference to leaders"
+    multiplier: 1.7
+
+  - biases: ["PLANNING_FALLACY", "OVERCONFIDENCE"]
+    effect: "Overconfident inside view ignores base rates"
+    multiplier: 2.2
+
+# DETECTION PROTOCOLS
+detection_protocols:
+  quantitative_decision:
+    required_checks: [1, 2, 3, 8, 9, 18, 20]
+    high_priority: [1, 8, 9]
+
+  strategic_choice:
+    required_checks: [5, 6, 7, 12, 13, 15, 21]
+    high_priority: [12, 15, 21]
+
+  evaluation_comparison:
+    required_checks: [5, 17, 22, 23, 24]
+    high_priority: [5, 23]
+
+  resource_allocation:
+    required_checks: [7, 9, 21, 25]
+    high_priority: [7, 9]
+
+# CALIBRATION FRAMEWORK
+calibration:
+  confidence_levels:
+    70%: "More likely than not, but real uncertainty remains"
+    80%: "Strong evidence, but non-trivial chance of being wrong"
+    90%: "Very confident, would be surprised if wrong"
+    95%: "Extremely confident, overwhelming evidence"
+
+  warning_signs_overconfidence:
+    - "No dissent or alternative views documented"
+    - "Confidence intervals narrower than historical accuracy"
+    - "Round numbers used for estimates (anchoring on simplicity)"
+    - "No scenario planning or what-if analysis"
+    - "Outcome presented as inevitable"
+
+  # ============================================================
+  # EXTENDED CATALOG — Wikipedia List of Cognitive Biases
+  # Added v8.1 — organized by cognitive task (Dimara et al. 2020)
+  # Focused on decision-relevant biases (estimation, decision,
+  # hypothesis assessment, causal attribution)
+  # Memory biases included only where decision-relevant
+  # ============================================================
+
+  # --- ESTIMATION BIASES ---
+
+  - id: 36
+    name: "AESTHETIC_USABILITY_EFFECT"
+    category: "Estimation"
+    description: "Tendency to perceive attractive things as more usable or valuable"
+    detection_questions:
+      - "Is the option being favored because it looks good or feels polished?"
+      - "Would you rate this as highly if it were presented in plain text?"
+      - "Is aesthetic appeal being used as a proxy for functional quality?"
+    mitigation: "Evaluate functional criteria separately from aesthetic ones. Score usability independently."
+
+  - id: 37
+    name: "ATTRIBUTE_SUBSTITUTION"
+    category: "Estimation"
+    description: "Replacing a hard judgment with an easier one without noticing"
+    detection_questions:
+      - "Are you answering the question you were actually asked, or a simpler version of it?"
+      - "What is the precise question this decision requires answering?"
+      - "Is the metric being used a proxy for something harder to measure?"
+    mitigation: "State the target attribute explicitly. Check whether your assessment method actually measures it."
+
+  - id: 38
+    name: "HOT_COLD_EMPATHY_GAP"
+    category: "Estimation"
+    description: "Underestimating the influence of emotional/visceral states on future behavior and preferences"
+    detection_questions:
+      - "Is this decision being made in a calm state about a situation that will be experienced under stress?"
+      - "How would you evaluate this option if you were tired, under pressure, or in conflict?"
+      - "Are you assuming future-you will behave like current-you?"
+    mitigation: "Stress-test preferences under simulated hot states. Ask someone who has experienced the visceral state."
+
+  - id: 39
+    name: "TRAVIS_SYNDROME"
+    category: "Estimation"
+    description: "Overestimating the significance of the present moment relative to historical context"
+    detection_questions:
+      - "Is this situation genuinely unprecedented, or does it resemble historical patterns?"
+      - "Are you treating current conditions as permanent when they may be cyclical?"
+      - "What would someone looking back from 10 years from now say about this moment?"
+    mitigation: "Reference historical cycles. Seek base rates from analogous past periods."
+
+  - id: 40
+    name: "BASE_RATE_NEGLECT"
+    category: "Estimation"
+    description: "Ignoring general statistical information in favor of specific case details"
+    detection_questions:
+      - "What is the base rate for this type of outcome across similar cases?"
+      - "Are you weighting case-specific information more than statistical frequencies?"
+      - "If you knew nothing specific about this case, what would you predict?"
+    mitigation: "Start with the base rate. Adjust only for specific factors with demonstrated predictive validity."
+
+  - id: 41
+    name: "DUNNING_KRUGER_EFFECT"
+    category: "Estimation"
+    description: "Unskilled individuals overestimate their ability; experts underestimate theirs"
+    detection_questions:
+      - "How does your confidence level compare to your track record in this domain?"
+      - "Have you sought evaluation from someone with demonstrably more expertise?"
+      - "What is the hardest part of this problem — and have you fully grasped it?"
+    mitigation: "Track calibration history. Seek external expert review. Explicitly list what you do not know."
+
+  - id: 42
+    name: "HARD_EASY_EFFECT"
+    category: "Estimation"
+    description: "Overestimating ability on hard tasks; underestimating on easy tasks"
+    detection_questions:
+      - "Has this type of task been done before, and what was the actual difficulty?"
+      - "Are you underestimating execution complexity because the concept is clear?"
+      - "Where have similar initiatives struggled unexpectedly?"
+    mitigation: "Distinguish conceptual clarity from execution difficulty. Reference implementation track records."
+
+  - id: 43
+    name: "INSENSITIVITY_TO_SAMPLE_SIZE"
+    category: "Estimation"
+    description: "Underestimating variance in small samples; over-generalizing from limited data"
+    detection_questions:
+      - "How large is the sample this conclusion is based on?"
+      - "Could this result be noise rather than signal?"
+      - "What confidence interval would be appropriate for this sample size?"
+    mitigation: "State sample size explicitly. Calculate confidence intervals. Resist generalizing from N < 30."
+
+  - id: 44
+    name: "OPTIMISM_BIAS"
+    category: "Estimation"
+    description: "Systematic overestimation of favorable outcomes and underestimation of risks"
+    detection_questions:
+      - "What is your historical accuracy on similar optimistic projections?"
+      - "Are competitors or peers achieving the outcomes you're projecting?"
+      - "What would a skeptic say about this forecast?"
+    mitigation: "Apply reference class forecasting. Compare to base rates. Seek devil's advocate perspective."
+
+  - id: 45
+    name: "IMPACT_BIAS"
+    category: "Estimation"
+    description: "Overestimating the emotional intensity and duration of future events"
+    detection_questions:
+      - "Are you overweighting how much this outcome will matter in 6 months?"
+      - "Have past outcomes you expected to be major turned out to be less impactful than anticipated?"
+      - "Are you making this decision based on anticipated emotional state rather than functional value?"
+    mitigation: "Reference past emotional forecasting accuracy. Apply temporal discounting to emotional projections."
+
+  - id: 46
+    name: "ILLUSION_OF_VALIDITY"
+    category: "Estimation"
+    description: "Overestimating judgment accuracy when information is internally consistent"
+    detection_questions:
+      - "Does the consistency of the information reflect reality or selection bias?"
+      - "Are all data points confirming the same story — and if so, why?"
+      - "What contradictory information might exist that is not in front of you?"
+    mitigation: "Actively seek disconfirming data. Distinguish internal consistency from external validity."
+
+  - id: 47
+    name: "CURSE_OF_KNOWLEDGE"
+    category: "Estimation"
+    description: "Inability to think from the perspective of someone who lacks your knowledge"
+    detection_questions:
+      - "Are you assuming the audience or stakeholders know what you know?"
+      - "Have you explained this to someone outside the domain and checked their understanding?"
+      - "What is obvious to you that would not be obvious to a newcomer?"
+    mitigation: "Explain the decision to a non-expert. Test assumptions about shared knowledge explicitly."
+
+  - id: 48
+    name: "FALSE_CONSENSUS_EFFECT"
+    category: "Estimation"
+    description: "Overestimating how much others share your views and preferences"
+    detection_questions:
+      - "Have you actually surveyed the people whose agreement you're assuming?"
+      - "Could others reasonably reach a different conclusion from the same facts?"
+      - "Are you confusing 'no one has objected' with 'everyone agrees'?"
+    mitigation: "Conduct explicit preference surveys. Create safe channels for dissent. Distinguish silence from consent."
+
+  # --- DECISION BIASES ---
+
+  - id: 49
+    name: "AMBIGUITY_AVERSION"
+    category: "Decision"
+    description: "Avoiding options with unknown probability of success, even when expected value may be higher"
+    detection_questions:
+      - "Are you avoiding this option because you don't know the odds, rather than because the odds are bad?"
+      - "Would you take this option if the probability distribution were known?"
+      - "Is the discomfort with ambiguity being mistaken for evidence of risk?"
+    mitigation: "Separate known risk from ambiguity. Estimate probability ranges. Evaluate expected value under uncertainty."
+
+  - id: 50
+    name: "AUTOMATION_BIAS"
+    category: "Decision"
+    description: "Excessive reliance on automated systems, overriding correct human judgment"
+    detection_questions:
+      - "Are you deferring to a model, algorithm, or tool without interrogating its assumptions?"
+      - "When did the automated system last fail, and would you have caught it?"
+      - "Is the tool's output being treated as a decision rather than an input to a decision?"
+    mitigation: "Treat automated outputs as recommendations, not conclusions. Maintain independent human assessment."
+
+  - id: 51
+    name: "DEFAULT_EFFECT"
+    category: "Decision"
+    description: "Tendency to favor the default option regardless of whether it is optimal"
+    detection_questions:
+      - "Is the current option being retained because it is actually best, or because it is the default?"
+      - "Would you actively choose this option if starting from scratch with no default?"
+      - "What is the status quo costing that is not being measured?"
+    mitigation: "Force active choice. Evaluate the status quo as if it were a new proposal requiring justification."
+
+  - id: 52
+    name: "HYPERBOLIC_DISCOUNTING"
+    category: "Decision"
+    description: "Preferring smaller immediate rewards over larger future rewards; inconsistent time preferences"
+    detection_questions:
+      - "Would you make the same tradeoff if both options were shifted 6 months into the future?"
+      - "Is urgency driving this decision, or genuine time preference?"
+      - "Are you sacrificing long-term value for short-term comfort?"
+    mitigation: "Pre-commit to long-term decisions. Evaluate options as if they were both in the future."
+
+  - id: 53
+    name: "COMPASSION_FADE"
+    category: "Decision"
+    description: "Stronger compassion toward identifiable individuals than toward large anonymous groups"
+    detection_questions:
+      - "Are decisions being driven by vivid individual cases rather than aggregate impact?"
+      - "If the same number of people were affected but anonymous, would the response be the same?"
+      - "Is statistical suffering being underweighted relative to visible suffering?"
+    mitigation: "Evaluate decisions on aggregate impact. Be wary of policy driven by single high-visibility cases."
+
+  - id: 54
+    name: "PSEUDOCERTAINTY_EFFECT"
+    category: "Decision"
+    description: "Risk-averse when expected outcome is positive; risk-seeking when expected outcome is negative"
+    detection_questions:
+      - "Is the framing of this decision as a gain or loss affecting your risk tolerance?"
+      - "Would you make the same choice if the options were described in reverse terms?"
+      - "Are you taking on disproportionate risk to avoid accepting a loss?"
+    mitigation: "Reframe the decision in both gain and loss terms. Check for preference reversal."
+
+  - id: 55
+    name: "RISK_COMPENSATION"
+    category: "Decision"
+    description: "Taking greater risks when perceived safety increases (Peltzman effect)"
+    detection_questions:
+      - "Has adding a safety measure led to riskier behavior elsewhere?"
+      - "Is the team taking more risks because of a new control or insurance?"
+      - "Are risk mitigations creating false comfort that enables higher risk-taking?"
+    mitigation: "Audit total risk portfolio when adding mitigations. Do not assume mitigations reduce net risk."
+
+  - id: 56
+    name: "ACTION_BIAS"
+    category: "Decision"
+    description: "Tendency to act even when inaction would be more effective"
+    detection_questions:
+      - "What is the expected value of doing nothing?"
+      - "Is action being taken primarily to demonstrate effort or control?"
+      - "What would happen if you waited 30 days before deciding?"
+    mitigation: "Evaluate inaction as a legitimate option. Calculate expected value of waiting."
+
+  - id: 57
+    name: "ADDITIVE_BIAS"
+    category: "Decision"
+    description: "Solving problems by adding elements rather than removing existing ones"
+    detection_questions:
+      - "Have you considered what could be removed or simplified rather than added?"
+      - "Is complexity increasing because subtraction feels like loss?"
+      - "What would this look like if you had to cut it by 30% instead of adding to it?"
+    mitigation: "Explicitly generate subtraction-based solutions. Evaluate removal options before additions."
+
+  - id: 58
+    name: "DECOY_EFFECT"
+    category: "Decision"
+    description: "Preferences shifting when an asymmetrically dominated third option is added"
+    detection_questions:
+      - "Is the option set you're evaluating constructed by someone with a preferred outcome?"
+      - "Would your preference hold if the third option were removed?"
+      - "Is one option making another look relatively better than it should?"
+    mitigation: "Evaluate each option independently against your criteria, not against the other options."
+
+  - id: 59
+    name: "DISPOSITION_EFFECT"
+    category: "Decision"
+    description: "Selling winners too early and holding losers too long"
+    detection_questions:
+      - "Are you holding this investment/project because you believe in it, or to avoid realizing a loss?"
+      - "If you were starting fresh today, would you invest in this at its current state?"
+      - "Are you exiting a winning position too early to lock in a gain?"
+    mitigation: "Evaluate positions on future prospects only, not purchase price. Set pre-committed exit criteria."
+
+  - id: 60
+    name: "MONEY_ILLUSION"
+    category: "Decision"
+    description: "Focusing on nominal value rather than real purchasing power or adjusted value"
+    detection_questions:
+      - "Are comparisons being made in nominal terms without adjusting for inflation or dilution?"
+      - "Is a nominal gain actually a real loss when adjusted for relevant factors?"
+      - "Are stakeholders being presented with numbers that look good nominally but are deteriorating in real terms?"
+    mitigation: "Always adjust for inflation, dilution, or time value. Present real-terms comparisons."
+
+  - id: 61
+    name: "PROJECTION_BIAS"
+    category: "Decision"
+    description: "Overestimating how much future preferences will resemble current preferences"
+    detection_questions:
+      - "Are you making a long-term commitment based on how you feel right now?"
+      - "Have your preferences in this domain changed significantly over the past 3 years?"
+      - "Would the team or organization that will implement this decision agree with these priorities?"
+    mitigation: "Consult future stakeholders. Reference how similar preferences evolved in the past."
+
+  - id: 62
+    name: "SCOPE_NEGLECT"
+    category: "Decision"
+    description: "Insensitivity to the scale of a problem when evaluating it"
+    detection_questions:
+      - "Is the proposed solution scaled to the actual size of the problem?"
+      - "Would you respond the same way if the problem were 10x larger? 10x smaller?"
+      - "Are you treating problems of very different magnitudes as equivalent?"
+    mitigation: "Force explicit quantification of problem scale. Test responses against order-of-magnitude variations."
+
+  - id: 63
+    name: "ESCALATION_OF_COMMITMENT"
+    category: "Decision"
+    description: "Continued investment in a failing course of action due to prior commitment"
+    detection_questions:
+      - "If this were a new proposal with no history, would you approve it today?"
+      - "Is continued investment driven by future prospects or reluctance to admit past error?"
+      - "What is the pre-agreed kill criterion, and has it been reached?"
+    mitigation: "Set kill criteria before starting. Evaluate continuation on future cash flows only."
+
+  - id: 64
+    name: "SEMMELWEIS_REFLEX"
+    category: "Decision"
+    description: "Rejecting new evidence that contradicts an established paradigm"
+    detection_questions:
+      - "Is this new evidence being dismissed because it contradicts existing beliefs, or because it is actually weak?"
+      - "Who has evaluated this evidence who does not have a stake in the current paradigm?"
+      - "What would it take for this evidence to change your view?"
+    mitigation: "Separate evidence quality from paradigm fit. Seek evaluation from those outside the current framework."
+
+  - id: 65
+    name: "NORMALCY_BIAS"
+    category: "Decision"
+    description: "Underestimating the possibility and impact of disasters that have not happened before"
+    detection_questions:
+      - "Is low historical frequency being confused with low probability?"
+      - "What tail risks are being excluded from the analysis because they seem unlikely?"
+      - "Has your planning considered black swan scenarios, not just base cases?"
+    mitigation: "Include explicit tail risk scenarios. Use pre-mortem to surface unprecedented failure modes."
+
+  - id: 66
+    name: "SHARED_INFORMATION_BIAS"
+    category: "Decision"
+    description: "Groups over-discussing shared information and under-discussing unique information"
+    detection_questions:
+      - "What does each person know that others in the room do not?"
+      - "Is the meeting converging on information everyone already had?"
+      - "Have participants with unique knowledge had equal floor time?"
+    mitigation: "Explicitly solicit unique information before group discussion. Use pre-meeting individual input."
+
+  - id: 67
+    name: "PLAN_CONTINUATION_BIAS"
+    category: "Decision"
+    description: "Failure to recognize when the original plan is no longer appropriate"
+    detection_questions:
+      - "Has the situation changed materially since the plan was made?"
+      - "Are you continuing because it is the right path, or because stopping feels like failure?"
+      - "Would you design this plan the same way given what you know now?"
+    mitigation: "Schedule explicit re-evaluation checkpoints. Treat changing conditions as a trigger to reassess."
+
+  # --- HYPOTHESIS ASSESSMENT BIASES ---
+
+  - id: 68
+    name: "AVAILABILITY_CASCADE"
+    category: "Hypothesis Assessment"
+    description: "A belief gains plausibility through repetition in public discourse regardless of evidence"
+    detection_questions:
+      - "Is this claim widely believed because it has been repeated, or because it has been verified?"
+      - "What is the original source of evidence for this belief?"
+      - "Would this claim survive rigorous external scrutiny?"
+    mitigation: "Trace beliefs to their primary sources. Distinguish repetition from corroboration."
+
+  - id: 69
+    name: "FLUENCY_HEURISTIC"
+    category: "Hypothesis Assessment"
+    description: "More fluently processed information is judged as more true or valuable"
+    detection_questions:
+      - "Is this argument compelling because it is well-articulated or because it is correct?"
+      - "Would a poorly-worded version of the same argument receive the same consideration?"
+      - "Is the quality of the presentation being confused with the quality of the evidence?"
+    mitigation: "Evaluate the underlying argument stripped of its presentation. Seek uglier versions of good ideas."
+
+  - id: 70
+    name: "ILLUSORY_TRUTH_EFFECT"
+    category: "Hypothesis Assessment"
+    description: "Repeated statements are judged as more true regardless of actual veracity"
+    detection_questions:
+      - "Has this claim been repeated in this discussion, making it feel more established than it is?"
+      - "What is the actual evidence for this claim, beyond how often it has been stated?"
+      - "Is familiarity being mistaken for verification?"
+    mitigation: "Track claim origins. Require evidence citations. Distinguish familiarity from verified fact."
+
+  - id: 71
+    name: "GROUPSHIFT"
+    category: "Hypothesis Assessment"
+    description: "Group decisions becoming more extreme in the direction the group is already leaning"
+    detection_questions:
+      - "Is the group's final position more extreme than the average of individual positions going in?"
+      - "Did discussion amplify the dominant view rather than test it?"
+      - "What was each person's independent position before group discussion?"
+    mitigation: "Collect individual positions before group discussion. Use structured devil's advocate roles."
+
+  - id: 72
+    name: "ILLUSION_OF_EXPLANATORY_DEPTH"
+    category: "Hypothesis Assessment"
+    description: "Believing one understands a topic much better than one actually does"
+    detection_questions:
+      - "Can you explain the mechanism, not just the label?"
+      - "Have you tried to explain this to an expert and had your understanding corrected?"
+      - "What are the three most important things you do NOT know about this topic?"
+    mitigation: "Request step-by-step mechanistic explanation. Consult domain experts. List explicit knowledge gaps."
+
+  - id: 73
+    name: "QUANTIFICATION_BIAS"
+    category: "Hypothesis Assessment"
+    description: "Ascribing more weight to measurable metrics than to important but unquantifiable values"
+    detection_questions:
+      - "Are critical factors being excluded from analysis because they cannot be quantified?"
+      - "Is the decision being driven by what can be measured rather than what matters?"
+      - "What important considerations are missing from the metrics dashboard?"
+    mitigation: "Explicitly list qualitative factors alongside quantitative ones. Resist McNamara fallacy."
+
+  - id: 74
+    name: "SALIENCE_BIAS"
+    category: "Hypothesis Assessment"
+    description: "Focusing on emotionally striking or prominent information at the expense of relevant but unremarkable data"
+    detection_questions:
+      - "Is this factor receiving disproportionate attention because it is vivid or recent?"
+      - "What less salient information is being underweighted?"
+      - "Would this factor receive the same attention if it were presented in a plain table rather than a story?"
+    mitigation: "Systematically review all relevant dimensions, not just the most prominent ones."
+
+  - id: 75
+    name: "SELECTION_BIAS"
+    category: "Hypothesis Assessment"
+    description: "Drawing conclusions from a sample that is not representative of the population"
+    detection_questions:
+      - "Is the evidence based on a representative sample, or on the cases most available to you?"
+      - "Who or what is systematically missing from the data set?"
+      - "Would the conclusion hold if you included the cases you don't have data on?"
+    mitigation: "Identify sampling method. Seek disconfirming cases. Correct for known selection pressures."
+
+  - id: 76
+    name: "SURVIVORSHIP_BIAS"
+    category: "Hypothesis Assessment"
+    description: "Focusing on successes while ignoring failures that are less visible"
+    detection_questions:
+      - "Are the examples being cited drawn from successful cases only?"
+      - "What did the failures look like, and how many were there?"
+      - "Is this strategy being recommended because it worked, without accounting for how often it failed?"
+    mitigation: "Actively seek failure cases. Reference base rates including failures. Ask 'where are the losers?'"
+
+  - id: 77
+    name: "CONGRUENCE_BIAS"
+    category: "Hypothesis Assessment"
+    description: "Testing hypotheses only through direct confirmation rather than alternative hypotheses"
+    detection_questions:
+      - "Have you tested this hypothesis by trying to disprove it, not just confirm it?"
+      - "What alternative hypotheses would predict the same evidence?"
+      - "What test would definitively distinguish your hypothesis from the alternatives?"
+    mitigation: "Design disconfirmation tests. List competing hypotheses. Apply Karl Popper's falsifiability standard."
+
+  # --- CAUSAL ATTRIBUTION BIASES ---
+
+  - id: 78
+    name: "HOSTILE_ATTRIBUTION_BIAS"
+    category: "Causal Attribution"
+    description: "Interpreting ambiguous behavior from others as having hostile intent"
+    detection_questions:
+      - "Is there a benign explanation for this behavior that is equally plausible?"
+      - "Are you inferring intent from outcome?"
+      - "What would you assume if this behavior came from someone you trust?"
+    mitigation: "Generate at least two alternative attributions before concluding hostile intent. Seek direct clarification."
+
+  - id: 79
+    name: "ILLUSION_OF_CONTROL"
+    category: "Causal Attribution"
+    description: "Overestimating one's influence over external events"
+    detection_questions:
+      - "What portion of this outcome is actually within your control?"
+      - "How much of your past success was due to your actions versus favorable conditions?"
+      - "What external factors could override even optimal execution?"
+    mitigation: "Separate controllable from uncontrollable factors. Scenario-plan for external factors moving adversely."
+
+  - id: 80
+    name: "JUST_WORLD_FALLACY"
+    category: "Causal Attribution"
+    description: "Believing the world is fundamentally fair, causing victim-blaming and risk underestimation"
+    detection_questions:
+      - "Are you assuming good outcomes because you are doing things right, rather than accounting for luck?"
+      - "Is failure being attributed to personal deficiency rather than systemic or random factors?"
+      - "What could go wrong through no fault of your own?"
+    mitigation: "Include external/random failure scenarios. Distinguish merit from outcome in post-mortems."
+
+  - id: 81
+    name: "PRO_INNOVATION_BIAS"
+    category: "Causal Attribution"
+    description: "Excessive optimism about an innovation's utility while underestimating limitations"
+    detection_questions:
+      - "What are the three most significant limitations of this technology or innovation?"
+      - "Who has tried something similar and failed, and why?"
+      - "Are you accounting for adoption friction, not just technical capability?"
+    mitigation: "Require explicit limitation analysis. Seek expert skeptics. Reference technology adoption curves."
+
+  - id: 82
+    name: "SYSTEM_JUSTIFICATION"
+    category: "Causal Attribution"
+    description: "Tendency to defend and bolster the status quo even against self-interest"
+    detection_questions:
+      - "Is the current system being defended because it is genuinely good, or because it is familiar?"
+      - "What would an outside observer with no investment in the current system recommend?"
+      - "Are alternatives being dismissed because they challenge existing structures?"
+    mitigation: "Apply zero-based evaluation. Require the status quo to justify itself as if it were a new proposal."
+
+  - id: 83
+    name: "PROPORTIONALITY_BIAS"
+    category: "Causal Attribution"
+    description: "Assuming large events must have large causes; fuels conspiracy thinking"
+    detection_questions:
+      - "Are you assuming a complex explanation because the outcome is significant?"
+      - "Could this result from simple, mundane causes?"
+      - "Is the magnitude of the cause being inferred from the magnitude of the effect?"
+    mitigation: "Apply Occam's razor. Evaluate simple causal explanations before complex ones."
+
+  - id: 84
+    name: "OSTRICH_EFFECT"
+    category: "Causal Attribution"
+    description: "Avoiding acknowledgment of an obviously bad situation to avoid negative feelings"
+    detection_questions:
+      - "Is there information you are not seeking because you suspect it will be bad?"
+      - "Are warning signs being minimized to protect morale or confidence?"
+      - "What would you need to see to acknowledge this is a serious problem?"
+    mitigation: "Create explicit mechanisms for bad news to surface without penalty. Schedule red-flag reviews."
+
+  - id: 85
+    name: "G_I_JOE_FALLACY"
+    category: "Causal Attribution"
+    description: "Believing that knowing about a cognitive bias is sufficient to overcome it"
+    detection_questions:
+      - "Has knowing about this bias actually changed your behavior in past decisions?"
+      - "Are structural interventions in place, or only awareness?"
+      - "Is the team assuming that naming the bias makes them immune to it?"
+    mitigation: "Replace awareness with process. Use structural interventions (checklists, independent review) not just labels."
+
+  # --- SOCIAL / GROUP BIASES ---
+
+  - id: 86
+    name: "INGROUP_BIAS"
+    category: "Social"
+    description: "Giving preferential treatment to members of one's own group"
+    detection_questions:
+      - "Is this candidate/option being evaluated on merit or on group membership?"
+      - "Would the same decision be made if this person came from outside the team/network?"
+      - "Are in-group members being given benefit of the doubt that out-group members are not?"
+    mitigation: "Use blind evaluation where possible. Apply identical criteria regardless of group membership."
+
+  - id: 87
+    name: "BANDWAGON_EFFECT"
+    category: "Social"
+    description: "Adopting beliefs or behaviors because many others do"
+    detection_questions:
+      - "Is this option being considered because it is genuinely good, or because it is popular?"
+      - "What do the dissenters believe, and have their arguments been seriously evaluated?"
+      - "Would you take this position if you were the first person to evaluate it?"
+    mitigation: "Evaluate on independent criteria. Seek contrarian views before committing."
+
+  - id: 88
+    name: "SOCIAL_DESIRABILITY_BIAS"
+    category: "Social"
+    description: "Over-reporting socially desirable behaviors and under-reporting undesirable ones"
+    detection_questions:
+      - "Are stakeholders reporting what actually happened or what sounds good?"
+      - "Is there a safe channel for people to report problems without social penalty?"
+      - "Are surveys or interviews designed to minimize social desirability pressure?"
+    mitigation: "Use anonymous reporting. Separate evaluation from feedback. Create psychological safety for honest reporting."
+
+  - id: 89
+    name: "COURTESY_BIAS"
+    category: "Social"
+    description: "Giving socially correct opinions rather than true ones to avoid offending"
+    detection_questions:
+      - "Is the absence of objections genuine agreement or polite avoidance?"
+      - "Would people give different answers in private than in this meeting?"
+      - "Are critical stakeholders giving you only positive feedback?"
+    mitigation: "Use anonymous pre-meeting surveys. Create explicit permission to disagree. Reward dissent."
+
+  - id: 90
+    name: "ZERO_SUM_BIAS"
+    category: "Social"
+    description: "Incorrectly perceiving situations as zero-sum when positive-sum outcomes are possible"
+    detection_questions:
+      - "Are you assuming one party must lose for the other to win?"
+      - "What positive-sum arrangements have not been explored?"
+      - "Is competitive framing preventing collaboration that would benefit both parties?"
+    mitigation: "Explicitly map joint gains. Apply integrative negotiation frameworks before competitive ones."
+
+  # --- MEMORY BIASES (decision-relevant subset) ---
+
+  - id: 91
+    name: "CHOICE_SUPPORTIVE_BIAS"
+    category: "Memory"
+    description: "Remembering past choices as better than they actually were"
+    detection_questions:
+      - "Are you evaluating the current situation based on an idealized memory of the past decision?"
+      - "Was the original decision as good as you remember, or has memory been revised upward?"
+      - "Have you reviewed the actual record of what was decided and predicted?"
+    mitigation: "Keep written decision records. Review actual predictions against outcomes before citing past success."
+
+  - id: 92
+    name: "HINDSIGHT_BIAS"
+    category: "Memory"
+    description: "Perceiving past events as having been more predictable than they actually were"
+    detection_questions:
+      - "Would you actually have predicted this outcome before it happened?"
+      - "Are you evaluating the quality of a past decision based on its outcome rather than the information available at the time?"
+      - "Is 'I knew it all along' thinking distorting the lesson being drawn?"
+    mitigation: "Evaluate past decisions against information available at decision time. Keep pre-decision records."
+
+  - id: 93
+    name: "RECENCY_BIAS"
+    category: "Memory"
+    description: "Giving greater weight to recent events than to more important historical patterns"
+    detection_questions:
+      - "Is recent performance being extrapolated beyond what the data supports?"
+      - "Are longer-term historical patterns being discounted in favor of recent trends?"
+      - "Would this conclusion change if the recent period were excluded from the analysis?"
+    mitigation: "Use longer historical windows. Weight evidence by quality, not recency."
+
+  - id: 94
+    name: "ROSY_RETROSPECTION"
+    category: "Memory"
+    description: "Remembering the past as better than it actually was"
+    detection_questions:
+      - "Is the past alternative being idealized compared to current challenges?"
+      - "What were the actual problems with the previous approach?"
+      - "Are you comparing a romanticized memory to a realistic current assessment?"
+    mitigation: "Review actual records of past performance. Compare like-for-like on documented metrics."
+
+  # --- SELF-PERCEPTION BIASES ---
+
+  - id: 95
+    name: "BIAS_BLIND_SPOT"
+    category: "Self-Perception"
+    description: "Seeing oneself as less biased than others; identifying biases in others but not oneself"
+    detection_questions:
+      - "Where in this analysis might you personally be most susceptible to motivated reasoning?"
+      - "Has an external reviewer identified a bias in your reasoning that you did not notice?"
+      - "What would an adversarial reader say about your reasoning process here?"
+    mitigation: "Seek external review. Assume your own biases are present. Use structural constraints, not just awareness."
+
+  - id: 96
+    name: "ILLUSORY_SUPERIORITY"
+    category: "Self-Perception"
+    description: "Overestimating desirable qualities and underestimating undesirable ones relative to others"
+    detection_questions:
+      - "Is this plan premised on performing better than the field average?"
+      - "What evidence exists that you/the team genuinely outperforms the reference class?"
+      - "Are you in the top quartile on the dimensions that matter most here?"
+    mitigation: "Require explicit evidence of competitive differentiation. Apply outside view to capability claims."
+
+  - id: 97
+    name: "NAIVE_REALISM"
+    category: "Self-Perception"
+    description: "Believing one perceives reality objectively and that rational others will agree"
+    detection_questions:
+      - "Is disagreement being attributed to others' bias or irrationality rather than to legitimate alternative perspectives?"
+      - "Have you genuinely engaged with the strongest version of opposing views?"
+      - "What would it take for you to conclude that the other side has a point?"
+    mitigation: "Steelman opposing views. Attribute disagreement to legitimate difference, not deficiency."
+
+  - id: 98
+    name: "END_OF_HISTORY_ILLUSION"
+    category: "Self-Perception"
+    description: "Believing one will change less in the future than one has in the past"
+    detection_questions:
+      - "How much have your priorities and preferences changed in the last 5 years?"
+      - "Are long-term commitments being made based on current preferences that will likely evolve?"
+      - "Are you locking in decisions that future-you may strongly disagree with?"
+    mitigation: "Build optionality into long-term commitments. Plan for preference change."
+
+
+# ============================================================
+# MITIGATION MODE INDEX — v8.1
+# Maps each bias ID to its most effective intervention type
+# Used by sentinel.md orchestrator to select the right agent
+# ============================================================
+#
+# MODE DEFINITIONS:
+# STRUCTURE    → MAP protocol, forced dimension separation, active-choice framing
+# QUESTION     → Questioner: reflective questions the decision-maker can engage with
+# SIMULATION   → failure-finder, temporal-auditor: mental time-travel exercises
+# CONFRONTATION → reality-checker, scope-checker: outside-view data injection
+# PROTOCOL     → group-facilitator: process-level interventions for group dynamics
+# DISRUPTION   → Inline: format disruption for biases immune to conscious correction
+
+mitigation_mode_index:
+  STRUCTURE:    [1, 16, 17, 21, 36, 51, 58, 73, 74, 82, 86]
+  QUESTION:     [2, 3, 4, 5, 6, 7, 8, 12, 13, 18, 19, 20, 22, 23, 27, 28, 29, 30, 31, 32, 33, 34, 37, 43, 46, 47, 48, 49, 53, 54, 55, 56, 57, 59, 63, 64, 67, 68, 72, 75, 77, 78, 80, 81, 83, 84, 90, 97]
+  SIMULATION:   [9, 11, 14, 24, 25, 38, 45, 52, 61, 65, 91, 92, 94, 98]
+  CONFRONTATION: [10, 26, 39, 40, 41, 42, 44, 60, 62, 76, 79, 93, 96]
+  PROTOCOL:     [15, 66, 71, 87, 88, 89]
+  DISRUPTION:   [50, 69, 70, 85, 95]

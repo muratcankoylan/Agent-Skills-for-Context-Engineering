@@ -1,0 +1,54 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${CLAUDE_PLUGIN_ROOT}/data"
+      ],
+      "_comment": "Enables reading and writing to the PARA data structure in the /data directory."
+    },
+    "exa": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "exa-mcp-server"
+      ],
+      "env": {
+        "EXA_API_KEY": "~~EXA_API_KEY"
+      },
+      "_comment": "Neural search for market research and competitor analysis."
+    },
+    "wordpress": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@wordpress/mcp-server",
+        "--url",
+        "~~WP_SITE_URL",
+        "--username",
+        "~~WP_USERNAME",
+        "--password",
+        "~~WP_APP_PASSWORD"
+      ],
+      "_comment": "Publishes drafts directly to your WordPress CMS."
+    },
+    "reddit": {
+      "command": "python",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/reddit_mcp.py",
+        "--client_id",
+        "~~REDDIT_CLIENT_ID",
+        "--client_secret",
+        "~~REDDIT_CLIENT_SECRET"
+      ],
+      "_comment": "Mines unfiltered user insights and 'Voice of Customer' from Reddit."
+    },
+    "linkedin": {
+        "type": "http",
+        "url": "https://api.zapier.com/v1/mcp/linkedin",
+        "_comment": "Automates LinkedIn outreach and profile research (via Zapier MCP)."
+    }
+  }
+}

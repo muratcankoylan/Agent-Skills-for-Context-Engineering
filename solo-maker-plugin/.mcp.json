@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "figma": {
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp",
+      "_comment": "Connects to your Figma designs for UI/UX prototyping and design briefs."
+    },
+    "stitch": {
+      "type": "http",
+      "url": "https://stitch.googleapis.com/mcp",
+      "_comment": "Connects to Google Stitch for advanced UI/UX automation and component management."
+    }
+  }
+}

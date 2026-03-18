@@ -1,0 +1,79 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${CLAUDE_PLUGIN_ROOT}/data"
+      ],
+      "_comment": "Enables reading and writing to the PARA data structure in the /data directory."
+    },
+    "exa": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "exa-mcp-server"
+      ],
+      "env": {
+        "EXA_API_KEY": "~~EXA_API_KEY"
+      },
+      "_comment": "Neural search for market research, competitor analysis, and prospect deep-dives."
+    },
+    "slack": {
+      "type": "http",
+      "url": "https://mcp.slack.com/mcp",
+      "_comment": "Connects to your Slack workspace for communication and notifications."
+    },
+    "hubspot": {
+      "type": "http",
+      "url": "https://mcp.hubspot.com/anthropic",
+      "_comment": "Syncs client data and pipeline status from HubSpot CRM."
+    },
+    "notion": {
+      "type": "http",
+      "url": "https://mcp.notion.com/mcp",
+      "_comment": "Accesses your Notion workspace for knowledge management and project tracking."
+    },
+    "ms365": {
+      "type": "http",
+      "url": "https://microsoft365.mcp.claude.com/mcp",
+      "_comment": "Integrates with Microsoft 365 (Outlook, OneDrive, SharePoint) for files and email."
+    },
+    "clay": {
+      "type": "http",
+      "url": "https://api.clay.com/v3/mcp",
+      "_comment": "Enriches prospect data and automates lead research."
+    },
+    "fireflies": {
+      "type": "http",
+      "url": "https://api.fireflies.ai/mcp",
+      "_comment": "Transcribes and analyzes meeting notes from your calls."
+    },
+    "stripe": {
+      "type": "http",
+      "url": "https://mcp.stripe.com/mcp",
+      "_comment": "Manages payments, subscriptions, and financial reporting via Stripe."
+    },
+    "linkedin": {
+      "type": "http",
+      "url": "https://api.zapier.com/v1/mcp/linkedin",
+      "_comment": "Automates LinkedIn outreach and profile research (configured via Zapier MCP)."
+    },
+    "figma": {
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp",
+      "_comment": "Connects to your Figma designs for UI/UX prototyping and design briefs."
+    },
+    "stitch": {
+      "type": "http",
+      "url": "https://stitch.googleapis.com/mcp",
+      "_comment": "Connects to Google Stitch for advanced UI/UX automation and component management."
+    },
+    "tally": {
+      "type": "http",
+      "url": "https://api.tally.so/mcp",
+      "_comment": "Publishes diagnostics as live Tally forms and syncs responses back for scoring. Used by /solo:diagnose share --tally and /solo:diagnose results --tally."
+    }
+  }
+}
