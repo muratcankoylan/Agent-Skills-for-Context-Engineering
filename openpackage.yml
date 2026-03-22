@@ -1,0 +1,8 @@
+name: context-engineering-marketplace
+version: 1.0.0
+description: Context Engineering skills for building production-grade AI agent systems. Covers fundamentals, architecture patterns, evaluation, and cognitive modeling.
+author: Muratcan Koylan
+license: MIT
+
+includes:
+  - skills/**/*
