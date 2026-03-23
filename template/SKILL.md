@@ -69,6 +69,13 @@ List specific guidelines to follow when applying this skill. These should be act
 2. Guideline two with clear success conditions
 3. Continue as needed
 
+## Gotchas
+
+List experience-derived failure modes, common mistakes, and counterintuitive behaviors. These are the highest-signal content in any skill. Each gotcha should be specific, actionable, and non-overlapping with guidance already in the skill body. Use numbered format:
+
+1. **Short descriptive title**: One to two sentences explaining what goes wrong and how to prevent it.
+2. **Another gotcha title**: Description of the failure mode and what to do instead.
+
 ## Integration
 
 Explain how this skill integrates with other skills in the collection. List related skills as plain text (not links) to avoid cross-directory reference issues:
