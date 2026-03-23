@@ -1,0 +1,38 @@
+[
+    {
+      "id": "compression-basic-001",
+      "input": "The transformer architecture was introduced in the paper 'Attention Is All You Need' by Vaswani et al. in 2017. It replaced recurrent neural networks with self-attention mechanisms. The key innovation was the multi-head attention layer, which allows the model to attend to different positions of the input sequence simultaneously. Transformers became the foundation for large language models like BERT, GPT, and Claude. Training is done using the Adam optimizer with a learning rate warmup schedule. The model uses positional encodings to retain sequence order information since attention itself is order-agnostic.",
+      "question": "What was the key innovation in the transformer architecture and what year was it introduced?",
+      "expected_facts": [
+        "Introduced in 2017",
+        "Replaced recurrent neural networks",
+        "Multi-head attention is the key innovation",
+        "Allows attending to different positions simultaneously",
+        "Positional encodings retain sequence order"
+      ]
+    },
+    {
+      "id": "compression-retrieval-002",
+      "input": "Context windows in large language models have a limited size measured in tokens. The 'lost-in-the-middle' phenomenon describes how models pay less attention to information in the middle of long contexts. Research by Liu et al. (2023) showed performance degrades significantly when key information is placed in the middle versus the beginning or end. The U-shaped attention curve explains this: attention is highest at the start and end of context. This has practical implications: place critical instructions at the beginning of system prompts, and place the most relevant retrieved documents at the end of the context, not buried in the middle.",
+      "question": "Where should critical instructions be placed in a context window and why?",
+      "expected_facts": [
+        "Critical instructions at the beginning of system prompts",
+        "Most relevant documents at the end of context",
+        "Lost-in-the-middle phenomenon causes degradation",
+        "U-shaped attention curve — highest at start and end",
+        "Liu et al. 2023 demonstrated this experimentally"
+      ]
+    },
+    {
+      "id": "compression-multikey-003",
+      "input": "LangGraph is a library for building stateful, multi-actor applications with LLMs. It extends LangChain by adding support for cycles and controllability. The core abstraction is a graph where nodes are functions or agents, and edges define the flow of information between them. LangGraph supports both deterministic graphs (fixed edges) and conditional graphs (edges chosen at runtime). State is persisted between steps using a checkpoint system, enabling long-running workflows that can be paused and resumed. It is particularly useful for agentic workflows that require loops, such as a ReAct agent that repeatedly calls tools until a task is complete.",
+      "question": "What is LangGraph and what makes it different from LangChain?",
+      "expected_facts": [
+        "LangGraph builds stateful multi-actor applications",
+        "Adds support for cycles and controllability beyond LangChain",
+        "Core abstraction is a graph with nodes and edges",
+        "Supports conditional edges chosen at runtime",
+        "Checkpoint system enables pausing and resuming workflows"
+      ]
+    }
+  ]
