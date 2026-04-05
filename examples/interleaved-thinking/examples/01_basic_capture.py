@@ -7,6 +7,7 @@ This shows how interleaved thinking provides visibility into agent decisions.
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 from reasoning_trace_optimizer import TraceCapture

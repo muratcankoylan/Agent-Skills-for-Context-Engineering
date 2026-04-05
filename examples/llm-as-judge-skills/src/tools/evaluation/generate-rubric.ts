@@ -127,7 +127,7 @@ Respond with valid JSON:
         generationTimeMs: Date.now() - startTime
       }
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       criterion: {
@@ -158,4 +158,3 @@ Use to establish consistent evaluation standards.`,
   parameters: GenerateRubricInputSchema,
   execute: executeGenerateRubric
 });
-

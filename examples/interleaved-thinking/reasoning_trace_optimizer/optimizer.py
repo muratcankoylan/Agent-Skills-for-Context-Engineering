@@ -18,7 +18,6 @@ from reasoning_trace_optimizer.models import (
     ReasoningTrace,
 )
 
-
 OPTIMIZER_SYSTEM_PROMPT = """You are an expert prompt engineer specializing in AI agent optimization.
 
 Your task is to improve agent prompts based on reasoning trace analysis.

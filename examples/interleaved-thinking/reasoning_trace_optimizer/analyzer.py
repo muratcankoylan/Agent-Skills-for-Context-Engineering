@@ -7,7 +7,6 @@ detecting patterns like context degradation, tool confusion, and instruction dri
 
 import json
 import os
-from typing import Any
 
 import anthropic
 
@@ -18,7 +17,6 @@ from reasoning_trace_optimizer.models import (
     ReasoningTrace,
     Severity,
 )
-
 
 ANALYSIS_SYSTEM_PROMPT = """You are an expert AI agent debugger specializing in analyzing reasoning traces.
 

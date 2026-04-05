@@ -7,6 +7,9 @@ import {
 } from '../src/index.js';
 import { validateConfig } from '../src/config/index.js';
 
+const hasOpenAIKey = Boolean(process.env.OPENAI_API_KEY);
+const describeLive = hasOpenAIKey ? describe : describe.skip;
+
 // Test fixtures
 const TEST_PROMPT = 'Explain quantum entanglement to a high school student';
 
@@ -32,10 +35,12 @@ even if they're far apart. It's used in quantum computing research.`;
 
 // Validate config once before all tests
 beforeAll(() => {
-  validateConfig();
+  if (hasOpenAIKey) {
+    validateConfig();
+  }
 });
 
-describe('Direct Score Tool', () => {
+describeLive('Direct Score Tool', () => {
   it('should score a response against criteria', async () => {
     const result = await executeDirectScore({
       response: GOOD_RESPONSE,
@@ -95,7 +100,7 @@ describe('Direct Score Tool', () => {
   }, 120000);
 });
 
-describe('Pairwise Compare Tool', () => {
+describeLive('Pairwise Compare Tool', () => {
   it('should correctly identify the better response', async () => {
     const result = await executePairwiseCompare({
       responseA: GOOD_RESPONSE,
@@ -146,7 +151,7 @@ describe('Pairwise Compare Tool', () => {
   }, 60000);
 });
 
-describe('Generate Rubric Tool', () => {
+describeLive('Generate Rubric Tool', () => {
   it('should generate a complete rubric', async () => {
     const result = await executeGenerateRubric({
       criterionName: 'Factual Accuracy',
@@ -198,7 +203,7 @@ describe('Generate Rubric Tool', () => {
   }, 120000);
 });
 
-describe('Evaluator Agent', () => {
+describeLive('Evaluator Agent', () => {
   let agent: EvaluatorAgent;
 
   beforeAll(() => {

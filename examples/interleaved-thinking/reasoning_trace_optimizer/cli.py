@@ -13,9 +13,8 @@ from rich.console import Console
 
 from reasoning_trace_optimizer.analyzer import TraceAnalyzer, format_analysis_report
 from reasoning_trace_optimizer.capture import TraceCapture, format_trace_for_display
-from reasoning_trace_optimizer.loop import OptimizationLoop, LoopConfig
+from reasoning_trace_optimizer.loop import LoopConfig, OptimizationLoop
 from reasoning_trace_optimizer.skill_generator import SkillGenerator
-
 
 console = Console()
 
@@ -138,7 +137,9 @@ def cmd_generate_skill(args: argparse.Namespace) -> None:
         summary = json.load(f)
 
     # Create minimal loop result from summary
-    from reasoning_trace_optimizer.models import LoopResult, LoopIteration, ReasoningTrace, AnalysisResult
+    from reasoning_trace_optimizer.models import (
+        LoopResult,
+    )
 
     # Load final prompt
     final_prompt_path = artifacts_dir / "final_prompt.txt"

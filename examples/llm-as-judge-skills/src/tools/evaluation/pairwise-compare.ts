@@ -225,7 +225,7 @@ export async function executePairwiseCompare(input: PairwiseCompareInput): Promi
         }
       };
     }
-  } catch (error) {
+  } catch {
     return {
       success: false,
       winner: 'TIE',
@@ -252,4 +252,3 @@ More reliable than direct scoring for preferences.`,
   parameters: PairwiseCompareInputSchema,
   execute: executePairwiseCompare
 });
-

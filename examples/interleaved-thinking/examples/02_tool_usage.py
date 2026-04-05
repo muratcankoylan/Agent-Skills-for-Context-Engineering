@@ -9,10 +9,10 @@ adapting to tool outputs in real-time.
 import json
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 from reasoning_trace_optimizer import TraceCapture
-from reasoning_trace_optimizer.capture import format_trace_for_display
 
 # Load environment variables from the project root
 env_path = Path(__file__).parent.parent / ".env"

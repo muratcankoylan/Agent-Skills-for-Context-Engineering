@@ -2,11 +2,14 @@ import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { EvaluatorAgent } from '../src/agents/evaluator.js';
 import { validateConfig } from '../src/config/index.js';
 
+const hasOpenAIKey = Boolean(process.env.OPENAI_API_KEY);
+const describeLive = hasOpenAIKey ? describe : describe.skip;
+
 /**
  * Tests for skills implementation based on LLM-as-a-Judge research
  */
 
-describe('LLM Evaluator Skill Tests', () => {
+describeLive('LLM Evaluator Skill Tests', () => {
   let agent: EvaluatorAgent;
 
   beforeAll(() => {
@@ -151,7 +154,7 @@ describe('LLM Evaluator Skill Tests', () => {
   });
 });
 
-describe('Skill Input/Output Validation', () => {
+describeLive('Skill Input/Output Validation', () => {
   let agent: EvaluatorAgent;
 
   beforeAll(() => {

@@ -9,7 +9,6 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 import anthropic
 
@@ -17,9 +16,7 @@ from reasoning_trace_optimizer.models import (
     AnalysisResult,
     LoopResult,
     Pattern,
-    PatternType,
 )
-
 
 SKILL_TEMPLATE = '''---
 name: {skill_name}

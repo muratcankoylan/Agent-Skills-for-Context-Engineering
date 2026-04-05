@@ -13,15 +13,14 @@ how the Reasoning Trace Optimizer works in production scenarios.
 
 import json
 import os
-import random
 from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 from reasoning_trace_optimizer import (
-    OptimizationLoop,
     LoopConfig,
+    OptimizationLoop,
     SkillGenerator,
 )
 

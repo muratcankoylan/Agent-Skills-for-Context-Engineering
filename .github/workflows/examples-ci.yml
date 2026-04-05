@@ -1,0 +1,41 @@
+name: Examples CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  llm-as-judge-skills:
+    name: LLM-as-Judge Skills
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/llm-as-judge-skills
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: examples/llm-as-judge-skills/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build

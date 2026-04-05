@@ -6,7 +6,7 @@ running iterative improvements until convergence or max iterations.
 """
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
@@ -22,11 +22,9 @@ from reasoning_trace_optimizer.models import (
     AnalysisResult,
     LoopIteration,
     LoopResult,
-    OptimizationResult,
     ReasoningTrace,
 )
 from reasoning_trace_optimizer.optimizer import PromptOptimizer, format_optimization_report
-
 
 console = Console()
 
