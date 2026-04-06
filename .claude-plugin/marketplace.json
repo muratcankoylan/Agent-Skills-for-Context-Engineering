@@ -6,63 +6,29 @@
   },
   "metadata": {
     "description": "Context Engineering skills for building production-grade AI agent systems",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "plugins": [
     {
-      "name": "context-engineering-fundamentals",
-      "description": "Core context engineering skills covering fundamentals, degradation patterns, compression strategies, and optimization techniques for AI agent systems",
+      "name": "context-engineering",
+      "description": "Comprehensive context engineering skills for building production-grade AI agent systems — covering fundamentals, degradation patterns, compression, optimization, multi-agent coordination, memory systems, tool design, filesystem context, hosted agents, evaluation, project development, and cognitive architecture",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/context-fundamentals",
         "./skills/context-degradation",
         "./skills/context-compression",
-        "./skills/context-optimization"
-      ]
-    },
-    {
-      "name": "agent-architecture",
-      "description": "Multi-agent patterns, memory systems, tool design, filesystem-based context, and hosted agent infrastructure for building production AI agent architectures",
-      "source": "./",
-      "strict": false,
-      "skills": [
+        "./skills/context-optimization",
         "./skills/multi-agent-patterns",
         "./skills/memory-systems",
         "./skills/tool-design",
         "./skills/filesystem-context",
-        "./skills/hosted-agents"
-      ]
-    },
-    {
-      "name": "agent-evaluation",
-      "description": "Evaluation frameworks and LLM-as-judge techniques for testing and validating AI agent systems",
-      "source": "./",
-      "strict": false,
-      "skills": [
+        "./skills/hosted-agents",
         "./skills/evaluation",
-        "./skills/advanced-evaluation"
-      ]
-    },
-    {
-      "name": "agent-development",
-      "description": "Project development methodology for LLM-powered applications including pipeline architecture and batch processing",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/project-development"
-      ]
-    },
-    {
-      "name": "cognitive-architecture",
-      "description": "BDI mental state modeling and cognitive architecture patterns for building rational agents with formal belief-desire-intention representations",
-      "source": "./",
-      "strict": false,
-      "skills": [
+        "./skills/advanced-evaluation",
+        "./skills/project-development",
         "./skills/bdi-mental-states"
       ]
     }
   ]
 }
-
-

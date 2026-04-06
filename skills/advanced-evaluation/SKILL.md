@@ -25,52 +25,44 @@ Activate this skill when:
 
 ### The Evaluation Taxonomy
 
-Evaluation approaches fall into two primary categories with distinct reliability profiles:
+Select between two primary approaches based on whether ground truth exists:
 
-**Direct Scoring**: A single LLM rates one response on a defined scale.
-- Best for: Objective criteria (factual accuracy, instruction following, toxicity)
-- Reliability: Moderate to high for well-defined criteria
-- Failure mode: Score calibration drift, inconsistent scale interpretation
+**Direct Scoring** — Use when objective criteria exist (factual accuracy, instruction following, toxicity). A single LLM rates one response on a defined scale. Achieves moderate-to-high reliability for well-defined criteria. Watch for score calibration drift and inconsistent scale interpretation.
 
-**Pairwise Comparison**: An LLM compares two responses and selects the better one.
-- Best for: Subjective preferences (tone, style, persuasiveness)
-- Reliability: Higher than direct scoring for preferences
-- Failure mode: Position bias, length bias
-
-Research from the MT-Bench paper (Zheng et al., 2023) establishes that pairwise comparison achieves higher agreement with human judges than direct scoring for preference-based evaluation, while direct scoring remains appropriate for objective criteria with clear ground truth.
+**Pairwise Comparison** — Use for subjective preferences (tone, style, persuasiveness). An LLM compares two responses and selects the better one. Achieves higher human-judge agreement than direct scoring for preference tasks (Zheng et al., 2023). Watch for position bias and length bias.
 
 ### The Bias Landscape
 
-LLM judges exhibit systematic biases that must be actively mitigated:
+Mitigate these systematic biases in every evaluation system:
 
-**Position Bias**: First-position responses receive preferential treatment in pairwise comparison. Mitigation: Evaluate twice with swapped positions, use majority vote or consistency check.
+**Position Bias**: First-position responses get preferential treatment. Mitigate by evaluating twice with swapped positions, then apply majority vote or consistency check.
 
-**Length Bias**: Longer responses are rated higher regardless of quality. Mitigation: Explicit prompting to ignore length, length-normalized scoring.
+**Length Bias**: Longer responses score higher regardless of quality. Mitigate by explicitly prompting to ignore length and applying length-normalized scoring.
 
-**Self-Enhancement Bias**: Models rate their own outputs higher. Mitigation: Use different models for generation and evaluation, or acknowledge limitation.
+**Self-Enhancement Bias**: Models rate their own outputs higher. Mitigate by using different models for generation and evaluation.
 
-**Verbosity Bias**: Detailed explanations receive higher scores even when unnecessary. Mitigation: Criteria-specific rubrics that penalize irrelevant detail.
+**Verbosity Bias**: Excessive detail scores higher even when unnecessary. Mitigate with criteria-specific rubrics that penalize irrelevant detail.
 
-**Authority Bias**: Confident, authoritative tone rated higher regardless of accuracy. Mitigation: Require evidence citation, fact-checking layer.
+**Authority Bias**: Confident tone scores higher regardless of accuracy. Mitigate by requiring evidence citation and adding a fact-checking layer.
 
 ### Metric Selection Framework
 
-Choose metrics based on the evaluation task structure:
+Match metrics to the evaluation task structure:
 
 | Task Type | Primary Metrics | Secondary Metrics |
 |-----------|-----------------|-------------------|
-| Binary classification (pass/fail) | Recall, Precision, F1 | Cohen's κ |
-| Ordinal scale (1-5 rating) | Spearman's ρ, Kendall's τ | Cohen's κ (weighted) |
+| Binary classification (pass/fail) | Recall, Precision, F1 | Cohen's kappa |
+| Ordinal scale (1-5 rating) | Spearman's rho, Kendall's tau | Cohen's kappa (weighted) |
 | Pairwise preference | Agreement rate, Position consistency | Confidence calibration |
 | Multi-label | Macro-F1, Micro-F1 | Per-label precision/recall |
 
-The critical insight: High absolute agreement matters less than systematic disagreement patterns. A judge that consistently disagrees with humans on specific criteria is more problematic than one with random noise.
+Prioritize systematic disagreement patterns over absolute agreement rates because a judge that consistently disagrees with humans on specific criteria is more problematic than one with random noise.
 
 ## Evaluation Approaches
 
 ### Direct Scoring Implementation
 
-Direct scoring requires three components: clear criteria, a calibrated scale, and structured output format.
+Build direct scoring with three components: clear criteria, a calibrated scale, and structured output format.
 
 **Criteria Definition Pattern**:
 ```
@@ -79,10 +71,10 @@ Description: [What this criterion measures]
 Weight: [Relative importance, 0-1]
 ```
 
-**Scale Calibration**:
-- 1-3 scales: Binary with neutral option, lowest cognitive load
-- 1-5 scales: Standard Likert, good balance of granularity and reliability
-- 1-10 scales: High granularity but harder to calibrate, use only with detailed rubrics
+**Scale Calibration** — Choose scale granularity based on rubric detail:
+- 1-3: Binary with neutral option, lowest cognitive load
+- 1-5: Standard Likert, best balance of granularity and reliability
+- 1-10: Use only with detailed per-level rubrics because calibration is harder
 
 **Prompt Structure for Direct Scoring**:
 ```
@@ -111,13 +103,12 @@ For each criterion:
 Respond with structured JSON containing scores, justifications, and summary.
 ```
 
-**Chain-of-Thought Requirement**: All scoring prompts must require justification before the score. Research shows this improves reliability by 15-25% compared to score-first approaches.
+Always require justification before the score in all scoring prompts because research shows this improves reliability by 15-25% compared to score-first approaches.
 
 ### Pairwise Comparison Implementation
 
-Pairwise comparison is inherently more reliable for preference-based evaluation but requires bias mitigation.
+Apply position bias mitigation in every pairwise evaluation:
 
-**Position Bias Mitigation Protocol**:
 1. First pass: Response A in first position, Response B in second
 2. Second pass: Response B in first position, Response A in second
 3. Consistency check: If passes disagree, return TIE with reduced confidence
@@ -154,121 +145,60 @@ You are an expert evaluator comparing two AI responses.
 JSON with per-criterion comparison, overall winner, confidence (0-1), and reasoning.
 ```
 
-**Confidence Calibration**: Confidence scores should reflect position consistency:
+**Confidence Calibration** — Map confidence to position consistency:
 - Both passes agree: confidence = average of individual confidences
 - Passes disagree: confidence = 0.5, verdict = TIE
 
 ### Rubric Generation
 
-Well-defined rubrics reduce evaluation variance by 40-60% compared to open-ended scoring.
+Generate rubrics to reduce evaluation variance by 40-60% compared to open-ended scoring.
 
-**Rubric Components**:
+**Include these rubric components**:
 1. **Level descriptions**: Clear boundaries for each score level
 2. **Characteristics**: Observable features that define each level
 3. **Examples**: Representative text for each level (optional but valuable)
 4. **Edge cases**: Guidance for ambiguous situations
 5. **Scoring guidelines**: General principles for consistent application
 
-**Strictness Calibration**:
-- **Lenient**: Lower bar for passing scores, appropriate for encouraging iteration
-- **Balanced**: Fair, typical expectations for production use
-- **Strict**: High standards, appropriate for safety-critical or high-stakes evaluation
+**Set strictness calibration** for the use case:
+- **Lenient**: Lower passing bar, appropriate for encouraging iteration
+- **Balanced**: Typical production expectations
+- **Strict**: High standards for safety-critical or high-stakes evaluation
 
-**Domain Adaptation**: Rubrics should use domain-specific terminology. A "code readability" rubric mentions variables, functions, and comments. A "medical accuracy" rubric references clinical terminology and evidence standards.
+Adapt rubrics to the domain — use domain-specific terminology. A code readability rubric mentions variables, functions, and comments. A medical accuracy rubric references clinical terminology and evidence standards.
 
 ## Practical Guidance
 
 ### Evaluation Pipeline Design
 
-Production evaluation systems require multiple layers:
-
-```
-┌─────────────────────────────────────────────────┐
-│                 Evaluation Pipeline              │
-├─────────────────────────────────────────────────┤
-│                                                   │
-│  Input: Response + Prompt + Context               │
-│           │                                       │
-│           ▼                                       │
-│  ┌─────────────────────┐                         │
-│  │   Criteria Loader   │ ◄── Rubrics, weights    │
-│  └──────────┬──────────┘                         │
-│             │                                     │
-│             ▼                                     │
-│  ┌─────────────────────┐                         │
-│  │   Primary Scorer    │ ◄── Direct or Pairwise  │
-│  └──────────┬──────────┘                         │
-│             │                                     │
-│             ▼                                     │
-│  ┌─────────────────────┐                         │
-│  │   Bias Mitigation   │ ◄── Position swap, etc. │
-│  └──────────┬──────────┘                         │
-│             │                                     │
-│             ▼                                     │
-│  ┌─────────────────────┐                         │
-│  │ Confidence Scoring  │ ◄── Calibration         │
-│  └──────────┬──────────┘                         │
-│             │                                     │
-│             ▼                                     │
-│  Output: Scores + Justifications + Confidence     │
-│                                                   │
-└─────────────────────────────────────────────────┘
-```
-
-### Common Anti-Patterns
-
-**Anti-pattern: Scoring without justification**
-- Problem: Scores lack grounding, difficult to debug or improve
-- Solution: Always require evidence-based justification before score
-
-**Anti-pattern: Single-pass pairwise comparison**
-- Problem: Position bias corrupts results
-- Solution: Always swap positions and check consistency
-
-**Anti-pattern: Overloaded criteria**
-- Problem: Criteria measuring multiple things are unreliable
-- Solution: One criterion = one measurable aspect
-
-**Anti-pattern: Missing edge case guidance**
-- Problem: Evaluators handle ambiguous cases inconsistently
-- Solution: Include edge cases in rubrics with explicit guidance
-
-**Anti-pattern: Ignoring confidence calibration**
-- Problem: High-confidence wrong judgments are worse than low-confidence
-- Solution: Calibrate confidence to position consistency and evidence strength
+Build production evaluation systems with these layers: Criteria Loader (rubrics + weights) -> Primary Scorer (direct or pairwise) -> Bias Mitigation (position swap, etc.) -> Confidence Scoring (calibration) -> Output (scores + justifications + confidence). See [Evaluation Pipeline Diagram](./references/evaluation-pipeline.md) for the full visual layout.
 
 ### Decision Framework: Direct vs. Pairwise
 
-Use this decision tree:
+Apply this decision tree:
 
 ```
 Is there an objective ground truth?
-├── Yes → Direct Scoring
-│   └── Examples: factual accuracy, instruction following, format compliance
-│
-└── No → Is it a preference or quality judgment?
-    ├── Yes → Pairwise Comparison
-    │   └── Examples: tone, style, persuasiveness, creativity
-    │
-    └── No → Consider reference-based evaluation
-        └── Examples: summarization (compare to source), translation (compare to reference)
++-- Yes -> Direct Scoring
+|   Examples: factual accuracy, instruction following, format compliance
+|
++-- No -> Is it a preference or quality judgment?
+    +-- Yes -> Pairwise Comparison
+    |   Examples: tone, style, persuasiveness, creativity
+    |
+    +-- No -> Consider reference-based evaluation
+        Examples: summarization (compare to source), translation (compare to reference)
 ```
 
 ### Scaling Evaluation
 
-For high-volume evaluation:
+For high-volume evaluation, apply one of these strategies:
 
-1. **Panel of LLMs (PoLL)**: Use multiple models as judges, aggregate votes
-   - Reduces individual model bias
-   - More expensive but more reliable for high-stakes decisions
+1. **Panel of LLMs (PoLL)**: Use multiple models as judges and aggregate votes to reduce individual model bias. More expensive but more reliable for high-stakes decisions.
 
-2. **Hierarchical evaluation**: Fast cheap model for screening, expensive model for edge cases
-   - Cost-effective for large volumes
-   - Requires calibration of screening threshold
+2. **Hierarchical evaluation**: Use a fast cheap model for screening and an expensive model for edge cases. Requires calibration of the screening threshold.
 
-3. **Human-in-the-loop**: Automated evaluation for clear cases, human review for low-confidence
-   - Best reliability for critical applications
-   - Design feedback loop to improve automated evaluation
+3. **Human-in-the-loop**: Automate clear cases and route low-confidence decisions to human review. Design feedback loops to improve automated evaluation over time.
 
 ## Examples
 
@@ -277,7 +207,7 @@ For high-volume evaluation:
 **Input**:
 ```
 Prompt: "What causes seasons on Earth?"
-Response: "Seasons are caused by Earth's tilted axis. As Earth orbits the Sun, 
+Response: "Seasons are caused by Earth's tilted axis. As Earth orbits the Sun,
 different hemispheres receive more direct sunlight at different times of year."
 Criterion: Factual Accuracy (weight: 1.0)
 Scale: 1-5
@@ -293,10 +223,10 @@ Scale: 1-5
     "Correctly explains differential sunlight by hemisphere",
     "No factual errors present"
   ],
-  "justification": "Response accurately explains the cause of seasons with correct 
-scientific reasoning. Both the axial tilt and its effect on sunlight distribution 
+  "justification": "Response accurately explains the cause of seasons with correct
+scientific reasoning. Both the axial tilt and its effect on sunlight distribution
 are correctly described.",
-  "improvement": "Could add the specific tilt angle (23.5°) for completeness."
+  "improvement": "Could add the specific tilt angle (23.5 degrees) for completeness."
 }
 ```
 
@@ -416,6 +346,24 @@ strictness: "balanced"
 
 10. **Design for iteration** - Evaluation systems improve with feedback loops
 
+## Gotchas
+
+1. **Scoring without justification**: Scores lack grounding and are difficult to debug. Always require evidence-based justification before the score.
+
+2. **Single-pass pairwise comparison**: Position bias corrupts results when positions are not swapped. Always evaluate twice with swapped positions and check consistency.
+
+3. **Overloaded criteria**: Criteria that measure multiple things at once produce unreliable scores. Enforce one criterion = one measurable aspect.
+
+4. **Missing edge case guidance**: Evaluators handle ambiguous cases inconsistently without explicit instructions. Include edge cases in rubrics with clear resolution rules.
+
+5. **Ignoring confidence calibration**: High-confidence wrong judgments are worse than low-confidence ones. Calibrate confidence to position consistency and evidence strength.
+
+6. **Rubric drift**: Rubrics become miscalibrated as quality standards evolve or model capabilities improve. Schedule periodic rubric reviews and re-anchor score levels against fresh human-annotated examples.
+
+7. **Evaluation prompt sensitivity**: Minor wording changes in evaluation prompts (e.g., reordering instructions, changing phrasing) can cause 10-20% score swings. Version-control evaluation prompts and run regression tests before deploying prompt changes.
+
+8. **Uncontrolled length bias**: Longer responses systematically score higher even when conciseness is preferred. Add explicit length-neutrality instructions to evaluation prompts and validate with length-controlled test pairs.
+
 ## Integration
 
 This skill integrates with:
@@ -428,15 +376,16 @@ This skill integrates with:
 ## References
 
 Internal reference:
-- [LLM-as-Judge Implementation Patterns](./references/implementation-patterns.md)
-- [Bias Mitigation Techniques](./references/bias-mitigation.md)
-- [Metric Selection Guide](./references/metrics-guide.md)
+- [LLM-as-Judge Implementation Patterns](./references/implementation-patterns.md) - Read when: building an evaluation pipeline from scratch or integrating LLM judges into CI/CD
+- [Bias Mitigation Techniques](./references/bias-mitigation.md) - Read when: evaluation results show inconsistent or suspicious scoring patterns
+- [Metric Selection Guide](./references/metrics-guide.md) - Read when: choosing statistical metrics to validate evaluation reliability
+- [Evaluation Pipeline Diagram](./references/evaluation-pipeline.md) - Read when: designing the architecture of a multi-stage evaluation system
 
 External research:
-- [Eugene Yan: Evaluating the Effectiveness of LLM-Evaluators](https://eugeneyan.com/writing/llm-evaluators/)
-- [Judging LLM-as-a-Judge (Zheng et al., 2023)](https://arxiv.org/abs/2306.05685)
-- [G-Eval: NLG Evaluation using GPT-4 (Liu et al., 2023)](https://arxiv.org/abs/2303.16634)
-- [Large Language Models are not Fair Evaluators (Wang et al., 2023)](https://arxiv.org/abs/2305.17926)
+- [Eugene Yan: Evaluating the Effectiveness of LLM-Evaluators](https://eugeneyan.com/writing/llm-evaluators/) - Read when: surveying the state of the art in LLM evaluation
+- [Judging LLM-as-a-Judge (Zheng et al., 2023)](https://arxiv.org/abs/2306.05685) - Read when: understanding position bias and MT-Bench methodology
+- [G-Eval: NLG Evaluation using GPT-4 (Liu et al., 2023)](https://arxiv.org/abs/2303.16634) - Read when: implementing chain-of-thought evaluation scoring
+- [Large Language Models are not Fair Evaluators (Wang et al., 2023)](https://arxiv.org/abs/2305.17926) - Read when: diagnosing systematic bias in evaluation outputs
 
 Related skills in this collection:
 - evaluation - Foundational evaluation concepts
@@ -447,8 +396,7 @@ Related skills in this collection:
 
 ## Skill Metadata
 
-**Created**: 2024-12-24
-**Last Updated**: 2024-12-24
-**Author**: Muratcan Koylan
-**Version**: 1.0.0
-
+**Created**: 2025-12-24
+**Last Updated**: 2026-03-17
+**Author**: Agent Skills for Context Engineering Contributors
+**Version**: 2.0.0

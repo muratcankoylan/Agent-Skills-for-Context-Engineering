@@ -19,67 +19,67 @@ Activate this skill when:
 
 ## Core Concepts
 
-Multi-agent systems address single-agent context limitations through distribution. Three dominant patterns exist: supervisor/orchestrator for centralized control, peer-to-peer/swarm for flexible handoffs, and hierarchical for layered abstraction. The critical design principle is context isolation—sub-agents exist primarily to partition context rather than to simulate organizational roles.
+Use multi-agent patterns when a single agent's context window cannot hold all task-relevant information. Context isolation is the primary benefit — each agent operates in a clean context without accumulated noise from other subtasks, preventing the telephone game problem where information degrades through repeated summarization.
 
-Effective multi-agent systems require explicit coordination protocols, consensus mechanisms that avoid sycophancy, and careful attention to failure modes including bottlenecks, divergence, and error propagation.
+Choose among three dominant patterns based on coordination needs, not organizational metaphor:
+
+- **Supervisor/orchestrator** — Use for centralized control when tasks have clear decomposition and human oversight matters. A single coordinator delegates to specialists and synthesizes results.
+- **Peer-to-peer/swarm** — Use for flexible exploration when rigid planning is counterproductive. Any agent can transfer control to any other through explicit handoff mechanisms.
+- **Hierarchical** — Use for large-scale projects with layered abstraction (strategy, planning, execution). Each layer operates at a different level of detail with its own context structure.
+
+Design every multi-agent system around explicit coordination protocols, consensus mechanisms that resist sycophancy, and failure handling that prevents error propagation cascades.
 
 ## Detailed Topics
 
 ### Why Multi-Agent Architectures
 
 **The Context Bottleneck**
-Single agents face inherent ceilings in reasoning capability, context management, and tool coordination. As tasks grow more complex, context windows fill with accumulated history, retrieved documents, and tool outputs. Performance degrades according to predictable patterns: the lost-in-middle effect, attention scarcity, and context poisoning.
+Reach for multi-agent architectures when a single agent's context fills with accumulated history, retrieved documents, and tool outputs to the point where performance degrades. Recognize three degradation signals: the lost-in-middle effect (attention weakens for mid-context content), attention scarcity (too many competing items), and context poisoning (irrelevant content displaces useful content).
 
-Multi-agent architectures address these limitations by partitioning work across multiple context windows. Each agent operates in a clean context focused on its subtask. Results aggregate at a coordination layer without any single context bearing the full burden.
+Partition work across multiple context windows so each agent operates in a clean context focused on its subtask. Aggregate results at a coordination layer without any single context bearing the full burden.
 
 **The Token Economics Reality**
-Multi-agent systems consume significantly more tokens than single-agent approaches. Production data shows:
+Budget for substantially higher token costs. Production data shows multi-agent systems run at approximately 15x the token cost of a single-agent chat:
 
 | Architecture | Token Multiplier | Use Case |
 |--------------|------------------|----------|
-| Single agent chat | 1× baseline | Simple queries |
-| Single agent with tools | ~4× baseline | Tool-using tasks |
-| Multi-agent system | ~15× baseline | Complex research/coordination |
+| Single agent chat | 1x baseline | Simple queries |
+| Single agent with tools | ~4x baseline | Tool-using tasks |
+| Multi-agent system | ~15x baseline | Complex research/coordination |
 
-Research on the BrowseComp evaluation found that three factors explain 95% of performance variance: token usage (80% of variance), number of tool calls, and model choice. This validates the multi-agent approach of distributing work across agents with separate context windows to add capacity for parallel reasoning.
+Research on the BrowseComp evaluation found that three factors explain 95% of performance variance: token usage (80% of variance), number of tool calls, and model choice. This validates distributing work across agents with separate context windows to add capacity for parallel reasoning.
 
-Critically, upgrading to better models often provides larger performance gains than doubling token budgets. Claude Sonnet 4.5 showed larger gains than doubling tokens on earlier Sonnet versions. GPT-5.2's thinking mode similarly outperforms raw token increases. This suggests model selection and multi-agent architecture are complementary strategies.
+Prioritize model selection alongside architecture design — upgrading to better models often provides larger performance gains than doubling token budgets. BrowseComp data shows that model quality improvements frequently outperform raw token increases. Treat model selection and multi-agent architecture as complementary strategies.
 
 **The Parallelization Argument**
-Many tasks contain parallelizable subtasks that a single agent must execute sequentially. A research task might require searching multiple independent sources, analyzing different documents, or comparing competing approaches. A single agent processes these sequentially, accumulating context with each step.
-
-Multi-agent architectures assign each subtask to a dedicated agent with a fresh context. All agents work simultaneously, then return results to a coordinator. The total real-world time approaches the duration of the longest subtask rather than the sum of all subtasks.
+Assign parallelizable subtasks to dedicated agents with fresh contexts rather than processing them sequentially in a single agent. A research task requiring searches across multiple independent sources, analysis of different documents, or comparison of competing approaches benefits from parallel execution. Total real-world time approaches the duration of the longest subtask rather than the sum of all subtasks.
 
 **The Specialization Argument**
-Different tasks benefit from different agent configurations: different system prompts, different tool sets, different context structures. A general-purpose agent must carry all possible configurations in context. Specialized agents carry only what they need.
-
-Multi-agent architectures enable specialization without combinatorial explosion. The coordinator routes to specialized agents; each agent operates with lean context optimized for its domain.
+Configure each agent with only the system prompt, tools, and context it needs for its specific subtask. A general-purpose agent must carry all possible configurations in context, diluting attention. Specialized agents carry only what they need, operating with lean context optimized for their domain. Route from a coordinator to specialized agents to achieve specialization without combinatorial explosion.
 
 ### Architectural Patterns
 
 **Pattern 1: Supervisor/Orchestrator**
-The supervisor pattern places a central agent in control, delegating to specialists and synthesizing results. The supervisor maintains global state and trajectory, decomposes user objectives into subtasks, and routes to appropriate workers.
+Deploy a central agent that maintains global state and trajectory, decomposes user objectives into subtasks, and routes to appropriate workers.
 
 ```
 User Query -> Supervisor -> [Specialist, Specialist, Specialist] -> Aggregation -> Final Output
 ```
 
-When to use: Complex tasks with clear decomposition, tasks requiring coordination across domains, tasks where human oversight is important.
+Choose this pattern when: tasks have clear decomposition, coordination across domains is needed, or human oversight is important.
 
-Advantages: Strict control over workflow, easier to implement human-in-the-loop interventions, ensures adherence to predefined plans.
-
-Disadvantages: Supervisor context becomes bottleneck, supervisor failures cascade to all workers, "telephone game" problem where supervisors paraphrase sub-agent responses incorrectly.
+Expect these trade-offs: strict workflow control and easier human-in-the-loop interventions, but the supervisor context becomes a bottleneck, supervisor failures cascade to all workers, and the "telephone game" problem emerges where supervisors paraphrase sub-agent responses incorrectly.
 
 **The Telephone Game Problem and Solution**
-LangGraph benchmarks found supervisor architectures initially performed 50% worse than optimized versions due to the "telephone game" problem where supervisors paraphrase sub-agent responses incorrectly, losing fidelity.
+Anticipate that supervisor architectures initially perform approximately 50% worse than optimized versions due to the telephone game problem (LangGraph benchmarks). Supervisors paraphrase sub-agent responses, losing fidelity with each pass.
 
-The fix: implement a `forward_message` tool allowing sub-agents to pass responses directly to users:
+Fix this by implementing a `forward_message` tool that allows sub-agents to pass responses directly to users:
 
 ```python
 def forward_message(message: str, to_user: bool = True):
     """
     Forward sub-agent response directly to user without supervisor synthesis.
-    
+
     Use when:
     - Sub-agent response is final and complete
     - Supervisor synthesis would lose important details
@@ -90,12 +90,10 @@ def forward_message(message: str, to_user: bool = True):
     return {"type": "supervisor_input", "content": message}
 ```
 
-With this pattern, swarm architectures slightly outperform supervisors because sub-agents respond directly to users, eliminating translation errors.
-
-Implementation note: Implement direct pass-through mechanisms allowing sub-agents to pass responses directly to users rather than through supervisor synthesis when appropriate.
+Prefer swarm architectures over supervisors when sub-agents can respond directly to users, as this eliminates translation errors entirely.
 
 **Pattern 2: Peer-to-Peer/Swarm**
-The peer-to-peer pattern removes central control, allowing agents to communicate directly based on predefined protocols. Any agent can transfer control to any other through explicit handoff mechanisms.
+Remove central control and allow agents to communicate directly based on predefined protocols. Any agent transfers control to any other through explicit handoff mechanisms.
 
 ```python
 def transfer_to_agent_b():
@@ -107,56 +105,49 @@ agent_a = Agent(
 )
 ```
 
-When to use: Tasks requiring flexible exploration, tasks where rigid planning is counterproductive, tasks with emergent requirements that defy upfront decomposition.
+Choose this pattern when: tasks require flexible exploration, rigid planning is counterproductive, or requirements emerge dynamically and defy upfront decomposition.
 
-Advantages: No single point of failure, scales effectively for breadth-first exploration, enables emergent problem-solving behaviors.
+Expect these trade-offs: no single point of failure and effective breadth-first scaling, but coordination complexity increases with agent count, divergence risk rises without a central state keeper, and robust convergence constraints become essential.
 
-Disadvantages: Coordination complexity increases with agent count, risk of divergence without central state keeper, requires robust convergence constraints.
-
-Implementation note: Define explicit handoff protocols with state passing. Ensure agents can communicate their context needs to receiving agents.
+Define explicit handoff protocols with state passing. Ensure agents communicate their context needs to receiving agents.
 
 **Pattern 3: Hierarchical**
-Hierarchical structures organize agents into layers of abstraction: strategic, planning, and execution layers. Strategy layer agents define goals and constraints; planning layer agents break goals into actionable plans; execution layer agents perform atomic tasks.
+Organize agents into layers of abstraction: strategy (goal definition), planning (task decomposition), and execution (atomic tasks).
 
 ```
 Strategy Layer (Goal Definition) -> Planning Layer (Task Decomposition) -> Execution Layer (Atomic Tasks)
 ```
 
-When to use: Large-scale projects with clear hierarchical structure, enterprise workflows with management layers, tasks requiring both high-level planning and detailed execution.
+Choose this pattern when: projects have clear hierarchical structure, workflows involve management layers, or tasks require both high-level planning and detailed execution.
 
-Advantages: Mirrors organizational structures, clear separation of concerns, enables different context structures at different levels.
-
-Disadvantages: Coordination overhead between layers, potential for misalignment between strategy and execution, complex error propagation.
+Expect these trade-offs: clear separation of concerns and support for different context structures at different levels, but coordination overhead between layers, potential strategy-execution misalignment, and complex error propagation paths.
 
 ### Context Isolation as Design Principle
 
-The primary purpose of multi-agent architectures is context isolation. Each sub-agent operates in a clean context window focused on its subtask without carrying accumulated context from other subtasks.
+Treat context isolation as the primary purpose of multi-agent architectures. Each sub-agent should operate in a clean context window focused on its subtask without carrying accumulated context from other subtasks.
 
 **Isolation Mechanisms**
-Full context delegation: For complex tasks where the sub-agent needs complete understanding, the planner shares its entire context. The sub-agent has its own tools and instructions but receives full context for its decisions.
+Select the right isolation mechanism for each subtask:
 
-Instruction passing: For simple, well-defined subtasks, the planner creates instructions via function call. The sub-agent receives only the instructions needed for its specific task.
+- **Full context delegation** — Share the planner's entire context with the sub-agent. Use for complex tasks where the sub-agent needs complete understanding. The sub-agent has its own tools and instructions but receives full context for its decisions. Note: this partially defeats the purpose of context isolation.
+- **Instruction passing** — Create instructions via function call; the sub-agent receives only what it needs. Use for simple, well-defined subtasks. Maintains isolation but limits sub-agent flexibility.
+- **File system memory** — Agents read and write to persistent storage. Use for complex tasks requiring shared state. The file system serves as the coordination mechanism, avoiding context bloat from shared state passing. Introduces latency and consistency challenges but scales better than message-passing.
 
-File system memory: For complex tasks requiring shared state, agents read and write to persistent storage. The file system serves as the coordination mechanism, avoiding context bloat from shared state passing.
-
-**Isolation Trade-offs**
-Full context delegation provides maximum capability but defeats the purpose of sub-agents. Instruction passing maintains isolation but limits sub-agent flexibility. File system memory enables shared state without context passing but introduces latency and consistency challenges.
-
-The right choice depends on task complexity, coordination needs, and acceptable latency.
+Choose based on task complexity, coordination needs, and acceptable latency. Default to instruction passing and escalate to file system memory when shared state is needed. Avoid full context delegation unless the subtask genuinely requires it.
 
 ### Consensus and Coordination
 
 **The Voting Problem**
-Simple majority voting treats hallucinations from weak models as equal to reasoning from strong models. Without intervention, multi-agent discussions devolve into consensus on false premises due to inherent bias toward agreement.
+Avoid simple majority voting — it treats hallucinations from weak models as equal to reasoning from strong models. Without intervention, multi-agent discussions devolve into consensus on false premises due to inherent bias toward agreement.
 
 **Weighted Voting**
-Weight agent votes by confidence or expertise. Agents with higher confidence or domain expertise carry more weight in final decisions.
+Weight agent votes by confidence or expertise. Agents with higher confidence or domain expertise should carry more weight in final decisions.
 
 **Debate Protocols**
-Debate protocols require agents to critique each other's outputs over multiple rounds. Adversarial critique often yields higher accuracy on complex reasoning than collaborative consensus.
+Structure agents to critique each other's outputs over multiple rounds. Adversarial critique often yields higher accuracy on complex reasoning than collaborative consensus. Guard against sycophantic convergence where agents agree to be agreeable rather than correct.
 
 **Trigger-Based Intervention**
-Monitor multi-agent interactions for specific behavioral markers. Stall triggers activate when discussions make no progress. Sycophancy triggers detect when agents mimic each other's answers without unique reasoning.
+Monitor multi-agent interactions for behavioral markers. Activate stall triggers when discussions make no progress. Detect sycophancy triggers when agents mimic each other's answers without unique reasoning.
 
 ### Framework Considerations
 
@@ -169,22 +160,22 @@ Different frameworks implement these patterns with different philosophies. LangG
 **Failure: Supervisor Bottleneck**
 The supervisor accumulates context from all workers, becoming susceptible to saturation and degradation.
 
-Mitigation: Implement output schema constraints so workers return only distilled summaries. Use checkpointing to persist supervisor state without carrying full history.
+Mitigate by constraining worker output schemas so workers return only distilled summaries. Use checkpointing to persist supervisor state without carrying full history in context.
 
 **Failure: Coordination Overhead**
 Agent communication consumes tokens and introduces latency. Complex coordination can negate parallelization benefits.
 
-Mitigation: Minimize communication through clear handoff protocols. Batch results where possible. Use asynchronous communication patterns.
+Mitigate by minimizing communication through clear handoff protocols. Batch results where possible. Use asynchronous communication patterns. Measure whether multi-agent coordination actually saves time versus a single agent with a longer context.
 
 **Failure: Divergence**
-Agents pursuing different goals without central coordination can drift from intended objectives.
+Agents pursuing different goals without central coordination drift from intended objectives.
 
-Mitigation: Define clear objective boundaries for each agent. Implement convergence checks that verify progress toward shared goals. Use time-to-live limits on agent execution.
+Mitigate by defining clear objective boundaries for each agent. Implement convergence checks that verify progress toward shared goals. Set time-to-live limits on agent execution to prevent unbounded exploration.
 
 **Failure: Error Propagation**
-Errors in one agent's output propagate to downstream agents that consume that output.
+Errors in one agent's output propagate to downstream agents that consume that output, compounding into increasingly wrong results.
 
-Mitigation: Validate agent outputs before passing to consumers. Implement retry logic with circuit breakers. Use idempotent operations where possible.
+Mitigate by validating agent outputs before passing to consumers. Implement retry logic with circuit breakers. Use idempotent operations where possible. Consider adding a verification agent that cross-checks critical outputs before they enter the pipeline.
 
 ## Examples
 
@@ -221,6 +212,17 @@ def handle_customer_request(request):
 7. Set time-to-live limits to prevent infinite loops
 8. Test failure scenarios explicitly
 
+## Gotchas
+
+1. **Supervisor bottleneck scaling** — Supervisor context pressure grows non-linearly with worker count. At 5+ workers, the supervisor spends more tokens processing summaries than workers spend on actual tasks. Set a hard cap on workers per supervisor (3-5) and add a second supervisor tier rather than overloading one.
+2. **Token cost underestimation** — Multi-agent runs cost approximately 15x baseline. Teams consistently underbudget because they estimate per-agent costs without accounting for coordination overhead, retries, and consensus rounds. Budget for 15x and treat anything less as a bonus.
+3. **Sycophantic consensus** — Agents in debate patterns tend to converge on agreeable answers, not correct ones. LLMs have an inherent bias toward agreement. Counter this by assigning explicit adversarial roles and requiring agents to state disagreements before convergence is allowed.
+4. **Agent sprawl** — Adding more agents past 3-5 shows diminishing returns and increases coordination overhead. Each additional agent adds communication channels quadratically. Start with the minimum viable number of agents and add only when a clear context isolation benefit exists.
+5. **Telephone game in message-passing** — Information degrades through repeated summarization as it passes between agents. Each agent paraphrases and loses nuance. Use filesystem coordination instead of message-passing for state that multiple agents need to access faithfully.
+6. **Error propagation cascades** — One agent's hallucination becomes another agent's "fact." Downstream agents have no way to distinguish upstream hallucinations from genuine information. Add validation checkpoints between agents and never trust upstream output without verification.
+7. **Over-decomposition** — Splitting tasks too finely creates more coordination overhead than the task itself. A 10-step pipeline with 10 agents spends more tokens on handoffs than on actual work. Decompose only when subtasks genuinely benefit from separate contexts.
+8. **Missing shared state** — Agents operating without a shared filesystem or state store duplicate work, produce inconsistent outputs, and lose track of what has already been accomplished. Establish shared persistent storage before building multi-agent workflows.
+
 ## Integration
 
 This skill builds on context-fundamentals and context-degradation. It connects to:
@@ -232,24 +234,24 @@ This skill builds on context-fundamentals and context-degradation. It connects t
 ## References
 
 Internal reference:
-- [Frameworks Reference](./references/frameworks.md) - Detailed framework implementation patterns
+- [Frameworks Reference](./references/frameworks.md) - Read when: implementing a specific multi-agent pattern in LangGraph, AutoGen, or CrewAI and needing framework-specific code examples
 
 Related skills in this collection:
-- context-fundamentals - Context basics
-- memory-systems - Cross-agent memory
-- context-optimization - Partitioning strategies
+- context-fundamentals - Read when: needing to understand context window mechanics before designing agent partitioning
+- memory-systems - Read when: agents need to share state across context boundaries or persist information between runs
+- context-optimization - Read when: individual agent contexts are too large and need partitioning or compression strategies
 
 External resources:
-- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Multi-agent patterns and state management
-- [AutoGen Framework](https://microsoft.github.io/autogen/) - GroupChat and conversational patterns
-- [CrewAI Documentation](https://docs.crewai.com/) - Hierarchical agent processes
-- [Research on Multi-Agent Coordination](https://arxiv.org/abs/2308.00352) - Survey of multi-agent systems
+- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Read when: building graph-based multi-agent workflows with explicit state machines
+- [AutoGen Framework](https://microsoft.github.io/autogen/) - Read when: implementing conversational GroupChat patterns or event-driven agent coordination
+- [CrewAI Documentation](https://docs.crewai.com/) - Read when: designing role-based hierarchical agent processes
+- [Research on Multi-Agent Coordination](https://arxiv.org/abs/2308.00352) - Read when: needing academic grounding on multi-agent system theory and evaluation
 
 ---
 
 ## Skill Metadata
 
 **Created**: 2025-12-20
-**Last Updated**: 2025-12-20
+**Last Updated**: 2026-03-17
 **Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.0.0
+**Version**: 2.0.0
