@@ -23,17 +23,21 @@ Activate this skill when:
 
 ### Mental Reality Architecture
 
-**Mental States (Endurants)**: Persistent cognitive attributes
-- `Belief`: What the agent believes to be true about the world
-- `Desire`: What the agent wishes to bring about
-- `Intention`: What the agent commits to achieving
+Separate mental states into two ontological categories because BDI reasoning requires distinguishing what persists from what happens:
 
-**Mental Processes (Perdurants)**: Events that modify mental states
-- `BeliefProcess`: Forming/updating beliefs from perception
-- `DesireProcess`: Generating desires from beliefs
-- `IntentionProcess`: Committing to desires as actionable intentions
+**Mental States (Endurants)** -- model these as persistent cognitive attributes that hold over time intervals:
+- `Belief`: Represent what the agent holds true about the world. Ground every belief in a world state reference.
+- `Desire`: Represent what the agent wishes to bring about. Link each desire back to the beliefs that motivate it.
+- `Intention`: Represent what the agent commits to achieving. An intention must fulfil a desire and specify a plan.
+
+**Mental Processes (Perdurants)** -- model these as events that create or modify mental states, because tracking causal transitions enables explainability:
+- `BeliefProcess`: Triggers belief formation/update from perception. Always connect to a generating world state.
+- `DesireProcess`: Generates desires from existing beliefs. Preserves the motivational chain.
+- `IntentionProcess`: Commits to selected desires as actionable intentions.
 
 ### Cognitive Chain Pattern
+
+Wire beliefs, desires, and intentions into directed chains using bidirectional properties (`motivates`/`isMotivatedBy`, `fulfils`/`isFulfilledBy`) because this enables both forward reasoning (what should the agent do?) and backward tracing (why did the agent act?):
 
 ```turtle
 :Belief_store_open a bdi:Belief ;
@@ -53,7 +57,7 @@ Activate this skill when:
 
 ### World State Grounding
 
-Mental states reference structured configurations of the environment:
+Always ground mental states in world state references rather than free-text descriptions, because ungrounded beliefs break semantic querying and cross-agent interoperability:
 
 ```turtle
 :Agent_A a bdi:Agent ;
@@ -70,7 +74,7 @@ Mental states reference structured configurations of the environment:
 
 ### Goal-Directed Planning
 
-Intentions specify plans that address goals through task sequences:
+Connect intentions to plans via `bdi:specifies`, and decompose plans into ordered task sequences using `bdi:precedes`, because this separation allows plan reuse across different intentions while keeping execution order explicit:
 
 ```turtle
 :Intention_I1 bdi:specifies :Plan_P1 .
@@ -86,11 +90,10 @@ Intentions specify plans that address goals through task sequences:
 
 ## T2B2T Paradigm
 
-Triples-to-Beliefs-to-Triples implements bidirectional flow between RDF knowledge graphs and internal mental states:
+Implement Triples-to-Beliefs-to-Triples as a bidirectional pipeline because agents must both consume external RDF context and produce new RDF assertions. Structure every T2B2T implementation in two explicit phases:
 
-**Phase 1: Triples-to-Beliefs**
+**Phase 1: Triples-to-Beliefs** -- Translate incoming RDF triples into belief instances. Use `bdi:triggers` to connect the external world state to a `BeliefProcess`, and `bdi:generates` to produce the resulting belief. This preserves provenance from source data through to internal cognition:
 ```turtle
-# External RDF context triggers belief formation
 :WorldState_notification a bdi:WorldState ;
     rdfs:comment "Push notification: Payment request $250" ;
     bdi:triggers :BeliefProcess_BP1 .
@@ -99,9 +102,8 @@ Triples-to-Beliefs-to-Triples implements bidirectional flow between RDF knowledg
     bdi:generates :Belief_payment_request .
 ```
 
-**Phase 2: Beliefs-to-Triples**
+**Phase 2: Beliefs-to-Triples** -- After BDI deliberation selects an intention and executes a plan, project the results back into RDF using `bdi:bringsAbout`. This closes the loop so downstream systems can consume agent outputs as standard linked data:
 ```turtle
-# Mental deliberation produces new RDF output
 :Intention_pay a bdi:Intention ;
     bdi:specifies :Plan_payment .
 
@@ -112,6 +114,8 @@ Triples-to-Beliefs-to-Triples implements bidirectional flow between RDF knowledg
 
 ## Notation Selection by Level
 
+Choose notation based on the C4 abstraction level being modeled, because mixing notations at the wrong level obscures rather than clarifies the cognitive architecture:
+
 | C4 Level | Notation | Mental State Representation |
 |----------|----------|----------------------------|
 | L1 Context | ArchiMate | Agent boundaries, external perception sources |
@@ -121,7 +125,7 @@ Triples-to-Beliefs-to-Triples implements bidirectional flow between RDF knowledg
 
 ## Justification and Explainability
 
-Mental entities link to supporting evidence for traceable reasoning:
+Attach `bdi:Justification` instances to every mental entity using `bdi:isJustifiedBy`, because unjustified mental states make agent reasoning opaque and untraceable. Each justification should capture the evidence or rule that produced the mental state:
 
 ```turtle
 :Belief_B1 a bdi:Belief ;
@@ -139,7 +143,7 @@ Mental entities link to supporting evidence for traceable reasoning:
 
 ## Temporal Dimensions
 
-Mental states persist over bounded time periods:
+Assign validity intervals to every mental state using `bdi:hasValidity` with `TimeInterval` instances, because beliefs without temporal bounds cannot be garbage-collected or conflict-checked during diachronic reasoning:
 
 ```turtle
 :Belief_B1 a bdi:Belief ;
@@ -150,28 +154,28 @@ Mental states persist over bounded time periods:
     bdi:hasEndTime :TimeInstant_11am .
 ```
 
-Query mental states active at specific moments:
+Query mental states active at a specific moment using SPARQL temporal filters. Use this pattern to resolve conflicts when multiple beliefs about the same world state overlap in time:
 
 ```sparql
 SELECT ?mentalState WHERE {
     ?mentalState bdi:hasValidity ?interval .
     ?interval bdi:hasStartTime ?start ;
               bdi:hasEndTime ?end .
-    FILTER(?start <= "2025-01-04T10:00:00"^^xsd:dateTime && 
+    FILTER(?start <= "2025-01-04T10:00:00"^^xsd:dateTime &&
            ?end >= "2025-01-04T10:00:00"^^xsd:dateTime)
 }
 ```
 
 ## Compositional Mental Entities
 
-Complex mental entities decompose into constituent parts for selective updates:
+Decompose complex beliefs into constituent parts using `bdi:hasPart` relations, because monolithic beliefs force full replacement on partial updates. Structure composite beliefs so that each sub-belief can be independently updated, queried, or invalidated:
 
 ```turtle
 :Belief_meeting a bdi:Belief ;
     rdfs:comment "Meeting at 10am in Room 5" ;
     bdi:hasPart :Belief_meeting_time , :Belief_meeting_location .
 
-# Update only location component
+# Update only location component without touching time
 :BeliefProcess_update a bdi:BeliefProcess ;
     bdi:modifies :Belief_meeting_location .
 ```
@@ -180,33 +184,33 @@ Complex mental entities decompose into constituent parts for selective updates:
 
 ### Logic Augmented Generation (LAG)
 
-Augment LLM outputs with ontological constraints:
+Use LAG to constrain LLM outputs with ontological structure, because unconstrained generation produces triples that violate BDI class restrictions. Serialize the ontology into the prompt context, then validate generated triples against it before accepting them:
 
 ```python
 def augment_llm_with_bdi_ontology(prompt, ontology_graph):
     ontology_context = serialize_ontology(ontology_graph, format='turtle')
     augmented_prompt = f"{ontology_context}\n\n{prompt}"
-    
+
     response = llm.generate(augmented_prompt)
     triples = extract_rdf_triples(response)
-    
+
     is_consistent = validate_triples(triples, ontology_graph)
     return triples if is_consistent else retry_with_feedback()
 ```
 
 ### SEMAS Rule Translation
 
-Map BDI ontology to executable production rules:
+Translate BDI ontology patterns into executable production rules when deploying to rule-based agent platforms. Map each cognitive chain link (belief-to-desire, desire-to-intention) to a HEAD/CONDITIONALS/TAIL rule, because this preserves the deliberative semantics while enabling runtime execution:
 
 ```prolog
 % Belief triggers desire formation
-[HEAD: belief(agent_a, store_open)] / 
-[CONDITIONALS: time(weekday_afternoon)] » 
+[HEAD: belief(agent_a, store_open)] /
+[CONDITIONALS: time(weekday_afternoon)] »
 [TAIL: generate_desire(agent_a, buy_groceries)].
 
 % Desire triggers intention commitment
-[HEAD: desire(agent_a, buy_groceries)] / 
-[CONDITIONALS: belief(agent_a, has_shopping_list)] » 
+[HEAD: desire(agent_a, buy_groceries)] /
+[CONDITIONALS: belief(agent_a, has_shopping_list)] »
 [TAIL: commit_intention(agent_a, buy_groceries)].
 ```
 
@@ -259,17 +263,21 @@ SELECT ?task ?nextTask WHERE {
 } ORDER BY ?task
 ```
 
-## Anti-Patterns
+## Gotchas
 
-1. **Conflating mental states with world states**: Mental states reference world states, they are not world states themselves.
+1. **Conflating mental states with world states**: Mental states reference world states via `bdi:refersTo`, they are not world states themselves. Mixing them collapses the perception-cognition boundary and breaks SPARQL queries that filter by type.
 
-2. **Missing temporal bounds**: Every mental state should have validity intervals for diachronic reasoning.
+2. **Missing temporal bounds**: Every mental state needs validity intervals for diachronic reasoning. Without them, stale beliefs persist indefinitely and conflict detection becomes impossible.
 
-3. **Flat belief structures**: Use compositional modeling with `hasPart` for complex beliefs.
+3. **Flat belief structures**: Use compositional modeling with `hasPart` for complex beliefs. Monolithic beliefs force full replacement when only one attribute changes.
 
-4. **Implicit justifications**: Always link mental entities to explicit justification instances.
+4. **Implicit justifications**: Always link mental entities to explicit `Justification` instances. Unjustified mental states cannot be audited or traced.
 
-5. **Direct intention-to-action mapping**: Intentions specify plans which contain tasks; actions execute tasks.
+5. **Direct intention-to-action mapping**: Intentions specify plans which contain tasks; actions execute tasks. Skipping the plan layer removes the ability to reuse, reorder, or share execution strategies.
+
+6. **Ontology over-complexity**: Start with 5-10 core classes and properties (Belief, Desire, Intention, WorldState, Plan, plus key relations). Expanding the ontology prematurely inflates prompt context and slows SPARQL queries without improving reasoning quality.
+
+7. **Reasoning cost explosion**: Keep belief chains to 3 levels or fewer (belief -> desire -> intention). Deeper chains become prohibitively expensive for LLM inference and rarely improve decision quality over shallower alternatives.
 
 ## Integration
 
@@ -282,14 +290,22 @@ SELECT ?task ?nextTask WHERE {
 
 ## References
 
-See `references/` folder for detailed documentation:
-- `bdi-ontology-core.md` - Core ontology patterns and class definitions
-- `rdf-examples.md` - Complete RDF/Turtle examples
-- `sparql-competency.md` - Full competency question SPARQL queries
-- `framework-integration.md` - SEMAS, JADE, LAG integration patterns
+Internal references:
+- [BDI Ontology Core](./references/bdi-ontology-core.md) - Read when: implementing BDI class hierarchies or defining ontology properties from scratch
+- [RDF Examples](./references/rdf-examples.md) - Read when: writing Turtle serializations of mental states or debugging triple structure
+- [SPARQL Competency Queries](./references/sparql-competency.md) - Read when: validating an implementation against competency questions or building custom queries
+- [Framework Integration](./references/framework-integration.md) - Read when: deploying BDI models to SEMAS, JADE, or LAG pipelines
 
 Primary sources:
-- Zuppiroli et al. "The Belief-Desire-Intention Ontology" (2025)
-- Rao & Georgeff "BDI agents: From theory to practice" (1995)
-- Bratman "Intention, plans, and practical reason" (1987)
+- Zuppiroli et al. "The Belief-Desire-Intention Ontology" (2025) — Read when: implementing formal BDI class hierarchies or validating ontology alignment
+- Rao & Georgeff "BDI agents: From theory to practice" (1995) — Read when: understanding the theoretical foundations of practical reasoning agents
+- Bratman "Intention, plans, and practical reason" (1987) — Read when: grounding implementation decisions in the philosophical basis of intentionality
 
+---
+
+## Skill Metadata
+
+**Created**: 2026-01-07
+**Last Updated**: 2026-03-17
+**Author**: Agent Skills for Context Engineering Contributors
+**Version**: 2.0.0

@@ -1,0 +1,8 @@
+{
+  "name": "context-engineering",
+  "description": "Context engineering skills for building production-grade AI agent systems — covering fundamentals, degradation patterns, compression, optimization, multi-agent coordination, memory systems, tool design, evaluation, and more.",
+  "version": "2.0.0",
+  "author": {
+    "name": "Muratcan Koylan"
+  }
+}
