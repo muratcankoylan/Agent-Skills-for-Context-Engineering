@@ -49,6 +49,7 @@ These skills address the ongoing operation and optimization of agent systems.
 | [context-optimization](skills/context-optimization/) | Apply compaction, masking, and caching strategies |
 | [evaluation](skills/evaluation/) | Build evaluation frameworks for agent systems |
 | [advanced-evaluation](skills/advanced-evaluation/) | Master LLM-as-a-Judge techniques: direct scoring, pairwise comparison, rubric generation, and bias mitigation |
+| [session-handoff](skills/session-handoff/) | Persist task progress across AI sessions via structured JSON records and a state machine. When a session expires mid-task, the next session resumes cleanly |
 
 ### Development Methodology
 
