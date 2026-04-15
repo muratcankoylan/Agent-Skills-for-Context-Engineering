@@ -52,6 +52,7 @@ These skills address the ongoing operation and optimization of agent systems.
 | [latent-briefing](skills/latent-briefing/) | Share task-relevant orchestrator state with workers via task-guided KV cache compaction when the worker runtime is controllable |
 | [evaluation](skills/evaluation/) | Build evaluation frameworks for agent systems |
 | [advanced-evaluation](skills/advanced-evaluation/) | Master LLM-as-a-Judge techniques: direct scoring, pairwise comparison, rubric generation, and bias mitigation |
+| [session-handoff](skills/session-handoff/) | Persist task progress across AI sessions via structured JSON records and a state machine. When a session expires mid-task, the next session resumes cleanly |
 
 ### Development Methodology
 
