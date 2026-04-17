@@ -18,6 +18,12 @@ This repository is cited in academic research as foundational work on static ski
 
 — [Meta Context Engineering via Agentic Skill Evolution](https://arxiv.org/pdf/2601.21557), Peking University State Key Laboratory of General Artificial Intelligence (2026)
 
+## Landing Page Preview
+
+The community has curated a landing page that summarizes the mission and highlights the key skills in this repo. View it live at https://bubbling.dev/api/preview/6098455e-190e-4a2d-8351-b545ffa373f9 or click the preview image below.
+
+![Landing page preview](https://bubbling.dev/api/preview/6098455e-190e-4a2d-8351-b545ffa373f9)
+
 ## Skills Overview
 
 ### Foundational Skills
