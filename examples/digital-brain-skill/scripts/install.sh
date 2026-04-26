@@ -35,6 +35,13 @@ case $choice in
         ;;
     3)
         read -p "Enter custom path: " custom_path
+        # Reject paths that could escape intended directories or contain shell metacharacters.
+        if [[ "$custom_path" == *".."* ]] || [[ "$custom_path" =~ [[:space:]\;\|\&\$\`\<\>] ]]; then
+            echo "Invalid path: must not contain '..', spaces, or shell metacharacters."
+            exit 1
+        fi
+        # Canonicalize so symlinks and relative components are resolved before use.
+        custom_path="$(realpath --canonicalize-missing -- "$custom_path")"
         TARGET_DIR="$custom_path/$SKILL_NAME"
         ;;
     *)
