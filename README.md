@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/muratcankoylan-agent-skills-for-context-engineering-badge.png)](https://mseep.ai/app/muratcankoylan-agent-skills-for-context-engineering)
+
 # Agent Skills for Context Engineering
 
 A comprehensive, open collection of Agent Skills focused on context engineering principles for building production-grade AI agent systems. These skills teach the art and science of curating context to maximize agent effectiveness across any agent platform.
