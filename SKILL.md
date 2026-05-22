@@ -13,6 +13,7 @@ Activate these skills when:
 - Building new agent systems from scratch
 - Optimizing existing agent performance
 - Debugging context-related failures
+- Designing privacy-safe receipts for context inputs, transformations, and sensitive agent workflows
 - Designing multi-agent architectures
 - Creating or evaluating tools for agents
 - Implementing memory and persistence layers
@@ -52,6 +53,9 @@ When agent sessions exhaust memory, compression becomes mandatory. The correct o
 
 **Context Optimization**
 Techniques include compaction (summarizing context near limits), observation masking (replacing verbose tool outputs with references), prefix caching (reusing KV blocks across requests), and strategic context partitioning (splitting work across sub-agents with isolated contexts).
+
+**Context Receipts**
+Context receipts are privacy-safe evidence records that prove what instructions, memories, skills, tool definitions, compactions, deletes, or security findings entered or transformed an agent session without logging raw private content. They make context behavior debuggable across tools and harnesses.
 
 **Latent Briefing (KV Memory Sharing)**
 Orchestrator-worker systems can compound tokens when supervisors accumulate long trajectories but workers see only narrow text slices. Latent Briefing compacts the orchestrator trajectory in the worker model's KV cache using task-guided attention (Attention Matching-style compaction) so workers receive relevant latent state without full-text replay when the stack exposes worker KV state and the models are compatible.
@@ -98,6 +102,7 @@ Internal skills in this collection:
 - [filesystem-context](skills/filesystem-context/SKILL.md)
 - [hosted-agents](skills/hosted-agents/SKILL.md)
 - [context-optimization](skills/context-optimization/SKILL.md)
+- [context-receipts](skills/context-receipts/SKILL.md)
 - [latent-briefing](skills/latent-briefing/SKILL.md)
 - [evaluation](skills/evaluation/SKILL.md)
 - [advanced-evaluation](skills/advanced-evaluation/SKILL.md)

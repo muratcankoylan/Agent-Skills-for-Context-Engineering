@@ -50,6 +50,7 @@ These skills address the ongoing operation and optimization of agent systems.
 | Skill | Description |
 |-------|-------------|
 | [context-optimization](skills/context-optimization/) | Apply compaction, masking, and caching strategies |
+| [context-receipts](skills/context-receipts/) | Design privacy-safe receipts and traces that prove what context loaded, changed, or stayed out without exposing raw content |
 | [latent-briefing](skills/latent-briefing/) | Share task-relevant orchestrator state with workers via task-guided KV cache compaction when the worker runtime is controllable |
 | [evaluation](skills/evaluation/) | Build evaluation frameworks for agent systems |
 | [advanced-evaluation](skills/advanced-evaluation/) | Master LLM-as-a-Judge techniques: direct scoring, pairwise comparison, rubric generation, and bias mitigation |
@@ -115,7 +116,7 @@ Option B - Direct install via command:
 /plugin install context-engineering@context-engineering-marketplace
 ```
 
-This installs all 15 skills in a single plugin. Skills are activated automatically based on your task context.
+This installs all 16 skills in a single plugin. Skills are activated automatically based on your task context.
 
 ### Skill Activation Scenarios
 
@@ -125,6 +126,7 @@ This installs all 15 skills in a single plugin. Skills are activated automatical
 | `context-degradation` | Diagnosing attention failures, context poisoning, lost-in-middle behavior, or degraded agent performance across long sessions |
 | `context-compression` | Preserving useful state while reducing conversation, tool-output, or trajectory size under context pressure |
 | `context-optimization` | Improving token efficiency, retrieval precision, prefix reuse, masking, partitioning, or budget allocation for agent systems |
+| `context-receipts` | Proving which instructions, skills, memories, tool definitions, compactions, or sensitive findings entered or transformed context without leaking raw content |
 | `latent-briefing` | Sharing orchestrator trajectory with workers via task-guided KV cache compaction when the worker runtime is controllable and the models are compatible |
 | `multi-agent-patterns` | Choosing coordination patterns, isolating context across agents, designing handoffs, or evaluating whether parallel agents are justified |
 | `memory-systems` | Persisting cross-session knowledge, tracking entities over time, choosing memory frameworks, or designing retrieval and update semantics |
@@ -156,7 +158,7 @@ curl -o .claude/skills/context-fundamentals.md \
   https://raw.githubusercontent.com/muratcankoylan/Agent-Skills-for-Context-Engineering/main/skills/context-fundamentals/SKILL.md
 ```
 
-Available skills: `context-fundamentals`, `context-degradation`, `context-compression`, `context-optimization`, `latent-briefing`, `multi-agent-patterns`, `memory-systems`, `tool-design`, `filesystem-context`, `hosted-agents`, `evaluation`, `advanced-evaluation`, `harness-engineering`, `project-development`, `bdi-mental-states`
+Available skills: `context-fundamentals`, `context-degradation`, `context-compression`, `context-optimization`, `context-receipts`, `latent-briefing`, `multi-agent-patterns`, `memory-systems`, `tool-design`, `filesystem-context`, `hosted-agents`, `evaluation`, `advanced-evaluation`, `harness-engineering`, `project-development`, `bdi-mental-states`
 
 ### For Custom Implementations
 

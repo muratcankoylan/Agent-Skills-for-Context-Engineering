@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "generated_by": "manual-breakthrough-roadmap-seed",
-  "updated_at": "2026-05-15",
+  "updated_at": "2026-05-22",
   "purpose": "Canonical machine-readable map for skills, mechanisms, claims, and activation scenarios.",
   "skills": [
     {
@@ -45,6 +45,13 @@
       "activation_scenarios": ["observation masking", "prefix cache strategy", "context partitioning", "token-budget optimization"],
       "mechanism_ids": ["retrievable-observation-masking"],
       "claim_ids": ["claim-context-optimization-tool-output-dominance"]
+    },
+    {
+      "name": "context-receipts",
+      "path": "skills/context-receipts/SKILL.md",
+      "activation_scenarios": ["privacy-safe context receipts", "loaded context audit", "suppression evidence", "redacted agent traces"],
+      "mechanism_ids": ["redacted-context-receipt"],
+      "claim_ids": []
     },
     {
       "name": "evaluation",

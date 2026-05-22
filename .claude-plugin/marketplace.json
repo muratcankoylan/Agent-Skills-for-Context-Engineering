@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "context-engineering",
-      "description": "Comprehensive context engineering and harness engineering skills for production-grade AI agent systems: fundamentals, degradation patterns, compression, optimization, multi-agent coordination, memory systems, tool design, filesystem context, hosted agents, evaluation, autonomous harnesses, latent briefing (KV cache sharing between agents), project development, and cognitive architecture. Ships with a researcher operating system (rubrics, mechanism registry, claim provenance, run state machine, adversarial benchmarks, continuous loop).",
+      "description": "Comprehensive context engineering and harness engineering skills for production-grade AI agent systems: fundamentals, degradation patterns, compression, optimization, context receipts, multi-agent coordination, memory systems, tool design, filesystem context, hosted agents, evaluation, autonomous harnesses, latent briefing (KV cache sharing between agents), project development, and cognitive architecture. Ships with a researcher operating system (rubrics, mechanism registry, claim provenance, run state machine, adversarial benchmarks, continuous loop).",
       "source": "./",
       "strict": false,
       "skills": [
@@ -19,6 +19,7 @@
         "./skills/context-degradation",
         "./skills/context-compression",
         "./skills/context-optimization",
+        "./skills/context-receipts",
         "./skills/multi-agent-patterns",
         "./skills/memory-systems",
         "./skills/tool-design",
