@@ -11,8 +11,8 @@ Context receipts are small, shareable evidence records for agent context operati
 
 Activate this skill when:
 - Proving which project instructions, rules, skills, memories, retrieved documents, or tool definitions entered an agent session
-- Debugging lazy context loading, MCP Tool Search, deferred skill loading, or duplicate context loading
-- Auditing compaction, tool-result clearing, summarization, memory consolidation, or objective continuity
+- Debugging lazy context loading, MCP Tool Search, deferred skill loading, skill registry reads, or duplicate context loading
+- Auditing compaction, tool-result clearing, summarization, memory consolidation, self-distilled skill reuse, or objective continuity
 - Sharing evidence about memory retrieval, writes, forget/delete actions, or security scans without exposing raw content
 - Designing OpenTelemetry spans, JSON logs, or bug-report artifacts for context operations
 
@@ -91,6 +91,7 @@ Hashes prove sameness, not safety. Hash only content that is already protected e
 |---|---|---|---|
 | Instruction load | `context.input.loaded`, `context.input.suppressed` | source kind, target agent, load order, reason, hash | raw instruction body |
 | Lazy tool loading | `mcp.tool_index.loaded`, `mcp.tool_definition.loaded` | server ID, tool ID, token bucket, selection reason | tool args, results, private descriptions |
+| Skill registry lifecycle | `context.skill.registry.index.loaded`, `context.skill.registry.skill.read`, `context.skill.registry.skill.injected` | registry ID, skill ID hash, index/body state, reuse count bucket, injection reason | raw skill body, private file path, incident notes |
 | Memory retrieval | `memory.search.returned`, `context.input.loaded` | query hash, memory IDs, scores or buckets, loaded IDs | raw query, memory body |
 | Compaction | `context.compaction.completed` | trigger, preserved item IDs, before/after objective hash, audit gaps | summary body, transcript text |
 | Governance delete | `memory.governance.delete.completed` | candidates, confirmation ID, tombstone IDs, replay result | deleted memory content |
@@ -140,6 +141,17 @@ for value in private_strings:
 {"event":"mcp.tool_definition.loaded","tool_id":"issues.list","definition_hash":"sha256:def"}
 ```
 
+**Example: Self-distilled skill registry receipt**
+
+```json
+{"event":"context.skill.registry.index.loaded","registry_id":"skill-registry","skill_count":24,"raw_skill_bodies_logged":false}
+{"event":"context.skill.registry.skill.read","skill_id_hash":"sha256:skill","body_hash":"sha256:body","reason":"task_match"}
+{"event":"context.skill.registry.skill.injected","skill_id_hash":"sha256:skill","target_surface":"agent_context","token_bucket":"1k_2k"}
+{"event":"context.skill.registry.reuse.evaluated","skill_id_hash":"sha256:skill","reuse_count_bucket":"2_5","decision_relevance":"supporting"}
+```
+
+Use this pattern when a runtime stores or self-distills skills, injects an index, and reads full skill bodies on demand. The receipt should distinguish index-only exposure from full-body injection; otherwise a bug report cannot tell whether a skill was merely available or actually entered context.
+
 **Example: Compaction receipt**
 
 ```json
@@ -167,7 +179,9 @@ for value in private_strings:
 
 4. **Compaction receipts can imply quality they did not verify**: A completed compaction event proves the operation ran, not that the summary preserved every objective. Include audit gaps explicitly.
 
-5. **Debug logs become API contracts**: Once users attach receipts to issues, field names become hard to change. Version event schemas before broad adoption.
+5. **Skill indexes are not skill bodies**: A registry index may be safe to expose broadly while a full skill body contains private rationale, incident notes, or paths. Log index load, body read, body injection, and reuse/accounting as separate events.
+
+6. **Debug logs become API contracts**: Once users attach receipts to issues, field names become hard to change. Version event schemas before broad adoption.
 
 ## Integration
 
@@ -198,6 +212,6 @@ External resources:
 ## Skill Metadata
 
 **Created**: 2026-05-22
-**Last Updated**: 2026-05-22
+**Last Updated**: 2026-05-23
 **Author**: Agent Skills for Context Engineering Contributors
 **Version**: 1.0.0
