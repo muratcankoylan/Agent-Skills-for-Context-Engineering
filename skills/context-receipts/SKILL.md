@@ -123,6 +123,20 @@ for value in private_strings:
     assert value not in receipt
 ```
 
+### 60-Second Tool Search Receipt Smoke
+
+Use this quick smoke when a runtime claims lazy tool loading, progressive disclosure, or skill search reduced context bloat:
+
+1. **Startup**: Did the agent receive only an index/catalog, not every full tool schema or skill body?
+2. **Search/routing**: Is there an event for the search query or routing decision with raw query text omitted or hashed?
+3. **Hydration**: Is there exactly one or a bounded set of full definitions/bodies loaded after the decision?
+4. **Suppression**: Are non-selected tools, skills, rules, or memories counted as suppressed/deferred rather than invisible?
+5. **Boundary**: If a subagent or manager performed the heavy work, did the parent receive a bounded summary instead of raw child output?
+6. **Privacy**: Do explicit flags show raw prompts, schemas, tool results, skill bodies, memory bodies, paths, tickets, and secrets were not exported?
+7. **Audit gap**: Does the receipt say it proves the loading boundary, not semantic quality or task correctness?
+
+If any answer is missing, ask for the missing receipt field before asking the user to paste private prompts, schemas, or transcripts.
+
 ## Examples
 
 **Example: AGENTS overlay receipt**
@@ -133,12 +147,13 @@ for value in private_strings:
 {"event":"context.input.suppressed","source_role":"overlay","target_agent":"codex","reason":"target_agent_mismatch"}
 ```
 
-**Example: Lazy MCP receipt**
+**Example: Lazy MCP / Tool Search receipt**
 
 ```json
-{"event":"mcp.tool_index.loaded","server_id":"github","definition_mode":"index_only"}
-{"event":"mcp.tool_search.performed","query_hash":"sha256:query","selected_tool_id":"issues.list"}
-{"event":"mcp.tool_definition.loaded","tool_id":"issues.list","definition_hash":"sha256:def"}
+{"event":"mcp.tool_index.loaded","server_id":"github","definition_mode":"index_only","full_schema_count":0,"raw_schemas_logged":false}
+{"event":"mcp.tool_search.performed","query_hash":"sha256:query","selected_tool_id":"issues.list","suppressed_tool_count":87,"raw_query_logged":false}
+{"event":"mcp.tool_definition.loaded","tool_id":"issues.list","definition_hash":"sha256:def","hydrate_reason":"search_match","raw_schema_logged":false}
+{"event":"mcp.tool_call.completed","tool_id":"issues.list","argument_hash":"sha256:args","result_count_bucket":"10_50","raw_args_logged":false,"raw_results_logged":false,"audit_gap":"proves loading boundary, not tool result correctness"}
 ```
 
 **Example: Self-distilled skill registry receipt**
@@ -212,6 +227,6 @@ External resources:
 ## Skill Metadata
 
 **Created**: 2026-05-22
-**Last Updated**: 2026-05-23
+**Last Updated**: 2026-05-25
 **Author**: Agent Skills for Context Engineering Contributors
 **Version**: 1.0.0
