@@ -93,7 +93,9 @@ Hashes prove sameness, not safety. Hash only content that is already protected e
 | Lazy tool loading | `mcp.tool_index.loaded`, `mcp.tool_definition.loaded` | server ID, tool ID, token bucket, selection reason | tool args, results, private descriptions |
 | Skill registry lifecycle | `context.skill.registry.index.loaded`, `context.skill.registry.skill.read`, `context.skill.registry.skill.injected` | registry ID, skill ID hash, index/body state, reuse count bucket, injection reason | raw skill body, private file path, incident notes |
 | Memory retrieval | `memory.search.returned`, `context.input.loaded` | query hash, memory IDs, scores or buckets, loaded IDs | raw query, memory body |
-| Compaction | `context.compaction.completed` | trigger, preserved item IDs, before/after objective hash, audit gaps | summary body, transcript text |
+| Code/RAG retrieval | `retrieval.search.completed`, `context.chunk.loaded`, `context.chunk.suppressed` | index snapshot, result IDs, loaded IDs, stale/duplicate/suppression reasons | raw code, private paths, raw query |
+| Compaction transaction | `context.compaction.started`, `context.compaction.swap.committed`, `context.compaction.rollback.completed` | trigger, before/after objective hash, commit vs rollback, preservation flags | summary body, transcript text |
+| Pruning / clearing | `context.pruning.candidate_selected`, `context.pruning.completed` | strategy, protected item IDs, pruned/minified/stubbed counts, backup flag | raw tool output, JSONL transcript, private paths |
 | Governance delete | `memory.governance.delete.completed` | candidates, confirmation ID, tombstone IDs, replay result | deleted memory content |
 | Secret scanning | `security.secret_scanning.completed` | detector type, redacted finding ID, policy decision, clean rescan | secret value, private path, raw patch |
 
@@ -167,10 +169,31 @@ If any answer is missing, ask for the missing receipt field before asking the us
 
 Use this pattern when a runtime stores or self-distills skills, injects an index, and reads full skill bodies on demand. The receipt should distinguish index-only exposure from full-body injection; otherwise a bug report cannot tell whether a skill was merely available or actually entered context.
 
-**Example: Compaction receipt**
+**Example: Retrieval-to-context receipt**
 
 ```json
-{"event":"context.compaction.completed","trigger":"budget_pressure","preserved_objective_hash":"sha256:goal","raw_transcript_logged":false,"audit_gaps":["summary_quality_not_machine_verified"]}
+{"event":"retrieval.search.completed","index_snapshot_hash":"sha256:index","result_count":5,"raw_query_logged":false,"raw_code_logged":false}
+{"event":"context.chunk.loaded","chunk_id_hash":"sha256:chunk-a","rank":1,"reason":"high_score_unique","raw_chunk_logged":false}
+{"event":"context.chunk.suppressed","chunk_id_hash":"sha256:chunk-b","rank":2,"reason":"duplicate_of_loaded_chunk","raw_chunk_logged":false}
+{"event":"context.chunk.suppressed","chunk_id_hash":"sha256:chunk-c","rank":4,"reason":"stale_index_snapshot","raw_chunk_logged":false,"audit_gap":"proves returned-vs-loaded boundary, not answer correctness"}
+```
+
+Use this pattern when code search, vector search, or memory/RAG tools return more candidates than the agent actually loads. `returned` and `loaded` are separate claims; receipts should make stale, duplicate, budget, and policy suppressions visible without exporting source code or private paths.
+
+**Example: Compaction transaction receipt**
+
+```json
+{"event":"context.compaction.started","trigger":"budget_pressure","before_objective_hash":"sha256:goal-before","raw_transcript_logged":false}
+{"event":"context.compaction.rollback.completed","summary_status":"failed","swap_committed":false,"original_context_preserved":true,"backup_available":true,"raw_summary_logged":false,"audit_gaps":["summary_quality_not_machine_verified"]}
+```
+
+A compaction receipt should distinguish a successful summary from a committed context swap. If the summary call fails, the receipt should prove rollback/preservation rather than merely logging that compaction was attempted.
+
+**Example: Pruning receipt**
+
+```json
+{"event":"context.pruning.candidate_selected","strategy":"tool_result_age","candidate_count":12,"protected_count":3,"raw_tool_outputs_logged":false}
+{"event":"context.pruning.completed","pruned_count":4,"minified_count":5,"stubbed_count":3,"backup_created":true,"raw_jsonl_logged":false,"audit_gap":"proves what left context, not semantic sufficiency"}
 ```
 
 ## Guidelines
