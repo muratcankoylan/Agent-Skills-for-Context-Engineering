@@ -15,6 +15,7 @@ Activate this skill when:
 - Auditing compaction, tool-result clearing, summarization, memory consolidation, self-distilled skill reuse, or objective continuity
 - Sharing evidence about memory retrieval, writes, forget/delete actions, or security scans without exposing raw content
 - Designing OpenTelemetry spans, JSON logs, or bug-report artifacts for context operations
+- Proving whether an agent was allowed to start, wait for, retry, kill, or hand off a long-running command
 
 Do not activate this skill for adjacent work owned by other skills:
 - Reducing token cost without an audit requirement: `context-optimization`.
@@ -35,6 +36,7 @@ Model every receipt around a narrow operation:
 - **Input suppression**: candidate existed but did not enter context because of target agent, path scope, duplicate detection, budget, or policy
 - **Transformation**: compaction, summarization, consolidation, tool-result clearing, objective handoff
 - **Sensitive workflow**: secret scanning, governance delete, permission check, policy bypass evaluation
+- **Command lifecycle**: long-running command preflight, timeout capability, no-auto-restart rule, external-terminal handoff
 
 Each receipt should make the operation auditable without making private content recoverable from the receipt alone.
 
@@ -98,6 +100,7 @@ Hashes prove sameness, not safety. Hash only content that is already protected e
 | Pruning / clearing | `context.pruning.candidate_selected`, `context.pruning.completed` | strategy, protected item IDs, pruned/minified/stubbed counts, backup flag | raw tool output, JSONL transcript, private paths |
 | Governance delete | `memory.governance.delete.completed` | candidates, confirmation ID, tombstone IDs, replay result | deleted memory content |
 | Secret scanning | `security.secret_scanning.completed` | detector type, redacted finding ID, policy decision, clean rescan | secret value, private path, raw patch |
+| Long command lifecycle | `command.lifecycle.preflight`, `command.lifecycle.handoff_required`, `command.lifecycle.completed` | command kind, timeout capability bucket, executor kind, retry/kill policy, report ID hash | full command with secrets, raw logs, private paths |
 
 ### Bug Report Template
 
@@ -196,6 +199,15 @@ A compaction receipt should distinguish a successful summary from a committed co
 {"event":"context.pruning.completed","pruned_count":4,"minified_count":5,"stubbed_count":3,"backup_created":true,"raw_jsonl_logged":false,"audit_gap":"proves what left context, not semantic sufficiency"}
 ```
 
+**Example: Long command lifecycle receipt**
+
+```json
+{"event":"command.lifecycle.preflight","command_kind":"integration_test","executor":"agent_harness","required_timeout_bucket":"25m_30m","executor_timeout_bucket":"under_5m","decision":"handoff_required","auto_restart_allowed":false,"raw_command_logged":false}
+{"event":"command.lifecycle.handoff_required","reason":"executor_timeout_too_short","handoff_target":"external_terminal_or_long_command_agent","report_id_hash":"sha256:report","raw_logs_logged":false}
+```
+
+Use this pattern when a skill or agent instruction can describe a command but the current harness cannot safely own its lifecycle. The receipt should distinguish command discovery from command authority: an agent may find the right skill and still be the wrong executor for a 20-minute command.
+
 ## Guidelines
 
 1. Make the receipt answer a concrete audit question, not every question.
@@ -219,7 +231,9 @@ A compaction receipt should distinguish a successful summary from a committed co
 
 5. **Skill indexes are not skill bodies**: A registry index may be safe to expose broadly while a full skill body contains private rationale, incident notes, or paths. Log index load, body read, body injection, and reuse/accounting as separate events.
 
-6. **Debug logs become API contracts**: Once users attach receipts to issues, field names become hard to change. Version event schemas before broad adoption.
+6. **Long commands need authority, not just instructions**: A skill can correctly say “do not retry or kill this command,” while the harness still enforces a short timeout and restarts it. Record timeout capability, retry policy, and handoff decisions as first-class lifecycle evidence.
+
+7. **Debug logs become API contracts**: Once users attach receipts to issues, field names become hard to change. Version event schemas before broad adoption.
 
 ## Integration
 
