@@ -20,7 +20,13 @@ For substantive changes, please:
 3. Make changes following the skill template structure
 4. Ensure SKILL.md files remain under 500 lines
 5. Add references or scripts as appropriate
-6. Submit a pull request with a clear description of changes
+6. If your changes affect skill files, run the deterministic gates before submitting:
+   ```
+   python3 researcher/scripts/validate_repo.py --strict
+   python3 researcher/scripts/skill_health.py --strict --no-history
+   python3 researcher/scripts/check_activation_cases.py
+   ```
+7. Submit a pull request with a clear description of changes
 
 ### Adding New Skills
 
