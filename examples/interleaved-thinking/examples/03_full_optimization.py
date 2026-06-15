@@ -992,6 +992,9 @@ def execute_tool(name: str, input_data: dict) -> str:
                 "pi": math.pi,
                 "e": math.e,
             }
+            # Note: eval is used here within a strictly controlled namespace for 
+            # demonstration of interleaved tool use. In production, prefer a 
+            # dedicated expression parser like simpleeval or ast.literal_eval.
             result = eval(expression, {"__builtins__": {}}, allowed_names)
             return json.dumps({
                 "expression": expression,
