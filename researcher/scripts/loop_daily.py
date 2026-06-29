@@ -47,7 +47,7 @@ def run_subprocess(cmd: list[str]) -> dict[str, Any]:
 
 
 def run_repo_validation() -> dict[str, Any]:
-    return run_subprocess([sys.executable, str(RESEARCHER / "scripts" / "validate_repo.py"), "--json"])
+    return run_subprocess([sys.executable, str(RESEARCHER / "scripts" / "validate_repo.py"), "--strict", "--json"])
 
 
 def run_benchmarks() -> dict[str, Any]:

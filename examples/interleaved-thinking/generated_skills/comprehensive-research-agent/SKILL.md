@@ -25,24 +25,24 @@ This skill addresses common failures in multi-step research tasks: unhandled too
 
 ## Patterns to Avoid
 
-- *Silent Tool Failure**: A tool call returns an error (404, timeout, invalid URL) but the agent proceeds without acknowledging it, potentially missing critical information. Always log failures and attempt recovery or document the gap.
-- *Vague Completion Claims**: Agent declares 'I have enough information' or 'research is comprehensive' without specifying what was learned, what sources support claims, or what gaps remain. Replace with specific summaries of coverage.
-- *Unvalidated Source Selection**: Agent reads URLs from search results without evaluating relevance, credibility, or recency first. This wastes tool calls on low-quality sources. Always rank and prioritize sources before deep reading.
-- *Generic Thinking Blocks**: Thinking contains only next-action descriptions ('Now I will search for X') without analysis of what was learned, how it connects to the goal, or what questions remain. Thinking should be substantive and reflective.
-- *Verification Method Error**: Using list_directory to verify file creation can produce false negatives due to caching. Always use read_file for actual content verification.
-- *Citation Without Retrieval**: Citing sources (URLs, paper titles) in the final report that were never successfully fetched or read. Track sources explicitly and prohibit citing unretrieved content.
-- *Redundant Tool Calls**: Making overlapping searches or reading sources without tracking what has already been obtained. Maintain a 'found resources' tracker to avoid duplication.
+- **Silent Tool Failure**: A tool call returns an error (404, timeout, invalid URL) but the agent proceeds without acknowledging it, potentially missing critical information. Always log failures and attempt recovery or document the gap.
+- **Vague Completion Claims**: Agent declares 'I have enough information' or 'research is comprehensive' without specifying what was learned, what sources support claims, or what gaps remain. Replace with specific summaries of coverage.
+- **Unvalidated Source Selection**: Agent reads URLs from search results without evaluating relevance, credibility, or recency first. This wastes tool calls on low-quality sources. Always rank and prioritize sources before deep reading.
+- **Generic Thinking Blocks**: Thinking contains only next-action descriptions ('Now I will search for X') without analysis of what was learned, how it connects to the goal, or what questions remain. Thinking should be substantive and reflective.
+- **Verification Method Error**: Using list_directory to verify file creation can produce false negatives due to caching. Always use read_file for actual content verification.
+- **Citation Without Retrieval**: Citing sources (URLs, paper titles) in the final report that were never successfully fetched or read. Track sources explicitly and prohibit citing unretrieved content.
+- **Redundant Tool Calls**: Making overlapping searches or reading sources without tracking what has already been obtained. Maintain a 'found resources' tracker to avoid duplication.
 
 ## Recommended Practices
 
-- *Implement Pre-Reading Source Evaluation**: Before reading URLs, rank search results by relevance, credibility, recency, and authority. Document selection rationale in thinking blocks.
-- *Use Structured Thinking Blocks**: Each thinking block must include: (a) what was learned from the source/action, (b) how it connects to the research goal, (c) any contradictions/gaps identified, (d) strategic decisions made. Avoid generic next-action statements.
-- *Add Mandatory Error Acknowledgment**: When any tool fails, the next thinking block must explicitly address it: note the failure type, propose a recovery strategy (retry, alternative source, or documented gap), and explain the chosen approach.
-- *Create Pre-Completion Validation Checklist**: Before declaring research complete, verify: all required sections have specific evidence, all sources were successfully retrieved, key claims are cross-validated, and gaps are documented.
-- *Implement Cross-Source Validation**: After gathering information from multiple sources, explicitly compare findings. Note where sources agree, where they contradict, and what remains unverified. Use this to assess overall confidence.
-- *Maintain Source Tracking Table**: Create a simple table in thinking showing which URLs were fetched, which failed, and which were used for specific claims. Never cite unretrieved sources.
-- *Use Read_File for Verification**: When confirming file writes, use read_file to verify actual content rather than list_directory, which can have caching issues causing false negatives.
-- *Add Explicit Validation Phase**: After reading sources, write a brief synthesis that confirms usefulness, notes relevance to research goals, and identifies remaining gaps before proceeding to the next phase.
+- **Implement Pre-Reading Source Evaluation**: Before reading URLs, rank search results by relevance, credibility, recency, and authority. Document selection rationale in thinking blocks.
+- **Use Structured Thinking Blocks**: Each thinking block must include: (a) what was learned from the source/action, (b) how it connects to the research goal, (c) any contradictions/gaps identified, (d) strategic decisions made. Avoid generic next-action statements.
+- **Add Mandatory Error Acknowledgment**: When any tool fails, the next thinking block must explicitly address it: note the failure type, propose a recovery strategy (retry, alternative source, or documented gap), and explain the chosen approach.
+- **Create Pre-Completion Validation Checklist**: Before declaring research complete, verify: all required sections have specific evidence, all sources were successfully retrieved, key claims are cross-validated, and gaps are documented.
+- **Implement Cross-Source Validation**: After gathering information from multiple sources, explicitly compare findings. Note where sources agree, where they contradict, and what remains unverified. Use this to assess overall confidence.
+- **Maintain Source Tracking Table**: Create a simple table in thinking showing which URLs were fetched, which failed, and which were used for specific claims. Never cite unretrieved sources.
+- **Use Read_File for Verification**: When confirming file writes, use read_file to verify actual content rather than list_directory, which can have caching issues causing false negatives.
+- **Add Explicit Validation Phase**: After reading sources, write a brief synthesis that confirms usefulness, notes relevance to research goals, and identifies remaining gaps before proceeding to the next phase.
 
 ## Guidelines
 
@@ -59,10 +59,10 @@ This skill addresses common failures in multi-step research tasks: unhandled too
 
 ## Examples
 
-- **Before (Anti-Pattern)**: 'I searched for context engineering and found several results. Now I'll read some URLs and then write the report. I have enough information to proceed.'
+- ***Before (Anti-Pattern)**: 'I searched for context engineering and found several results. Now I'll read some URLs and then write the report. I have enough information to proceed.'
 
 **After (Pattern)**: 'Search returned 15 results on context engineering. Evaluating relevance: Liu et al. (2024) appears most authoritative on 'lost in the middle' phenomenon; Anthropic documentation likely has current context window specs; Patel (2023) covers RAG best practices. Ranking these as top 3 priorities. Reading top result first. If the primary source fails (URL error), will try backup search for correct documentation URL and note the gap in final report.'
-- **Before (Anti-Pattern)**: Tool returns 404 error for Anthropic context windows URL. Agent continues without acknowledgment. Later cites 'Claude has 200K context window' without showing source. Final report cites Google Research paper that was never fetched.
+- ***Before (Anti-Pattern)**: Tool returns 404 error for Anthropic context windows URL. Agent continues without acknowledgment. Later cites 'Claude has 200K context window' without showing source. Final report cites Google Research paper that was never fetched.
 
 **After (Pattern)**: Tool returned 404 for Anthropic URL. Thinking: 'Primary source failed. Fallback: search for alternative Anthropic documentation URL or find archived version. If unavailable, note context window data from secondary sources only and add disclaimer about verification status.' Then: 'Cross-validated Claude context window: Anthropic blog (successfully read) and two developer documentation sources agree on 200K. Confident in this claim.' Source tracking table shows: Anthropic URL (failed, backup used), Blog (success), Dev docs (success).
 

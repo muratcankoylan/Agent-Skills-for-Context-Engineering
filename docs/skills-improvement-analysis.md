@@ -3,6 +3,8 @@
 *Analysis date: 2026-03-17*
 *Source: "Lessons from Building Claude Code: How We Use Skills" — Anthropic Team*
 
+> Historical note: this analysis predates the current 15-skill v2.3.x corpus. Counts such as "12/13" and "13 skills" describe the older baseline and should not be used as current production inventory.
+
 ---
 
 ## What We're Already Doing Well

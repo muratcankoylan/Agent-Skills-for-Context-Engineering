@@ -27,7 +27,7 @@
     "weekly-review": "python3 agents/scripts/weekly_review.py",
     "content-ideas": "python3 agents/scripts/content_ideas.py",
     "stale-contacts": "python3 agents/scripts/stale_contacts.py",
-    "setup": "node scripts/setup.js"
+    "setup": "bash scripts/install.sh"
   },
   "engines": {
     "node": ">=16.0.0"

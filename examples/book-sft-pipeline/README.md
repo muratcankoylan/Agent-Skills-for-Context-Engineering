@@ -1,26 +1,30 @@
 # Book SFT Pipeline
 
-A standalone skill for training language models to write in any author's style. This is a **separate plugin** from the main Context Engineering collection.
+A standalone example skill for training language models to write in any author's style. It is not published as a separate Claude Code marketplace plugin from this repository.
 
 ## Installation
 
-### Claude Code
+### Claude Code / Cursor / Codex
+
+Agent Skills hosts expect a directory containing `SKILL.md`, not a flat copied markdown file. From the repository root, copy the whole example directory into the target skill root:
 
 ```bash
-# Add the marketplace first
-/plugin marketplace add muratcankoylan/Agent-Skills-for-Context-Engineering
+# Claude Code project-scoped install
+mkdir -p .claude/skills
+cp -R examples/book-sft-pipeline .claude/skills/book-sft-pipeline
 
-# Install the book-sft-pipeline plugin
-/plugin install book-sft-pipeline@context-engineering-marketplace
+# Cursor project-scoped install
+mkdir -p .cursor/skills
+cp -R examples/book-sft-pipeline .cursor/skills/book-sft-pipeline
+
+# Codex / OpenAI Agent Skills install
+mkdir -p .agents/skills
+cp -R examples/book-sft-pipeline .agents/skills/book-sft-pipeline
 ```
-
-### Cursor / Codex / IDE
-
-Copy `SKILL.md` to your `.rules` or project skills folder.
 
 ### Manual
 
-Reference the `SKILL.md` file directly in your agent's context.
+Reference the `examples/book-sft-pipeline/SKILL.md` file directly only if your agent does not support the Agent Skills directory layout.
 
 ## What's Included
 

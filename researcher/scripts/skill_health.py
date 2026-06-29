@@ -39,6 +39,8 @@ REQUIRED_SECTIONS = [
     "## When to Activate",
     "## Core Concepts",
     "## Practical Guidance",
+    "## Examples",
+    "## Guidelines",
     "## Gotchas",
     "## Integration",
     "## References",

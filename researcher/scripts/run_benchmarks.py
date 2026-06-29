@@ -97,7 +97,7 @@ def run_benchmarks(record: bool) -> dict[str, Any]:
     checks = [
         run_command(
             "repo-validation",
-            [sys.executable, str(RESEARCHER / "scripts" / "validate_repo.py"), "--json"],
+            [sys.executable, str(RESEARCHER / "scripts" / "validate_repo.py"), "--strict", "--json"],
         ),
         run_command(
             "activation-cases",

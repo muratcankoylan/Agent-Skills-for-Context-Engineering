@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. Versions follow semantic versioning where practical, with skill content treated as data.
 
-## [Unreleased]
+## [2.3.1] - 2026-06-29
 
 ### Fixed
 

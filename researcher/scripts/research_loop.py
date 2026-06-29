@@ -379,6 +379,7 @@ def run_validator(run_dir: Path) -> int:
     cmd = [
         sys.executable,
         str(RESEARCHER / "scripts" / "validate_repo.py"),
+        "--strict",
         "--root",
         str(ROOT),
         "--json",
@@ -671,7 +672,7 @@ def main() -> int:
         if args.run_dir:
             (args.run_dir / "reports").mkdir(parents=True, exist_ok=True)
             return run_validator(args.run_dir)
-        cmd = [sys.executable, str(RESEARCHER / "scripts" / "validate_repo.py")]
+        cmd = [sys.executable, str(RESEARCHER / "scripts" / "validate_repo.py"), "--strict"]
         return subprocess.run(cmd, cwd=ROOT, check=False).returncode
     if args.command == "retrieve":
         return retrieve_source(args)

@@ -156,7 +156,7 @@ This repository ships as an [Open Plugins](https://open-plugins.com) plugin. Hos
 
 ### Using Individual Skills
 
-Agent Skills require a **directory layout**, not a flat markdown file. Copy or symlink the skill folder into your project's skills directory:
+Agent Skills require a **directory layout**, not a flat markdown file. Copy the skill folder into your project's skills directory:
 
 ```bash
 # Example: add just the context-fundamentals skill to a Cursor project
@@ -170,6 +170,10 @@ cp -R skills/context-fundamentals .claude/skills/
 # Codex project-scoped install
 mkdir -p .codex/skills
 cp -R skills/context-fundamentals .codex/skills/
+
+# Generic Agent Skills repo-scoped install (Codex/OpenAI, Copilot CLI, Open Plugins hosts)
+mkdir -p .agents/skills
+cp -R skills/context-fundamentals .agents/skills/
 ```
 
 Do not flatten `SKILL.md` into a single file at `.claude/skills/context-fundamentals.md`. That breaks relative `references/` paths and violates the Agent Skills directory spec used by Cursor, Claude Code, and Codex.
@@ -274,10 +278,10 @@ Reproduce any of these numbers exactly via the runner under `researcher/benchmar
 
 ### Operator commands
 
-Install the reference validator once before running the platform-compatibility gate locally:
+Install the validation dependencies once before running local gates:
 
 ```bash
-python3 -m pip install skills-ref
+python3 -m pip install -r requirements-dev.txt
 ```
 
 ```bash

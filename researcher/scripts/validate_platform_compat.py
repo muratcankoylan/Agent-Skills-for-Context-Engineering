@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -33,6 +34,7 @@ PLATFORM_SKILL_ROOTS = [
     ".codex/skills",
     ".agents/skills",
 ]
+SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 def error(message: str, errors: list[str]) -> None:
@@ -64,8 +66,13 @@ def validate_skill_dir(skill_dir: Path, errors: list[str]) -> None:
     for issue in issues:
         error(f"{skill_file.relative_to(ROOT)}: {issue}", errors)
     name = str(data.get("name", ""))
+    description = str(data.get("description", ""))
     if name != skill_dir.name:
         error(f"{skill_file.relative_to(ROOT)}: name {name!r} does not match directory {skill_dir.name!r}", errors)
+    if not SKILL_NAME_PATTERN.fullmatch(name):
+        error(f"{skill_file.relative_to(ROOT)}: name must be lowercase kebab-case without repeated hyphens", errors)
+    if len(description) > 1024:
+        error(f"{skill_file.relative_to(ROOT)}: description exceeds 1024 characters", errors)
 
 
 def validate_manifests(skill_names: list[str], errors: list[str]) -> None:

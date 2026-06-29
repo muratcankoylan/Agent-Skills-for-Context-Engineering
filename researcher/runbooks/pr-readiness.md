@@ -40,6 +40,10 @@ If publishing a new skill, update:
 - [ ] The proposal cites accepted mechanisms that overlap and explains why the delta is still needed.
 - [ ] The PR body lists risks and gaps.
 - [ ] The test plan includes deterministic structure checks.
+- [ ] `python3 -m unittest researcher.scripts.tests.test_skill_frontmatter` passes.
+- [ ] `python3 researcher/scripts/validate_platform_compat.py --require-reference-validator` passes.
+- [ ] `python3 researcher/scripts/validate_repo.py --strict` passes.
+- [ ] `python3 researcher/scripts/skill_health.py --strict --no-history` passes.
 - [ ] Activation regression cases and researcher benchmarks pass, or failures are listed as risks.
 - [ ] The PR body states that merge requires human approval.
 - [ ] No secrets, credentials, or private source material are included.

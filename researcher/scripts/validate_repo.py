@@ -229,6 +229,7 @@ class Validator:
                 f"plugin name {plugin_name!r} differs from marketplace plugin {marketplace_plugin_name!r}",
             )
         self.validate_open_plugin_manifest(plugin_path, plugin, skill_names)
+        self.validate_documented_plugin_commands({marketplace_plugin_name})
 
     def validate_open_plugin_manifest(
         self,
@@ -303,6 +304,17 @@ class Validator:
             expected = f"{len(skill_names)} skill"
             if expected not in text:
                 self.warn(claude, f"does not mention current skill count phrase '{expected}'")
+
+    def validate_documented_plugin_commands(self, plugin_names: set[str]) -> None:
+        pattern = re.compile(r"/plugin install\s+([a-z0-9.-]+)@")
+        for path in sorted(self.root.glob("**/*.md")):
+            if ".git" in path.parts:
+                continue
+            text = path.read_text(encoding="utf-8")
+            for match in pattern.finditer(text):
+                plugin_name = match.group(1)
+                if plugin_name not in plugin_names:
+                    self.error(path, f"documented install command references unknown plugin: {plugin_name}")
 
     def validate_researcher(self) -> None:
         researcher = self.root / "researcher"

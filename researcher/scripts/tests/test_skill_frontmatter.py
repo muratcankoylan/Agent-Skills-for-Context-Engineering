@@ -51,6 +51,17 @@ class SplitFrontmatterTests(unittest.TestCase):
         inner, _ = sf.split_frontmatter("---\nname: foo\nnever closes")
         self.assertIsNone(inner)
 
+    def test_longer_dash_line_is_not_a_closing_fence(self) -> None:
+        text = f"---\nname: foo\ndescription: {VALID_DESC}\n------\nbody"
+        inner, _ = sf.split_frontmatter(text)
+        self.assertIsNone(inner)
+
+    def test_closing_fence_allows_trailing_spaces(self) -> None:
+        text = f"---\nname: foo\ndescription: {VALID_DESC}\n---   \nbody"
+        inner, body = sf.split_frontmatter(text)
+        self.assertIn("name: foo", inner)
+        self.assertEqual(body, "body")
+
 
 class ParseFrontmatterTests(unittest.TestCase):
     def test_valid_plain(self) -> None:
@@ -92,6 +103,14 @@ class ParseFrontmatterTests(unittest.TestCase):
             self.skipTest("PyYAML required for mapping validation")
         _data, issues = sf.parse_frontmatter("---\n- just\n- a\n- list\n---\nbody")
         self.assertTrue(any("mapping" in i for i in issues))
+
+    def test_non_string_name_is_rejected(self) -> None:
+        _data, issues = sf.parse_frontmatter(f"---\nname: true\ndescription: {VALID_DESC}\n---\nbody")
+        self.assertTrue(any("name must be a string" in i for i in issues), issues)
+
+    def test_non_string_description_is_rejected(self) -> None:
+        _data, issues = sf.parse_frontmatter("---\nname: foo\ndescription: true\n---\nbody")
+        self.assertTrue(any("description must be a string" in i for i in issues), issues)
 
 
 @unittest.skipIf(sf.yaml is None, "PyYAML required for strict-YAML regression test")
@@ -137,9 +156,11 @@ class CorpusIntegrationTests(unittest.TestCase):
         self.assertTrue(skill_files, "no skills found")
         for path in skill_files:
             with self.subTest(skill=path.parent.name):
-                data, issues = sf.parse_frontmatter(path.read_text(encoding="utf-8"))
+                text = path.read_text(encoding="utf-8")
+                data, issues = sf.parse_frontmatter(text)
                 self.assertEqual(issues, [], f"{path.parent.name}: {issues}")
                 self.assertEqual(data["name"], path.parent.name)
+                self.assertRegex(text, r'\ndescription: "')
 
     @unittest.skipIf(sf.yaml is None, "PyYAML required for strict example validation")
     def test_example_and_template_frontmatter_is_strict_yaml(self) -> None:
@@ -150,11 +171,13 @@ class CorpusIntegrationTests(unittest.TestCase):
             if not path.exists():
                 continue
             with self.subTest(skill=str(path.relative_to(REPO_ROOT))):
-                inner, _ = sf.split_frontmatter(path.read_text(encoding="utf-8"))
+                text = path.read_text(encoding="utf-8")
+                inner, _ = sf.split_frontmatter(text)
                 self.assertIsNotNone(inner, f"{path} missing frontmatter")
                 loaded = sf.yaml.safe_load(inner)
                 self.assertIsInstance(loaded, dict)
                 self.assertTrue(str(loaded.get("description", "")).strip())
+                self.assertRegex(text, r'\ndescription: "')
 
 
 if __name__ == "__main__":

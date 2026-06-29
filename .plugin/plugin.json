@@ -1,7 +1,7 @@
 {
   "name": "context-engineering",
   "description": "Context engineering and harness engineering skills for production-grade AI agent systems: fundamentals, degradation patterns, compression, optimization, latent briefing (KV cache sharing between agents), multi-agent coordination, memory systems, tool design, evaluation, autonomous harnesses, and a file-based researcher operating system with deterministic gates, a continuous loop, and measured router-benchmark results across four frontier models.",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "author": {
     "name": "Muratcan Koylan"
   },

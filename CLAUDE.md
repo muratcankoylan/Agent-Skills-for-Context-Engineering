@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Agent Skills for Context Engineering: an open collection of 15 Agent Skills teaching context engineering and harness engineering principles for production AI agent systems. Skills are platform-agnostic (Claude Code, Cursor, GitHub Copilot, any Open Plugins-conformant tool). v2.2.0 ships a file-based researcher operating system with deterministic gates and a continuous loop.
+Agent Skills for Context Engineering: an open collection of 15 Agent Skills teaching context engineering and harness engineering principles for production AI agent systems. Skills are platform-agnostic (Claude Code, Cursor, Codex/OpenAI Agent Skills, GitHub Copilot, any Open Plugins-conformant tool). v2.3.1 ships a file-based researcher operating system with deterministic gates, cross-platform Agent Skills validation, and a continuous loop.
 
 Context engineering is the discipline of curating everything that enters a model's context window (system prompts, tool definitions, retrieved documents, message history, tool outputs) to maximize signal within limited attention budget.
 
@@ -16,8 +16,8 @@ Context engineering is the discipline of curating everything that enters a model
 - `researcher/` - File-based research-to-skill operating system: rubrics, mechanism registry, claim provenance, corpus index, run state machine, adversarial benchmarks, continuous loop, launchd service definitions
 - `template/SKILL.md` - Canonical skill template (use when creating new skills)
 - `SKILL.md` (root) - Collection-level metadata and skill map
-- `.claude-plugin/marketplace.json` - Claude Code marketplace manifest (single bundled plugin, v2.2.0)
-- `.plugin/plugin.json` - Open Plugins format manifest (v2.2.0)
+- `.claude-plugin/marketplace.json` - Claude Code marketplace manifest (single bundled plugin, v2.3.1)
+- `.plugin/plugin.json` - Open Plugins format manifest (v2.3.1)
 
 ## Build & Test Commands
 

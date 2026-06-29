@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
@@ -25,15 +26,13 @@ def split_frontmatter(text: str) -> tuple[str | None, str]:
         return None, text
 
     delimiter_len = 5 if text.startswith("---\r\n") else 4
-    # A closing fence is a line that is exactly "---" (optionally CR-terminated).
-    # Searching for "\n---" matches both LF and CRLF inputs because CRLF contains
-    # a trailing "\n" before the fence.
-    end = text.find("\n---", delimiter_len)
-    if end == -1:
+    match = re.search(r"(?m)^---\s*$", text[delimiter_len:])
+    if match is None:
         return None, text
 
+    end = delimiter_len + match.start()
     inner = text[delimiter_len:end].rstrip("\r")
-    body = text[end + 4 :]
+    body = text[delimiter_len + match.end() :]
     if body.startswith("\r\n"):
         body = body[2:]
     elif body.startswith("\n"):
@@ -65,10 +64,7 @@ def parse_frontmatter(text: str) -> tuple[dict[str, Any], list[str]]:
     for key, value in data.items():
         if value is None:
             continue
-        if isinstance(value, str):
-            normalized[str(key)] = value
-        else:
-            normalized[str(key)] = str(value)
+        normalized[str(key)] = value
 
     _validate_required_fields(normalized, issues)
     return normalized, issues
@@ -112,8 +108,20 @@ def _parse_frontmatter_fallback(inner: str, issues: list[str]) -> tuple[dict[str
 
 
 def _validate_required_fields(data: dict[str, Any], issues: list[str]) -> None:
-    name = str(data.get("name", "")).strip()
-    description = str(data.get("description", "")).strip()
+    raw_name = data.get("name", "")
+    raw_description = data.get("description", "")
+
+    if raw_name and not isinstance(raw_name, str):
+        issues.append(f"name must be a string, got {type(raw_name).__name__}")
+        name = ""
+    else:
+        name = str(raw_name).strip()
+
+    if raw_description and not isinstance(raw_description, str):
+        issues.append(f"description must be a string, got {type(raw_description).__name__}")
+        description = ""
+    else:
+        description = str(raw_description).strip()
 
     if not name:
         issues.append("missing name")
@@ -127,21 +135,7 @@ def _validate_required_fields(data: dict[str, Any], issues: list[str]) -> None:
 
 def format_frontmatter(name: str, description: str, **extra: str) -> str:
     """Render a standards-compliant frontmatter block."""
-    if yaml is None:
-        escaped = description.replace("\\", "\\\\").replace('"', '\\"')
-        lines = [f"name: {name}", f'description: "{escaped}"']
-        for key, value in extra.items():
-            escaped_value = value.replace("\\", "\\\\").replace('"', '\\"')
-            lines.append(f'{key}: "{escaped_value}"')
-        return "---\n" + "\n".join(lines) + "\n---\n"
-
-    payload: dict[str, str] = {"name": name, "description": description}
-    payload.update(extra)
-    dumped = yaml.safe_dump(
-        payload,
-        sort_keys=False,
-        default_flow_style=False,
-        allow_unicode=True,
-        width=1000,
-    ).strip()
-    return f"---\n{dumped}\n---\n"
+    lines = [f"name: {name}", f"description: {json.dumps(description, ensure_ascii=False)}"]
+    for key, value in extra.items():
+        lines.append(f"{key}: {json.dumps(value, ensure_ascii=False)}")
+    return "---\n" + "\n".join(lines) + "\n---\n"

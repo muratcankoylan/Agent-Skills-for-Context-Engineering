@@ -21,7 +21,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install validation dependencies
-        run: pip install pyyaml skills-ref
+        run: pip install -r requirements-dev.txt
 
       - name: Compile researcher scripts
         run: |

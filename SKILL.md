@@ -1,6 +1,6 @@
 ---
 name: context-engineering-collection
-description: A comprehensive collection of Agent Skills for context engineering, harness engineering, multi-agent architectures, and production agent systems. Use when building, optimizing, evaluating, or debugging agent systems that require effective context management and reliable operating loops.
+description: "A comprehensive collection of Agent Skills for context engineering, harness engineering, multi-agent architectures, and production agent systems. Use when building, optimizing, evaluating, or debugging agent systems that require effective context management and reliable operating loops."
 ---
 
 # Agent Skills for Context Engineering
@@ -115,6 +115,6 @@ External resources on context engineering:
 ## Skill Metadata
 
 **Created**: 2025-12-20
-**Last Updated**: 2026-05-15
+**Last Updated**: 2026-06-29
 **Author**: Agent Skills for Context Engineering Contributors
-**Version**: 2.3.0
+**Version**: 2.3.1
