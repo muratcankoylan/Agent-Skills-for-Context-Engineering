@@ -16,7 +16,7 @@ Workspace memory for agents collaborating on this repository. Keep entries durab
 - This repo is an autonomous research-to-skill organization. External AI research is curated through rubrics and distilled into context-engineering and harness-engineering skill updates.
 - `researcher/` is repo-native and file-based so agents can resume, audit, validate, and prepare PR-ready skill changes without a hosted scheduler.
 - Per-run state lives in `researcher/runs/<run-id>/run-state.json` with explicit transitions (`initialized -> retrieved -> evaluated -> proposed -> novelty_checked -> validated -> pr_ready -> closed`). Use `research_loop.py` subcommands to advance state, never hand-edit `run-state.json`.
-- Repo health (`validate_repo.py`) and per-run readiness (`validate_run.py`) are different questions. CI runs `validate_repo.py --strict`, `run_benchmarks.py`, and `check_activation_cases.py` on every PR via `.github/workflows/validate.yml`.
+- Repo health (`validate_repo.py`) and per-run readiness (`validate_run.py`) are different questions. CI runs `validate_platform_compat.py --require-reference-validator`, `validate_repo.py --strict`, `skill_health.py --strict --no-history`, `run_benchmarks.py`, and `check_activation_cases.py` on every PR via `.github/workflows/validate.yml`.
 - The mechanism registry (`researcher/mechanisms/registry.jsonl`) is the encyclopedia backbone. Promotion is gated by `research_loop.py promote-mechanisms` with a recorded reviewer; ledgers live under `researcher/mechanisms/ledgers/`.
 - Claim provenance for numeric or volatile claims lives in `researcher/claims/index.jsonl`. Add an entry for any new benchmark or volatility-sensitive claim.
 - The corpus index (`researcher/corpus/index.json`) is the machine-readable map of skills, activation scenarios, mechanisms, and claims. Update it when adding or restructuring skills.
@@ -31,7 +31,7 @@ Workspace memory for agents collaborating on this repository. Keep entries durab
 
 ## Repository Operating Defaults
 
-- Deterministic checks before model judges. Always run `validate_repo.py --strict` before claiming a change is complete.
+- Deterministic checks before model judges. Always run `validate_platform_compat.py --require-reference-validator` and `validate_repo.py --strict` before claiming a skill-format or packaging change is complete.
 - Adversarial benchmarks before declaring the harness safe. Add a scenario when a new failure mode is discovered.
 - Append-only ledgers for accepted and rejected mechanisms so future agents do not rediscover failed paths.
 - Atomic writes (`tempfile` + `os.replace`) and `fcntl` locks for any shared file the loop touches.

@@ -204,6 +204,9 @@ class Validator:
                 f"manifest skills differ from skills directory: manifest={manifest_names} skills={skill_names}",
             )
         for raw_path in manifest_paths:
+            if not str(raw_path).startswith("./"):
+                self.error(marketplace_path, f"skill path must start with './': {raw_path}")
+                continue
             if Path(raw_path).is_absolute() or ".." in Path(raw_path).parts:
                 self.error(marketplace_path, f"skill path escapes repo: {raw_path}")
                 continue
@@ -247,6 +250,9 @@ class Validator:
         discovered: set[str] = set()
         for raw_path in skill_paths:
             path = Path(raw_path)
+            if not raw_path.startswith("./"):
+                self.error(plugin_path, f"Open Plugins skill path must start with './': {raw_path}")
+                continue
             if path.is_absolute() or ".." in path.parts:
                 self.error(plugin_path, f"Open Plugins skill path escapes repo: {raw_path}")
                 continue
@@ -267,6 +273,10 @@ class Validator:
                 plugin_path,
                 f"Open Plugins skills differ from skills directory: manifest={sorted(discovered)} skills={skill_names}",
             )
+        plugin_metadata_dir = plugin_path.parent
+        unexpected = sorted(p.name for p in plugin_metadata_dir.iterdir() if p.name != "plugin.json")
+        if unexpected:
+            self.error(plugin_path, f"Open Plugins metadata directory must contain only plugin.json: {unexpected}")
 
     def validate_docs(self, skill_names: list[str]) -> None:
         readme = self.root / "README.md"

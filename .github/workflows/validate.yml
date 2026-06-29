@@ -21,13 +21,14 @@ jobs:
           python-version: "3.12"
 
       - name: Install validation dependencies
-        run: pip install pyyaml
+        run: pip install pyyaml skills-ref
 
       - name: Compile researcher scripts
         run: |
           python -m py_compile \
             researcher/scripts/skill_frontmatter.py \
             researcher/scripts/tests/test_skill_frontmatter.py \
+            researcher/scripts/validate_platform_compat.py \
             researcher/scripts/validate_repo.py \
             researcher/scripts/validate_run.py \
             researcher/scripts/research_loop.py \
@@ -44,6 +45,9 @@ jobs:
 
       - name: Unit tests (frontmatter parser)
         run: python -m unittest researcher.scripts.tests.test_skill_frontmatter
+
+      - name: Platform compatibility (Agent Skills reference)
+        run: python researcher/scripts/validate_platform_compat.py --require-reference-validator
 
       - name: Validate repository (strict)
         run: python researcher/scripts/validate_repo.py --strict

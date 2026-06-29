@@ -36,6 +36,7 @@ When adding new skills:
 8. Ensure content is platform-agnostic (works across Cursor, Claude Code, etc.)
 9. Run the unit tests and deterministic gates before opening a PR:
    - `python3 -m unittest researcher.scripts.tests.test_skill_frontmatter`
+   - `python3 researcher/scripts/validate_platform_compat.py --require-reference-validator`
    - `python3 researcher/scripts/validate_repo.py --strict`
    - `python3 researcher/scripts/skill_health.py --strict --no-history`
    - `python3 researcher/scripts/check_activation_cases.py`

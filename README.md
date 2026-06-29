@@ -274,8 +274,16 @@ Reproduce any of these numbers exactly via the runner under `researcher/benchmar
 
 ### Operator commands
 
+Install the reference validator once before running the platform-compatibility gate locally:
+
+```bash
+python3 -m pip install skills-ref
+```
+
 ```bash
 # Deterministic gates (also run in CI on every PR)
+python3 -m unittest researcher.scripts.tests.test_skill_frontmatter
+python3 researcher/scripts/validate_platform_compat.py --require-reference-validator
 python3 researcher/scripts/validate_repo.py --strict
 python3 researcher/scripts/skill_health.py --strict --no-history
 python3 researcher/scripts/run_benchmarks.py

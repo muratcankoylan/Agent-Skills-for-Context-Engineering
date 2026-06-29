@@ -26,6 +26,8 @@ No top-level build system. Repo-level gates and per-project tooling below.
 ### Top-level deterministic gates (run on every PR via CI)
 
 ```
+python3 -m unittest researcher.scripts.tests.test_skill_frontmatter # parser and strict-YAML regression tests
+python3 researcher/scripts/validate_platform_compat.py --require-reference-validator # Agent Skills reference validator + Cursor/Claude/Codex install-layout simulation
 python3 researcher/scripts/validate_repo.py --strict       # corpus structure, manifests, rubric math, mechanism registry, claims, corpus index, activation cases, benchmark scenarios, run artifacts
 python3 researcher/scripts/skill_health.py --strict --no-history  # deterministic skill-body quality gate
 python3 researcher/scripts/run_benchmarks.py               # adversarial benchmark harness + repo + activation gates
@@ -97,7 +99,7 @@ When creating or editing skills:
 11. **Update marketplace/plugin manifests** when adding skills (`.claude-plugin/marketplace.json`, `.plugin/plugin.json`)
 12. **Update the corpus index** (`researcher/corpus/index.json`) to map the new skill to activation scenarios, mechanism IDs, and claim IDs
 13. **Update mechanisms and claims**: add registry entries for reusable behavior changes and `claim-*` provenance for numeric, benchmark, volatile, or vendor-performance claims
-14. **Run `validate_repo.py --strict`, `skill_health.py --strict --no-history`, `check_activation_cases.py`, and `run_benchmarks.py`** before committing skill changes
+14. **Run `validate_platform_compat.py --require-reference-validator`, `validate_repo.py --strict`, `skill_health.py --strict --no-history`, `check_activation_cases.py`, and `run_benchmarks.py`** before committing skill changes
 
 ## Researcher OS Rules
 
