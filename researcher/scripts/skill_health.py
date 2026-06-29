@@ -24,6 +24,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from skill_frontmatter import parse_frontmatter as parse_skill_frontmatter
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SKILLS_DIR = ROOT / "skills"
@@ -110,21 +112,8 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def parse_frontmatter(text: str) -> tuple[dict[str, str], list[str]]:
-    issues: list[str] = []
-    if not text.startswith("---\n"):
-        return {}, ["missing opening frontmatter delimiter"]
-    end = text.find("\n---", 4)
-    if end == -1:
-        return {}, ["missing closing frontmatter delimiter"]
-    data: dict[str, str] = {}
-    for raw in text[4:end].splitlines():
-        if not raw.strip() or raw.startswith(" "):
-            continue
-        if ":" not in raw:
-            continue
-        key, value = raw.split(":", 1)
-        data[key.strip()] = value.strip().strip('"').strip("'")
-    return data, issues
+    data, issues = parse_skill_frontmatter(text)
+    return {key: str(value) for key, value in data.items()}, issues
 
 
 def count_gotchas(text: str) -> int:

@@ -80,7 +80,7 @@ The continuous loop will reap closed runs into `researcher/queue/done.jsonl` on 
 
 Each skill must include:
 
-- YAML frontmatter with `name` and `description` fields
+- YAML frontmatter with `name` and `description` fields. Quote `description` values that contain colons (`:`) so strict YAML parsers used by Cursor, Claude Code, and Codex can load the skill. Run `python3 researcher/scripts/validate_repo.py --strict` before opening a PR.
 - `## When to Activate` with positive triggers and an explicit `Do not activate` boundary for adjacent skills
 - `## Core Concepts` focused on behavior-changing mechanisms, not generic background
 - `## Practical Guidance` with an executable workflow, checklist, decision table, or operating rule

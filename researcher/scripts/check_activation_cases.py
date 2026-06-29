@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from skill_frontmatter import parse_frontmatter as parse_skill_frontmatter
+
 
 ROOT = Path(__file__).resolve().parents[2]
 STOPWORDS = {
@@ -44,18 +46,8 @@ def tokens(text: str) -> set[str]:
 
 
 def parse_frontmatter(text: str) -> dict[str, str]:
-    if not text.startswith("---\n"):
-        return {}
-    end = text.find("\n---", 4)
-    if end == -1:
-        return {}
-    result: dict[str, str] = {}
-    for line in text[4:end].splitlines():
-        if ":" not in line or line.startswith(" "):
-            continue
-        key, value = line.split(":", 1)
-        result[key.strip()] = value.strip().strip('"')
-    return result
+    data, _issues = parse_skill_frontmatter(text)
+    return {key: str(value) for key, value in data.items()}
 
 
 def activation_text(text: str) -> str:

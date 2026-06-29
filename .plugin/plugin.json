@@ -4,5 +4,6 @@
   "version": "2.3.0",
   "author": {
     "name": "Muratcan Koylan"
-  }
+  },
+  "skills": "./skills/"
 }

@@ -15,6 +15,8 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any
 
+from skill_frontmatter import parse_frontmatter as parse_skill_frontmatter
+
 
 REQUIRED_RESEARCHER_FILES = [
     "README.md",
@@ -167,22 +169,10 @@ class Validator:
         return sorted(skill_names)
 
     def parse_frontmatter(self, text: str, path: Path) -> dict[str, str]:
-        if not text.startswith("---\n"):
-            self.error(path, "missing opening frontmatter delimiter")
-            return {}
-        end = text.find("\n---", 4)
-        if end == -1:
-            self.error(path, "missing closing frontmatter delimiter")
-            return {}
-        data: dict[str, str] = {}
-        for line in text[4:end].splitlines():
-            if not line.strip() or line.startswith(" "):
-                continue
-            if ":" not in line:
-                continue
-            key, value = line.split(":", 1)
-            data[key.strip()] = value.strip().strip('"')
-        return data
+        data, issues = parse_skill_frontmatter(text)
+        for issue in issues:
+            self.error(path, issue)
+        return {key: str(value) for key, value in data.items()}
 
     def validate_manifests(self, skill_names: list[str]) -> None:
         marketplace_path = self.root / ".claude-plugin" / "marketplace.json"

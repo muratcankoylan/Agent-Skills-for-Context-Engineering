@@ -9,23 +9,16 @@ import re
 from pathlib import Path
 from typing import Any
 
+from skill_frontmatter import parse_frontmatter as parse_skill_frontmatter
+
 
 def section_set(text: str) -> set[str]:
     return set(re.findall(r"^##\s+(.+)$", text, flags=re.MULTILINE))
 
 
 def parse_frontmatter(text: str) -> dict[str, str]:
-    if not text.startswith("---\n"):
-        return {}
-    end = text.find("\n---", 4)
-    if end == -1:
-        return {}
-    result: dict[str, str] = {}
-    for line in text[4:end].splitlines():
-        if ":" in line and not line.startswith(" "):
-            key, value = line.split(":", 1)
-            result[key.strip()] = value.strip().strip('"')
-    return result
+    data, _issues = parse_skill_frontmatter(text)
+    return {key: str(value) for key, value in data.items()}
 
 
 def candidate_metrics(path: Path) -> dict[str, Any]:

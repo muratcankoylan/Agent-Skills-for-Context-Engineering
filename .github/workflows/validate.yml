@@ -20,9 +20,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install validation dependencies
+        run: pip install pyyaml
+
       - name: Compile researcher scripts
         run: |
           python -m py_compile \
+            researcher/scripts/skill_frontmatter.py \
             researcher/scripts/validate_repo.py \
             researcher/scripts/validate_run.py \
             researcher/scripts/research_loop.py \

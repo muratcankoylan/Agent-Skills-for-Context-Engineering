@@ -138,22 +138,39 @@ This installs all 15 skills in a single plugin. Skills are activated automatical
 
 <img width="1014" height="894" alt="Screenshot 2025-12-26 at 12 34 47 PM" src="https://github.com/user-attachments/assets/f79aaf03-fd2d-4c71-a630-7027adeb9bfe" />
 
-### For Cursor (Open Plugins)
+### For Cursor, Codex, and Open Plugins
 
-This repository is listed on the [Cursor Plugin Directory](https://cursor.directory/plugins/context-engineering).
+This repository ships as an [Open Plugins](https://open-plugins.com) plugin. Hosts discover skills from the repo-root `skills/` directory (each subdirectory contains a `SKILL.md` file). The manifest lives at `.plugin/plugin.json`.
 
-The `.plugin/plugin.json` manifest follows the [Open Plugins](https://open-plugins.com) standard, so the repo also works with any conformant agent tool (Codex, GitHub Copilot, etc.).
+**Cursor (recommended):**
+
+1. Install from the [Cursor Plugin Directory](https://cursor.directory/plugins/context-engineering), or clone this repo and point Cursor at the plugin root.
+2. Cursor loads skills from `.cursor/skills/`, `.agents/skills/`, and compatible paths (`.claude/skills/`, `.codex/skills/`). This repo includes `.agents/skills/` as a symlink to `skills/` for local development.
+
+**Codex / GitHub Copilot CLI / other Open Plugins hosts:**
+
+1. Clone or add this repository as a plugin directory.
+2. The host reads `.plugin/plugin.json` and discovers all 15 skills under `skills/`.
 
 ### Using Individual Skills
 
-To use a single skill without installing the full plugin, copy its `SKILL.md` directly into your project's `.claude/skills/` directory:
+Agent Skills require a **directory layout**, not a flat markdown file. Copy or symlink the skill folder into your project's skills directory:
 
 ```bash
-# Example: add just the context-fundamentals skill
+# Example: add just the context-fundamentals skill to a Cursor project
+mkdir -p .cursor/skills
+cp -R skills/context-fundamentals .cursor/skills/
+
+# Claude Code project-scoped install (same directory layout)
 mkdir -p .claude/skills
-curl -o .claude/skills/context-fundamentals.md \
-  https://raw.githubusercontent.com/muratcankoylan/Agent-Skills-for-Context-Engineering/main/skills/context-fundamentals/SKILL.md
+cp -R skills/context-fundamentals .claude/skills/
+
+# Codex project-scoped install
+mkdir -p .codex/skills
+cp -R skills/context-fundamentals .codex/skills/
 ```
+
+Do not flatten `SKILL.md` into a single file at `.claude/skills/context-fundamentals.md`. That breaks relative `references/` paths and violates the Agent Skills directory spec used by Cursor, Claude Code, and Codex.
 
 Available skills: `context-fundamentals`, `context-degradation`, `context-compression`, `context-optimization`, `latent-briefing`, `multi-agent-patterns`, `memory-systems`, `tool-design`, `filesystem-context`, `hosted-agents`, `evaluation`, `advanced-evaluation`, `harness-engineering`, `project-development`, `bdi-mental-states`
 
