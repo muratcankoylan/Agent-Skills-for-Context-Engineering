@@ -218,6 +218,55 @@ class Validator:
                 plugin_path,
                 f"plugin version {plugin_version} differs from marketplace metadata {marketplace_version}",
             )
+        plugin_name = str(plugin.get("name", ""))
+        marketplace_plugin_name = str(plugin_entry.get("name", ""))
+        if plugin_name != marketplace_plugin_name:
+            self.error(
+                plugin_path,
+                f"plugin name {plugin_name!r} differs from marketplace plugin {marketplace_plugin_name!r}",
+            )
+        self.validate_open_plugin_manifest(plugin_path, plugin, skill_names)
+
+    def validate_open_plugin_manifest(
+        self,
+        plugin_path: Path,
+        plugin: dict[str, Any],
+        skill_names: list[str],
+    ) -> None:
+        raw_skills = plugin.get("skills")
+        if raw_skills is None:
+            return
+        if isinstance(raw_skills, str):
+            skill_paths = [raw_skills]
+        elif isinstance(raw_skills, list) and all(isinstance(item, str) for item in raw_skills):
+            skill_paths = list(raw_skills)
+        else:
+            self.error(plugin_path, "Open Plugins 'skills' field must be a string or list of strings")
+            return
+
+        discovered: set[str] = set()
+        for raw_path in skill_paths:
+            path = Path(raw_path)
+            if path.is_absolute() or ".." in path.parts:
+                self.error(plugin_path, f"Open Plugins skill path escapes repo: {raw_path}")
+                continue
+            full_path = self.root / raw_path
+            if not full_path.exists():
+                self.error(plugin_path, f"Open Plugins skill path does not exist: {raw_path}")
+                continue
+            if (full_path / "SKILL.md").exists():
+                discovered.add(full_path.name)
+                continue
+            if full_path.is_dir():
+                discovered.update(sorted(p.name for p in full_path.iterdir() if (p / "SKILL.md").exists()))
+                continue
+            self.error(plugin_path, f"Open Plugins skill path is not a skill directory: {raw_path}")
+
+        if sorted(discovered) != sorted(skill_names):
+            self.error(
+                plugin_path,
+                f"Open Plugins skills differ from skills directory: manifest={sorted(discovered)} skills={skill_names}",
+            )
 
     def validate_docs(self, skill_names: list[str]) -> None:
         readme = self.root / "README.md"

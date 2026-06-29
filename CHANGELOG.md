@@ -10,8 +10,9 @@ All notable changes to this project are documented here. Versions follow semanti
 - **Shared frontmatter parser**: added `researcher/scripts/skill_frontmatter.py` and wired it into `validate_repo.py`, `skill_health.py`, `check_activation_cases.py`, and `compare_skill_revisions.py`. CI installs `pyyaml` for deterministic strict parsing. The parser handles LF/CRLF line endings, UTF-8 BOM, quoted scalars, and folded block scalars, and rejects empty, too-short, or indicator-only descriptions.
 - **Unit tests**: added `researcher/scripts/tests/test_skill_frontmatter.py` (19 tests) covering parser edge cases, a strict-YAML regression guard for the unquoted-colon bug, format/parse round-trips, and a corpus integration test asserting every published skill parses clean. Wired into CI before the strict repo gate.
 - **Example skills**: quoted the `description` fields in `examples/digital-brain-skill/SKILL.md` and `examples/book-sft-pipeline/SKILL.md`, which had the same unquoted-colon YAML hazard developers would copy.
+- **Manifest validation**: `validate_repo.py --strict` now checks that `.plugin/plugin.json` and `.claude-plugin/marketplace.json` name the same bundled plugin and that Open Plugins `skills` discovery resolves to the same 15 published skills as the repository.
 - **Platform install docs**: README now documents directory-based install paths for Cursor (`.cursor/skills/`), Claude Code (`.claude/skills/`), and Codex (`.codex/skills/`) instead of the broken flat-file `.md` pattern.
-- **Local Cursor/Codex discovery**: added `.agents/skills/` symlink to repo-root `skills/`; Open Plugins manifest now declares `"skills": "./skills/"`.
+- **Open Plugins discovery**: `.plugin/plugin.json` now declares `"skills": "./skills/"`. The repository does not commit `.agents/skills` or `.cursor/skills` symlinks because symlinks are fragile on Windows and in plugin packaging.
 
 ## [2.3.0] - 2026-05-15
 

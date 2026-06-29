@@ -145,12 +145,14 @@ This repository ships as an [Open Plugins](https://open-plugins.com) plugin. Hos
 **Cursor (recommended):**
 
 1. Install from the [Cursor Plugin Directory](https://cursor.directory/plugins/context-engineering), or clone this repo and point Cursor at the plugin root.
-2. Cursor loads skills from `.cursor/skills/`, `.agents/skills/`, and compatible paths (`.claude/skills/`, `.codex/skills/`). This repo includes `.agents/skills/` as a symlink to `skills/` for local development.
+2. Cursor reads `.plugin/plugin.json` and discovers the repo-root `skills/` directory through the Open Plugins manifest.
+3. For project-local manual installs, copy skill directories into `.cursor/skills/`. Do not rely on repository symlinks; they are fragile on Windows and in plugin packaging.
 
 **Codex / GitHub Copilot CLI / other Open Plugins hosts:**
 
 1. Clone or add this repository as a plugin directory.
 2. The host reads `.plugin/plugin.json` and discovers all 15 skills under `skills/`.
+3. For project-local manual installs, copy skill directories into `.codex/skills/` or the host's documented Agent Skills directory.
 
 ### Using Individual Skills
 
