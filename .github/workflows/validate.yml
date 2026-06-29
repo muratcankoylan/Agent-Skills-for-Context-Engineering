@@ -27,6 +27,7 @@ jobs:
         run: |
           python -m py_compile \
             researcher/scripts/skill_frontmatter.py \
+            researcher/scripts/tests/test_skill_frontmatter.py \
             researcher/scripts/validate_repo.py \
             researcher/scripts/validate_run.py \
             researcher/scripts/research_loop.py \
@@ -40,6 +41,9 @@ jobs:
             researcher/scripts/loop_step.py \
             researcher/scripts/loop_daily.py \
             researcher/scripts/loop_status.py
+
+      - name: Unit tests (frontmatter parser)
+        run: python -m unittest researcher.scripts.tests.test_skill_frontmatter
 
       - name: Validate repository (strict)
         run: python researcher/scripts/validate_repo.py --strict

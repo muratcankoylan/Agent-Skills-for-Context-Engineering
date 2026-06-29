@@ -1,6 +1,6 @@
 ---
 name: digital-brain
-description: This skill should be used for personal operating-system workflows: content creation, voice consistency, relationship lookup, meeting preparation, weekly review, goal tracking, personal brand management, and network management.
+description: "This skill should be used for personal operating-system workflows: content creation, voice consistency, relationship lookup, meeting preparation, weekly review, goal tracking, personal brand management, and network management."
 version: 1.0.0
 ---
 

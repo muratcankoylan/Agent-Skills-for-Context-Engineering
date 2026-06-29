@@ -34,7 +34,12 @@ When adding new skills:
 6. Update `researcher/corpus/index.json` with the new skill's name, activation scenarios, mechanism IDs, and claim IDs
 7. Add at least one entry to `researcher/fixtures/activation-cases.jsonl`; include rejected or adjacent skills when the boundary is easy to confuse
 8. Ensure content is platform-agnostic (works across Cursor, Claude Code, etc.)
-9. Run `python3 researcher/scripts/validate_repo.py --strict`, `python3 researcher/scripts/skill_health.py --strict --no-history`, `python3 researcher/scripts/check_activation_cases.py`, and `python3 researcher/scripts/run_benchmarks.py` before opening a PR
+9. Run the unit tests and deterministic gates before opening a PR:
+   - `python3 -m unittest researcher.scripts.tests.test_skill_frontmatter`
+   - `python3 researcher/scripts/validate_repo.py --strict`
+   - `python3 researcher/scripts/skill_health.py --strict --no-history`
+   - `python3 researcher/scripts/check_activation_cases.py`
+   - `python3 researcher/scripts/run_benchmarks.py`
 
 ## Researcher Operating System Contributions
 

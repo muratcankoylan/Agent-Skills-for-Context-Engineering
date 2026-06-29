@@ -25,13 +25,14 @@ def split_frontmatter(text: str) -> tuple[str | None, str]:
         return None, text
 
     delimiter_len = 5 if text.startswith("---\r\n") else 4
+    # A closing fence is a line that is exactly "---" (optionally CR-terminated).
+    # Searching for "\n---" matches both LF and CRLF inputs because CRLF contains
+    # a trailing "\n" before the fence.
     end = text.find("\n---", delimiter_len)
-    if end == -1:
-        end = text.find("\r\n---", delimiter_len)
     if end == -1:
         return None, text
 
-    inner = text[delimiter_len:end]
+    inner = text[delimiter_len:end].rstrip("\r")
     body = text[end + 4 :]
     if body.startswith("\r\n"):
         body = body[2:]

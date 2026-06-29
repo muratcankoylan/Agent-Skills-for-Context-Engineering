@@ -7,7 +7,9 @@ All notable changes to this project are documented here. Versions follow semanti
 ### Fixed
 
 - **Cross-platform YAML frontmatter**: 11 of 15 published skills used unquoted `description` values containing colons, which strict YAML parsers (Cursor, Claude Code, Codex, Agent Skills validators) reject. All skill descriptions now use YAML-safe quoting; `memory-systems` no longer uses a folded block scalar that repo validators misread as `">"`.
-- **Shared frontmatter parser**: added `researcher/scripts/skill_frontmatter.py` and wired it into `validate_repo.py`, `skill_health.py`, `check_activation_cases.py`, and `compare_skill_revisions.py`. CI installs `pyyaml` for deterministic strict parsing.
+- **Shared frontmatter parser**: added `researcher/scripts/skill_frontmatter.py` and wired it into `validate_repo.py`, `skill_health.py`, `check_activation_cases.py`, and `compare_skill_revisions.py`. CI installs `pyyaml` for deterministic strict parsing. The parser handles LF/CRLF line endings, UTF-8 BOM, quoted scalars, and folded block scalars, and rejects empty, too-short, or indicator-only descriptions.
+- **Unit tests**: added `researcher/scripts/tests/test_skill_frontmatter.py` (19 tests) covering parser edge cases, a strict-YAML regression guard for the unquoted-colon bug, format/parse round-trips, and a corpus integration test asserting every published skill parses clean. Wired into CI before the strict repo gate.
+- **Example skills**: quoted the `description` fields in `examples/digital-brain-skill/SKILL.md` and `examples/book-sft-pipeline/SKILL.md`, which had the same unquoted-colon YAML hazard developers would copy.
 - **Platform install docs**: README now documents directory-based install paths for Cursor (`.cursor/skills/`), Claude Code (`.claude/skills/`), and Codex (`.codex/skills/`) instead of the broken flat-file `.md` pattern.
 - **Local Cursor/Codex discovery**: added `.agents/skills/` symlink to repo-root `skills/`; Open Plugins manifest now declares `"skills": "./skills/"`.
 
