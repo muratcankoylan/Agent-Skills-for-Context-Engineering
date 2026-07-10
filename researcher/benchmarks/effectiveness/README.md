@@ -2,7 +2,10 @@
 
 Real agent tasks executed through native Codex CLI, Headroom, and OpenAI ChatGPT/Codex OAuth. Each task runs under controlled skill-loading conditions; differences in deterministic success, behavior signals, and wall time measure skill effects.
 
-See `researcher/benchmarks/PLAN.md` and the canonical task under `tasks/001-filesystem-context-offload/`.
+See `researcher/benchmarks/PLAN.md`. The current preliminary task set is under `tasks/`:
+
+- `001-filesystem-context-offload/`: retrieval and scratch-offload behavior;
+- `002-context-compression-handoff/`: bounded structured handoff with exact artifact and decision anchors.
 
 ## Task layout
 

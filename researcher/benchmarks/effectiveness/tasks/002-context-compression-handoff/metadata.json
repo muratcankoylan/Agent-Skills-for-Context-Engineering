@@ -1,0 +1,11 @@
+{
+  "id": "002",
+  "slug": "context-compression-handoff",
+  "target_skill": "context-compression",
+  "irrelevant_skill": "bdi-mental-states",
+  "related_skill": "filesystem-context",
+  "unrelated_skill": "hosted-agents",
+  "category": "context-management",
+  "difficulty": "medium",
+  "notes": "Tests whether structured compression preserves intent, exact identifiers, artifact trail, decisions, state, risks, constraints, and next actions under a strict handoff budget."
+}
