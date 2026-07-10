@@ -4,8 +4,10 @@ Real agent tasks executed through native Codex CLI, Headroom, and OpenAI ChatGPT
 
 See `researcher/benchmarks/PLAN.md`. The current preliminary task set is under `tasks/`:
 
-- `001-filesystem-context-offload/`: retrieval and scratch-offload behavior;
-- `002-context-compression-handoff/`: bounded structured handoff with exact artifact and decision anchors.
+- `001-filesystem-context-offload/`: retrieval and scratch-offload smoke fixture;
+- `002-context-compression-handoff/`: bounded migration handoff with exact artifact and decision anchors;
+- `003-debugging-artifact-trail/`: held-out debugging/error/artifact trail;
+- `004-migration-constraint-retention/`: held-out early-constraint and late-decision retention.
 
 ## Task layout
 
@@ -68,8 +70,8 @@ npm test
 npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 12
 npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 12
 
-# One-task preliminary pilot with three baseline conditions.
-npm run effectiveness:dry-run -- --models gpt-5.5 --task-ids 002 --conditions control,target,negative --reps 3 --max-runs 9
+# Three-task held-out pilot with three baseline conditions and three replications.
+npm run effectiveness:dry-run -- --models gpt-5.5 --task-ids 002,003,004 --conditions control,target,negative --reps 3 --max-runs 27
 ```
 
 Live execution requires an explicit hard cap. Resume is enabled by default.

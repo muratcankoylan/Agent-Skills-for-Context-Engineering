@@ -35,9 +35,9 @@ npm run router:run -- --models gpt-5.5 --reps 1 --max-runs 106
 npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 6
 npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 6
 
-# Bounded preliminary pilot: one task, three conditions, three replications.
-npm run effectiveness:dry-run -- --models gpt-5.5 --task-ids 002 --conditions control,target,negative --reps 3 --max-runs 9
-npm run effectiveness:run -- --models gpt-5.5 --task-ids 002 --conditions control,target,negative --reps 3 --max-runs 9
+# Bounded preliminary pilot: three held-out tasks, three conditions, three replications.
+npm run effectiveness:dry-run -- --models gpt-5.5 --task-ids 002,003,004 --conditions control,target,negative --reps 3 --max-runs 27
+npm run effectiveness:run -- --models gpt-5.5 --task-ids 002,003,004 --conditions control,target,negative --reps 3 --max-runs 27
 ```
 
 ## Shared flags
