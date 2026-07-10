@@ -35,13 +35,17 @@ npm run router:run -- --models gpt-5.5 --reps 1 --max-runs 106
 npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 6
 npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 6
 
-# Locked six-task promotion-gate plan. Live 54-run execution requires explicit approval.
-npm run effectiveness:dry-run -- --models gpt-5.6-sol --task-ids 002,004,005,006,007,008 --conditions control,target,negative --reps 3 --max-runs 54
+# Locked six-task promotion-gate plan. The published 54-run gate used explicit/default medium.
+npm run effectiveness:dry-run -- --models gpt-5.6-sol --reasoning-effort medium --task-ids 002,004,005,006,007,008 --conditions control,target,negative --reps 3 --max-runs 54
+
+# Separate maximum-reasoning factor; do not merge with medium evidence.
+npm run effectiveness:dry-run -- --models gpt-5.6-sol --reasoning-effort xhigh --task-ids 005 --conditions control --reps 1 --max-runs 1
 ```
 
 ## Shared flags
 
 - `--models <id,id,...>`: native Codex model IDs; default `gpt-5.5`.
+- `--reasoning-effort <minimal|low|medium|high|xhigh>`: Codex Responses reasoning level; default `medium`. It is included in selection isolation, run records, and summary provenance.
 - `--reps <N>`: replications per condition; default 3.
 - `--max-runs <N>`: mandatory hard cap on live invocations.
 - `--max-budget-usd <N>`: optional marginal-cost gate. Current subscription route forecasts `$0`; the hard run cap remains mandatory operational policy.

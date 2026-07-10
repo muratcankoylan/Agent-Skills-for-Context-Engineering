@@ -193,6 +193,7 @@ async function main(): Promise<number> {
           model: item.modelId,
           cwd: isolationDir,
           sandbox: "read-only",
+          reasoningEffort: config.reasoningEffort,
         });
         record.status = "finished";
         record.raw_text = result.finalText;

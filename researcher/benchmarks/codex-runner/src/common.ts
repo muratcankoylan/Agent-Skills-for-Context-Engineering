@@ -27,6 +27,9 @@ export const RESEARCHER_DIR = resolve(RUNNER_ROOT, "..", "..");
 export const REPO_ROOT = resolve(RESEARCHER_DIR, "..");
 
 export type SkillId = string;
+export type ReasoningEffort = "minimal" | "low" | "medium" | "high" | "xhigh";
+
+const REASONING_EFFORTS = new Set<ReasoningEffort>(["minimal", "low", "medium", "high", "xhigh"]);
 
 export interface ResolvedConfig {
   models: string[];
@@ -41,6 +44,7 @@ export interface ResolvedConfig {
   noResume: boolean;
   taskIds: string[];
   conditions: string[];
+  reasoningEffort: ReasoningEffort;
 }
 
 export interface RunPlanItem {
@@ -63,6 +67,7 @@ export interface CliFlags {
   noResume: boolean;
   taskIds?: string[];
   conditions?: string[];
+  reasoningEffort?: string;
 }
 
 const DEFAULT_MODELS = ["gpt-5.5"];
@@ -108,6 +113,9 @@ export function parseCliFlags(argv: string[]): CliFlags {
       case "--conditions":
         flags.conditions = parseCsvFlag(argv[++i] ?? "");
         break;
+      case "--reasoning-effort":
+        flags.reasoningEffort = argv[++i] ?? "";
+        break;
       default:
         if (arg?.startsWith("--")) {
           throw new Error(`Unknown flag: ${arg}`);
@@ -127,6 +135,10 @@ export function resolveConfig(
         "Use --dry-run to inspect the plan without model calls.",
     );
   }
+  const reasoningEffort = flags.reasoningEffort ?? "medium";
+  if (!REASONING_EFFORTS.has(reasoningEffort as ReasoningEffort)) {
+    throw new Error(`Unknown --reasoning-effort value: ${reasoningEffort}. Available values: minimal,low,medium,high,xhigh`);
+  }
   return {
     models: flags.models?.length ? flags.models : DEFAULT_MODELS,
     reps: flags.reps && flags.reps > 0 ? flags.reps : 3,
@@ -140,6 +152,7 @@ export function resolveConfig(
     noResume: flags.noResume,
     taskIds: flags.taskIds ?? [],
     conditions: flags.conditions ?? [],
+    reasoningEffort: reasoningEffort as ReasoningEffort,
   };
 }
 
@@ -240,6 +253,7 @@ export interface CodexPromptOptions {
   cwd?: string;
   sandbox?: "read-only" | "workspace-write" | "danger-full-access";
   timeoutMs?: number;
+  reasoningEffort?: ReasoningEffort;
 }
 
 export interface CodexPromptResult {
@@ -320,6 +334,8 @@ export async function runCodexPrompt(
     cwd,
     "-m",
     options.model,
+    "-c",
+    `model_reasoning_effort="${options.reasoningEffort ?? "medium"}"`,
     "exec",
     "--ephemeral",
     "--skip-git-repo-check",

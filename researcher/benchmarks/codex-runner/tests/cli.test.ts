@@ -24,11 +24,13 @@ test("effectiveness filters produce the bounded pilot plan", () => {
     "--task-ids", "002,004,005,006,007,008",
     "--conditions", "control,target,negative",
     "--reps", "3",
+    "--reasoning-effort", "xhigh",
     "--max-runs", "54",
   ]);
   assert.equal(result.code, 0, result.output);
   assert.match(result.output, /tasks discovered: 8; selected: 6/);
   assert.match(result.output, /planned runs: 54/);
+  assert.match(result.output, /reasoning effort: xhigh/);
   assert.match(result.output, /conditions=control,target,negative/);
 });
 
@@ -67,6 +69,12 @@ test("unknown conditions fail with available values", () => {
   assert.equal(result.code, 2, result.output);
   assert.match(result.output, /Unknown --conditions value\(s\): banana/);
   assert.match(result.output, /Available conditions: control,target,negative,full,target_plus_one,target_plus_unrelated/);
+});
+
+test("unknown reasoning effort fails with available values", () => {
+  const result = run("runEffectiveness.ts", ["--dry-run", "--reasoning-effort", "ultra"]);
+  assert.equal(result.code, 2, result.output);
+  assert.match(result.output, /Available values: minimal,low,medium,high,xhigh/);
 });
 
 test("router rejects effectiveness-only filters", () => {

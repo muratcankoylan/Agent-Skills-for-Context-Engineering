@@ -87,6 +87,7 @@ interface EffectivenessRunRecord {
   task_id: string;
   condition: Condition;
   model_id: string;
+  reasoning_effort: string;
   rep: number;
   status: "finished" | "error" | "cancelled" | "dry_run";
   skills: string[];
@@ -130,6 +131,7 @@ async function main(): Promise<number> {
   console.log(runHeader("Effectiveness Benchmark (Stage 3, Native Codex/Headroom)"));
   console.log(`tasks dir: ${TASKS_DIR}`);
   console.log(`models: ${config.models.join(", ")}`);
+  console.log(`reasoning effort: ${config.reasoningEffort}`);
   console.log(`reps per (task, condition, model): ${config.reps}`);
   console.log(`seed: ${config.seed}`);
   console.log(`concurrency: ${config.concurrency}`);
@@ -190,8 +192,9 @@ async function main(): Promise<number> {
   const selection = {
     task_ids: tasks.map((task) => task.id),
     conditions: selectedConditions,
+    reasoning_effort: config.reasoningEffort,
   };
-  const selectionSuffix = config.taskIds.length || config.conditions.length
+  const selectionSuffix = config.taskIds.length || config.conditions.length || config.reasoningEffort !== "medium"
     ? `-${shortHash(JSON.stringify(selection))}`
     : "";
   const runDir = join(RESULTS_DIR, `${todayUtc()}-${config.seed}-codex${selectionSuffix}`);
@@ -228,6 +231,7 @@ async function main(): Promise<number> {
       task_id: task.id,
       condition,
       model_id: item.modelId,
+      reasoning_effort: config.reasoningEffort,
       rep: item.rep,
       status: "error",
       skills,
@@ -253,6 +257,7 @@ async function main(): Promise<number> {
         // Workspaces contain only benchmark fixtures and the prompt forbids external writes.
         sandbox: "danger-full-access",
         timeoutMs: 300_000,
+        reasoningEffort: config.reasoningEffort,
       });
       record.status = "finished";
       if (result.sessionId) record.session_id = result.sessionId;
@@ -302,6 +307,7 @@ async function main(): Promise<number> {
     selection,
     seed: config.seed,
     models: config.models,
+    reasoning_effort: config.reasoningEffort,
     reps: config.reps,
     tasks: tasks.length,
   };
