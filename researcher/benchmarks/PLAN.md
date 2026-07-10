@@ -191,11 +191,13 @@ Loading a relevant skill into an agent's context improves outcome quality, token
    - `target_plus_unrelated`: target skill plus one unrelated skill (interaction control).
 
 3. **Runner**: `researcher/benchmarks/codex-runner/src/runEffectiveness.ts`. For each task x condition x model x replication:
+   - Filter tasks and conditions before building the run plan (`--task-ids`, `--conditions`), with a mandatory hard cap over the selected plan.
    - Build the task workspace from `starting/`.
    - Copy only the in-scope skills into the fresh workspace under `.codex/skills/`.
-   - Call native `codex exec` with `-C <workspace>` and `workspace-write` sandboxing.
-   - On completion, stage `.runner/final.txt`, run `verify.sh`, and record exit code, duration, behavior note, and session ID.
-   - Persist final text, verifier evidence, condition metadata, and workspace artifacts.
+   - Call native `codex exec` with `-C <workspace>` and the deployment-compatible sandbox.
+   - On completion, stage `.runner/final.txt`, run `verify.sh`, and record exit code, duration, behavior note, failure reason, and session ID.
+   - Persist final text, verifier evidence, condition metadata, verifier SHA, and full task-fixture SHA.
+   - Isolate filtered selections in deterministic selection-hash result directories; resume only records in the current plan whose provenance hashes still match.
 
 4. **Initial task set**: 20 tasks across categories. Two preliminary fixtures are currently executable (`001-filesystem-context-offload` and `002-context-compression-handoff`); the remaining categories below are planned:
    - **filesystem-context**: agent must offload a 5,000-line tool output then retrieve specific data from it.

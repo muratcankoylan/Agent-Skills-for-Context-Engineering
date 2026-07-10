@@ -39,6 +39,8 @@ export interface ResolvedConfig {
   unsafeNoCostCap: boolean;
   concurrency: number;
   noResume: boolean;
+  taskIds: string[];
+  conditions: string[];
 }
 
 export interface RunPlanItem {
@@ -59,6 +61,8 @@ export interface CliFlags {
   unsafeNoCostCap: boolean;
   concurrency?: number;
   noResume: boolean;
+  taskIds?: string[];
+  conditions?: string[];
 }
 
 const DEFAULT_MODELS = ["gpt-5.5"];
@@ -98,6 +102,12 @@ export function parseCliFlags(argv: string[]): CliFlags {
       case "--concurrency":
         flags.concurrency = Number(argv[++i]);
         break;
+      case "--task-ids":
+        flags.taskIds = parseCsvFlag(argv[++i] ?? "");
+        break;
+      case "--conditions":
+        flags.conditions = parseCsvFlag(argv[++i] ?? "");
+        break;
       default:
         if (arg?.startsWith("--")) {
           throw new Error(`Unknown flag: ${arg}`);
@@ -128,7 +138,13 @@ export function resolveConfig(
     unsafeNoCostCap: flags.unsafeNoCostCap,
     concurrency: flags.concurrency && flags.concurrency > 0 ? flags.concurrency : 1,
     noResume: flags.noResume,
+    taskIds: flags.taskIds ?? [],
+    conditions: flags.conditions ?? [],
   };
+}
+
+function parseCsvFlag(value: string): string[] {
+  return [...new Set(value.split(",").map((item) => item.trim()).filter(Boolean))];
 }
 
 /**

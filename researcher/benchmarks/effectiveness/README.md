@@ -64,20 +64,27 @@ The runner:
 cd researcher/benchmarks/codex-runner
 npm install
 npm run typecheck
-npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 6
-npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 6
+npm test
+npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 12
+npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 12
+
+# One-task preliminary pilot with three baseline conditions.
+npm run effectiveness:dry-run -- --models gpt-5.5 --task-ids 002 --conditions control,target,negative --reps 3 --max-runs 9
 ```
 
 Live execution requires an explicit hard cap. Resume is enabled by default.
 
 ## Reporting
 
-The summary reports, per condition:
+The summary reports both corpus-level and per-task metrics. For each selected condition it includes:
 
 - total runs;
 - deterministic passes;
 - pass rate;
-- scratch-use count and rate when the verifier emits that signal.
+- scratch-use count and rate when the verifier emits that signal;
+- average wall-clock duration.
+
+Each run record stores `verifier_sha`, `task_fixture_sha`, and the first verifier failure line when present. Filtered runs use isolated selection-hash result directories, and resume ignores stale records when either hash changes.
 
 The current Hermes CLI does not expose provider-normalized token usage in quiet mode, so request count and wall time remain the portable cost proxies. Do not fabricate token counts.
 

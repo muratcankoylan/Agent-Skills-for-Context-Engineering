@@ -91,6 +91,9 @@ const MAX_FORMAT_ATTEMPTS = 2;
 async function main(): Promise<number> {
   const flags = parseCliFlags(process.argv.slice(2));
   const config = resolveConfig(flags, DEFAULT_FIXTURE);
+  if (config.taskIds.length || config.conditions.length) {
+    throw new Error("--task-ids and --conditions are supported only by the effectiveness runner.");
+  }
 
   console.log(runHeader("Router Benchmark (Stage 2)"));
   console.log(`fixture: ${config.fixturePath}`);

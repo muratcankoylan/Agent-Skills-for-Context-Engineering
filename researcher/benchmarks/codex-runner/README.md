@@ -23,6 +23,7 @@ The runner explicitly sets `HOME=/home/hermesadmin` and `CODEX_HOME=/home/hermes
 cd researcher/benchmarks/codex-runner
 npm install
 npm run typecheck
+npm test
 ```
 
 ## Commands
@@ -33,6 +34,10 @@ npm run router:run -- --models gpt-5.5 --reps 1 --max-runs 106
 
 npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 6
 npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 6
+
+# Bounded preliminary pilot: one task, three conditions, three replications.
+npm run effectiveness:dry-run -- --models gpt-5.5 --task-ids 002 --conditions control,target,negative --reps 3 --max-runs 9
+npm run effectiveness:run -- --models gpt-5.5 --task-ids 002 --conditions control,target,negative --reps 3 --max-runs 9
 ```
 
 ## Shared flags
@@ -46,6 +51,13 @@ npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 6
 - `--dry-run`: print the plan without model calls.
 - `--concurrency <N>`: bounded Codex subprocess concurrency; default 1.
 - `--no-resume`: ignore saved per-run records and execute again.
+
+Effectiveness-only filters:
+
+- `--task-ids <id,id,...>`: run only the listed task IDs; unknown IDs fail with the available IDs.
+- `--conditions <name,name,...>`: run only the listed conditions; accepted values are `control`, `target`, `negative`, `full`, `target_plus_one`, and `target_plus_unrelated`.
+
+CSV values are trimmed and deduplicated. The router rejects these effectiveness-only flags instead of silently ignoring them.
 
 ## Isolation
 
@@ -80,7 +92,9 @@ History summaries append to:
 - `researcher/reports/router-history.jsonl`;
 - `researcher/reports/effectiveness-history.jsonl`.
 
-Result directories and runtime histories are gitignored. Every record includes model, condition, duration, final response, verifier evidence, and the native Codex session ID when available.
+Result directories and runtime histories are gitignored. Every record includes model, condition, duration, final response, verifier evidence, verifier SHA, full task-fixture SHA, and the native Codex session ID when available.
+
+Filtered selections use a deterministic selection-hash suffix in the results directory, so their summaries cannot overwrite or absorb an unfiltered run. Resume accepts only records in the current run plan whose verifier and task-fixture hashes still match; stale records are rerun. Summaries report both aggregate condition metrics and per-task condition metrics, including average duration.
 
 ## Safety
 

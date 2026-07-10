@@ -7,6 +7,7 @@
  */
 
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   cpSync,
   existsSync,
@@ -76,8 +77,11 @@ interface EffectivenessRunRecord {
   verify_exit_code?: number;
   verify_stdout?: string;
   verify_stderr?: string;
+  verify_failure?: string;
   passed?: boolean;
   behavior_note?: string;
+  verifier_sha: string;
+  task_fixture_sha: string;
   workspace: string;
   notes?: string;
 }
@@ -117,16 +121,26 @@ async function main(): Promise<number> {
     console.error(`Tasks directory missing: ${TASKS_DIR}`);
     return 1;
   }
-  const tasks = discoverTasks();
-  console.log(`tasks discovered: ${tasks.length}`);
+  const discoveredTasks = discoverTasks();
+  const tasks = selectTasks(discoveredTasks, config.taskIds);
+  const selectedConditions = selectConditions(config.conditions);
+  console.log(`tasks discovered: ${discoveredTasks.length}; selected: ${tasks.length}`);
+  console.log(`task filter: ${config.taskIds.length ? config.taskIds.join(",") : "all"}`);
+  console.log(`condition filter: ${selectedConditions.join(",")}`);
   if (!tasks.length) {
-    console.error("No effectiveness tasks discovered.");
+    console.error("No effectiveness tasks selected.");
     return 1;
   }
 
   const planIds: string[] = [];
   for (const task of tasks) {
-    for (const condition of conditionsForTask(task)) {
+    const taskConditions = conditionsForTask(task, selectedConditions);
+    if (!taskConditions.length) {
+      throw new Error(
+        `No selected conditions apply to task ${task.id}. Requested: ${selectedConditions.join(",")}`,
+      );
+    }
+    for (const condition of taskConditions) {
       planIds.push(`${task.id}|${condition}`);
     }
   }
@@ -138,7 +152,7 @@ async function main(): Promise<number> {
     ESTIMATED_USD_PER_RUN,
   );
   console.log(`planned runs: ${forecast.totalRuns}`);
-  console.log(`conditions per positive task: ${CONDITIONS.length}`);
+  console.log(`selected conditions: ${selectedConditions.length}`);
   console.log(`est. marginal API cost through subscription route: ${forecast.estimatedTotalUsd} USD`);
   assertBudget(plan, forecast, config);
 
@@ -146,17 +160,32 @@ async function main(): Promise<number> {
     console.log("Dry-run: no Hermes/Codex calls made.");
     for (const task of tasks.slice(0, 3)) {
       console.log(
-        `  - ${task.id} target=${task.target_skill} conditions=${conditionsForTask(task).join(",")}`,
+        `  - ${task.id} target=${task.target_skill} conditions=${conditionsForTask(task, selectedConditions).join(",")}`,
       );
     }
     return 0;
   }
 
   const allSkills = loadSkillDescriptions().map((skill) => skill.name);
-  const runDir = join(RESULTS_DIR, `${todayUtc()}-${config.seed}-codex`);
+  const selection = {
+    task_ids: tasks.map((task) => task.id),
+    conditions: selectedConditions,
+  };
+  const selectionSuffix = config.taskIds.length || config.conditions.length
+    ? `-${shortHash(JSON.stringify(selection))}`
+    : "";
+  const runDir = join(RESULTS_DIR, `${todayUtc()}-${config.seed}-codex${selectionSuffix}`);
   const workspacesDir = join(runDir, "workspaces");
   mkdirSync(workspacesDir, { recursive: true });
-  const existing = config.noResume ? new Map<string, EffectivenessRunRecord>() : loadExistingResults(runDir);
+  const taskProvenance = new Map(
+    tasks.map((task) => [task.id, provenanceForTask(task)] as const),
+  );
+  const plannedNames = new Set(
+    plan.map((item) => resultFileName(item.promptId, item.modelId, item.rep)),
+  );
+  const existing = config.noResume
+    ? new Map<string, EffectivenessRunRecord>()
+    : loadExistingResults(runDir, plannedNames, taskProvenance);
   const remaining = plan.filter(
     (item) => !existing.has(resultFileName(item.promptId, item.modelId, item.rep)),
   );
@@ -171,6 +200,7 @@ async function main(): Promise<number> {
     const task = tasks.find((candidate) => candidate.id === taskId);
     if (!task) throw new Error(`Task missing from plan: ${taskId}`);
     const skills = skillsForCondition(task, condition, allSkills);
+    const provenance = taskProvenance.get(task.id)!;
     const workspaceName = safeName(`${task.id}-${condition}-${item.modelId}-${item.rep}`);
     const workspace = join(workspacesDir, workspaceName);
     prepareWorkspace(task, workspace, skills);
@@ -182,6 +212,8 @@ async function main(): Promise<number> {
       status: "error",
       skills,
       duration_ms: 0,
+      verifier_sha: provenance.verifier_sha,
+      task_fixture_sha: provenance.task_fixture_sha,
       workspace,
     };
     const started = Date.now();
@@ -211,6 +243,10 @@ async function main(): Promise<number> {
       record.verify_stdout = verify.stdout;
       record.verify_stderr = verify.stderr;
       record.passed = verify.code === 0;
+      if (!record.passed) {
+        const verifyFailure = firstNonEmptyLine(verify.stderr) ?? firstNonEmptyLine(verify.stdout);
+        if (verifyFailure) record.verify_failure = verifyFailure;
+      }
       const notesPath = join(workspace, ".runner", "notes.txt");
       if (existsSync(notesPath)) record.behavior_note = readFileSync(notesPath, "utf-8").trim();
     } catch (error) {
@@ -235,7 +271,8 @@ async function main(): Promise<number> {
     timestamp: utcNow(),
     runtime: runtimeFingerprint(),
     repo_sha: repoCommitSha(),
-    fixture_sha: fixtureSha(join(tasks[0]!.taskDir, "metadata.json")),
+    task_fixtures: Object.fromEntries(taskProvenance),
+    selection,
     seed: config.seed,
     models: config.models,
     reps: config.reps,
@@ -268,9 +305,14 @@ function discoverTasks(): EffectivenessTaskMetadata[] {
   return tasks;
 }
 
-function conditionsForTask(task: EffectivenessTaskMetadata): Condition[] {
-  if (task.target_skill === "none") return ["control", "full", "negative"];
-  return CONDITIONS;
+function conditionsForTask(
+  task: EffectivenessTaskMetadata,
+  selected: Condition[] = CONDITIONS,
+): Condition[] {
+  const available: Condition[] = task.target_skill === "none"
+    ? ["control", "full", "negative"]
+    : CONDITIONS;
+  return selected.filter((condition) => available.includes(condition));
 }
 
 function skillsForCondition(
@@ -334,14 +376,28 @@ async function runVerifier(
   }
 }
 
-function loadExistingResults(runDir: string): Map<string, EffectivenessRunRecord> {
+function loadExistingResults(
+  runDir: string,
+  plannedNames: Set<string>,
+  taskProvenance: Map<string, TaskProvenance>,
+): Map<string, EffectivenessRunRecord> {
   const records = new Map<string, EffectivenessRunRecord>();
   if (!existsSync(runDir)) return records;
   for (const name of readdirSync(runDir)) {
     if (!name.endsWith(".json") || name === "summary.json") continue;
+    if (!plannedNames.has(name)) continue;
     try {
       const record = JSON.parse(readFileSync(join(runDir, name), "utf-8")) as EffectivenessRunRecord;
-      if (record.task_id && record.condition && record.model_id) records.set(name, record);
+      const expected = taskProvenance.get(record.task_id);
+      if (
+        expected &&
+        record.condition &&
+        record.model_id &&
+        record.verifier_sha === expected.verifier_sha &&
+        record.task_fixture_sha === expected.task_fixture_sha
+      ) {
+        records.set(name, record);
+      }
     } catch {
       // Malformed partial artifacts are ignored and rerun.
     }
@@ -349,28 +405,127 @@ function loadExistingResults(runDir: string): Map<string, EffectivenessRunRecord
   return records;
 }
 
-function summarize(records: EffectivenessRunRecord[]): Record<string, unknown> {
-  const byCondition: Record<string, { total: number; passed: number; scratchUsed: number }> = {};
+function summarizeConditions(records: EffectivenessRunRecord[]): Record<string, unknown> {
+  const byCondition: Record<
+    string,
+    { total: number; passed: number; scratchUsed: number; durationMs: number }
+  > = {};
   for (const record of records) {
-    const bucket = byCondition[record.condition] ?? { total: 0, passed: 0, scratchUsed: 0 };
+    const bucket = byCondition[record.condition] ?? {
+      total: 0,
+      passed: 0,
+      scratchUsed: 0,
+      durationMs: 0,
+    };
     bucket.total += 1;
     if (record.passed) bucket.passed += 1;
     if (record.behavior_note === "scratch_used") bucket.scratchUsed += 1;
+    bucket.durationMs += record.duration_ms;
     byCondition[record.condition] = bucket;
   }
   const conditions: Record<string, unknown> = {};
   for (const [condition, bucket] of Object.entries(byCondition)) {
     conditions[condition] = {
-      ...bucket,
+      total: bucket.total,
+      passed: bucket.passed,
+      scratchUsed: bucket.scratchUsed,
       pass_rate: bucket.total ? Number((bucket.passed / bucket.total).toFixed(4)) : 0,
       scratch_use_rate: bucket.total ? Number((bucket.scratchUsed / bucket.total).toFixed(4)) : 0,
+      average_duration_ms: bucket.total ? Math.round(bucket.durationMs / bucket.total) : 0,
     };
   }
+  return conditions;
+}
+
+function summarize(records: EffectivenessRunRecord[]): Record<string, unknown> {
+  const taskIds = [...new Set(records.map((record) => record.task_id))].sort();
+  const tasks = Object.fromEntries(
+    taskIds.map((taskId) => {
+      const taskRecords = records.filter((record) => record.task_id === taskId);
+      const passed = taskRecords.filter((record) => record.passed).length;
+      return [
+        taskId,
+        {
+          total_runs: taskRecords.length,
+          passed,
+          pass_rate: taskRecords.length ? Number((passed / taskRecords.length).toFixed(4)) : 0,
+          conditions: summarizeConditions(taskRecords),
+        },
+      ];
+    }),
+  );
   return {
     total_runs: records.length,
     passed: records.filter((record) => record.passed).length,
-    conditions,
+    conditions: summarizeConditions(records),
+    tasks,
   };
+}
+
+interface TaskProvenance {
+  verifier_sha: string;
+  task_fixture_sha: string;
+}
+
+function provenanceForTask(task: EffectivenessTaskMetadata): TaskProvenance {
+  return {
+    verifier_sha: fixtureSha(join(task.taskDir, "verify.sh")),
+    task_fixture_sha: directorySha(task.taskDir),
+  };
+}
+
+function directorySha(root: string): string {
+  const hash = createHash("sha256");
+  const visit = (directory: string, relative: string): void => {
+    const entries = readdirSync(directory, { withFileTypes: true })
+      .sort((left, right) => left.name.localeCompare(right.name));
+    for (const entry of entries) {
+      const absolute = join(directory, entry.name);
+      const childRelative = relative ? join(relative, entry.name) : entry.name;
+      if (entry.isDirectory()) {
+        visit(absolute, childRelative);
+      } else if (entry.isFile()) {
+        hash.update(childRelative).update("\0").update(readFileSync(absolute)).update("\0");
+      }
+    }
+  };
+  visit(root, "");
+  return hash.digest("hex").slice(0, 16);
+}
+
+function selectTasks(
+  tasks: EffectivenessTaskMetadata[],
+  requestedIds: string[],
+): EffectivenessTaskMetadata[] {
+  if (!requestedIds.length) return tasks;
+  const available = new Set(tasks.map((task) => task.id));
+  const unknown = requestedIds.filter((id) => !available.has(id));
+  if (unknown.length) {
+    throw new Error(
+      `Unknown --task-ids value(s): ${unknown.join(",")}. Available task IDs: ${[...available].sort().join(",")}`,
+    );
+  }
+  const requested = new Set(requestedIds);
+  return tasks.filter((task) => requested.has(task.id));
+}
+
+function selectConditions(requested: string[]): Condition[] {
+  if (!requested.length) return CONDITIONS;
+  const unknown = requested.filter((condition) => !CONDITIONS.includes(condition as Condition));
+  if (unknown.length) {
+    throw new Error(
+      `Unknown --conditions value(s): ${unknown.join(",")}. Available conditions: ${CONDITIONS.join(",")}`,
+    );
+  }
+  return CONDITIONS.filter((condition) => requested.includes(condition));
+}
+
+function shortHash(value: string): string {
+  return createHash("sha256").update(value).digest("hex").slice(0, 8);
+}
+
+function firstNonEmptyLine(value: string): string | undefined {
+  return value.split("\n").map((line) => line.trim()).find(Boolean);
 }
 
 function safeName(value: string): string {
