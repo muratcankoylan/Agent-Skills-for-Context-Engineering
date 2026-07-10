@@ -28,7 +28,9 @@ jobs:
           python -m py_compile \
             researcher/scripts/skill_frontmatter.py \
             researcher/scripts/tests/test_skill_frontmatter.py \
+            researcher/scripts/tests/test_validate_all.py \
             researcher/scripts/tests/test_validation_paths.py \
+            researcher/scripts/validate_all.py \
             researcher/scripts/validate_platform_compat.py \
             researcher/scripts/validate_repo.py \
             researcher/scripts/validate_run.py \

@@ -54,7 +54,7 @@ Deterministic no-API gates were run after publishing the xhigh evidence. `agents
 |---|---|
 | `npm run typecheck` | PASS |
 | `npm test` | PASS: 6 Node runner tests + 12 Python scorer tests |
-| `python3 -m unittest discover -s researcher/scripts/tests -p 'test_*.py'` | PASS: 29 tests |
+| `python3 -m unittest discover -s researcher/scripts/tests -p 'test_*.py'` | PASS: 32 tests |
 | `validate_platform_compat.py --require-reference-validator` | PASS: 16 skills, 4 local install layouts |
 | `validate_repo.py --strict` | PASS: 0 errors, 0 warnings, 16 skills |
 | `skill_health.py --strict --no-history` | PASS: corpus 0.9172, flagged 0, 16 skills |
