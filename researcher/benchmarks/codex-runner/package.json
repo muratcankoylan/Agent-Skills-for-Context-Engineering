@@ -9,7 +9,9 @@
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test": "npm run test:cli && npm run test:scorer",
+    "test:cli": "node --experimental-strip-types --test tests/*.test.ts",
+    "test:scorer": "python3 -m unittest discover -s ../effectiveness/tests -p \"test_*.py\"",
     "router:dry-run": "node --experimental-strip-types src/runRouter.ts --dry-run",
     "router:run": "node --experimental-strip-types src/runRouter.ts",
     "effectiveness:dry-run": "node --experimental-strip-types src/runEffectiveness.ts --dry-run",

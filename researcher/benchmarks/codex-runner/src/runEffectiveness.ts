@@ -27,7 +27,6 @@ import {
   appendHistoryEntry,
   assertBudget,
   buildRunPlan,
-  fixtureSha,
   forecastCost,
   loadSkillDescriptions,
   parseCliFlags,
@@ -64,6 +63,20 @@ type Condition =
   | "target_plus_one"
   | "target_plus_unrelated";
 
+interface HandoffScore {
+  schema_version: number;
+  task_id?: string;
+  passed: boolean;
+  structural: Record<string, unknown>;
+  anchors: {
+    found: number;
+    total: number;
+    retention_rate: number;
+    missing: Array<{ value: string; category: string }>;
+  };
+  categories: Record<string, { found: number; total: number; retention_rate: number }>;
+}
+
 interface EffectivenessRunRecord {
   task_id: string;
   condition: Condition;
@@ -80,6 +93,7 @@ interface EffectivenessRunRecord {
   verify_failure?: string;
   passed?: boolean;
   behavior_note?: string;
+  score?: HandoffScore;
   verifier_sha: string;
   task_fixture_sha: string;
   workspace: string;
@@ -243,6 +257,13 @@ async function main(): Promise<number> {
       record.verify_stdout = verify.stdout;
       record.verify_stderr = verify.stderr;
       record.passed = verify.code === 0;
+      const scorePath = join(workspace, ".runner", "score.json");
+      const rubricPath = join(task.taskDir, "rubric.json");
+      if (existsSync(scorePath)) {
+        record.score = JSON.parse(readFileSync(scorePath, "utf-8")) as HandoffScore;
+      } else if (existsSync(rubricPath)) {
+        throw new Error(`Verifier did not write required score artifact: ${scorePath}`);
+      }
       if (!record.passed) {
         const verifyFailure = firstNonEmptyLine(verify.stderr) ?? firstNonEmptyLine(verify.stdout);
         if (verifyFailure) record.verify_failure = verifyFailure;
@@ -406,25 +427,59 @@ function loadExistingResults(
 }
 
 function summarizeConditions(records: EffectivenessRunRecord[]): Record<string, unknown> {
-  const byCondition: Record<
-    string,
-    { total: number; passed: number; scratchUsed: number; durationMs: number }
-  > = {};
+  interface Bucket {
+    total: number;
+    passed: number;
+    scratchUsed: number;
+    durationMs: number;
+    scoredRuns: number;
+    anchorsFound: number;
+    anchorsTotal: number;
+    categories: Record<string, { found: number; total: number }>;
+  }
+  const byCondition: Record<string, Bucket> = {};
   for (const record of records) {
     const bucket = byCondition[record.condition] ?? {
       total: 0,
       passed: 0,
       scratchUsed: 0,
       durationMs: 0,
+      scoredRuns: 0,
+      anchorsFound: 0,
+      anchorsTotal: 0,
+      categories: {},
     };
     bucket.total += 1;
     if (record.passed) bucket.passed += 1;
     if (record.behavior_note === "scratch_used") bucket.scratchUsed += 1;
     bucket.durationMs += record.duration_ms;
+    if (record.score?.anchors) {
+      bucket.scoredRuns += 1;
+      bucket.anchorsFound += record.score.anchors.found;
+      bucket.anchorsTotal += record.score.anchors.total;
+      for (const [category, score] of Object.entries(record.score.categories)) {
+        const categoryBucket = bucket.categories[category] ?? { found: 0, total: 0 };
+        categoryBucket.found += score.found;
+        categoryBucket.total += score.total;
+        bucket.categories[category] = categoryBucket;
+      }
+    }
     byCondition[record.condition] = bucket;
   }
   const conditions: Record<string, unknown> = {};
   for (const [condition, bucket] of Object.entries(byCondition)) {
+    const categories = Object.fromEntries(
+      Object.entries(bucket.categories).sort(([left], [right]) => left.localeCompare(right)).map(
+        ([category, score]) => [
+          category,
+          {
+            found: score.found,
+            total: score.total,
+            retention_rate: score.total ? Number((score.found / score.total).toFixed(4)) : 0,
+          },
+        ],
+      ),
+    );
     conditions[condition] = {
       total: bucket.total,
       passed: bucket.passed,
@@ -432,6 +487,13 @@ function summarizeConditions(records: EffectivenessRunRecord[]): Record<string, 
       pass_rate: bucket.total ? Number((bucket.passed / bucket.total).toFixed(4)) : 0,
       scratch_use_rate: bucket.total ? Number((bucket.scratchUsed / bucket.total).toFixed(4)) : 0,
       average_duration_ms: bucket.total ? Math.round(bucket.durationMs / bucket.total) : 0,
+      scored_runs: bucket.scoredRuns,
+      anchors_found: bucket.anchorsFound,
+      anchors_total: bucket.anchorsTotal,
+      anchor_retention_rate: bucket.anchorsTotal
+        ? Number((bucket.anchorsFound / bucket.anchorsTotal).toFixed(4))
+        : null,
+      categories,
     };
   }
   return conditions;
@@ -468,10 +530,22 @@ interface TaskProvenance {
 }
 
 function provenanceForTask(task: EffectivenessTaskMetadata): TaskProvenance {
+  const verifierFiles = [join(task.taskDir, "verify.sh")];
+  if (existsSync(join(task.taskDir, "rubric.json"))) {
+    verifierFiles.push(join(RESEARCHER_DIR, "benchmarks", "effectiveness", "verify_handoff.py"));
+  }
   return {
-    verifier_sha: fixtureSha(join(task.taskDir, "verify.sh")),
+    verifier_sha: filesSha(verifierFiles),
     task_fixture_sha: directorySha(task.taskDir),
   };
+}
+
+function filesSha(paths: string[]): string {
+  const hash = createHash("sha256");
+  for (const path of paths.slice().sort()) {
+    hash.update(path).update("\0").update(readFileSync(path)).update("\0");
+  }
+  return hash.digest("hex").slice(0, 16);
 }
 
 function directorySha(root: string): string {

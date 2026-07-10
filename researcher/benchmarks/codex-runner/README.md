@@ -35,9 +35,9 @@ npm run router:run -- --models gpt-5.5 --reps 1 --max-runs 106
 npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 6
 npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 6
 
-# Bounded preliminary pilot: three held-out tasks, three conditions, three replications.
-npm run effectiveness:dry-run -- --models gpt-5.5 --task-ids 002,003,004 --conditions control,target,negative --reps 3 --max-runs 27
-npm run effectiveness:run -- --models gpt-5.5 --task-ids 002,003,004 --conditions control,target,negative --reps 3 --max-runs 27
+# Bounded richer-metric pilot: three non-ceiling tasks, three conditions, three replications.
+npm run effectiveness:dry-run -- --models gpt-5.6-sol --task-ids 002,004,005 --conditions control,target,negative --reps 3 --max-runs 27
+npm run effectiveness:run -- --models gpt-5.6-sol --task-ids 002,004,005 --conditions control,target,negative --reps 3 --max-runs 27
 ```
 
 ## Shared flags
@@ -92,9 +92,9 @@ History summaries append to:
 - `researcher/reports/router-history.jsonl`;
 - `researcher/reports/effectiveness-history.jsonl`.
 
-Result directories and runtime histories are gitignored. Every record includes model, condition, duration, final response, verifier evidence, verifier SHA, full task-fixture SHA, and the native Codex session ID when available.
+Result directories and runtime histories are gitignored. Every record includes model, condition, duration, final response, verifier evidence, verifier SHA, full task-fixture SHA, partial anchor/category score when available, and the native Codex session ID.
 
-Filtered selections use a deterministic selection-hash suffix in the results directory, so their summaries cannot overwrite or absorb an unfiltered run. Resume accepts only records in the current run plan whose verifier and task-fixture hashes still match; stale records are rerun. Summaries report both aggregate condition metrics and per-task condition metrics, including average duration.
+Filtered selections use a deterministic selection-hash suffix in the results directory, so their summaries cannot overwrite or absorb an unfiltered run. Resume accepts only records in the current run plan whose verifier and task-fixture hashes still match; stale records are rerun. Summaries report aggregate and per-task condition metrics, average duration, anchor retention, and category retention.
 
 ## Safety
 

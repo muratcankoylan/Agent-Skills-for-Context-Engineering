@@ -1,0 +1,11 @@
+{
+  "id": "005",
+  "slug": "security-rotation-handoff",
+  "target_skill": "context-compression",
+  "irrelevant_skill": "bdi-mental-states",
+  "related_skill": "filesystem-context",
+  "unrelated_skill": "hosted-agents",
+  "category": "security",
+  "difficulty": "hard",
+  "notes": "Independent hard held-out handoff with a predeclared 1800-byte budget, early audit constraints, exact security identifiers, artifact trail, overlap decisions, test state, session-loss risk, and approval gate."
+}

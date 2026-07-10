@@ -6,8 +6,9 @@ See `researcher/benchmarks/PLAN.md`. The current preliminary task set is under `
 
 - `001-filesystem-context-offload/`: retrieval and scratch-offload smoke fixture;
 - `002-context-compression-handoff/`: bounded migration handoff with exact artifact and decision anchors;
-- `003-debugging-artifact-trail/`: held-out debugging/error/artifact trail;
-- `004-migration-constraint-retention/`: held-out early-constraint and late-decision retention.
+- `003-debugging-artifact-trail/`: retained ceiling fixture; excluded from the next comparative pilot;
+- `004-migration-constraint-retention/`: held-out early-constraint and late-decision retention;
+- `005-security-rotation-handoff/`: independent hard fixture with a predeclared 1,800-byte budget and partial-credit rubric.
 
 ## Task layout
 
@@ -16,6 +17,7 @@ researcher/benchmarks/effectiveness/tasks/<NNN>-<slug>/
   README.md
   task.md
   metadata.json
+  rubric.json      # partial-credit anchors and categories (handoff tasks)
   starting/
   verify.sh
 ```
@@ -70,8 +72,8 @@ npm test
 npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 12
 npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 12
 
-# Three-task held-out pilot with three baseline conditions and three replications.
-npm run effectiveness:dry-run -- --models gpt-5.5 --task-ids 002,003,004 --conditions control,target,negative --reps 3 --max-runs 27
+# Three-task richer-metric pilot; ceiling task 003 is replaced by hard task 005.
+npm run effectiveness:dry-run -- --models gpt-5.6-sol --task-ids 002,004,005 --conditions control,target,negative --reps 3 --max-runs 27
 ```
 
 Live execution requires an explicit hard cap. Resume is enabled by default.
@@ -80,13 +82,14 @@ Live execution requires an explicit hard cap. Resume is enabled by default.
 
 The summary reports both corpus-level and per-task metrics. For each selected condition it includes:
 
-- total runs;
-- deterministic passes;
-- pass rate;
-- scratch-use count and rate when the verifier emits that signal;
-- average wall-clock duration.
+- total runs and deterministic pass rate;
+- average wall-clock duration;
+- scored-run count;
+- anchors found / total and aggregate anchor-retention rate;
+- per-category retention for intent, error, root cause, artifacts, decisions, current state, risks, constraints, and next actions;
+- scratch-use count and rate when a task emits that signal.
 
-Each run record stores `verifier_sha`, `task_fixture_sha`, and the first verifier failure line when present. Filtered runs use isolated selection-hash result directories, and resume ignores stale records when either hash changes.
+Handoff verifiers write `.runner/score.json` on both PASS and FAIL. This preserves partial credit and all missing anchors instead of collapsing a nearly complete handoff to a binary zero. Each run record stores the full score, `verifier_sha`, `task_fixture_sha`, and the verifier failure line when present. The verifier SHA includes the shared scorer implementation, so scorer changes invalidate stale resume records.
 
 The current Hermes CLI does not expose provider-normalized token usage in quiet mode, so request count and wall time remain the portable cost proxies. Do not fabricate token counts.
 
@@ -95,10 +98,12 @@ Latest preliminary report: `results-published/2026-07-10-context-compression-pre
 ## Adding a task
 
 1. Copy the canonical directory layout.
-2. Make `task.md` self-contained.
-3. Make `verify.sh` deterministic and portable to any temporary workspace.
-4. Specify target, irrelevant, related, and unrelated skills honestly.
-5. Run typecheck and dry-run.
-6. Start with one replication and a hard cap before any larger sweep.
+2. Make `task.md` self-contained and freeze task difficulty before model execution.
+3. Define `rubric.json` with categorized anchors, source SHA-256, heading floor, and byte budget.
+4. Use the shared `verify_handoff.py` wrapper for handoff tasks; do not duplicate scoring logic.
+5. Test a complete golden handoff and at least one partial/negative handoff deterministically.
+6. Specify target, irrelevant, related, and unrelated skills honestly.
+7. Run typecheck, `npm test`, and dry-run.
+8. Start with three paired conditions and a hard cap before composition conditions or larger sweeps.
 
 For a negative-control task where no skill should help, set `target_skill` and `irrelevant_skill` to `none`; the runner limits the condition set accordingly.

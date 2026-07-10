@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "task_id": "003",
+  "output_file": "HANDOFF.md",
+  "source_file": "history.md",
+  "source_sha256": "f4e6e332765101b4dfb4b4fd8af4fcd4df7017921e2a931f343cec0ffd307926",
+  "max_bytes": 2500,
+  "min_headings": 6,
+  "anchors": [
+    {
+      "value": "without changing the public API",
+      "category": "intent"
+    },
+    {
+      "value": "UPSTREAM_POOL_EXHAUSTED E5037",
+      "category": "error"
+    },
+    {
+      "value": "trace-91af",
+      "category": "error"
+    },
+    {
+      "value": "acquireLease()",
+      "category": "root_cause"
+    },
+    {
+      "value": "services/orders/pool.ts",
+      "category": "artifacts"
+    },
+    {
+      "value": "middleware/retry.ts",
+      "category": "artifacts"
+    },
+    {
+      "value": "tests/orders/pool-leak.test.ts",
+      "category": "artifacts"
+    },
+    {
+      "value": "config/order-gateway.yaml",
+      "category": "artifacts"
+    },
+    {
+      "value": "12 failures/30s",
+      "category": "decisions"
+    },
+    {
+      "value": "58 passed, 1 failing",
+      "category": "current_state"
+    },
+    {
+      "value": "arm64",
+      "category": "current_state"
+    },
+    {
+      "value": "ord_8N4K",
+      "category": "risks"
+    },
+    {
+      "value": "Nadia",
+      "category": "constraints"
+    },
+    {
+      "value": "acme-eu",
+      "category": "next_actions"
+    }
+  ]
+}
