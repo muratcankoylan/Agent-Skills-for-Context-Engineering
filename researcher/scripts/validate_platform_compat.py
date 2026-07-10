@@ -15,6 +15,7 @@ compatibility that are deterministic from the repository contents:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 import shutil
@@ -158,15 +159,21 @@ def validate_platform_install_layouts(skill_dirs: list[Path], errors: list[str])
 
 
 def run_reference_validator(skill_dirs: list[Path], require: bool, errors: list[str]) -> None:
-    agentskills = shutil.which("agentskills")
-    if agentskills is None:
+    command = reference_validator_command()
+    if command is None:
         if require:
-            error("agentskills CLI not found; install with `python -m pip install skills-ref`", errors)
+            error(
+                "Agent Skills reference validator not found. Install dev dependencies with "
+                f"`{sys.executable} -m pip install -r requirements-dev.txt`; expected either "
+                "an `agentskills` console script on PATH or importable `skills_ref.cli` in the "
+                "current Python environment.",
+                errors,
+            )
         return
 
     for skill_dir in skill_dirs:
         completed = subprocess.run(
-            [agentskills, "validate", str(skill_dir)],
+            [*command, "validate", str(skill_dir)],
             cwd=ROOT,
             text=True,
             capture_output=True,
@@ -175,6 +182,23 @@ def run_reference_validator(skill_dirs: list[Path], require: bool, errors: list[
         if completed.returncode != 0:
             message = completed.stderr.strip() or completed.stdout.strip() or f"exit {completed.returncode}"
             error(f"agentskills validate {skill_dir.relative_to(ROOT)} failed: {message}", errors)
+
+
+def reference_validator_command() -> list[str] | None:
+    """Return a stable command for the skills-ref reference validator.
+
+    CI and well-configured local environments expose the `agentskills` console
+    script after `pip install -r requirements-dev.txt`. Agent sandboxes may run
+    the repository with an explicit Python interpreter whose script directory is
+    not on PATH, so fall back to the module entrypoint in that same interpreter.
+    """
+
+    agentskills = shutil.which("agentskills")
+    if agentskills is not None:
+        return [agentskills]
+    if importlib.util.find_spec("skills_ref.cli") is not None:
+        return [sys.executable, "-m", "skills_ref.cli"]
+    return None
 
 
 def main() -> int:

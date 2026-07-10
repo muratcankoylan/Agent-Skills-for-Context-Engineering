@@ -288,7 +288,7 @@ python3 -m pip install -r requirements-dev.txt
 
 ```bash
 # Deterministic gates (also run in CI on every PR)
-python3 -m unittest researcher.scripts.tests.test_skill_frontmatter
+python3 -m unittest discover -s researcher/scripts/tests -p "test_*.py"
 python3 researcher/scripts/validate_platform_compat.py --require-reference-validator
 python3 researcher/scripts/validate_repo.py --strict
 python3 researcher/scripts/skill_health.py --strict --no-history
