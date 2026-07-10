@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "task_id": "004",
+  "output_file": "HANDOFF.md",
+  "source_file": "history.md",
+  "source_sha256": "34acb3d52427f61921a50e0924db0717e6afcb3737745171569d6d05f6c79833",
+  "max_bytes": 2500,
+  "min_headings": 6,
+  "anchors": [
+    {
+      "value": "legacy_customer_id",
+      "category": "intent"
+    },
+    {
+      "value": "SCHEMA_COMPATIBILITY_BREAK E1904",
+      "category": "error"
+    },
+    {
+      "value": "batch_2026_07_10_42",
+      "category": "error"
+    },
+    {
+      "value": "encodeEnvelopeV2()",
+      "category": "root_cause"
+    },
+    {
+      "value": "ingestion/envelope_v2.py",
+      "category": "artifacts"
+    },
+    {
+      "value": "consumers/dual_write.py",
+      "category": "artifacts"
+    },
+    {
+      "value": "tests/ingestion/schema_compat_test.py",
+      "category": "artifacts"
+    },
+    {
+      "value": "infra/kafka/topics.yaml",
+      "category": "artifacts"
+    },
+    {
+      "value": "events-v1",
+      "category": "constraints"
+    },
+    {
+      "value": "CAB-2048",
+      "category": "constraints"
+    },
+    {
+      "value": "14 days",
+      "category": "decisions"
+    },
+    {
+      "value": "44 passed, 3 failing",
+      "category": "current_state"
+    },
+    {
+      "value": "2,304,118 events",
+      "category": "risks"
+    },
+    {
+      "value": "Mara",
+      "category": "constraints"
+    },
+    {
+      "value": "DPO-771",
+      "category": "constraints"
+    },
+    {
+      "value": "ap-southeast-2",
+      "category": "next_actions"
+    }
+  ]
+}

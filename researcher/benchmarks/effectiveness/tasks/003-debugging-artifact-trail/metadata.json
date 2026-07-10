@@ -1,0 +1,11 @@
+{
+  "id": "003",
+  "slug": "debugging-artifact-trail",
+  "target_skill": "context-compression",
+  "irrelevant_skill": "bdi-mental-states",
+  "related_skill": "filesystem-context",
+  "unrelated_skill": "hosted-agents",
+  "category": "debugging",
+  "difficulty": "medium",
+  "notes": "Held-out debugging handoff that probes exact error, trace, artifact trail, decision rationale, test state, incident risk, approval constraint, and continuation."
+}

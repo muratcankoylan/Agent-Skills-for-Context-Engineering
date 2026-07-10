@@ -7,23 +7,30 @@
  * Procedure (per the methodology in researcher/benchmarks/PLAN.md):
  *   1. Load 50+ ground-truth prompts from router/prompts.jsonl.
  *   2. For each (prompt, model, replication), build a routing prompt with the
- *      15 skill descriptions in deterministically-shuffled order.
- *   3. Call Agent.prompt() with settingSources: [] (no skills loaded; the
- *      descriptions in the prompt are the only signal).
+ *      16 skill descriptions in deterministically-shuffled order.
+ *   3. Call native Codex CLI in an isolated temporary cwd through Headroom
+ *      with project rules, plugins, and hooks disabled.
  *   4. Parse strict JSON ranking. Score top-1 and top-3 accuracy.
  *   5. Persist per-run JSON + transcript; append a summary to history.
  *
- * Runs only execute when CURSOR_API_KEY is set AND a cost cap is provided.
+ * Runs only execute when a hard invocation cap is provided.
  * --dry-run prints the plan and cost forecast and exits cleanly.
  */
 
 import { join } from "node:path";
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 
 import {
   RESEARCHER_DIR,
-  REPO_ROOT,
-  apiKeyFingerprint,
   appendHistoryEntry,
   assertBudget,
   buildRunPlan,
@@ -35,9 +42,11 @@ import {
   repoCommitSha,
   resolveConfig,
   resultFileName,
+  runCodexPrompt,
   runConcurrently,
   runHeader,
   shuffleSeeded,
+  runtimeFingerprint,
   todayUtc,
   utcNow,
   writeJson,
@@ -65,6 +74,7 @@ interface RouterRunRecord {
   top1_correct?: boolean;
   top3_correct?: boolean;
   raw_text?: string;
+  session_id?: string;
   notes?: string;
 }
 
@@ -75,12 +85,15 @@ const HISTORY_PATH = join(RESEARCHER_DIR, "reports", "router-history.jsonl");
 
 const ESTIMATED_TOKENS_INPUT = 4000;
 const ESTIMATED_TOKENS_OUTPUT = 400;
-const ESTIMATED_USD_PER_RUN = 0.012;
+const ESTIMATED_USD_PER_RUN = 0;
 const MAX_FORMAT_ATTEMPTS = 2;
 
 async function main(): Promise<number> {
   const flags = parseCliFlags(process.argv.slice(2));
   const config = resolveConfig(flags, DEFAULT_FIXTURE);
+  if (config.taskIds.length || config.conditions.length) {
+    throw new Error("--task-ids and --conditions are supported only by the effectiveness runner.");
+  }
 
   console.log(runHeader("Router Benchmark (Stage 2)"));
   console.log(`fixture: ${config.fixturePath}`);
@@ -90,7 +103,7 @@ async function main(): Promise<number> {
   console.log(`concurrency: ${config.concurrency}`);
   console.log(`resume: ${!config.noResume}`);
   console.log(`dry-run: ${config.dryRun}`);
-  console.log(`api key: ${apiKeyFingerprint()}`);
+  console.log(`runtime: ${runtimeFingerprint()}`);
 
   const prompts = loadJsonl<RouterPrompt>(config.fixturePath);
   console.log(`prompts loaded: ${prompts.length}`);
@@ -118,19 +131,19 @@ async function main(): Promise<number> {
   console.log(`planned runs: ${forecast.totalRuns}`);
   console.log(`est. tokens per run: ${ESTIMATED_TOKENS_INPUT}in / ${ESTIMATED_TOKENS_OUTPUT}out`);
   console.log(`max attempts per run: ${MAX_FORMAT_ATTEMPTS}`);
-  console.log(`max SDK invocations: ${worstCaseInvocations}`);
+  console.log(`max Codex invocations: ${worstCaseInvocations}`);
   console.log(`est. worst-case total cost: ${forecast.estimatedTotalUsd} USD`);
 
   if (worstCaseInvocations > config.maxRuns) {
     throw new Error(
-      `Worst-case SDK invocations ${worstCaseInvocations} exceeds --max-runs ${config.maxRuns}. ` +
+      `Worst-case Hermes invocations ${worstCaseInvocations} exceeds --max-runs ${config.maxRuns}. ` +
         "Increase --max-runs or lower the plan size.",
     );
   }
   assertBudget(plan, forecast, config);
 
   if (config.dryRun) {
-    console.log("Dry-run: no SDK calls made.");
+    console.log("Dry-run: no Hermes/Codex calls made.");
     if (plan[0]) {
       const sample = prompts.find((p) => p.prompt_id === plan[0].promptId)!;
       const shuffled = shuffleSeeded(skills.map((s) => s.name), plan[0].shuffleSeed);
@@ -140,22 +153,6 @@ async function main(): Promise<number> {
     }
     return 0;
   }
-
-  if (!process.env.CURSOR_API_KEY) {
-    console.error("CURSOR_API_KEY is not set. Refusing to run.");
-    return 1;
-  }
-
-  let cursorSdk: typeof import("@cursor/sdk") | null = null;
-  try {
-    cursorSdk = await import("@cursor/sdk");
-  } catch {
-    console.error(
-      "@cursor/sdk is not installed. Run `npm install` inside researcher/benchmarks/sdk-runner before executing.",
-    );
-    return 1;
-  }
-  const { Agent, CursorAgentError } = cursorSdk;
 
   const promptTemplate = await loadPromptTemplate();
   const runDir = join(RESULTS_DIR, `${todayUtc()}-${config.seed}`);
@@ -169,6 +166,7 @@ async function main(): Promise<number> {
 
   const totalToExecute = remaining.length;
   const startedAt = Date.now();
+  const isolationDir = mkdtempSync(join(tmpdir(), "researcher-router-codex-"));
   let completed = 0;
   const newResults: RouterRunRecord[] = [];
   const printLock = { value: Promise.resolve() };
@@ -191,14 +189,16 @@ async function main(): Promise<number> {
     try {
       for (let attempt = 1; attempt <= MAX_FORMAT_ATTEMPTS; attempt++) {
         record.attempts = attempt;
-        const result = await Agent.prompt(filled, {
-          apiKey: process.env.CURSOR_API_KEY!,
-          model: { id: item.modelId },
-          local: { cwd: REPO_ROOT, settingSources: [] },
+        const result = await runCodexPrompt(filled, {
+          model: item.modelId,
+          cwd: isolationDir,
+          sandbox: "read-only",
+          reasoningEffort: config.reasoningEffort,
         });
-        record.status = result.status;
-        record.raw_text = result.result ?? "";
-        const parsed = parseRouterJson(result.result ?? "");
+        record.status = "finished";
+        record.raw_text = result.finalText;
+        if (result.sessionId) record.session_id = result.sessionId;
+        const parsed = parseRouterJson(record.raw_text);
         if (parsed) {
           record.predicted_primary = parsed[0];
           record.predicted_top3 = parsed.slice(0, 3);
@@ -210,12 +210,7 @@ async function main(): Promise<number> {
         record.notes = attempt < MAX_FORMAT_ATTEMPTS ? "format failure; retrying once" : "format failure after retry";
       }
     } catch (error) {
-      if (CursorAgentError && error instanceof CursorAgentError) {
-        record.status = "model_unavailable";
-        record.notes = error.message;
-      } else {
-        record.notes = (error as Error).message;
-      }
+      record.notes = (error as Error).message;
     }
     record.duration_ms = Date.now() - started;
     writeJson(join(runDir, resultFileName(item.promptId, item.modelId, item.rep)), record);
@@ -236,6 +231,7 @@ async function main(): Promise<number> {
       console.log(line);
     });
   });
+  rmSync(isolationDir, { recursive: true, force: true });
 
   const results: RouterRunRecord[] = [...existingResults.values(), ...newResults];
 

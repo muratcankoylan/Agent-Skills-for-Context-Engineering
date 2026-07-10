@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "task_id": "002",
+  "output_file": "HANDOFF.md",
+  "source_file": "history.md",
+  "source_sha256": "b58adf8efa640f1d91115fd77869c624e5d0673233193f6a5fb60b7cad72828c",
+  "max_bytes": 2500,
+  "min_headings": 6,
+  "anchors": [
+    {
+      "value": "without changing the public API",
+      "category": "intent"
+    },
+    {
+      "value": "WEBHOOK_REPLAY_DIVERGENCE E7421",
+      "category": "error"
+    },
+    {
+      "value": "evt_7QX9",
+      "category": "error"
+    },
+    {
+      "value": "normalizeEventTimestamp()",
+      "category": "root_cause"
+    },
+    {
+      "value": "src/webhooks/normalize.ts",
+      "category": "artifacts"
+    },
+    {
+      "value": "src/idempotency/key.ts",
+      "category": "artifacts"
+    },
+    {
+      "value": "tests/webhooks/replay.test.ts",
+      "category": "artifacts"
+    },
+    {
+      "value": "config/payments.yaml",
+      "category": "artifacts"
+    },
+    {
+      "value": "provider_event_id",
+      "category": "artifacts"
+    },
+    {
+      "value": "Postgres advisory lock",
+      "category": "decisions"
+    },
+    {
+      "value": "37 passed, 2 failing",
+      "category": "current_state"
+    },
+    {
+      "value": "184 charges",
+      "category": "risks"
+    },
+    {
+      "value": "explicit human approval",
+      "category": "constraints"
+    },
+    {
+      "value": "eu-west-1",
+      "category": "next_actions"
+    }
+  ]
+}

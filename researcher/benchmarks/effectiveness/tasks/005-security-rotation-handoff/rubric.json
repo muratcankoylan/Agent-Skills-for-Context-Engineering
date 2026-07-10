@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "task_id": "005",
+  "output_file": "HANDOFF.md",
+  "source_file": "history.md",
+  "source_sha256": "f70f48b962164aff8aad1426d7821afb5c3fa1cc427a68d91f1c531170d23559",
+  "max_bytes": 1800,
+  "min_headings": 6,
+  "anchors": [
+    {
+      "value": "without invalidating active sessions",
+      "category": "intent"
+    },
+    {
+      "value": "legacy-2024",
+      "category": "constraints"
+    },
+    {
+      "value": "90 days",
+      "category": "constraints"
+    },
+    {
+      "value": "KEYRING_EPOCH_MISMATCH E6112",
+      "category": "error"
+    },
+    {
+      "value": "req-7f2c",
+      "category": "error"
+    },
+    {
+      "value": "selectSigningEpoch()",
+      "category": "root_cause"
+    },
+    {
+      "value": "auth/keyring.py",
+      "category": "artifacts"
+    },
+    {
+      "value": "sessions/validator.py",
+      "category": "artifacts"
+    },
+    {
+      "value": "tests/auth/key_rotation_test.py",
+      "category": "artifacts"
+    },
+    {
+      "value": "config/key-policy.yaml",
+      "category": "artifacts"
+    },
+    {
+      "value": "30 seconds",
+      "category": "decisions"
+    },
+    {
+      "value": "20-minute overlap window",
+      "category": "decisions"
+    },
+    {
+      "value": "73 passed, 2 failing",
+      "category": "current_state"
+    },
+    {
+      "value": "Windows clock-skew",
+      "category": "current_state"
+    },
+    {
+      "value": "48,219 active sessions",
+      "category": "risks"
+    },
+    {
+      "value": "northstar",
+      "category": "constraints"
+    },
+    {
+      "value": "Ilya",
+      "category": "constraints"
+    },
+    {
+      "value": "SEC-908",
+      "category": "constraints"
+    },
+    {
+      "value": "atlas-us",
+      "category": "next_actions"
+    }
+  ]
+}

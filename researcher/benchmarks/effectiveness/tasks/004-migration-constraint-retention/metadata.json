@@ -1,0 +1,11 @@
+{
+  "id": "004",
+  "slug": "migration-constraint-retention",
+  "target_skill": "context-compression",
+  "irrelevant_skill": "bdi-mental-states",
+  "related_skill": "filesystem-context",
+  "unrelated_skill": "hosted-agents",
+  "category": "migration",
+  "difficulty": "hard",
+  "notes": "Held-out migration handoff emphasizing preservation of early user constraints alongside late technical decisions and risks."
+}

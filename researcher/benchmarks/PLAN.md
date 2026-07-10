@@ -2,7 +2,7 @@
 
 The current benchmark harness verifies that the researcher OS itself is hard to game (deterministic structural checks and seven adversarial scenarios). It does not yet measure the thing users actually care about: **do these skills make agents better at the tasks they claim to help with?**
 
-This document is the plan to close that gap, in four staged releases, with research-paper-grade methodology and the Cursor SDK as the execution layer.
+This document is the plan to close that gap, in four staged releases, with research-paper-grade methodology and native Codex CLI through Headroom as the execution layer.
 
 ## Status
 
@@ -10,13 +10,13 @@ This document is the plan to close that gap, in four staged releases, with resea
 | --- | --- | --- | --- | --- |
 | 0 | v2.2.0 (shipped) | Harness resistance to gaming, structural validity | $0 | done |
 | 1 | v2.3.0 (shipped) | Per-skill health metrics (deterministic) | $0 | done; corpus 0.814 aggregate, 2 of 15 flagged |
-| 2 | v2.3.0 (shipped) | Skill router accuracy (LLM-as-router) | Cursor credits (~$7 per full sweep) | done; baseline + post-fix delta published |
-| 3 | v2.4.0 | Skill effectiveness on real agent tasks | Cursor credits, larger | scaffolded, one task built |
-| 4 | v2.5.0 | Cross-skill composition | Cursor credits | future |
+| 2 | v2.3.0 (shipped) | Skill router accuracy (LLM-as-router) | Codex subscription route; $0 marginal API spend | migrated; historical Cursor results preserved |
+| 3 | v2.4.0 | Skill effectiveness on real agent tasks | Codex subscription route | locked 54-run gate published; target perfect but policy outcome `not_eligible` |
+| 4 | v2.5.0 | Cross-skill composition | Codex subscription route | future |
 
 ### Shipped Stage 2 results (v2.3.0)
 
-Two full 600-run sweeps across `composer-2`, `claude-opus-4-7`, `gpt-5.5`, `gemini-3.1-pro` at seed=1, 3 replications per (prompt, model):
+Two historical 600-run Cursor sweeps covered `composer-2`, `claude-opus-4-7`, `gpt-5.5`, and `gemini-3.1-pro` at seed=1 with 3 replications per (prompt, model). They remain immutable provenance; new runs use native Codex CLI through Headroom:
 
 - Baseline: `researcher/benchmarks/router/results-published/2026-05-15.md` (566 of 600; v1 runner died mid-sweep).
 - Post-fix (description rewrites + hardened runner): `researcher/benchmarks/router/results-published/2026-05-15-v2.md` (600 of 600, includes delta-vs-baseline section).
@@ -38,7 +38,7 @@ Headline finding: targeted description rewrites moved `context-fundamentals` top
 - Build a general-purpose agent benchmarking framework. We benchmark this skill collection on representative tasks.
 - Replace SWE-bench, BrowseComp, or other public benchmarks. We can subset them or use them as comparison points, not redo them.
 - Train models. This is evaluation only.
-- Run benchmarks that require paid APIs other than Cursor. Stage 2 and 3 spend Cursor credits via the SDK.
+- Run benchmarks through direct metered API keys. Stage 2 and 3 use native Codex CLI with the configured Headroom provider and ChatGPT/Codex OAuth session.
 
 ## Methodology Principles
 
@@ -124,7 +124,7 @@ Anything below 0.75 is flagged in the daily snapshot.
 
 Skill rot is invisible without metrics. A skill that loses its gotcha section, accumulates dead internal links, or drifts past 500 lines is structurally weaker; catching that in CI is cheap insurance.
 
-## Stage 2: Skill Router Benchmark (v2.3.0, ~$5 per full run with Cursor SDK)
+## Stage 2: Skill Router Benchmark (v2.3.0, Codex subscription route)
 
 The first benchmark that exercises a real model. Tests whether the skill descriptions are good enough to route the right skill to a given task.
 
@@ -136,24 +136,24 @@ The activation-scenario descriptions in v2.2.0 frontmatter (replacing v2.1.x key
 
 1. **Fixture**: `researcher/benchmarks/router/prompts.jsonl` with 100 prompts. Each line: `{prompt_id, prompt, expected_primary_skill, acceptable_secondary_skills, rejected_skills, reason}`. Stage 1 ships with 50; expand to 100 over time.
 
-2. **Routing prompt**: A standard template (`researcher/benchmarks/router/routing-prompt.md`) that presents the 15 skill descriptions (shuffled per replication) and the task, asks the model to return a strict-JSON ranked list with confidence.
+2. **Routing prompt**: A standard template (`researcher/benchmarks/router/routing-prompt.md`) that presents all 16 skill descriptions (shuffled per replication) and the task, asks the model to return a strict-JSON ranked list with confidence.
 
-3. **Runner**: `researcher/benchmarks/sdk-runner/src/runRouter.ts`. For each prompt x model x replication:
+3. **Runner**: `researcher/benchmarks/codex-runner/src/runRouter.ts`. For each prompt x model x replication:
    - Build the routing prompt with shuffled skill order.
-   - Call `Agent.prompt(routingPrompt, { settingSources: [], model: { id }, local: { cwd: temp } })`.
-   - `settingSources: []` ensures the router agent has no skill loaded; the descriptions in the prompt are the only signal.
+   - Call native `codex exec` in a temporary directory outside the repository with read-only sandboxing, plugins/hooks disabled, and `--ignore-rules`.
+   - The isolated cwd contains no project-local skills; descriptions in the prompt are the only routing signal.
    - Parse JSON. If parse fails, record as `format_failure` (don't reward bad output).
    - Compare ranked list to ground truth. Record top-1 and top-3 accuracy.
 
-4. **Models**: `composer-2`, `claude-opus-4-7`, `gpt-5.5`, `gemini-3.1-pro`. The list comes from `Cursor.models.list()` at run time; if a model is unavailable it is recorded as `model_unavailable` and the run continues.
+4. **Models**: native Codex model IDs passed with `--models`; the deployment default is `gpt-5.5`. Every result records the requested model ID.
 
 5. **Replications**: 3 per (prompt, model). 100 prompts x 4 models x 3 reps = 1200 calls per full run.
 
 ### Cost analysis
 
 - Routing prompt is small (~3-5k input tokens, ~500 output tokens).
-- At Cursor's free-with-credits pricing: well under $5 per full run.
-- Even at unfavorable retail rates: estimated $5-15 per full run.
+- Marginal direct API spend is `$0` on the approved Codex subscription route.
+- A hard `--max-runs` gate is still required because subscription access does not remove rate, time, or quota risk.
 
 ### Reporting
 
@@ -182,22 +182,26 @@ Loading a relevant skill into an agent's context improves outcome quality, token
    - `verify.sh`: deterministic ground-truth check returning exit code 0 if the task succeeded.
    - `metadata.json`: relevant skills, irrelevant skills (for negative control), category, expected difficulty.
 
-2. **Conditions**: For each task, run six conditions:
-   - `control`: `settingSources: []`. No skills loaded.
-   - `target`: `settingSources: ["project"]` with only the target skill present. Other skills are temporarily moved out.
-   - `negative`: `settingSources: ["project"]` with only a known-irrelevant skill present.
-   - `full`: `settingSources: ["project"]` with all 15 skills present.
+2. **Conditions**: For each task, run six conditions in fresh Codex workspaces with only the condition's skills copied into `.codex/skills/`:
+   - `control`: no skills loaded.
+   - `target`: only the target skill.
+   - `negative`: only a known-irrelevant skill.
+   - `full`: all 16 skills.
    - `target_plus_one`: target skill plus one related skill.
    - `target_plus_unrelated`: target skill plus one unrelated skill (interaction control).
 
-3. **Runner**: `researcher/benchmarks/sdk-runner/src/runEffectiveness.ts`. For each task x condition x model x replication:
+3. **Runner**: `researcher/benchmarks/codex-runner/src/runEffectiveness.ts`. For each task x condition x model x replication:
+   - Filter tasks and conditions before building the run plan (`--task-ids`, `--conditions`), with a mandatory hard cap over the selected plan.
    - Build the task workspace from `starting/`.
-   - Copy only the in-scope skills into `.cursor/skills/` of the task workspace.
-   - Call `Agent.prompt(taskPrompt, { settingSources: ["project"], model: { id }, local: { cwd: taskWorkspace } })` (or local cloud option for parallel runs).
-   - On completion, run `verify.sh`; record exit code, durationMs, transcript token counts (from `run.conversation()`).
-   - Persist transcript JSON, workspace diff, verify output.
+   - Copy only the in-scope skills into the fresh workspace under `.codex/skills/`.
+   - Call native `codex exec` with `-C <workspace>` and the deployment-compatible sandbox.
+   - On completion, stage `.runner/final.txt`, run `verify.sh`, and record exit code, duration, behavior note, failure reason, and session ID.
+   - For rubric-backed handoff tasks, write `.runner/score.json` on PASS and FAIL with full anchor retention, per-category retention, and forbidden stale-fact violations.
+   - Persist final text, verifier evidence, condition metadata, verifier/scorer SHA, full task-fixture SHA, and partial-credit score.
+   - Evaluate completed summaries against the precommitted `acceptance-policy.json`; automated output is advisory and cannot promote a skill.
+   - Isolate filtered selections in deterministic selection-hash result directories; resume only records in the current plan whose provenance hashes still match.
 
-4. **Initial task set**: 20 tasks across categories:
+4. **Current task set**: Eight fixtures are executable. `001` is a smoke fixture; `003` is retained ceiling evidence and excluded; promotion-gate tasks are `002`, `004`, `005`, `006`, `007`, and `008`. Tasks `006`-`008` add predeclared forbidden stale-decision anchors so superseded proposals cannot coexist with final decisions. Remaining skill categories are planned:
    - **filesystem-context**: agent must offload a 5,000-line tool output then retrieve specific data from it.
    - **context-compression**: agent gets a 100k-token chat history and must produce a 2k-token handoff that preserves named entities.
    - **multi-agent-patterns**: agent must decide whether to use subagents for a parallelizable task and justify it.
@@ -222,8 +226,8 @@ Loading a relevant skill into an agent's context improves outcome quality, token
 ### Cost analysis
 
 - Average effectiveness task is larger than routing prompts: 10-50k input tokens, 1-5k output tokens, multiple tool calls.
-- Cursor free-with-credits: should fit in monthly allotment for one full sweep.
-- Retail equivalent estimate: $50-200 per full sweep depending on which models are active.
+- Marginal direct API spend is `$0` on the Codex subscription route.
+- Request caps, bounded concurrency, resume, and progress logs remain mandatory.
 
 ### Reporting
 
@@ -247,73 +251,74 @@ Composition is where curated collections add or destroy value compared to indivi
 
 Deferred to v2.5.0 because it requires Stage 3 infrastructure plus task design specifically targeting interactions. Sketched here, not designed in detail.
 
-## SDK Integration Details
+## Native Codex/Headroom Integration Details
 
-### Why the Cursor SDK
+### Why this runtime
 
-- Free with the existing Cursor team credits the user already has.
-- Same agent loop as the IDE and CLI, so results transfer to production usage.
-- Multi-model: composer-2, claude-opus-4-7, gpt-5.5, gemini-3.1-pro through one interface.
-- `settingSources` gives precise control over which skills load (this is the key affordance for ablation).
-- Cloud runtime for parallel execution when local resources are insufficient.
+- It is the server's installed first-party Codex CLI agent loop.
+- OpenAI ChatGPT/Codex OAuth is managed by Codex CLI; benchmark code never reads credentials.
+- Headroom remains on the localhost route used by production.
+- Isolated workspaces plus project-local `.codex/skills/` provide controlled routing and ablation conditions.
+- No separate Cursor account, API key, or vulnerable SDK dependency is required.
 
-### settingSources and skill loading
+### Skill loading and isolation
 
-This is the central mechanism we exploit.
+- Router: temporary cwd outside the repository, read-only sandbox, no project-local skills.
+- Control: fresh workspace with no `.codex/skills/` entries.
+- Target and ablations: copy only the curated skill directories into `.codex/skills/`.
+- Full: copy all corpus skills into `.codex/skills/`.
+- Never run benchmark conditions with ambient project/user rules enabled.
 
-- `settingSources: []` (default): no on-disk settings load. Agent has no skills. Use this as the **control condition** and for the router benchmark where we want descriptions to be the only signal.
-- `settingSources: ["project"]`: loads `.cursor/` from the cwd. Used to load only specific skills by copying them into a controlled workspace.
-- `settingSources: ["project", "plugins"]`: also loads plugin skills. Less useful for benchmarks; we want full control.
-- `settingSources: "all"`: loads everything including user and team settings. Avoid in benchmarks; it leaks the caller's environment.
+For Stage 3, each condition receives a fresh workspace copied from `starting/`. The task prompt includes the absolute workspace path, final text is written to `.runner/final.txt`, and the locked `verify.sh` executes inside that workspace.
 
-For Stage 3, each task workspace is built fresh per condition: copy the `starting/` directory to a temp dir, then conditionally place skills into `.cursor/skills/`.
+### Runtime result contract
 
-### Result schema we rely on
-
-From the Cursor SDK reference:
+The runner records:
 
 ```typescript
-interface RunResult {
-  id: string;
-  status: "finished" | "error" | "cancelled";
-  result?: string;          // final assistant text
-  model?: ModelSelection;   // resolved model
-  durationMs?: number;
-  git?: RunGitInfo;
+interface CodexPromptResult {
+  finalText: string;
+  stdout: string;
+  stderr: string;
+  sessionId?: string;
 }
 ```
 
-Plus `run.conversation(): Promise<ConversationTurn[]>` for the per-turn transcript. Token counts come from the conversation events (precise schema depends on SDK version; the runner abstracts this).
+Effectiveness records add condition, loaded skills, duration, final text, verifier exit/stdout/stderr, behavior notes, and workspace path. Request count and wall time remain the stable cross-version cost proxies.
 
 ### Runtime choice per stage
 
-- Stage 2 (router): local runtime, no cwd dependence beyond a temp dir. Fast.
-- Stage 3 (effectiveness): local runtime for most tasks; cloud runtime for tasks that need filesystem isolation or parallel execution.
-- Stage 4: cloud runtime by default for full parallelism.
+- Stage 2: isolated native Codex prompts in a read-only temporary cwd.
+- Stage 3: native Codex runs in fresh `workspace-write` sandboxes.
+- Stage 4: the same condition mechanism extended to composition tasks.
 
 ### Safety
 
-- Privacy Mode enabled on the Cursor account that runs benchmarks, per Cursor's [privacy docs](https://cursor.help/security-and-privacy/privacy.md). Eval data stays out of training.
-- `apiKey` always passed explicitly, never relied on from env, so cross-tenant mistakes are impossible.
-- `await using` syntax for every agent so disposal is automatic.
-- Concrete rate-limit handling: backoff schedule per Cursor's docs, exponential 1s/2s/4s/8s/16s on 429.
+- OAuth credentials stay inside `/home/hermesadmin/.codex`; the runner only selects `CODEX_HOME`.
+- Headroom is bound to localhost.
+- `--max-runs` is required for every live execution.
+- Concurrency is bounded and defaults to 1.
+- Resume skips completed result records by default.
+- Every run logs progress and an ETA.
+- Deterministic verifiers remain outside agent-editable surfaces.
 
 ### Cost gates
 
-The runner implements per-run cost caps:
+The runner implements:
 
-- `--max-runs N`: hard cap on total agent invocations.
-- `--max-budget-usd N`: estimated cost cap, fail fast if exceeded.
-- `--dry-run`: print plan, do not call.
-- `--models <list>`: subset to one model for development.
+- `--max-runs N`: hard invocation cap;
+- `--max-budget-usd N`: marginal-cost forecast cap;
+- `--dry-run`: plan without model calls;
+- `--models <list>`: explicit native Codex model subset;
+- `--concurrency N`: bounded subprocess concurrency.
 
-Every runner prints a cost forecast before any agent call.
+Every runner prints the runtime fingerprint and forecast before any model call.
 
 ## Implementation Order
 
 1. **Stage 1 (this PR, v2.2.1)**: `researcher/scripts/skill_health.py`, output file, integration with `loop_daily.py`. No API cost.
 
-2. **SDK runner scaffolding (this PR)**: `researcher/benchmarks/sdk-runner/` with package.json, tsconfig, common utilities, dry-run mode. Compiles and exits cleanly without an API key.
+2. **Codex runner**: `researcher/benchmarks/codex-runner/` with package.json, TypeScript utilities, dry-run mode, router executor, and effectiveness executor. It compiles and exits cleanly without direct API keys.
 
 3. **Router fixtures (this PR)**: 50 prompts in `researcher/benchmarks/router/prompts.jsonl`. Adversarial pairs for the v2.2.0 boundary-confusion cases (evaluation vs advanced-evaluation, etc.) plus single-skill positive controls.
 
@@ -323,7 +328,7 @@ Every runner prints a cost forecast before any agent call.
 
 6. **Execute Stage 1 in CI (next PR after merge)**: add to `loop_daily.py` so skill health updates daily.
 
-7. **Execute Stage 2 (when env key provided)**: run router benchmark, publish results, iterate descriptions where confusions appear.
+7. **Execute Stage 2 (with approved hard cap)**: run through native Codex CLI and Headroom, publish results, and iterate descriptions only when repeated confusions appear.
 
 8. **Build remaining 19 effectiveness tasks (rolling)**: prioritized by which skills carry the most user-facing claims.
 
@@ -333,18 +338,17 @@ Every runner prints a cost forecast before any agent call.
 
 ## Open Decisions
 
-These need user input before Stage 2 execution. They do not block scaffolding.
+These need user input before large or published sweeps. They do not block local capped runs.
 
-1. **Privacy mode**: confirm enabled on the Cursor account that will run benchmarks.
-2. **Higher rate limits**: confirm whether to email `leerob@cursor.com` for benchmark-grade limits per Cursor's docs, or rely on default limits for a smaller initial sweep.
-3. **Models to include in v2.3.0 first run**: ship with composer-2 only, or include claude/gpt/gemini from day one?
-4. **Publication policy**: full raw transcripts committed to the repo, or hosted separately and linked? Transcript size at full scale is multi-MB per sweep.
-5. **Comparison points**: include public benchmark subsets (BrowseComp, SWE-bench) for cross-reference, or keep our task set self-contained for v2.4.0 and add cross-reference in v2.5.0?
+1. **Replication budget**: approve the hard request cap for statistically meaningful repeated runs.
+2. **Models**: use only the deployed `gpt-5.6-sol` runtime or add other Hermes-configured models for cross-model evidence.
+3. **Publication policy**: commit redacted raw outputs, attach them to releases, or keep them local and publish aggregates.
+4. **Comparison points**: include public benchmark subsets or keep the task set self-contained until Stage 4.
 
 ## What This Plan Does Not Solve
 
-- Tokens-per-task accounting depends on the per-turn data the SDK exposes. If `conversation()` does not include token counts we fall back to wall-clock and request-count as cost proxies until we instrument it.
-- Cursor's model catalog is not stable across time; we record the resolved model id per run for reproducibility, but cross-version comparisons require care.
+- Hermes quiet-mode output does not currently expose provider-normalized token counts; wall-clock and request count are the portable cost proxies until that telemetry is added.
+- Model aliases can change across Hermes/provider versions; every run records the requested model ID and repository SHA, but cross-version comparisons still require care.
 - The seed user-curated task set is small. Public credibility requires either growing it to 100+ tasks or aligning with an existing public benchmark.
 - Real-world deployment differs from benchmark conditions. Effect sizes here are upper bounds, not guarantees.
 

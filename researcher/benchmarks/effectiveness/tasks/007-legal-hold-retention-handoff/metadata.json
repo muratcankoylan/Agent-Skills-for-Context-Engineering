@@ -1,0 +1,11 @@
+{
+  "id": "007",
+  "slug": "legal-hold-retention-handoff",
+  "target_skill": "context-compression",
+  "irrelevant_skill": "bdi-mental-states",
+  "related_skill": "filesystem-context",
+  "unrelated_skill": "hosted-agents",
+  "category": "compliance",
+  "difficulty": "hard",
+  "notes": "Predeclared independent hard handoff with superseded facts, forbidden stale-decision anchors, and partial-credit scoring."
+}

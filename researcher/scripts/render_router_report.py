@@ -157,7 +157,7 @@ def render(summary: dict[str, dict[str, Any]], confusion: dict[str, dict[str, in
     lines.append("## Methodology")
     lines.append("")
     lines.append(
-        "Each prompt is presented to each model with the 15 skill activation descriptions in a "
+        "Each prompt is presented to each model with all current skill activation descriptions in a "
         "deterministically-shuffled order (different shuffle per replication). The model must return "
         "JSON with a ranked list of skill names. Top-1 accuracy is whether the first ranked skill "
         "matches the human-labeled `expected_primary_skill`; top-3 is whether the expected skill appears "
@@ -165,7 +165,7 @@ def render(summary: dict[str, dict[str, Any]], confusion: dict[str, dict[str, in
     )
     lines.append("")
     lines.append(
-        "No skills are loaded into the agent (`settingSources: []`); the only routing signal is the "
+        "No skills or ambient rules are loaded into the agent (`--ignore-rules`); the only routing signal is the "
         "in-prompt descriptions. Confidence intervals are 95% bootstrap with 2000 resamples."
     )
     lines.append("")
@@ -233,15 +233,14 @@ def render(summary: dict[str, dict[str, Any]], confusion: dict[str, dict[str, in
     lines.append("Reproduce these numbers exactly with:")
     lines.append("")
     lines.append("```bash")
-    lines.append("cd researcher/benchmarks/sdk-runner")
+    lines.append("cd researcher/benchmarks/codex-runner")
     lines.append("npm install")
-    lines.append("export CURSOR_API_KEY=<your-key>")
     lines.append(
         "node --experimental-strip-types src/runRouter.ts "
         f"--models {','.join(meta.get('models', []))} "
         f"--reps {meta.get('reps')} "
         f"--seed {meta.get('seed')} "
-        "--max-budget-usd 15"
+        f"--max-runs {int(meta.get('total_runs') or 1) * 2}"
     )
     lines.append("python3 ../../scripts/render_router_report.py \\")
     lines.append("    --results ../router/results/<date>-<seed> \\")

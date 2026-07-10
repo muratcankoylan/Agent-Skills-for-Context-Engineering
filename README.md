@@ -240,7 +240,7 @@ The [researcher](researcher/) directory is a file-based operating system for tur
 
 ### Measured router-benchmark results
 
-The skill router (which decides whether the right skill gets loaded for a given task) has been benchmarked end-to-end against four frontier models via the [Cursor SDK](https://cursor.com/docs/sdk/typescript). Three full sweeps (50 prompts x 4 models x 3 replications = 600 calls each):
+Historical published sweeps used the Cursor SDK across four frontier models. Those reports remain immutable provenance records. Current and future runs use native Codex CLI through localhost Headroom and ChatGPT/Codex OAuth, so evaluation no longer requires a separate Cursor API key. Three historical full sweeps covered 50 prompts x 4 models x 3 replications = 600 calls each:
 
 - Baseline: [`researcher/benchmarks/router/results-published/2026-05-15.md`](researcher/benchmarks/router/results-published/2026-05-15.md)
 - After targeted description rewrites: [`researcher/benchmarks/router/results-published/2026-05-15-v2.md`](researcher/benchmarks/router/results-published/2026-05-15-v2.md) (includes delta-vs-baseline)
@@ -263,7 +263,7 @@ Per-model top-1 accuracy after the corpus-wide hardening pass:
 | gpt-5.5 | 0.913 | 0.973 |
 | claude-opus-4-7 | 0.840 | 0.933 |
 
-Reproduce any of these numbers exactly via the runner under `researcher/benchmarks/sdk-runner/`.
+The historical reports contain their original runner configuration. New reproducible runs use `researcher/benchmarks/codex-runner/`.
 
 ### What it includes
 
@@ -288,7 +288,10 @@ python3 -m pip install -r requirements-dev.txt
 
 ```bash
 # Deterministic gates (also run in CI on every PR)
-python3 -m unittest researcher.scripts.tests.test_skill_frontmatter
+python3 researcher/scripts/validate_all.py
+
+# Individual gates, useful when debugging a specific failure
+python3 -m unittest discover -s researcher/scripts/tests -p "test_*.py"
 python3 researcher/scripts/validate_platform_compat.py --require-reference-validator
 python3 researcher/scripts/validate_repo.py --strict
 python3 researcher/scripts/skill_health.py --strict --no-history

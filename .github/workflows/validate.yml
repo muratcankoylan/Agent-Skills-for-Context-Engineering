@@ -28,6 +28,9 @@ jobs:
           python -m py_compile \
             researcher/scripts/skill_frontmatter.py \
             researcher/scripts/tests/test_skill_frontmatter.py \
+            researcher/scripts/tests/test_validate_all.py \
+            researcher/scripts/tests/test_validation_paths.py \
+            researcher/scripts/validate_all.py \
             researcher/scripts/validate_platform_compat.py \
             researcher/scripts/validate_repo.py \
             researcher/scripts/validate_run.py \
@@ -43,8 +46,8 @@ jobs:
             researcher/scripts/loop_daily.py \
             researcher/scripts/loop_status.py
 
-      - name: Unit tests (frontmatter parser)
-        run: python -m unittest researcher.scripts.tests.test_skill_frontmatter
+      - name: Unit tests (researcher scripts)
+        run: python -m unittest discover -s researcher/scripts/tests -p "test_*.py"
 
       - name: Platform compatibility (Agent Skills reference)
         run: python researcher/scripts/validate_platform_compat.py --require-reference-validator

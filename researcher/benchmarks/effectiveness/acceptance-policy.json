@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "policy_id": "context-compression-stage3-v1",
+  "locked_before_run": true,
+  "scope": {
+    "target_skill": "context-compression",
+    "required_model": "gpt-5.6-sol",
+    "required_conditions": ["control", "target", "negative"],
+    "minimum_independent_tasks": 6,
+    "minimum_replications_per_task_condition": 3,
+    "minimum_total_runs": 54
+  },
+  "primary_gates": {
+    "target_anchor_retention_min": 0.97,
+    "target_minus_control_retention_pp_min": 1.0,
+    "target_minus_negative_retention_pp_min": 1.0,
+    "target_minus_control_pass_rate_pp_min": 10.0,
+    "target_minus_negative_pass_rate_pp_min": 5.0,
+    "paired_target_vs_control_exact_p_max": 0.05,
+    "paired_target_vs_negative_exact_p_max": 0.05,
+    "target_pairwise_regressions_max": 0,
+    "target_forbidden_violations_max": 0
+  },
+  "category_gates": {
+    "target_category_retention_min": 0.95,
+    "target_minus_control_category_pp_floor": -1.0,
+    "target_minus_negative_category_pp_floor": -1.0
+  },
+  "secondary_endpoints": {
+    "average_duration_ms": "report_only",
+    "average_output_bytes": "report_only"
+  },
+  "decision_contract": {
+    "all_gates_required": true,
+    "automated_outcome": "promotion_candidate_only",
+    "human_review_required": true,
+    "skill_changes_before_gate_pass": "forbidden",
+    "threshold_changes_after_run_start": "forbidden"
+  }
+}

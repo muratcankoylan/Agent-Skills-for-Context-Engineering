@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "task_id": "006",
+  "output_file": "HANDOFF.md",
+  "source_file": "history.md",
+  "source_sha256": "fb6950d6edec661ef8475410678c5d2340212f8dfb73868f2649d306632e557e",
+  "max_bytes": 1600,
+  "min_headings": 6,
+  "anchors": [
+    {
+      "value": "without losing acknowledged writes",
+      "category": "intent"
+    },
+    {
+      "value": "REPLICA_TIMELINE_DIVERGED E8206",
+      "category": "error"
+    },
+    {
+      "value": "0/9F3A11C8",
+      "category": "error"
+    },
+    {
+      "value": "selectCandidate()",
+      "category": "root_cause"
+    },
+    {
+      "value": "db/failover/candidate.go",
+      "category": "artifacts"
+    },
+    {
+      "value": "db/wal/archive.py",
+      "category": "artifacts"
+    },
+    {
+      "value": "tests/failover/timeline_test.go",
+      "category": "artifacts"
+    },
+    {
+      "value": "infra/postgres/replicas.yaml",
+      "category": "artifacts"
+    },
+    {
+      "value": "db-eu-5",
+      "category": "decisions"
+    },
+    {
+      "value": "under 5 seconds",
+      "category": "decisions"
+    },
+    {
+      "value": "tenant cobalt",
+      "category": "decisions"
+    },
+    {
+      "value": "68 passed, 2 failing",
+      "category": "current_state"
+    },
+    {
+      "value": "Consul invalidation",
+      "category": "current_state"
+    },
+    {
+      "value": "7,842 acknowledged writes",
+      "category": "risks"
+    },
+    {
+      "value": "Oksana",
+      "category": "constraints"
+    },
+    {
+      "value": "INC-441",
+      "category": "constraints"
+    },
+    {
+      "value": "30 days",
+      "category": "constraints"
+    },
+    {
+      "value": "eu-central-2",
+      "category": "next_actions"
+    }
+  ],
+  "forbidden": [
+    {
+      "value": "promote replica db-eu-3",
+      "category": "decisions"
+    },
+    {
+      "value": "lag is under 30 seconds",
+      "category": "decisions"
+    },
+    {
+      "value": "tenant amber",
+      "category": "decisions"
+    }
+  ]
+}

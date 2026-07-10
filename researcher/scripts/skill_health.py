@@ -331,6 +331,26 @@ def build_report(check_urls: bool, url_timeout: float) -> dict[str, Any]:
     }
 
 
+def normalize_output_path(path: Path) -> Path:
+    """Resolve report outputs relative to the repository root.
+
+    Validation gates are normally invoked from the repository root, but agents and
+    CI wrappers may run them from subdirectories. Treating relative paths as
+    repo-root relative keeps report locations deterministic.
+    """
+
+    return path if path.is_absolute() else ROOT / path
+
+
+def display_path(path: Path) -> str:
+    """Return a stable display path without failing for external outputs."""
+
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path.resolve())
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deterministic skill health report")
     parser.add_argument("--json", action="store_true", help="print machine-readable JSON to stdout")
@@ -340,10 +360,11 @@ def main() -> int:
     parser.add_argument("--strict", action="store_true", help="exit non-zero if any skill is flagged")
     parser.add_argument("--no-history", action="store_true", help="do not append a one-line summary to the history file")
     args = parser.parse_args()
+    output_path = normalize_output_path(args.output)
 
     report = build_report(args.check_urls, args.url_timeout)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     if not args.no_history:
         HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -367,7 +388,7 @@ def main() -> int:
         for record in report.get("skills", []):
             marker = "FLAG" if record["flagged"] else "ok  "
             print(f"  {marker} {record['name']:<28} score={record['score']:.3f} lines={record['line_count']}")
-        print(f"Wrote report to {args.output.relative_to(ROOT)}")
+        print(f"Wrote report to {display_path(output_path)}")
 
     if args.strict and not report.get("ok"):
         return 1
