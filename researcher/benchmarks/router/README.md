@@ -12,14 +12,16 @@ See `researcher/benchmarks/PLAN.md` for full methodology.
 
 ## Running
 
-From the SDK runner:
+From the Codex runner:
 
 ```bash
-cd researcher/benchmarks/sdk-runner
+cd researcher/benchmarks/codex-runner
 npm install
-npm run router:dry-run                       # see the plan and cost forecast
-npm run router:run -- --max-budget-usd 5     # execute (after exporting CURSOR_API_KEY)
+npm run router:dry-run -- --models gpt-5.5 --reps 1 --max-runs 106
+npm run router:run -- --models gpt-5.5 --reps 1 --max-runs 106
 ```
+
+The live path is `native Codex CLI -> Headroom -> OpenAI ChatGPT/Codex OAuth`; no `CURSOR_API_KEY` is used.
 
 ## Ground truth
 

@@ -1,18 +1,28 @@
 /**
- * Shared utilities for the researcher SDK benchmark runner.
+ * Shared utilities for the native Codex/Headroom benchmark runner.
  *
- * Pure helpers only. No SDK calls live here so the helpers can be
- * unit-tested or invoked from --dry-run without an API key.
+ * Deterministic helpers plus the single subprocess boundary used to invoke
+ * native Codex CLI with the server's real Headroom and OAuth configuration.
+ * Dry-run paths never call that boundary.
  */
 
 import { createHash } from "node:crypto";
-import { execSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync, existsSync, appendFileSync } from "node:fs";
+import { execSync, spawn } from "node:child_process";
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const SDK_RUNNER_DIR = dirname(fileURLToPath(import.meta.url));
-export const RUNNER_ROOT = resolve(SDK_RUNNER_DIR, "..");
+export const CODEX_RUNNER_DIR = dirname(fileURLToPath(import.meta.url));
+export const RUNNER_ROOT = resolve(CODEX_RUNNER_DIR, "..");
 export const RESEARCHER_DIR = resolve(RUNNER_ROOT, "..", "..");
 export const REPO_ROOT = resolve(RESEARCHER_DIR, "..");
 
@@ -51,7 +61,7 @@ export interface CliFlags {
   noResume: boolean;
 }
 
-const DEFAULT_MODELS = ["composer-2"];
+const DEFAULT_MODELS = ["gpt-5.5"];
 
 export function parseCliFlags(argv: string[]): CliFlags {
   const flags: CliFlags = { dryRun: false, unsafeNoCostCap: false, noResume: false };
@@ -101,10 +111,10 @@ export function resolveConfig(
   flags: CliFlags,
   defaultFixturePath: string,
 ): ResolvedConfig {
-  if (!flags.unsafeNoCostCap && !flags.maxRuns && !flags.maxBudgetUsd && !flags.dryRun) {
+  if (!flags.dryRun && (!flags.maxRuns || flags.maxRuns <= 0)) {
     throw new Error(
-      "Refusing to run without a cost cap. Pass --max-runs or --max-budget-usd or --unsafe-no-cost-cap. " +
-        "Use --dry-run to see the plan without any agent calls.",
+      "Refusing live Hermes/Codex execution without a hard invocation cap. Pass --max-runs N. " +
+        "Use --dry-run to inspect the plan without model calls.",
     );
   }
   return {
@@ -205,12 +215,120 @@ export function fixtureSha(path: string): string {
   return createHash("sha256").update(content).digest("hex").slice(0, 16);
 }
 
-export function apiKeyFingerprint(): string {
-  const key = process.env.CURSOR_API_KEY;
-  if (!key || key.length < 8) {
-    return "unset";
+export function runtimeFingerprint(): string {
+  return "codex-cli:0.144+/headroom:localhost/codex:chatgpt-oauth";
+}
+
+export interface CodexPromptOptions {
+  model: string;
+  cwd?: string;
+  sandbox?: "read-only" | "workspace-write" | "danger-full-access";
+  timeoutMs?: number;
+}
+
+export interface CodexPromptResult {
+  finalText: string;
+  stdout: string;
+  stderr: string;
+  sessionId?: string | undefined;
+}
+
+async function spawnCodex(
+  args: string[],
+  cwd: string,
+  timeoutMs: number,
+): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn("codex", args, {
+      cwd,
+      env: {
+        ...process.env,
+        HOME: "/home/hermesadmin",
+        CODEX_HOME: "/home/hermesadmin/.codex",
+      },
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    const maxBuffer = 16 * 1024 * 1024;
+    const timer = setTimeout(() => child.kill("SIGKILL"), timeoutMs);
+    child.stdout.setEncoding("utf-8");
+    child.stderr.setEncoding("utf-8");
+    child.stdout.on("data", (chunk: string) => {
+      stdout += chunk;
+      if (stdout.length > maxBuffer) child.kill("SIGKILL");
+    });
+    child.stderr.on("data", (chunk: string) => {
+      stderr += chunk;
+      if (stderr.length > maxBuffer) child.kill("SIGKILL");
+    });
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.on("close", (code, signal) => {
+      clearTimeout(timer);
+      if (code === 0) {
+        resolvePromise({ stdout, stderr });
+        return;
+      }
+      reject(
+        new Error(
+          `codex exited code=${String(code)} signal=${String(signal)}\n${stderr || stdout}`,
+        ),
+      );
+    });
+    // Close optional piped-context input immediately; otherwise Codex waits.
+    child.stdin.end();
+  });
+}
+
+/** Execute one prompt through native Codex CLI with the real Headroom config. */
+export async function runCodexPrompt(
+  prompt: string,
+  options: CodexPromptOptions,
+): Promise<CodexPromptResult> {
+  const cwd = options.cwd ?? REPO_ROOT;
+  const outputDir = mkdtempSync(join(tmpdir(), "researcher-codex-output-"));
+  const outputPath = join(outputDir, "last-message.txt");
+  const args = [
+    "--disable",
+    "plugins",
+    "--disable",
+    "hooks",
+    "-a",
+    "never",
+    "-s",
+    options.sandbox ?? "read-only",
+    "-C",
+    cwd,
+    "-m",
+    options.model,
+    "exec",
+    "--ephemeral",
+    "--skip-git-repo-check",
+    "--ignore-rules",
+    "--color",
+    "never",
+    "--output-last-message",
+    outputPath,
+    prompt,
+  ];
+  try {
+    const { stdout, stderr } = await spawnCodex(
+      args,
+      cwd,
+      options.timeoutMs ?? 180_000,
+    );
+    const combined = `${stdout}\n${stderr}`;
+    const sessionId = combined.match(/^session id:\s*(\S+)/im)?.[1];
+    const finalText = existsSync(outputPath)
+      ? readFileSync(outputPath, "utf-8").trim()
+      : stdout.trim();
+    return { finalText, stdout, stderr, sessionId };
+  } finally {
+    rmSync(outputDir, { recursive: true, force: true });
   }
-  return `***${key.slice(-4)}`;
 }
 
 /**

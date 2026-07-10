@@ -3,6 +3,8 @@
   "slug": "filesystem-context-offload",
   "target_skill": "filesystem-context",
   "irrelevant_skill": "bdi-mental-states",
+  "related_skill": "context-optimization",
+  "unrelated_skill": "bdi-mental-states",
   "category": "context-management",
   "difficulty": "easy",
   "notes": "Tests whether an agent will offload a large simulated tool output to a file and then retrieve only the specific piece it needs, rather than re-reading the entire payload. The filesystem-context skill should make this behavior the default."

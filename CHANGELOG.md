@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. Versions follow semantic versioning where practical, with skill content treated as data.
 
+## [Unreleased]
+
+### Changed
+
+- Replaced the active Cursor SDK benchmark runtime with `researcher/benchmarks/codex-runner/`, which invokes native Codex CLI through localhost Headroom and ChatGPT/Codex OAuth.
+- Removed the `@cursor/sdk` and `CURSOR_API_KEY` requirements; the runner package now audits with zero known npm vulnerabilities.
+- Kept historical Cursor-generated published reports unchanged as provenance records.
+- Implemented the Stage 3 effectiveness executor with six controlled skill conditions, fresh workspaces, deterministic `verify.sh` execution, resume, bounded concurrency, progress logs, and hard invocation caps.
+
 ## [2.4.0] - 2026-07-08
 
 ### Added

@@ -1,8 +1,8 @@
 {
-  "name": "researcher-sdk-runner",
-  "version": "0.1.0",
+  "name": "researcher-codex-runner",
+  "version": "0.2.0",
   "private": true,
-  "description": "Cursor SDK-based benchmark runner for the researcher operating system. Runs router and effectiveness benchmarks against the skill corpus.",
+  "description": "Hermes/Headroom/OpenAI Codex benchmark runner for the researcher operating system.",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -13,9 +13,6 @@
     "router:run": "node --experimental-strip-types src/runRouter.ts",
     "effectiveness:dry-run": "node --experimental-strip-types src/runEffectiveness.ts --dry-run",
     "effectiveness:run": "node --experimental-strip-types src/runEffectiveness.ts"
-  },
-  "dependencies": {
-    "@cursor/sdk": "^1.0.13"
   },
   "devDependencies": {
     "typescript": "^5.6.0",

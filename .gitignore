@@ -59,8 +59,8 @@ researcher/reports/skill-health-history.jsonl
 # Benchmark runner runtime artifacts (do not commit)
 researcher/benchmarks/router/results/
 researcher/benchmarks/effectiveness/results/
-researcher/benchmarks/sdk-runner/node_modules/
-researcher/benchmarks/sdk-runner/dist/
+researcher/benchmarks/codex-runner/node_modules/
+researcher/benchmarks/codex-runner/dist/
 researcher/reports/router-history.jsonl
 researcher/reports/effectiveness-history.jsonl
 researcher/queue/.locks/
