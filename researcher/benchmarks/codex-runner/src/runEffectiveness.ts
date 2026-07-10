@@ -177,9 +177,8 @@ async function main(): Promise<number> {
   console.log(`planned runs: ${forecast.totalRuns}`);
   console.log(`selected conditions: ${selectedConditions.length}`);
   console.log(`est. marginal API cost through subscription route: ${forecast.estimatedTotalUsd} USD`);
-  assertBudget(plan, forecast, config);
-
   if (config.dryRun) {
+    assertBudget(plan, forecast, config);
     console.log("Dry-run: no Hermes/Codex calls made.");
     for (const task of tasks.slice(0, 3)) {
       console.log(
@@ -221,7 +220,14 @@ async function main(): Promise<number> {
   const remaining = plan.filter(
     (item) => !existing.has(resultFileName(item.promptId, item.modelId, item.rep)),
   );
-  console.log(`resume: ${existing.size} prior results, ${remaining.length} runs remaining`);
+  const remainingForecast = forecastCost(
+    remaining,
+    ESTIMATED_TOKENS_INPUT,
+    ESTIMATED_TOKENS_OUTPUT,
+    ESTIMATED_USD_PER_RUN,
+  );
+  assertBudget(remaining, remainingForecast, config);
+  console.log(`resume: ${existing.size} reusable results, ${remaining.length} new invocations remaining`);
 
   let completed = 0;
   const startedAt = Date.now();
@@ -447,6 +453,7 @@ function loadExistingResults(
         expected &&
         record.condition &&
         record.model_id &&
+        record.status === "finished" &&
         record.verifier_sha === expected.verifier_sha &&
         record.task_fixture_sha === expected.task_fixture_sha &&
         JSON.stringify(record.skill_shas ?? {}) === JSON.stringify(skillProvenance(record.skills ?? []))
