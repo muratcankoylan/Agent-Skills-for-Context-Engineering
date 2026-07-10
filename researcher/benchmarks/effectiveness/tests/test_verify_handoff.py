@@ -87,6 +87,19 @@ class VerifyHandoffTests(unittest.TestCase):
         self.assertEqual(score["anchors"]["retention_rate"], 1.0)
         self.assertFalse(score["structural"]["within_budget"])
 
+    def test_markdown_inline_code_does_not_break_exact_anchor(self):
+        temp, root, rubric = self.make_fixture()
+        self.addCleanup(temp.cleanup)
+        data = json.loads(rubric.read_text())
+        data["anchors"].append({"value": "tenant cobalt", "category": "decisions"})
+        rubric.write_text(json.dumps(data))
+        (root / "HANDOFF.md").write_text(
+            "## State\nERROR-7 risk-9 tenant `cobalt`\n## Next\nnext-eu\n", encoding="utf-8"
+        )
+        code, score, _ = self.evaluate_in(root, rubric)
+        self.assertEqual(code, 0)
+        self.assertEqual(score["anchors"]["retention_rate"], 1.0)
+
     def test_forbidden_stale_fact_fails_with_full_positive_credit(self):
         temp, root, rubric = self.make_fixture()
         self.addCleanup(temp.cleanup)

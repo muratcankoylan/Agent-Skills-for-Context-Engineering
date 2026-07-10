@@ -29,6 +29,11 @@ def write_score(score: dict[str, Any]) -> None:
     )
 
 
+def normalize_for_match(value: str) -> str:
+    """Ignore Markdown code markup and insignificant whitespace without fuzzy matching."""
+    return " ".join(value.replace("`", "").split())
+
+
 def evaluate(rubric_path: Path) -> tuple[int, dict[str, Any], str]:
     rubric = json.loads(rubric_path.read_text(encoding="utf-8"))
     output_path = Path(rubric.get("output_file", "HANDOFF.md"))
@@ -67,11 +72,12 @@ def evaluate(rubric_path: Path) -> tuple[int, dict[str, Any], str]:
     category_found: dict[str, int] = defaultdict(int)
     missing: list[dict[str, str]] = []
     found_count = 0
+    normalized_text = normalize_for_match(text)
     for anchor in anchors:
         value = str(anchor["value"])
         category = str(anchor["category"])
         category_totals[category] += 1
-        found = value in text
+        found = normalize_for_match(value) in normalized_text
         if found:
             found_count += 1
             category_found[category] += 1
@@ -90,7 +96,7 @@ def evaluate(rubric_path: Path) -> tuple[int, dict[str, Any], str]:
     forbidden_present = [
         {"value": str(item["value"]), "category": str(item["category"])}
         for item in forbidden
-        if str(item["value"]) in text
+        if normalize_for_match(str(item["value"])) in normalized_text
     ]
     anchors_complete = found_count == anchor_total
     forbidden_clear = not forbidden_present

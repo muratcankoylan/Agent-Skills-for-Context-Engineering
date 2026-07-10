@@ -11,7 +11,7 @@ This document is the plan to close that gap, in four staged releases, with resea
 | 0 | v2.2.0 (shipped) | Harness resistance to gaming, structural validity | $0 | done |
 | 1 | v2.3.0 (shipped) | Per-skill health metrics (deterministic) | $0 | done; corpus 0.814 aggregate, 2 of 15 flagged |
 | 2 | v2.3.0 (shipped) | Skill router accuracy (LLM-as-router) | Codex subscription route; $0 marginal API spend | migrated; historical Cursor results preserved |
-| 3 | v2.4.0 | Skill effectiveness on real agent tasks | Codex subscription route | promotion policy locked; six-task 54-run sweep ready for explicit approval |
+| 3 | v2.4.0 | Skill effectiveness on real agent tasks | Codex subscription route | locked 54-run gate published; target perfect but policy outcome `not_eligible` |
 | 4 | v2.5.0 | Cross-skill composition | Codex subscription route | future |
 
 ### Shipped Stage 2 results (v2.3.0)

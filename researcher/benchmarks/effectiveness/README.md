@@ -102,6 +102,7 @@ Published reports:
 
 - `results-published/2026-07-10-context-compression-preliminary.md`: initial GPT-5.5 binary pilot; direction positive but underpowered.
 - `results-published/2026-07-10-context-compression-gpt56-partial.md`: GPT-5.6-sol partial-credit rerun with ceiling task replacement; target retained 147/147 anchors, but paired significance remained insufficient for promotion.
+- `results-published/2026-07-10-context-compression-54run-gate.md`: locked six-task gate; target retained 309/309 with zero regressions, but precommitted effect-size and significance thresholds returned `not_eligible`.
 
 ## Adding a task
 
