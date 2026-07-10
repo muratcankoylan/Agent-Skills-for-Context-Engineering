@@ -95,9 +95,9 @@ History summaries append to:
 - `researcher/reports/router-history.jsonl`;
 - `researcher/reports/effectiveness-history.jsonl`.
 
-Result directories and runtime histories are gitignored. Every record includes model, condition, duration, final response, verifier evidence, verifier SHA, full task-fixture SHA, partial anchor/category score when available, and the native Codex session ID.
+Result directories and runtime histories are gitignored. Every record includes model, reasoning effort, condition, duration, final response, verifier evidence, verifier SHA, full task-fixture SHA, exact SHA for every loaded skill directory, partial anchor/category score, forbidden stale-fact score, and the native Codex session ID when available. Summaries also record the selected skill-fixture map. Resume trusts a record only when its planned name, task provenance, and loaded-skill provenance still match.
 
-Filtered selections use a deterministic selection-hash suffix in the results directory, so their summaries cannot overwrite or absorb an unfiltered run. Resume accepts only records in the current run plan whose verifier and task-fixture hashes still match; stale records are rerun. Summaries report aggregate and per-task condition metrics, average duration, anchor retention, and category retention.
+Filtered selections use a deterministic selection-hash suffix in the results directory, including reasoning effort, so their summaries cannot overwrite or absorb another factor level. Stale records are rerun. Summaries report aggregate and per-task condition metrics, average duration, anchor retention, category retention, and forbidden-fact violations.
 
 ## Safety
 

@@ -91,6 +91,7 @@ interface EffectivenessRunRecord {
   rep: number;
   status: "finished" | "error" | "cancelled" | "dry_run";
   skills: string[];
+  skill_shas: Record<string, string>;
   duration_ms: number;
   session_id?: string | undefined;
   final_text?: string;
@@ -189,6 +190,14 @@ async function main(): Promise<number> {
   }
 
   const allSkills = loadSkillDescriptions().map((skill) => skill.name);
+  const selectedSkillNames = unique(
+    tasks.flatMap((task) =>
+      conditionsForTask(task, selectedConditions).flatMap((condition) =>
+        skillsForCondition(task, condition, allSkills),
+      ),
+    ),
+  );
+  const selectedSkillProvenance = skillProvenance(selectedSkillNames);
   const selection = {
     task_ids: tasks.map((task) => task.id),
     conditions: selectedConditions,
@@ -235,6 +244,7 @@ async function main(): Promise<number> {
       rep: item.rep,
       status: "error",
       skills,
+      skill_shas: skillProvenance(skills),
       duration_ms: 0,
       verifier_sha: provenance.verifier_sha,
       task_fixture_sha: provenance.task_fixture_sha,
@@ -304,6 +314,7 @@ async function main(): Promise<number> {
     runtime: runtimeFingerprint(),
     repo_sha: repoCommitSha(),
     task_fixtures: Object.fromEntries(taskProvenance),
+    skill_fixtures: selectedSkillProvenance,
     selection,
     seed: config.seed,
     models: config.models,
@@ -371,6 +382,16 @@ function skillsForCondition(
   }
 }
 
+function skillProvenance(skills: string[]): Record<string, string> {
+  return Object.fromEntries(
+    [...skills].sort().map((skill) => {
+      const source = join(REPO_ROOT, "skills", skill);
+      if (!existsSync(source)) throw new Error(`Condition skill missing: ${source}`);
+      return [skill, directorySha(source)];
+    }),
+  );
+}
+
 function prepareWorkspace(
   task: EffectivenessTaskMetadata,
   workspace: string,
@@ -427,7 +448,8 @@ function loadExistingResults(
         record.condition &&
         record.model_id &&
         record.verifier_sha === expected.verifier_sha &&
-        record.task_fixture_sha === expected.task_fixture_sha
+        record.task_fixture_sha === expected.task_fixture_sha &&
+        JSON.stringify(record.skill_shas ?? {}) === JSON.stringify(skillProvenance(record.skills ?? []))
       ) {
         records.set(name, record);
       }
