@@ -90,6 +90,8 @@ Each run record stores `verifier_sha`, `task_fixture_sha`, and the first verifie
 
 The current Hermes CLI does not expose provider-normalized token usage in quiet mode, so request count and wall time remain the portable cost proxies. Do not fabricate token counts.
 
+Latest preliminary report: `results-published/2026-07-10-context-compression-preliminary.md`. It records a 27-run target/control/negative pilot; the direction is positive but underpowered, so it does not justify changing or promoting the skill.
+
 ## Adding a task
 
 1. Copy the canonical directory layout.
