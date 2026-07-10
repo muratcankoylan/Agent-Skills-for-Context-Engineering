@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "task_id": "008",
+  "output_file": "HANDOFF.md",
+  "source_file": "history.md",
+  "source_sha256": "5ce13b65b67cb21cf9497c96753607c94db15bbacf7e3ce53adf0c90bc56cd31",
+  "max_bytes": 1550,
+  "min_headings": 6,
+  "anchors": [
+    {
+      "value": "without locking out offline devices",
+      "category": "intent"
+    },
+    {
+      "value": "TOKEN_AUDIENCE_DRIFT E2608",
+      "category": "error"
+    },
+    {
+      "value": "dev-44AC",
+      "category": "error"
+    },
+    {
+      "value": "buildAudience()",
+      "category": "root_cause"
+    },
+    {
+      "value": "mobile/auth/audience.kt",
+      "category": "artifacts"
+    },
+    {
+      "value": "gateway/token/verify.rs",
+      "category": "artifacts"
+    },
+    {
+      "value": "tests/mobile/offline_auth_test.kt",
+      "category": "artifacts"
+    },
+    {
+      "value": "config/mobile-auth.yaml",
+      "category": "artifacts"
+    },
+    {
+      "value": "offline_scope",
+      "category": "artifacts"
+    },
+    {
+      "value": "2% cohort",
+      "category": "decisions"
+    },
+    {
+      "value": "cohort beta-ca",
+      "category": "decisions"
+    },
+    {
+      "value": "76 passed, 2 failing",
+      "category": "current_state"
+    },
+    {
+      "value": "airplane-mode",
+      "category": "current_state"
+    },
+    {
+      "value": "63,507 offline devices",
+      "category": "risks"
+    },
+    {
+      "value": "Ren",
+      "category": "constraints"
+    },
+    {
+      "value": "A11Y-92",
+      "category": "constraints"
+    },
+    {
+      "value": "21 days",
+      "category": "constraints"
+    },
+    {
+      "value": "northamerica-northeast1",
+      "category": "next_actions"
+    }
+  ],
+  "forbidden": [
+    {
+      "value": "deploy to 50% of users",
+      "category": "decisions"
+    },
+    {
+      "value": "cohort gamma-us",
+      "category": "decisions"
+    }
+  ]
+}

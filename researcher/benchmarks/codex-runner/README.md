@@ -35,9 +35,8 @@ npm run router:run -- --models gpt-5.5 --reps 1 --max-runs 106
 npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 6
 npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 6
 
-# Bounded richer-metric pilot: three non-ceiling tasks, three conditions, three replications.
-npm run effectiveness:dry-run -- --models gpt-5.6-sol --task-ids 002,004,005 --conditions control,target,negative --reps 3 --max-runs 27
-npm run effectiveness:run -- --models gpt-5.6-sol --task-ids 002,004,005 --conditions control,target,negative --reps 3 --max-runs 27
+# Locked six-task promotion-gate plan. Live 54-run execution requires explicit approval.
+npm run effectiveness:dry-run -- --models gpt-5.6-sol --task-ids 002,004,005,006,007,008 --conditions control,target,negative --reps 3 --max-runs 54
 ```
 
 ## Shared flags

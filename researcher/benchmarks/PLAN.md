@@ -11,7 +11,7 @@ This document is the plan to close that gap, in four staged releases, with resea
 | 0 | v2.2.0 (shipped) | Harness resistance to gaming, structural validity | $0 | done |
 | 1 | v2.3.0 (shipped) | Per-skill health metrics (deterministic) | $0 | done; corpus 0.814 aggregate, 2 of 15 flagged |
 | 2 | v2.3.0 (shipped) | Skill router accuracy (LLM-as-router) | Codex subscription route; $0 marginal API spend | migrated; historical Cursor results preserved |
-| 3 | v2.4.0 | Skill effectiveness on real agent tasks | Codex subscription route | GPT-5.6 partial-credit pilot published; positive direction, no promotion claim |
+| 3 | v2.4.0 | Skill effectiveness on real agent tasks | Codex subscription route | promotion policy locked; six-task 54-run sweep ready for explicit approval |
 | 4 | v2.5.0 | Cross-skill composition | Codex subscription route | future |
 
 ### Shipped Stage 2 results (v2.3.0)
@@ -196,11 +196,12 @@ Loading a relevant skill into an agent's context improves outcome quality, token
    - Copy only the in-scope skills into the fresh workspace under `.codex/skills/`.
    - Call native `codex exec` with `-C <workspace>` and the deployment-compatible sandbox.
    - On completion, stage `.runner/final.txt`, run `verify.sh`, and record exit code, duration, behavior note, failure reason, and session ID.
-   - For rubric-backed handoff tasks, write `.runner/score.json` on PASS and FAIL with full anchor retention and per-category retention.
+   - For rubric-backed handoff tasks, write `.runner/score.json` on PASS and FAIL with full anchor retention, per-category retention, and forbidden stale-fact violations.
    - Persist final text, verifier evidence, condition metadata, verifier/scorer SHA, full task-fixture SHA, and partial-credit score.
+   - Evaluate completed summaries against the precommitted `acceptance-policy.json`; automated output is advisory and cannot promote a skill.
    - Isolate filtered selections in deterministic selection-hash result directories; resume only records in the current plan whose provenance hashes still match.
 
-4. **Initial task set**: 20 tasks across categories. Five preliminary fixtures are executable: `001` is a smoke fixture; `002` and `004` are retained context-compression tasks; `003` is retained as published ceiling evidence but excluded from the next comparative pilot; `005` is an independent hard replacement with a predeclared budget and rubric. Remaining categories are planned:
+4. **Current task set**: Eight fixtures are executable. `001` is a smoke fixture; `003` is retained ceiling evidence and excluded; promotion-gate tasks are `002`, `004`, `005`, `006`, `007`, and `008`. Tasks `006`-`008` add predeclared forbidden stale-decision anchors so superseded proposals cannot coexist with final decisions. Remaining skill categories are planned:
    - **filesystem-context**: agent must offload a 5,000-line tool output then retrieve specific data from it.
    - **context-compression**: agent gets a 100k-token chat history and must produce a 2k-token handoff that preserves named entities.
    - **multi-agent-patterns**: agent must decide whether to use subagents for a parallelizable task and justify it.

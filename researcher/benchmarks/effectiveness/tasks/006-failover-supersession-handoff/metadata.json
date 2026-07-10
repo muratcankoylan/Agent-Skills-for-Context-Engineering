@@ -1,0 +1,11 @@
+{
+  "id": "006",
+  "slug": "failover-supersession-handoff",
+  "target_skill": "context-compression",
+  "irrelevant_skill": "bdi-mental-states",
+  "related_skill": "filesystem-context",
+  "unrelated_skill": "hosted-agents",
+  "category": "database",
+  "difficulty": "hard",
+  "notes": "Predeclared independent hard handoff with superseded facts, forbidden stale-decision anchors, and partial-credit scoring."
+}

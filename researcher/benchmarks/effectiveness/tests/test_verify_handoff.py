@@ -31,6 +31,7 @@ class VerifyHandoffTests(unittest.TestCase):
                 {"value": "risk-9", "category": "risks"},
                 {"value": "next-eu", "category": "next_actions"},
             ],
+            "forbidden": [{"value": "stale-decision", "category": "decisions"}],
         }
         rubric_path = root / "rubric.json"
         rubric_path.write_text(json.dumps(rubric), encoding="utf-8")
@@ -85,6 +86,18 @@ class VerifyHandoffTests(unittest.TestCase):
         self.assertEqual(code, 22)
         self.assertEqual(score["anchors"]["retention_rate"], 1.0)
         self.assertFalse(score["structural"]["within_budget"])
+
+    def test_forbidden_stale_fact_fails_with_full_positive_credit(self):
+        temp, root, rubric = self.make_fixture()
+        self.addCleanup(temp.cleanup)
+        (root / "HANDOFF.md").write_text(
+            "## State\nERROR-7 risk-9 stale-decision\n## Next\nnext-eu\n", encoding="utf-8"
+        )
+        code, score, message = self.evaluate_in(root, rubric)
+        self.assertEqual(code, 27)
+        self.assertEqual(score["anchors"]["retention_rate"], 1.0)
+        self.assertEqual(score["forbidden"]["violations"], 1)
+        self.assertIn("forbidden anchors", message)
 
     def test_source_mutation_fails_after_scoring(self):
         temp, root, rubric = self.make_fixture()

@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "task_id": "007",
+  "output_file": "HANDOFF.md",
+  "source_file": "history.md",
+  "source_sha256": "806e31dd773d00e95b8559c1af5ce150c2d4cbd0a7454aa786cfa39fca7f3803",
+  "max_bytes": 1500,
+  "min_headings": 6,
+  "anchors": [
+    {
+      "value": "without breaking active legal holds",
+      "category": "intent"
+    },
+    {
+      "value": "HOLD_SET_TRUNCATED E3319",
+      "category": "error"
+    },
+    {
+      "value": "case-LH-774",
+      "category": "error"
+    },
+    {
+      "value": "mergeHoldSets()",
+      "category": "root_cause"
+    },
+    {
+      "value": "retention/holds/merge.ts",
+      "category": "artifacts"
+    },
+    {
+      "value": "retention/expiry/plan.ts",
+      "category": "artifacts"
+    },
+    {
+      "value": "tests/retention/legal_hold_test.ts",
+      "category": "artifacts"
+    },
+    {
+      "value": "policy/retention-defaults.yaml",
+      "category": "artifacts"
+    },
+    {
+      "value": "400 days",
+      "category": "decisions"
+    },
+    {
+      "value": "account cedar",
+      "category": "decisions"
+    },
+    {
+      "value": "81 passed, 3 failing",
+      "category": "current_state"
+    },
+    {
+      "value": "timezone-boundary",
+      "category": "current_state"
+    },
+    {
+      "value": "91,044 objects",
+      "category": "risks"
+    },
+    {
+      "value": "Priya",
+      "category": "constraints"
+    },
+    {
+      "value": "LEG-118",
+      "category": "constraints"
+    },
+    {
+      "value": "manifest-7Z",
+      "category": "constraints"
+    },
+    {
+      "value": "7 years",
+      "category": "constraints"
+    },
+    {
+      "value": "ca-central-1",
+      "category": "next_actions"
+    }
+  ],
+  "forbidden": [
+    {
+      "value": "delete standard objects after 30 days",
+      "category": "decisions"
+    },
+    {
+      "value": "account pine",
+      "category": "decisions"
+    }
+  ]
+}

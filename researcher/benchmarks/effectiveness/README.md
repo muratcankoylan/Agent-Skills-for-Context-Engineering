@@ -8,7 +8,10 @@ See `researcher/benchmarks/PLAN.md`. The current preliminary task set is under `
 - `002-context-compression-handoff/`: bounded migration handoff with exact artifact and decision anchors;
 - `003-debugging-artifact-trail/`: retained ceiling fixture; excluded from the next comparative pilot;
 - `004-migration-constraint-retention/`: held-out early-constraint and late-decision retention;
-- `005-security-rotation-handoff/`: independent hard fixture with a predeclared 1,800-byte budget and partial-credit rubric.
+- `005-security-rotation-handoff/`: independent hard fixture with a predeclared 1,800-byte budget and partial-credit rubric;
+- `006-failover-supersession-handoff/`: database failover with superseded replica, lag, and tenant decisions;
+- `007-legal-hold-retention-handoff/`: legal-hold retention with superseded expiry and pilot values;
+- `008-offline-auth-rollout-handoff/`: offline-auth rollout with superseded rollout percentage and cohort.
 
 ## Task layout
 
@@ -72,8 +75,8 @@ npm test
 npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 12
 npm run effectiveness:run -- --models gpt-5.5 --reps 1 --max-runs 12
 
-# Three-task richer-metric pilot; ceiling task 003 is replaced by hard task 005.
-npm run effectiveness:dry-run -- --models gpt-5.6-sol --task-ids 002,004,005 --conditions control,target,negative --reps 3 --max-runs 27
+# Locked six-task promotion-gate dry-run. Live execution requires explicit approval for the 54-run cap.
+npm run effectiveness:dry-run -- --models gpt-5.6-sol --task-ids 002,004,005,006,007,008 --conditions control,target,negative --reps 3 --max-runs 54
 ```
 
 Live execution requires an explicit hard cap. Resume is enabled by default.
@@ -89,7 +92,9 @@ The summary reports both corpus-level and per-task metrics. For each selected co
 - per-category retention for intent, error, root cause, artifacts, decisions, current state, risks, constraints, and next actions;
 - scratch-use count and rate when a task emits that signal.
 
-Handoff verifiers write `.runner/score.json` on both PASS and FAIL. This preserves partial credit and all missing anchors instead of collapsing a nearly complete handoff to a binary zero. Each run record stores the full score, `verifier_sha`, `task_fixture_sha`, and the verifier failure line when present. The verifier SHA includes the shared scorer implementation, so scorer changes invalidate stale resume records.
+Handoff verifiers write `.runner/score.json` on both PASS and FAIL. This preserves partial credit and all missing anchors instead of collapsing a nearly complete handoff to a binary zero. Rubrics may also declare forbidden stale facts; retaining a superseded value records a violation and fails deterministically even when every positive anchor is present. Each run record stores the full score, `verifier_sha`, `task_fixture_sha`, and the verifier failure line when present. The verifier SHA includes the shared scorer implementation, so scorer changes invalidate stale resume records.
+
+Promotion criteria are locked in `acceptance-policy.json` and documented in `ACCEPTANCE.md`. `evaluate_promotion.py` can emit only `promotion_candidate` or `not_eligible`; human review is always required.
 
 The current Hermes CLI does not expose provider-normalized token usage in quiet mode, so request count and wall time remain the portable cost proxies. Do not fabricate token counts.
 

@@ -36,6 +36,7 @@ def evaluate(rubric_path: Path) -> tuple[int, dict[str, Any], str]:
     max_bytes = int(rubric.get("max_bytes", 2500))
     min_headings = int(rubric.get("min_headings", 6))
     anchors = rubric.get("anchors", [])
+    forbidden = rubric.get("forbidden", [])
 
     structural: dict[str, Any] = {
         "output_exists": output_path.is_file(),
@@ -86,12 +87,18 @@ def evaluate(rubric_path: Path) -> tuple[int, dict[str, Any], str]:
         for category, total in sorted(category_totals.items())
     }
     anchor_total = len(anchors)
+    forbidden_present = [
+        {"value": str(item["value"]), "category": str(item["category"])}
+        for item in forbidden
+        if str(item["value"]) in text
+    ]
     anchors_complete = found_count == anchor_total
+    forbidden_clear = not forbidden_present
     structural_complete = all(
         structural[key]
         for key in ("output_exists", "within_budget", "heading_requirement_met", "source_unchanged")
     )
-    passed = structural_complete and anchors_complete
+    passed = structural_complete and anchors_complete and forbidden_clear
     score: dict[str, Any] = {
         "schema_version": 1,
         "task_id": rubric.get("task_id"),
@@ -102,6 +109,12 @@ def evaluate(rubric_path: Path) -> tuple[int, dict[str, Any], str]:
             "total": anchor_total,
             "retention_rate": round(found_count / anchor_total, 4) if anchor_total else 0.0,
             "missing": missing,
+        },
+        "forbidden": {
+            "violations": len(forbidden_present),
+            "total": len(forbidden),
+            "violation_rate": round(len(forbidden_present) / len(forbidden), 4) if forbidden else 0.0,
+            "present": forbidden_present,
         },
         "categories": categories,
     }
@@ -115,6 +128,9 @@ def evaluate(rubric_path: Path) -> tuple[int, dict[str, Any], str]:
     if not anchors_complete:
         values = ", ".join(item["value"] for item in missing)
         return 24, score, f"missing {len(missing)}/{anchor_total} anchors: {values}"
+    if not forbidden_clear:
+        values = ", ".join(item["value"] for item in forbidden_present)
+        return 27, score, f"present {len(forbidden_present)}/{len(forbidden)} forbidden anchors: {values}"
     if not structural["source_unchanged"]:
         return 25, score, f"{source_path} was modified"
     return 0, score, f"handoff_valid bytes={structural['bytes']} anchors={found_count}/{anchor_total}"

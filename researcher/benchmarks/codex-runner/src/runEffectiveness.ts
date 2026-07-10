@@ -74,6 +74,12 @@ interface HandoffScore {
     retention_rate: number;
     missing: Array<{ value: string; category: string }>;
   };
+  forbidden?: {
+    violations: number;
+    total: number;
+    violation_rate: number;
+    present: Array<{ value: string; category: string }>;
+  };
   categories: Record<string, { found: number; total: number; retention_rate: number }>;
 }
 
@@ -435,6 +441,8 @@ function summarizeConditions(records: EffectivenessRunRecord[]): Record<string, 
     scoredRuns: number;
     anchorsFound: number;
     anchorsTotal: number;
+    forbiddenViolations: number;
+    forbiddenTotal: number;
     categories: Record<string, { found: number; total: number }>;
   }
   const byCondition: Record<string, Bucket> = {};
@@ -447,6 +455,8 @@ function summarizeConditions(records: EffectivenessRunRecord[]): Record<string, 
       scoredRuns: 0,
       anchorsFound: 0,
       anchorsTotal: 0,
+      forbiddenViolations: 0,
+      forbiddenTotal: 0,
       categories: {},
     };
     bucket.total += 1;
@@ -457,6 +467,8 @@ function summarizeConditions(records: EffectivenessRunRecord[]): Record<string, 
       bucket.scoredRuns += 1;
       bucket.anchorsFound += record.score.anchors.found;
       bucket.anchorsTotal += record.score.anchors.total;
+      bucket.forbiddenViolations += record.score.forbidden?.violations ?? 0;
+      bucket.forbiddenTotal += record.score.forbidden?.total ?? 0;
       for (const [category, score] of Object.entries(record.score.categories)) {
         const categoryBucket = bucket.categories[category] ?? { found: 0, total: 0 };
         categoryBucket.found += score.found;
@@ -493,6 +505,11 @@ function summarizeConditions(records: EffectivenessRunRecord[]): Record<string, 
       anchor_retention_rate: bucket.anchorsTotal
         ? Number((bucket.anchorsFound / bucket.anchorsTotal).toFixed(4))
         : null,
+      forbidden_violations: bucket.forbiddenViolations,
+      forbidden_total: bucket.forbiddenTotal,
+      forbidden_violation_rate: bucket.forbiddenTotal
+        ? Number((bucket.forbiddenViolations / bucket.forbiddenTotal).toFixed(4))
+        : 0,
       categories,
     };
   }
