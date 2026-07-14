@@ -7,7 +7,8 @@
     "max_runs_per_day": 6,
     "max_parked": 12,
     "max_failures_per_day": 5,
-    "max_inbox_size": 200
+    "max_inbox_size": 200,
+    "max_http_requests_per_day": 100
   },
   "intervals": {
     "loop_step_minutes": 10,

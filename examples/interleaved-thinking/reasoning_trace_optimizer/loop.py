@@ -6,10 +6,14 @@ running iterative improvements until convergence or max iterations.
 """
 
 import json
+import random
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
+
+import anthropic
 
 from rich.console import Console
 from rich.panel import Panel
@@ -26,6 +30,39 @@ from reasoning_trace_optimizer.models import (
     ReasoningTrace,
 )
 from reasoning_trace_optimizer.optimizer import PromptOptimizer, format_optimization_report
+
+
+T = TypeVar("T")
+
+
+def _api_call_with_retry(
+    call: Callable[[], T],
+    max_retries: int = 3,
+    base_delay: float = 1.0,
+    max_delay: float = 60.0,
+) -> T:
+    """Call a paid LLM API with exponential-backoff retry on rate limits.
+
+    Retries on Anthropic rate-limit, overloaded, and timeout errors. Other
+    exceptions are raised immediately so the loop can decide how to handle them.
+    """
+    retryable = (
+        anthropic.RateLimitError,
+        anthropic.OverloadedError,
+        anthropic.APITimeoutError,
+    )
+    for attempt in range(max_retries + 1):
+        try:
+            return call()
+        except retryable as exc:
+            if attempt >= max_retries:
+                raise
+            # Exponential backoff with full jitter.
+            delay = min(base_delay * (2 ** attempt), max_delay)
+            delay = random.uniform(0.0, delay)
+            time.sleep(delay)
+    # Unreachable, but keeps type checkers happy.
+    raise RuntimeError("retry loop exited without returning or raising")
 
 
 console = Console()
@@ -48,6 +85,18 @@ class LoopConfig:
     # Optimization behavior
     use_best_prompt: bool = True  # Use best performing prompt, not final
     max_prompt_growth: float = 5.0  # Max ratio of new prompt length to original
+
+    # Budget safeguards
+    max_total_tokens: int | None = None  # Hard cap on cumulative LLM tokens
+    max_requests: int | None = None  # Hard cap on capture/analyze/optimize calls
+    max_cost_usd: float | None = None  # Hard cap on estimated spend
+    cost_per_1m_tokens_usd: float = 3.0  # Blended cost estimate for budget checks
+    dry_run: bool = False  # If True, skip paid API calls and return stubs
+
+    # Retry behavior for paid API calls
+    max_retries: int = 3
+    retry_base_delay: float = 1.0
+    retry_max_delay: float = 60.0
 
     # Output options
     save_artifacts: bool = True
@@ -104,9 +153,80 @@ class OptimizationLoop:
         self.analyzer = TraceAnalyzer(api_key=api_key, base_url=base_url, model=model)
         self.optimizer = PromptOptimizer(api_key=api_key, base_url=base_url, model=model)
 
+        # Budget tracking
+        self._total_tokens = 0
+        self._request_count = 0
+        self._estimated_cost_usd = 0.0
+        self._stopped_by_budget = False
+
         # Create artifacts directory
         if self.config.save_artifacts:
             Path(self.config.artifacts_dir).mkdir(parents=True, exist_ok=True)
+
+    def _record_usage(self, tokens: int) -> None:
+        """Record token usage and update estimated cost."""
+        self._total_tokens += tokens
+        self._estimated_cost_usd += (
+            tokens * self.config.cost_per_1m_tokens_usd / 1_000_000
+        )
+
+    def _check_budget(self, label: str) -> tuple[bool, str]:
+        """Return (ok, reason) for current budget state before an API call."""
+        if self.config.max_requests is not None and self._request_count >= self.config.max_requests:
+            return False, f"request budget exceeded ({self._request_count}/{self.config.max_requests})"
+        if self.config.max_total_tokens is not None and self._total_tokens >= self.config.max_total_tokens:
+            return False, f"token budget exceeded ({self._total_tokens}/{self.config.max_total_tokens})"
+        if self.config.max_cost_usd is not None and self._estimated_cost_usd >= self.config.max_cost_usd:
+            return False, f"cost budget exceeded (${self._estimated_cost_usd:.4f}/${self.config.max_cost_usd:.4f})"
+        return True, ""
+
+    def _make_dry_run_trace(self, task: str, system_prompt: str) -> ReasoningTrace:
+        """Return a minimal stub trace when dry_run is enabled."""
+        from reasoning_trace_optimizer.models import ThinkingBlock, ToolCall
+        trace = ReasoningTrace(
+            session_id="dry-run",
+            task=task,
+            system_prompt=system_prompt,
+            model="dry-run",
+            success=True,
+            final_response="[dry-run] Skipped live LLM call.",
+        )
+        trace.thinking_blocks.append(
+            ThinkingBlock(
+                content="[dry-run] Thinking stub. No paid API call was made.",
+                turn_index=0,
+            )
+        )
+        trace.total_tokens = 0
+        trace.total_turns = 1
+        return trace
+
+    def _make_dry_run_analysis(self, trace: ReasoningTrace) -> AnalysisResult:
+        """Return a minimal stub analysis when dry_run is enabled."""
+        return AnalysisResult(
+            trace_id=trace.session_id,
+            overall_score=50.0,
+            reasoning_clarity=50.0,
+            goal_adherence=50.0,
+            tool_usage_quality=50.0,
+            error_recovery=50.0,
+            strengths=["[dry-run] No live analysis performed."],
+            recommendations=["Re-run with dry_run=False to perform real analysis."],
+        )
+
+    def _make_dry_run_optimization(
+        self,
+        original_prompt: str,
+        analysis: AnalysisResult,
+    ) -> OptimizationResult:
+        """Return a minimal stub optimization when dry_run is enabled."""
+        return OptimizationResult(
+            original_prompt=original_prompt,
+            optimized_prompt=original_prompt,
+            predicted_improvement=0.0,
+            confidence=0.0,
+            key_changes=["[dry-run] No live optimization performed."],
+        )
 
     def run(
         self,
@@ -138,12 +258,33 @@ class OptimizationLoop:
         best_iteration = 0
         consecutive_regressions = 0
 
+        # Pre-flight budget check
+        ok, reason = self._check_budget("start")
+        if not ok:
+            if self.config.verbose:
+                console.print(Panel(
+                    f"[bold red]Optimization blocked by budget guard[/bold red]\n\n{reason}",
+                    title="Reasoning Trace Optimizer"
+                ))
+            self._stopped_by_budget = True
+            return result
+
         if self.config.verbose:
+            budget_msg = ""
+            if self.config.max_total_tokens:
+                budget_msg += f"\nMax Tokens: {self.config.max_total_tokens:,}"
+            if self.config.max_requests:
+                budget_msg += f"\nMax Requests: {self.config.max_requests}"
+            if self.config.max_cost_usd:
+                budget_msg += f"\nMax Cost: ${self.config.max_cost_usd:.4f}"
+            if self.config.dry_run:
+                budget_msg += "\nMode: [yellow]DRY RUN[/yellow] (no paid API calls)"
             console.print(Panel(
                 f"[bold]Starting Optimization Loop[/bold]\n\n"
                 f"Task: {task}\n"
                 f"Max Iterations: {self.config.max_iterations}\n"
-                f"Convergence Threshold: {self.config.convergence_threshold}%",
+                f"Convergence Threshold: {self.config.convergence_threshold}%"
+                f"{budget_msg}",
                 title="Reasoning Trace Optimizer"
             ))
 
@@ -155,21 +296,49 @@ class OptimizationLoop:
         ) as progress:
 
             for i in range(self.config.max_iterations):
+                # Check budget before each iteration's paid calls.
+                ok, reason = self._check_budget(f"iteration {i + 1}")
+                if not ok:
+                    if self.config.verbose:
+                        console.print(f"\n[red]Stopping: {reason}[/red]")
+                    self._stopped_by_budget = True
+                    result.converged = False
+                    break
+
                 task_id = progress.add_task(f"Iteration {i + 1}/{self.config.max_iterations}", total=4)
 
                 # Step 1: Capture trace
                 progress.update(task_id, description=f"[cyan]Iteration {i + 1}: Capturing trace...")
-                trace = self.capture.run(
-                    task=task,
-                    system_prompt=current_prompt,
-                    tools=tools,
-                    tool_executor=tool_executor,
-                )
+                if self.config.dry_run:
+                    trace = self._make_dry_run_trace(task, current_prompt)
+                else:
+                    trace = _api_call_with_retry(
+                        lambda: self.capture.run(
+                            task=task,
+                            system_prompt=current_prompt,
+                            tools=tools,
+                            tool_executor=tool_executor,
+                        ),
+                        max_retries=self.config.max_retries,
+                        base_delay=self.config.retry_base_delay,
+                        max_delay=self.config.retry_max_delay,
+                    )
+                self._request_count += 1
+                self._record_usage(trace.total_tokens)
                 progress.advance(task_id)
 
                 # Step 2: Analyze trace
                 progress.update(task_id, description=f"[cyan]Iteration {i + 1}: Analyzing trace...")
-                analysis = self.analyzer.analyze(trace)
+                if self.config.dry_run:
+                    analysis = self._make_dry_run_analysis(trace)
+                else:
+                    analysis = _api_call_with_retry(
+                        lambda: self.analyzer.analyze(trace),
+                        max_retries=self.config.max_retries,
+                        base_delay=self.config.retry_base_delay,
+                        max_delay=self.config.retry_max_delay,
+                    )
+                self._request_count += 1
                 progress.advance(task_id)
 
                 # Calculate iteration score
@@ -193,12 +362,30 @@ class OptimizationLoop:
                 # Step 4: Optimize if continuing
                 optimization = None
                 if should_continue:
+                    # Re-check budget before the optimization call.
+                    ok, reason = self._check_budget(f"iteration {i + 1} optimization")
+                    if not ok:
+                        if self.config.verbose:
+                            console.print(f"\n[red]Stopping: {reason}[/red]")
+                        self._stopped_by_budget = True
+                        result.converged = False
+                        break
+
                     progress.update(task_id, description=f"[cyan]Iteration {i + 1}: Optimizing prompt...")
-                    optimization = self.optimizer.optimize(
-                        original_prompt=current_prompt,
-                        analysis=analysis,
-                        trace=trace,
-                    )
+                    if self.config.dry_run:
+                        optimization = self._make_dry_run_optimization(current_prompt, analysis)
+                    else:
+                        optimization = _api_call_with_retry(
+                            lambda: self.optimizer.optimize(
+                                original_prompt=current_prompt,
+                                analysis=analysis,
+                                trace=trace,
+                            ),
+                            max_retries=self.config.max_retries,
+                            base_delay=self.config.retry_base_delay,
+                            max_delay=self.config.retry_max_delay,
+                        )
+                    self._request_count += 1
 
                     # Check for excessive prompt growth
                     new_prompt = optimization.optimized_prompt
@@ -315,18 +502,42 @@ class OptimizationLoop:
         Run a single capture + analysis cycle (no optimization).
 
         Useful for debugging or when you just want analysis without
-        automatic optimization.
+        automatic optimization. Respects the same budget guards and retry
+        settings as the full loop.
 
         Returns:
             Tuple of (trace, analysis)
         """
-        trace = self.capture.run(
-            task=task,
-            system_prompt=prompt,
-            tools=tools,
-            tool_executor=tool_executor,
-        )
-        analysis = self.analyzer.analyze(trace)
+        ok, reason = self._check_budget("run_single")
+        if not ok:
+            raise RuntimeError(f"Budget guard blocked run_single: {reason}")
+
+        if self.config.dry_run:
+            trace = self._make_dry_run_trace(task, prompt)
+            analysis = self._make_dry_run_analysis(trace)
+        else:
+            trace = _api_call_with_retry(
+                lambda: self.capture.run(
+                    task=task,
+                    system_prompt=prompt,
+                    tools=tools,
+                    tool_executor=tool_executor,
+                ),
+                max_retries=self.config.max_retries,
+                base_delay=self.config.retry_base_delay,
+                max_delay=self.config.retry_max_delay,
+            )
+            self._request_count += 1
+            self._record_usage(trace.total_tokens)
+
+            analysis = _api_call_with_retry(
+                lambda: self.analyzer.analyze(trace),
+                max_retries=self.config.max_retries,
+                base_delay=self.config.retry_base_delay,
+                max_delay=self.config.retry_max_delay,
+            )
+            self._request_count += 1
+
         return trace, analysis
 
     def _calculate_score(
@@ -398,12 +609,22 @@ class OptimizationLoop:
     def _print_final_summary(self, result: LoopResult) -> None:
         """Print final optimization summary."""
         console.print("\n")
+        budget_content = (
+            f"[bold]Total Tokens:[/bold] {self._total_tokens:,}\n"
+            f"[bold]API Requests:[/bold] {self._request_count}\n"
+            f"[bold]Estimated Cost:[/bold] ${self._estimated_cost_usd:.4f}\n"
+        )
+        if self._stopped_by_budget:
+            budget_content += "[bold yellow]Stopped by budget guard[/bold yellow]\n"
+        if self.config.dry_run:
+            budget_content += "[bold yellow]Dry run: no paid API calls were made[/bold yellow]\n"
         panel_content = (
             f"[bold]Iterations:[/bold] {result.total_iterations}\n"
             f"[bold]Converged:[/bold] {'Yes' if result.converged else 'No'}\n"
             f"[bold]Initial Score:[/bold] {result.initial_score:.1f}\n"
             f"[bold]Final Score:[/bold] {result.final_score:.1f}\n"
-            f"[bold]Improvement:[/bold] {result.improvement_percentage:+.1f}%"
+            f"[bold]Improvement:[/bold] {result.improvement_percentage:+.1f}%\n\n"
+            f"{budget_content}"
         )
         console.print(Panel(panel_content, title="[green]Optimization Complete[/green]"))
 
@@ -444,6 +665,11 @@ class OptimizationLoop:
             "initial_score": result.initial_score,
             "final_score": result.final_score,
             "improvement_percentage": result.improvement_percentage,
+            "total_tokens": self._total_tokens,
+            "api_requests": self._request_count,
+            "estimated_cost_usd": round(self._estimated_cost_usd, 6),
+            "stopped_by_budget": self._stopped_by_budget,
+            "dry_run": self.config.dry_run,
             "timestamp": datetime.now().isoformat(),
         }
         with open(base_path / "summary.json", "w") as f:

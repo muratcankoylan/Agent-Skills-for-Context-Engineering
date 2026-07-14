@@ -2,7 +2,7 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
-import { config } from '../../config/index.js';
+import { checkBudget, config, recordUsage, withRetries } from '../../config/index.js';
 
 export const PairwiseCompareInputSchema = z.object({
   responseA: z.string().describe('First response to compare'),
@@ -104,15 +104,17 @@ Respond with valid JSON:
   }
 }`;
 
-  const result = await generateText({
+  const result = await withRetries('pairwiseCompare.evaluatePair', () => generateText({
     model: openai(config.openai.model),
     system: systemPrompt,
     prompt: userPrompt,
     temperature: 0.3
-  });
+  }));
+
+  recordUsage(result.usage);
 
   const parsed = JSON.parse(result.text);
-  
+
   return {
     winner: parsed.result.winner,
     confidence: parsed.result.confidence,
@@ -123,6 +125,58 @@ Respond with valid JSON:
 
 export async function executePairwiseCompare(input: PairwiseCompareInput): Promise<PairwiseCompareOutput> {
   const startTime = Date.now();
+
+  const budgetCheck = checkBudget('executePairwiseCompare');
+  if (!budgetCheck.ok) {
+    return {
+      success: false,
+      winner: 'TIE',
+      confidence: 0,
+      comparison: [],
+      analysis: {
+        responseA: { strengths: [], weaknesses: [] },
+        responseB: { strengths: [], weaknesses: [] }
+      },
+      differentiators: [],
+      metadata: {
+        evaluationTimeMs: Date.now() - startTime,
+        model: config.openai.model,
+        positionsSwapped: input.swapPositions
+      }
+    };
+  }
+
+  if (config.budgets.dryRun) {
+    recordUsage();
+    const comparisonStub = input.criteria.map(c => ({
+      criterion: c,
+      winner: 'TIE' as const,
+      aAssessment: '[dry-run] No live assessment performed.',
+      bAssessment: '[dry-run] No live assessment performed.',
+      reasoning: '[dry-run] JUDGE_DRY_RUN is enabled.'
+    }));
+    return {
+      success: true,
+      winner: 'TIE',
+      confidence: 0.5,
+      comparison: comparisonStub,
+      analysis: {
+        responseA: { strengths: ['[dry-run] No paid API call was made.'], weaknesses: [] },
+        responseB: { strengths: ['[dry-run] No paid API call was made.'], weaknesses: [] }
+      },
+      differentiators: [],
+      positionConsistency: {
+        consistent: true,
+        firstPassWinner: 'TIE',
+        secondPassWinner: 'TIE'
+      },
+      metadata: {
+        evaluationTimeMs: Date.now() - startTime,
+        model: config.openai.model,
+        positionsSwapped: input.swapPositions
+      }
+    };
+  }
 
   try {
     if (input.swapPositions) {
@@ -225,7 +279,7 @@ export async function executePairwiseCompare(input: PairwiseCompareInput): Promi
         }
       };
     }
-  } catch (error) {
+  } catch {
     return {
       success: false,
       winner: 'TIE',

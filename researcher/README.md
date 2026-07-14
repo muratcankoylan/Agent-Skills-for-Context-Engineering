@@ -76,7 +76,25 @@ python researcher/scripts/novelty_check.py --file researcher/fixtures/skill-prop
 python researcher/scripts/compare_skill_revisions.py skills/evaluation/SKILL.md skills/advanced-evaluation/SKILL.md
 python researcher/scripts/check_activation_cases.py
 python researcher/scripts/run_benchmarks.py
+python researcher/scripts/loop_step.py --allow-fetch
 ```
+
+## Budget & Rate-Limit Safeguards
+
+`researcher/orchestration/config.json` defines daily budgets that `loop_step.py` enforces:
+
+- `max_active_runs` — active research runs at one time
+- `max_runs_per_day` — new runs created per UTC day
+- `max_failures_per_day` — failures before the loop stops
+- `max_parked` — parked runs before the loop stops
+- `max_http_requests_per_day` — HTTP retrievals before the loop stops
+
+`loop_step.py` also supports:
+
+- `--dry-run` — advance state machines without making real HTTP requests
+- Exponential-backoff retry on HTTP 429 / 5xx / transient network errors
+
+> ⚠️ **Cost Warning**: The research harness is designed to stage evidence via whitelisted HTTP retrieval (`--allow-fetch`) before any paid-LLM judge or synthesis step. Keep `mode` as `dry-run` and use `--dry-run` for unattended scheduling until you explicitly enable paid-API stages.
 
 ## Current Published Research Skills
 
