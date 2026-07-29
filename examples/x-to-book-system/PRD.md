@@ -60,7 +60,42 @@ class OrchestratorState(TypedDict):
 - `fetch_engagement_metrics(tweet_ids)` - Get likes/retweets/replies
 - `write_to_store(account_id, data)` - Persist to file system
 
-**Output**: Structured JSON per account, written to file system (not passed through context).
+**Output**: Append-only source records per account, written to the file system
+and never passed through Orchestrator context.
+
+### Source Provenance Contract
+
+The Writer and Editor cannot verify quotes from previews or untyped provider
+responses. Normalize every fetched post into a provider-neutral source record
+before analysis:
+
+```python
+class SourceRecord(TypedDict):
+    source_record_id: str
+    tweet_id: str
+    conversation_id: Optional[str]
+    author_id: str
+    author_username: str
+    text: str
+    created_at: str
+    source_url: str
+    fetched_at: str
+    content_sha256: str
+    engagement: Dict[str, int]
+    raw_artifact: str
+```
+
+Apply these rules at the source boundary:
+
+1. Write the original provider response to an append-only `raw_artifact`.
+2. Compute `content_sha256` from the captured post before normalization.
+3. Reject records missing the post ID, full text, author, timestamp, or URL.
+4. Preserve `source_record_id` through analysis, outlines, drafts, and edits.
+5. Use concise records for routing only. Load detailed records before quoting.
+6. Verify each quote as an exact span of `text` and retain its ID and URL.
+
+Refreshing a post creates a new source record. It never overwrites the evidence
+used by a previously generated book.
 
 #### 3. Analyzer Agent
 **Purpose**: Extract patterns, themes, and insights from raw content.
@@ -310,8 +345,10 @@ def x_data_tool(
     - search: Search across accounts for query
     
     Returns:
-    - concise: tweet_id, content_preview, timestamp, engagement_score
-    - detailed: full content, thread context, all engagement metrics, reply preview
+    - Both formats: source_record_id, tweet_id, source_url, fetched_at
+    - concise: author_username, content_preview, timestamp, engagement_score
+    - detailed: full SourceRecord, thread context, all engagement metrics,
+      reply records
     
     Errors:
     - RATE_LIMITED: Wait {retry_after} seconds
@@ -387,7 +424,7 @@ Based on the evaluation skill, we define quality dimensions:
 
 | Dimension | Weight | Excellent | Acceptable | Failed |
 |-----------|--------|-----------|------------|--------|
-| Source Accuracy | 30% | All quotes verified, proper attribution | Minor attribution errors | Fabricated quotes |
+| Source Accuracy | 30% | Every quote matches a source record with ID and URL | Minor non-quote attribution errors | Fabricated, altered, or untraceable quotes |
 | Thematic Coherence | 25% | Clear narrative thread, logical flow | Some disconnected sections | No coherent narrative |
 | Completeness | 20% | Covers all major themes from sources | Misses some themes | Major gaps |
 | Insight Quality | 15% | Novel synthesis across sources | Restates obvious points | No synthesis |
@@ -399,7 +436,7 @@ Based on the evaluation skill, we define quality dimensions:
 def evaluate_daily_book(book: Book, source_data: Dict) -> EvaluationResult:
     scores = {}
     
-    # Source accuracy: verify quotes against original tweets
+    # Deterministic gate: exact text span plus source record ID and URL
     scores["source_accuracy"] = verify_quotes(book.chapters, source_data)
     
     # Thematic coherence: LLM-as-judge for narrative flow
@@ -513,8 +550,15 @@ def evaluate_daily_book(book: Book, source_data: Dict) -> EvaluationResult:
 **Symptom**: Writer generates quotes not in source material.
 **Mitigation**:
 - Strict source attribution in writing prompt
-- Editor agent verifies all quotes against source
-- Automated quote verification in evaluation
+- Editor verifies every quote against the referenced source record
+- Evaluation fails altered quotes, unknown record IDs, or missing source URLs
+
+### Failure: Source Provenance Loss
+**Symptom**: A claim cannot be traced after a post changes or disappears.
+**Mitigation**:
+- Store provider responses as append-only raw artifacts
+- Carry source record IDs through every derived artifact
+- Never replace the capture used by an existing book
 
 ### Failure: Theme Drift
 **Symptom**: Book themes diverge from actual source content.
@@ -641,4 +685,3 @@ context_limits:
 - Context optimization skill - Observation masking and compaction strategies
 - Tool design skill - Consolidation principle for tools
 - Evaluation skill - Multi-dimensional rubrics
-

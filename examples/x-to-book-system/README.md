@@ -106,7 +106,7 @@ These require relationship traversal and temporal validity that vector stores ca
 > "Agent quality is not a single dimension. It includes factual accuracy, completeness, coherence, tool efficiency, and process quality."
 
 **Application**: Five evaluation dimensions weighted by importance:
-- Source Accuracy (30%) - quotes verified against original tweets
+- Source Accuracy (30%) - quotes match preserved source records with IDs and URLs
 - Thematic Coherence (25%) - narrative flow
 - Completeness (20%) - theme coverage
 - Insight Quality (15%) - synthesis beyond restating
@@ -160,6 +160,7 @@ These require relationship traversal and temporal validity that vector stores ca
 | Temporal knowledge graph | memory-systems | Tracks evolving positions over time |
 | Observation masking | context-optimization | Raw tweets never enter orchestrator context |
 | Tool consolidation | tool-design | 3 tools instead of 15+ |
+| Source record provenance | tool-design + evaluation | Every quote traces to preserved source evidence |
 | Multi-dimensional evaluation | evaluation | 5 weighted quality dimensions |
 
 ## Files
@@ -178,4 +179,3 @@ This example serves as a template for applying context engineering skills to new
 5. **Build evaluation framework**: Define dimensions relevant to your use case
 
 The skills provide the vocabulary and patterns; the application requires understanding your specific constraints.
-
