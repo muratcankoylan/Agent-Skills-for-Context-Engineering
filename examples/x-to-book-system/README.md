@@ -167,6 +167,7 @@ These require relationship traversal and temporal validity that vector stores ca
 
 - [PRD.md](./PRD.md) - Complete Product Requirements Document
 - [SKILLS-MAPPING.md](./SKILLS-MAPPING.md) - Detailed mapping of skills to design decisions
+- [XQUIK-ADAPTER.md](./XQUIK-ADAPTER.md) - Concrete REST and MCP source adapter
 
 ## Using This Example
 

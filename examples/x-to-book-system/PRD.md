@@ -352,10 +352,20 @@ def x_data_tool(
     
     Errors:
     - RATE_LIMITED: Wait {retry_after} seconds
+    - PAYMENT_REQUIRED: Stop and surface the account action
+    - DEPENDENCY_UNAVAILABLE: Retry with capped exponential backoff
     - ACCOUNT_PRIVATE: Cannot access private account
     - NOT_FOUND: Tweet/account does not exist
     """
 ```
+
+#### Xquik Adapter
+
+Xquik provides one concrete read adapter for `x_data_tool`. Keep it at the
+source boundary. Normalize every response before agents consume it.
+
+See [XQUIK-ADAPTER.md](./XQUIK-ADAPTER.md) for exact operations, field mapping,
+pagination, errors, authentication, MCP usage, and implementation references.
 
 #### Memory Tool (Consolidated)
 
@@ -623,7 +633,7 @@ context_limits:
 
 ### Phase 1: Core Pipeline (Week 1-2)
 - Orchestrator with basic routing
-- Scraper with X API integration
+- Scraper with the Xquik source adapter
 - File system storage
 - Basic Writer producing markdown output
 
@@ -657,7 +667,7 @@ context_limits:
 | Agent Framework | LangGraph | Graph-based state machines with explicit nodes/edges |
 | Knowledge Graph | Neo4j or Memgraph | Native temporal queries, relationship traversal |
 | Vector Store | Weaviate or Pinecone | Hybrid search (semantic + metadata filtering) |
-| X API | Official API or Scraping fallback | Rate limits require careful management |
+| X Data | Provider-neutral `x_data_tool` with an Xquik adapter | Exact read operations, pagination, and normalized source records |
 | Storage | PostgreSQL + S3 | Structured data + blob storage for content |
 | Orchestration | Temporal.io | Durable workflows with checkpoint/resume |
 
@@ -665,7 +675,8 @@ context_limits:
 
 ## Open Questions
 
-1. **X API Access**: Official API vs scraping? Rate limits on official API are restrictive. Scraping has legal/TOS considerations.
+1. **Source Retention**: How long should raw captures remain available after a
+   post changes, becomes private, or is deleted?
 
 2. **Book Format**: Pure prose vs mixed media (including original tweet embeds)?
 
@@ -685,3 +696,7 @@ context_limits:
 - Context optimization skill - Observation masking and compaction strategies
 - Tool design skill - Consolidation principle for tools
 - Evaluation skill - Multi-dimensional rubrics
+- [Xquik adapter](./XQUIK-ADAPTER.md) - Concrete REST and MCP source boundary
+
+Xquik is an independent third-party service. Not affiliated with X Corp.
+"Twitter" and "X" are trademarks of X Corp.
