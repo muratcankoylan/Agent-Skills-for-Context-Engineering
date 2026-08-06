@@ -1,6 +1,6 @@
 {
   "name": "context-engineering",
-  "description": "Context engineering and harness engineering skills for production-grade AI agent systems: fundamentals, degradation patterns, compression, optimization, latent briefing (KV cache sharing between agents), multi-agent coordination, long-horizon prompting (pseudo-formal task briefs for long-running and parallel agents), memory systems, tool design, evaluation, autonomous harnesses, self-improvement loops (RSI, meta-harnesses, evolutionary scaffold search), and a file-based researcher operating system with deterministic gates, a continuous loop, and measured router-benchmark results across four frontier models.",
+  "description": "Context engineering and harness engineering skills for production-grade AI agent systems: fundamentals, degradation patterns, compression, optimization, latent briefing (KV cache sharing between agents), multi-agent coordination, long-horizon prompting (pseudo-formal task briefs for long-running and parallel agents), memory systems, tool design, evaluation, autonomous harnesses, self-improvement loops (RSI, meta-harnesses, evolutionary scaffold search), and a file-based researcher operating system with 22 accepted mechanisms, 26 provenance-tracked claims, 23 activation cases, deterministic gates, a strict skill-health score of 0.9221, a continuous loop, and measured router-benchmark results across four frontier models.",
   "version": "2.5.0",
   "author": {
     "name": "Muratcan Koylan"
