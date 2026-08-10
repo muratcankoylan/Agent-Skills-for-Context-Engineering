@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/corpus/inventory.schema.json",
+  "title": "Generated repository corpus inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repository_revision",
+    "source_tree_digest",
+    "sources",
+    "artifacts",
+    "relationships",
+    "compatibility",
+    "validator_ownership",
+    "unresolved_references"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "repository_revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "digest", "git_commit_excluded_to_avoid_self_reference"],
+      "properties": {
+        "kind": {"const": "canonical_source_tree"},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "git_commit_excluded_to_avoid_self_reference": {"const": true}
+      }
+    },
+    "source_tree_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "digest", "size_bytes"],
+        "properties": {
+          "path": {"type": "string"},
+          "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+          "size_bytes": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "artifacts": {"type": "object"},
+    "relationships": {"type": "object"},
+    "compatibility": {"type": "object"},
+    "validator_ownership": {"type": "array"},
+    "unresolved_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "path", "artifact_id", "message"],
+        "properties": {
+          "code": {"type": "string"},
+          "path": {"type": "string"},
+          "artifact_id": {"type": ["string", "null"]},
+          "message": {"type": "string"}
+        }
+      }
+    }
+  }
+}

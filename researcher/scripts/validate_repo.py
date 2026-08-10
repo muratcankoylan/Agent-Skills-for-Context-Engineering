@@ -298,13 +298,6 @@ class Validator:
                 if f"skills/{skill}/SKILL.md" not in text:
                     self.error(root_skill, f"missing exact internal skill path: {skill}")
 
-        claude = self.root / "CLAUDE.md"
-        if claude.exists():
-            text = claude.read_text(encoding="utf-8")
-            expected = f"{len(skill_names)} skill"
-            if expected not in text:
-                self.warn(claude, f"does not mention current skill count phrase '{expected}'")
-
     def validate_documented_plugin_commands(self, plugin_names: set[str]) -> None:
         pattern = re.compile(r"/plugin install\s+([a-z0-9.-]+)@")
         for path in sorted(self.root.glob("**/*.md")):

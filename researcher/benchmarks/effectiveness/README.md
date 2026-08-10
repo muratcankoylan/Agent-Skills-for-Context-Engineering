@@ -38,7 +38,7 @@ For each task, six conditions are evaluated per model:
 | `control` | `[]` | none (no skills loaded) |
 | `target` | `["project"]` | only `target_skill` |
 | `negative` | `["project"]` | only `irrelevant_skill` (negative control) |
-| `full` | `["project"]` | all 15 skills |
+| `full` | `["project"]` | all currently published skills |
 | `target_plus_one` | `["project"]` | `target_skill` plus one related skill |
 | `target_plus_unrelated` | `["project"]` | `target_skill` plus one unrelated skill (interaction control) |
 
