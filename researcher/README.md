@@ -2,6 +2,8 @@
 
 Current corpus counts, source digests, compatibility status, and unresolved-reference status are generated in the [live corpus inventory](generated/corpus-summary.md). Historical reports retain the values measured at their dated snapshot.
 
+The public/private boundary is defined by `governance/export-policy.yaml` and `scripts/validate_export.py`. Real private plans and receipts stay under ignored local paths; only validated projection trees are proposed for public review.
+
 This directory defines the repo-native workflow for turning external research into skill changes. It is intentionally file-based so agents can inspect, resume, and audit work without requiring a hosted scheduler.
 
 ## Mission

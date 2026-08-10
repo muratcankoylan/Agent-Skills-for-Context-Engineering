@@ -1,0 +1,15 @@
+{
+  "authors": [
+    "Fixture Author"
+  ],
+  "classification": "public_derived",
+  "id": "proj_restricted_fixture",
+  "kind": "CitationMetadata",
+  "license_note": "Metadata may be redistributed; raw body may not.",
+  "published_at": "2026-08-10",
+  "retention": "durable",
+  "schema_version": "1.0.0",
+  "source_type": "restricted_fixture",
+  "title": "Synthetic Restricted Harness Study",
+  "url": "https://example.invalid/restricted-harness-study"
+}

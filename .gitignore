@@ -68,6 +68,8 @@ researcher/queue/inbox.jsonl
 researcher/queue/parked.jsonl
 researcher/queue/done.jsonl
 researcher/queue/quarantine.jsonl
+researcher/exports/private/
+researcher/exports/staging/
 
 # Active research runs live under researcher/runs/; the seed run is kept as a
 # committed fixture, everything else is local runtime state.

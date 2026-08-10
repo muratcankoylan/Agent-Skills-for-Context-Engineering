@@ -1,0 +1,23 @@
+{
+  "classification": "public_derived",
+  "entries": [
+    {
+      "artifact_kind": "citation_metadata",
+      "entry_id": "entry_restricted_fixture",
+      "media_type": "application/json",
+      "output_digest": "sha256:3cd4d08885889eb70364bb5a3bfbff76ddcf49d5ebc5e9d11cc4bd79f6fd66dd",
+      "output_path": "citation/restricted-fixture.json",
+      "projection_id": "proj_restricted_fixture",
+      "size_bytes": 453,
+      "transformation_digest": "sha256:25a93628ef7d29c48874e74e68ff9bc80fa0f3a942b969ad19833017e818c031",
+      "transformation_id": "restricted_citation_v1"
+    }
+  ],
+  "id": "export_restricted_fixture_v1",
+  "kind": "ExportManifest",
+  "policy_digest": "sha256:bbc9a19a969246698c80a69c0692108a2ffabf84dbdbcb02a5ed127c1de2ced1",
+  "policy_version": "1.0.0",
+  "retention": "durable",
+  "schema_version": "1.0.0",
+  "state": "rendered"
+}
