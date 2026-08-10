@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/governance/authority.schema.json",
+  "title": "Program constitution and authority policy",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "constitution_version",
+    "lifecycle_state",
+    "effective_commit",
+    "default_effect",
+    "promotion_event",
+    "actor_classes",
+    "actions",
+    "resource_classes",
+    "protected_surfaces",
+    "rules",
+    "emergency_controls",
+    "amendment_procedure"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "constitution_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "lifecycle_state": {"enum": ["draft", "reviewed", "merged", "effective", "superseded"]},
+    "effective_commit": {"type": "string", "minLength": 1},
+    "default_effect": {"const": "deny"},
+    "promotion_event": {"const": "human_merged_commit"},
+    "identity_bindings": {"type": "object"},
+    "actor_classes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["automated", "conflicts_with"],
+        "additionalProperties": false,
+        "properties": {
+          "automated": {"type": "boolean"},
+          "conflicts_with": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        }
+      }
+    },
+    "actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "resource_classes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "protected_surfaces": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "separation_of_duty": {"type": "array", "items": {"type": "object"}},
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["rule_id", "effect", "actors", "actions", "resources", "reason_code"],
+        "additionalProperties": false,
+        "properties": {
+          "rule_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+          "effect": {"enum": ["allow", "deny"]},
+          "actors": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+          "actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+          "resources": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["key", "operator"],
+              "additionalProperties": false,
+              "properties": {
+                "key": {"type": "string"},
+                "operator": {"enum": ["equals", "not_equals", "in", "not_in", "present"]},
+                "value": {}
+              }
+            }
+          },
+          "reason_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]+$"}
+        }
+      }
+    },
+    "emergency_controls": {"type": "object"},
+    "amendment_procedure": {"type": "object"},
+    "non_constitutional_guidance": {"type": "array", "items": {"type": "string"}}
+  }
+}

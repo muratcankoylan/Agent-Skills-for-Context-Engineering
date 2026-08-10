@@ -3,8 +3,9 @@ name: Validate Researcher Operating System
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+  # Stacked pull requests use proposal branches as their base. Validate every
+  # pull request so dependent layers receive the same gates as the base layer.
+  pull_request: {}
   workflow_dispatch:
 
 jobs:
@@ -27,7 +28,10 @@ jobs:
         run: |
           python -m py_compile \
             researcher/scripts/skill_frontmatter.py \
+            researcher/scripts/governance_policy.py \
             researcher/scripts/tests/test_skill_frontmatter.py \
+            researcher/scripts/tests/test_governance_policy.py \
+            researcher/scripts/validate_governance.py \
             researcher/scripts/validate_platform_compat.py \
             researcher/scripts/validate_repo.py \
             researcher/scripts/validate_run.py \
@@ -45,8 +49,11 @@ jobs:
             examples/long-horizon-prompt-lab/scripts/build_lab.py \
             examples/long-horizon-prompt-lab/scripts/validate_site.py
 
-      - name: Unit tests (frontmatter parser)
-        run: python -m unittest researcher.scripts.tests.test_skill_frontmatter
+      - name: Researcher unit tests
+        run: python -m unittest discover -s researcher/scripts/tests -p 'test_*.py'
+
+      - name: Governance policy
+        run: python researcher/scripts/validate_governance.py --check
 
       - name: Build and validate long-horizon prompting site
         run: |
