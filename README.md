@@ -80,7 +80,7 @@ Each skill is structured for efficient context use. At startup, agents load only
 
 ### Platform Agnosticism
 
-These skills focus on transferable principles rather than vendor-specific implementations. The patterns work across Claude Code, Cursor, and any agent platform that supports skills or allows custom instructions.
+These skills focus on transferable principles rather than vendor-specific implementations. The patterns work across Claude Code, Cursor, AdaL, and any agent platform that supports skills or allows custom instructions.
 
 ### Conceptual Foundation with Practical Examples
 
