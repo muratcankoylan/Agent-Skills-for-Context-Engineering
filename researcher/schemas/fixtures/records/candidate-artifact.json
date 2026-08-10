@@ -1,0 +1,17 @@
+{
+  "artifact_ref_ids": [],
+  "candidate_type": "skill_change",
+  "causal_hypothesis_ref": "hypothesis-context-pack-v1",
+  "classification": "private_operational",
+  "created_at": "2026-08-10T12:00:00Z",
+  "declared_changed_surfaces": ["skills/context-fundamentals/SKILL.md"],
+  "draft_tree_digest": "sha256:b8e307cfcac5d7455c0e352c7b13e65aa997c023280b5fd90ac37454c00f3441",
+  "id": "cand_018f3e40-7b80-7a21-8000-000000000002",
+  "kind": "CandidateArtifact",
+  "parent_candidate_ids": [],
+  "preservation_obligations": ["router top-1 must not regress"],
+  "proposed_by": "skill_builder",
+  "root_production_epoch": "main@a1841d1",
+  "schema_version": "1.0.0",
+  "target_editable_surface": "skill-body"
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/legacy-queue-record.schema.json",
+  "title": "LegacyQueueRecord 1.0.0 adapter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "url", "title", "author_or_org", "source_type", "retrieval_status", "candidate_reason", "created_at"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "url": {"type": "string", "minLength": 1},
+    "title": {"type": "string"},
+    "author_or_org": {"type": "string"},
+    "source_type": {"type": "string", "minLength": 1},
+    "retrieval_status": {"type": "string", "minLength": 1},
+    "candidate_reason": {"type": "string"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "retrieved_at": {"type": "string", "format": "date-time"},
+    "raw_evidence": {"type": "array", "items": {"type": "string"}},
+    "retrieval_notes": {"type": "string"}
+  }
+}

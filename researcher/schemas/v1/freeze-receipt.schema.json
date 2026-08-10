@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/freeze-receipt.schema.json",
+  "title": "FreezeReceipt 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "kind",
+    "candidate_id",
+    "candidate_record_digest",
+    "root_production_epoch",
+    "expected_draft_digest",
+    "tree_digest",
+    "schema_registry_digest",
+    "freeze_policy_digest",
+    "entries",
+    "file_count",
+    "total_size_bytes",
+    "classification",
+    "frozen_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "id": {"type": "string", "pattern": "^freeze_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "kind": {"const": "FreezeReceipt"},
+    "candidate_id": {"type": "string", "pattern": "^cand_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "candidate_record_digest": {"$ref": "#/$defs/digest"},
+    "root_production_epoch": {"type": "string", "minLength": 1},
+    "expected_draft_digest": {"$ref": "#/$defs/digest"},
+    "tree_digest": {"$ref": "#/$defs/digest"},
+    "schema_registry_digest": {"$ref": "#/$defs/digest"},
+    "freeze_policy_digest": {"$ref": "#/$defs/digest"},
+    "entries": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/treeEntry"}
+    },
+    "file_count": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+    "total_size_bytes": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+    "classification": {"const": "private_operational"},
+    "frozen_at": {"type": "string", "format": "date-time", "pattern": "Z$"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "treeEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "entry_type", "executable", "size_bytes", "digest"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "entry_type": {"const": "file"},
+        "executable": {"type": "boolean"},
+        "size_bytes": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    }
+  }
+}

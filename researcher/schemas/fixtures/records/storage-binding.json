@@ -1,0 +1,10 @@
+{
+  "artifact_ref_id": "aref_018f3e40-7b80-7a21-8000-000000000003",
+  "classification": "private_operational",
+  "created_at": "2026-08-10T12:00:00Z",
+  "id": "bind_018f3e40-7b80-7a21-8000-000000000004",
+  "kind": "StorageBinding",
+  "locator": "sha256/22/2222222222222222222222222222222222222222222222222222222222222222",
+  "schema_version": "1.0.0",
+  "storage_class": "private_content_addressed"
+}

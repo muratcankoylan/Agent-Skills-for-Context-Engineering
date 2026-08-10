@@ -1,0 +1,76 @@
+{
+  "canonicalization_profile": "jcs-rfc8785-integer-v1",
+  "cases": [
+    {
+      "canonical": "{\"a\":\"é\",\"z\":1}",
+      "digest": "sha256:fb64e573f7cde5b7efeda52ffc4bdd57572055b0b7e64a70172606c82c6c7eac",
+      "id": "object-key-order",
+      "result": "pass"
+    },
+    {
+      "canonical": "{\"😀\":2,\"\":1}",
+      "digest": "sha256:28c95d1bbb2209223307e62f489020e8f9e0cfa16adf2daf6d88127a1e8dd22a",
+      "id": "utf16-astral-order",
+      "result": "pass"
+    },
+    {
+      "canonical": "{\"é\":\"NFD\",\"é\":\"NFC\"}",
+      "digest": "sha256:897b10cef0f117a16e395bf3b5d553fc6fdddbffb887ed8dc71bfb07b653959d",
+      "id": "unicode-not-normalized",
+      "result": "pass"
+    },
+    {
+      "canonical": "{\"control\":\"\\u0001\",\"line\":\"a b\"}",
+      "digest": "sha256:6e67b05a2a87139179e91ea5c8f88eaff9f0f16bfdec8cc46f23fdd50e1d498e",
+      "id": "controls-and-line-separator",
+      "result": "pass"
+    },
+    {
+      "canonical": "[-9007199254740991,0,9007199254740991]",
+      "digest": "sha256:96800f711edd6780b27c203b227a9d77227df8fd906a5236c3a17b6dea82d193",
+      "id": "safe-integer-boundaries",
+      "result": "pass"
+    },
+    {
+      "canonical": "{\"array\":[],\"empty\":\"\",\"nil\":null,\"object\":{}}",
+      "digest": "sha256:cb71d3142d4362df1346aa8388ea984c09b9beb39f9cac2a3a8cd6b029d4fc2b",
+      "id": "empty-values-and-null",
+      "result": "pass"
+    },
+    {
+      "id": "duplicate-key",
+      "reason_code": "DUPLICATE_KEY",
+      "result": "reject"
+    },
+    {
+      "id": "float",
+      "reason_code": "UNSAFE_NUMBER",
+      "result": "reject"
+    },
+    {
+      "id": "negative-zero",
+      "reason_code": "UNSAFE_NUMBER",
+      "result": "reject"
+    },
+    {
+      "id": "unsafe-integer",
+      "reason_code": "UNSAFE_NUMBER",
+      "result": "reject"
+    },
+    {
+      "id": "non-finite",
+      "reason_code": "UNSAFE_NUMBER",
+      "result": "reject"
+    },
+    {
+      "id": "lone-surrogate",
+      "reason_code": "INVALID_UNICODE",
+      "result": "reject"
+    }
+  ],
+  "golden_record_count": 21,
+  "registered_schema_count": 20,
+  "result": "pass",
+  "schema_version": "1.0.0",
+  "suite_digest": "sha256:f85913b47745ef1e028a1f36988ce33419658bdcdb382402f76e316386244091"
+}

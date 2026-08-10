@@ -1,0 +1,11 @@
+{
+  "classification": "public_derived",
+  "disposition": "corrected",
+  "id": "export_schema_fixture_correction",
+  "kind": "ExportCorrection",
+  "projection_id": "proj_schema_fixture",
+  "reason_code": "SOURCE_METADATA_CORRECTED",
+  "retention": "durable",
+  "schema_version": "1.0.0",
+  "supersedes_manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+}

@@ -1,0 +1,11 @@
+{
+  "classification": "public_derived",
+  "entries": [{"entry_id": "entry_fixture"}],
+  "id": "export_schema_fixture",
+  "kind": "ExportManifest",
+  "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "policy_version": "1.0.0",
+  "retention": "durable",
+  "schema_version": "1.0.0",
+  "state": "rendered"
+}

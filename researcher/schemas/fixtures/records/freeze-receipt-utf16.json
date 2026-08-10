@@ -1,0 +1,32 @@
+{
+  "candidate_id": "cand_018f3e40-7b80-7a21-8000-000000000002",
+  "candidate_record_digest": "sha256:a6bfe799f607363cfd5c58318456c3b1e02fa8c4635d91e80526295e8c828268",
+  "classification": "private_operational",
+  "entries": [
+    {
+      "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+      "entry_type": "file",
+      "executable": false,
+      "path": "😀",
+      "size_bytes": 1
+    },
+    {
+      "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+      "entry_type": "file",
+      "executable": false,
+      "path": "",
+      "size_bytes": 1
+    }
+  ],
+  "expected_draft_digest": "sha256:16ac029ab329f91b89c6e6bb0c24e5b1c228f29d55356bad4a5d783413ad97af",
+  "file_count": 2,
+  "freeze_policy_digest": "sha256:9157324eaf7ec5a74b6817c7183fbc79cfd2f0292629ae426c3cdf179378aeb8",
+  "frozen_at": "2026-08-10T12:01:00Z",
+  "id": "freeze_018f3e40-7b80-7a21-8000-000000000009",
+  "kind": "FreezeReceipt",
+  "root_production_epoch": "main@a1841d1",
+  "schema_registry_digest": "sha256:2bf3242fd6b4cbf9e42ef2470bceff7787b870fdd08842fc1a4d90fadc9806e0",
+  "schema_version": "1.0.0",
+  "total_size_bytes": 2,
+  "tree_digest": "sha256:16ac029ab329f91b89c6e6bb0c24e5b1c228f29d55356bad4a5d783413ad97af"
+}

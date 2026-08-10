@@ -1,0 +1,513 @@
+{
+  "deduplicated": [],
+  "deduplicated_count": 0,
+  "input_count": 50,
+  "migrated": [
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-advanced-evaluation-position-swap",
+      "new_digest": "sha256:47ec871ef2d930872b78351de418949f99f53f9fc9f8177201469edacbe21cf2",
+      "new_id": "rec_90fc915c-c760-559e-abfe-5bf847f89ff9",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:ff86a2aa2dbeab30063f0acfaf5a9fb08780f1d691cc94b9dc820a0d60edffb0",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:0e44b638988b12477c1f9446842db5aeec0b25ef95be058bead68dc9c1efe28e"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-context-compression-factory-benchmark",
+      "new_digest": "sha256:b1526ab5028b8cae15dc847c5dec11012ba3905eddd6255be5c089397d8a4e42",
+      "new_id": "rec_56cc2cf0-3beb-5cdd-b966-c736e2f4fcb8",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:ff4d0354a5f95119d3bfb5a4c48f934273a3eb79c3724043498290092e9d14f7",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:e0204364c0078631a8484c1cb9eeb53bf8197a3278d292a6f7e88df2f04f768f"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-context-degradation-distractor-shuffled",
+      "new_digest": "sha256:0cb21b9f587333b3a3d421b7c31d584d4e28e698712ae73020c3a6eafb408684",
+      "new_id": "rec_ef53f09b-71de-5c55-a03b-7ccc0aaa347d",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:9a8cfddbfa5a4e0649138e6f628dbdf62fb5db17ad7c7eb85b1c4ddae609ffb1",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:795dd44cdadb32b80e517a6796f24080a963eb5c8085ebd4a81408bbc3c1e3c1"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-context-degradation-lost-middle-ruler",
+      "new_digest": "sha256:d225ac34262153f888d9f331bb50dc74bd0fd325a1417abad100ea38417a742f",
+      "new_id": "rec_7bd8a229-e97a-587f-8359-f1f5b3f15305",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:afbbbd1299c2533d9d69821a90194ed98257e6535dde60dc2db26dd47c8ff77e",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:1f1f67b6dfb6f87ed57e4e0cdca70fd00ad64dc4f89dc5680cc76835f6ab9b50"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-context-optimization-tool-output-dominance",
+      "new_digest": "sha256:d1a8d1ee2dfdb195e1ffdd150636f99b833225713201daef0860eec874263834",
+      "new_id": "rec_bcb45489-e825-530d-92c0-37f75d9f7a14",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:47e85c98ba8db310f49b028a83c92e35590dbd21ffe46122b85129055d4a58e1",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:61d9fcb1fbb7939d701a924911c3e595547a610f98229e7ba5a1d0dd4226a88d"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-evaluation-browsecomp-variance",
+      "new_digest": "sha256:389b81f7b4799b7912ec430e976889a59229a8ae1f246e66954f579017d49f52",
+      "new_id": "rec_c7b61002-ecd2-5fa9-9b43-68c50ad3d953",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:a5f846d84583a187f54362b1e6ea7194197ced9796ffa85ee6dc2e3b493546f7",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:db5f5a19f3eabb3b1f11bc81c0fedb55d004c792e726ca902a6a9b0eb196a2e8"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-harness-locked-evaluator",
+      "new_digest": "sha256:05c4174719c8d4d625927fc91c4ae18abf0963ad3de41a927b1a86c747eeb4ca",
+      "new_id": "rec_85ecaf5c-4ff2-523f-9df7-e03877cd6771",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:83f3c65582418812a45d1c105d8c3be9e5f07a9ef3d5c0f53163bc848ea6ffcb",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:e9b98fba8ec5445a62696ac4aab2b19f7482f8858901aeff2c6caa93c740e28d"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-latent-briefing-public-results",
+      "new_digest": "sha256:7052576e0ee1bd40a012c8499aa2baa17eeb0eade4c0e9f9009578bb2d45b76d",
+      "new_id": "rec_887cf943-f868-58cf-8b72-092cddf408f8",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:82b0e4ba0aa761b06a60251e6f6f341751274d7a279bbbc2a85d3b5b41e1a4d0",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:adf99a5367f3747ed99083ba5899b27d7f6c5b1589109f78adf3e532c1b021f4"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-long-horizon-cdc-run",
+      "new_digest": "sha256:187f2b28c61f7c8a5f0d1c34af67c455dbf479503ff74ea2b6a99025e95ab970",
+      "new_id": "rec_67a17f5f-b27a-5946-808b-fec52ab13ae8",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:ce9bf2db7b19f7909d2ab5df7539887c3f4ebd5c14837dac770ee3171f3afed1",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:8746db6ae501c170a2bdb548d49b9cceee05af50696c8b6599a3f7fa1bfb39df"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-long-horizon-diversity-collapse",
+      "new_digest": "sha256:617d3d137a2a1ef432105885792104d526a65b54bcbc7e9bf3fc44ac75fbeaf5",
+      "new_id": "rec_d2955a00-55a0-58cf-ba13-369a12035df7",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:c1261b2ddeefa399350e843863a86118d28e69658c53f9c9cc727357a78ceb54",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:473133f006e4c231e8f4de39f7677de4bc9a63e5325fe85c24f85204f47f0929"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-long-horizon-evidence-audit",
+      "new_digest": "sha256:fc75e68ada2cbd84d0bb08b7bbb3e44f84d001ce42def4032bc9538966f71ecb",
+      "new_id": "rec_647655d7-994f-5c20-ab0f-0bc61ef12f2b",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:2eda7d287f9e2b32ba0a561db11df0b5d283135277a65772a417ab8bcb7d54ed",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:eee0f18b3eb09224e4eab6790ea41344d0a5a2233389e02dd50465fd05fb108c"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-long-horizon-give-up-drift",
+      "new_digest": "sha256:fe7f3f97c47a3ab5e3d26590ebadc86d0ced7fe18d9951c558eeaf94ac5c7287",
+      "new_id": "rec_15cd00d6-2821-54da-8f74-590778260729",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:b305c6d1d51c93ee1dddb9c3bc48aa6f29996a4f533cfbc2e1c93df0e39a5e0f",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:3ff67003db9f13dd7be5bfd902e8347d67ee462662289aa4b38f3bd6c5e83c5d"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-long-horizon-lean-prompt",
+      "new_digest": "sha256:b1030c0c9ab6666546711ec8e13fef0644ddc14f08d40567ba05b52d1cee7eda",
+      "new_id": "rec_6006e829-268d-5221-94e9-d44910e759ee",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:a0e100c073296d018bc6784e3e75d1a3231e96869ba382cb4d4696f647795c73",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:a6f5b8b849a7fc41a4aa58e16d5f6de43e97bae686837a2409f7d7460a0cf53d"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-long-horizon-persistence-hacking",
+      "new_digest": "sha256:ea2f18c27ebf374b2293a256be8d85d496716be16ae3047c87b15610e2b97cc6",
+      "new_id": "rec_07ea87ef-73c8-58de-a122-823a21d26727",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:105270648268d209346f9ba3cab3d89f308d95f3de1409b48e00a5a6cd1ddb8b",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:ff7403439b7dc7a99f9f47533e395e452293c8aae28d703c79e7e2508db25fd4"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-long-horizon-state-ledger",
+      "new_digest": "sha256:860e2ca94d292242f0d08f0ed9a5ac20959d8123d46909135eeb4e0128e5f14c",
+      "new_id": "rec_0adcc32a-7517-5d5c-9c4a-021e775ba87b",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:1387a4b7f5c75838e40f29c7f9123c2938d79495df2ea0bde263de061e41155b",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:75794c8135ef3ef0305af54987ad20a72fd431491e7fbd26e7e72ba0fbc288d2"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-long-horizon-verification-gap",
+      "new_digest": "sha256:a17dac138edbd20205ce7f67eff7604166e5d338472b8d92ad0f0665ffe319f6",
+      "new_id": "rec_883fd1ef-b1cc-5581-becb-e9ca2401ed6d",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:8905b73069d0c9cc3f2407117a00f388e82a8ed0e841373567810f71bec1df40",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:366734cb19d894c7ff698acaf83a018bf66dbe21744be053f47a87486b42c1da"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-memory-locomo-filesystem-baseline",
+      "new_digest": "sha256:5f29df237500e88dca06a2f02d0a4a2d3a313a8a3e998c92c0a8e2e858edb4f8",
+      "new_id": "rec_554e1649-850a-5ae4-bb3f-aed9e68c61d3",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:4b9b459dd24702399ee91c4f76a47426c0c9fd9c64f5dd1ba434719e4b6a7840",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:fe345d65674bc68549d6349f1add91ceff90ef6390095a9903b986c9be64e4ac"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-multi-agent-token-multiplier",
+      "new_digest": "sha256:3d1f60b3dc2b705b4021afc6cb93d6bcf4f4b5d9882d68808c81b8a88d2e39da",
+      "new_id": "rec_ea1bf0a2-8427-5c6b-8cb7-582a823378c9",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:3199a6a0200d1bc8b14f78c3e23a3db7aff11e44d96088c3d478eef25149afbe",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:625952d73ed61c2d9d1785f3e5e22420da37e475bad1f762e145d42869ef634d"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-project-development-vercel-d0-reduction",
+      "new_digest": "sha256:09f135c147a5bb8123b87bd26f16483468fa8885dc2a4a62d9c16de1e61ea975",
+      "new_id": "rec_b0ac21e8-6aa0-5df8-972a-3b17e6cee7eb",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:9e377c6f9ddd66a68db550e6bc3f968a96bc8bb55a396b8cd930bd498c4dad04",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:ecd3b693cd42174fb7275a367a834360e474cbe19c9961192bafa34d5ae4685c"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-self-improvement-capability-threshold",
+      "new_digest": "sha256:54c7c3bca10d6198e6af837d493579438f38285b2f76f00c1695a69e5ed0bce2",
+      "new_id": "rec_0c3c1983-2a9a-5419-b88e-297295126c64",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:335902b1370c2cb391dd4366195d984dd17d90bde5ca9d838e829d8174d698e0",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:b335725c929ee946b07a11c62b22c6535c5c354a526ff58568ab7f765d2ccbff"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-self-improvement-context-collapse",
+      "new_digest": "sha256:c6c1ad4ffe83f47249ab075d3b12af2bc6f4b40ab315318cb89d570a270eba0e",
+      "new_id": "rec_3929a81e-65db-5ea9-abb4-a6a887b730f0",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:f5e8fb59ce3c76e3ea0a08e119905481bec676edee854cb70454f646f0132296",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:10ad2093a6d465f1f4f292e6bfafcbd452a9a1629b58e41f21d0dd82d2312ddb"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-self-improvement-raw-trace-ablation",
+      "new_digest": "sha256:c2b7391e350a9018b4e6271182665d60f312333b951cd7a43732280d33d1c7c8",
+      "new_id": "rec_66fe3aa8-1ec8-5fc3-afdc-b6ff64c9b375",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:63520b6484326e0e6d0a193551910bffaea8d5e3706b8eae6b04b2c2480ffcd5",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:11e0163c80694cc00df441b421f0693199f1680b520e6650c99acb32a19a4617"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-self-improvement-scorer-visibility",
+      "new_digest": "sha256:de0da6ea8b77441d8e64aef3a41c99171a6713927472e1bb1b65695110a1e7ec",
+      "new_id": "rec_a8ce7ce7-f856-5c43-851f-e1f644c790b9",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:8ed84adb4a6eb9e4f9e0b01ac1923621af348a7d37fc5664050fdcf073865be0",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:5ee59354df4f345ed7216f40952db1853fb4919e348d07260ea9b46bafb4fdb7"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-self-improvement-two-split-acceptance",
+      "new_digest": "sha256:0c333b0537604aa3c97f1db54a3125b4c813aa2ee3f11353e9f91f0fde5fabbe",
+      "new_id": "rec_1b98b72f-03fd-5461-8c91-c2cd611d250a",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:28264c737f6ac2987159d17b557f92ff62a1285395afc1a7fde0ad24a5827670",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:a293e3e21a3abcf0dd353400db8f0340e96d43ffade44297cfa78f3f2bfa44a8"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-self-improvement-visible-evaluator-hacking",
+      "new_digest": "sha256:8928568aa4c4faf3f712c830a5b463c8b0f6d1fa2eda32640ae94163690a783d",
+      "new_id": "rec_b5b1f573-232f-52ea-83a7-21e0e18473b1",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:c2c0d8dc6c372405ed13e9eb11d05a92989f4fe5c91cda758de68005210e500c",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:8167bbb73561416a0b1768273e2c673e5d76857960bccd867ada6e8727fb4764"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-tool-design-vercel-d0-reduction",
+      "new_digest": "sha256:029e89f4159d824fafb737c77cda299e0553db3aaf615f01d07b7d24806aa640",
+      "new_id": "rec_6a65bc71-d590-56b3-8cd7-920fdc2d7743",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:b62daa32246ee68ca1ab6fcd73176510c3c234993ffdd9d2aa33cc306bf3a439",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:b0d241ff2a59a20926b682111619d39cc73f7a588af0d089efe2c75b93657de3"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "anchored-iterative-summary",
+      "new_digest": "sha256:de1f4623ab958019d4bab55cf62bb0d56c84d25370a6013e15cf43956c3e0462",
+      "new_id": "rec_2ac8071f-7c29-5010-8e64-136946d6ee6f",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:73ec6e4f00e03ebf739ae259e63101d810dd497c6804c9e8050fd5766d47cad0",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:2027776beaef782ebcf0d8912667ccb0d44fdc28beb6de52615ab0e2362622ab"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "audit-gated-return-condition",
+      "new_digest": "sha256:d423c734ed88cd36678f4a50f2e63a662091d3ee24158d07c8df16aa549a0a3c",
+      "new_id": "rec_cf46a5ca-5a97-5114-a928-b3adc14358a9",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:f3666003a310bd7ce980b7ce75b52706c415ae2031b14088ed1d1ff98f92ab7e",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:4b5fd015db03752a838f0cf9417105342b27acdfb9b66aeaa909b1cc0db3cbf4"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "context-isolation-agent-partitioning",
+      "new_digest": "sha256:9d247c7341b09eb65075395a2283612349af10e2b20dbc8144db07b851827d19",
+      "new_id": "rec_2ad8bfa9-d29c-5018-badf-49e059f1a8f2",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:92144ad767739a55b2db317cb74408fb2624a809dbe6f929bfba195c179b2adb",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:8fd18701cee32ff08eae0afb974d36c574cfbe7ea83bdd1547f7e84373f51a2e"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "context-poisoning-circuit-breaker",
+      "new_digest": "sha256:124e69cfc1c3ac2e55328853e81683b3293214a9f9520caa74bac7f055817629",
+      "new_id": "rec_87974525-d00d-59d5-bb75-d628069ce61f",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:021d1143f4a9ad31c07a650a20ef85aa7b9eea79d01e0f8fdebe7436e1ae8c65",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:cd98f8eb355df5cfc5cfc7774d9ab71a622ea6e61045a80ee7c284c70321c93e"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "deterministic-first-validation",
+      "new_digest": "sha256:efdb1a800147ba8b09fecd308e66d7f41ffc1178dded5f44627f512c047210d6",
+      "new_id": "rec_a53f639d-6edf-5bae-becc-941b99efa336",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:4aa4c9650a0510a2ecf1b421c2c3ea84ce82b7f8a1065e726c97542cca27a737",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:409286746ae63f4e7f8e14843a075d7a380d46b2bd95d59bbbeba7636e98e456"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "durable-research-thread",
+      "new_digest": "sha256:c348d45e29be0d7a87b75e4d592ef5d0ec7e3af9088d29805bf9c6634d7ed29b",
+      "new_id": "rec_861b18c9-e04e-54a0-a979-9dfb82490ee9",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:f0b2fa7333b02e47dda07473965b824980ebaa16c6bdc5c602246872c9ebed20",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:fbb0e436b028c5b3403982f94ab7970324eb79ccd81a1775fdafe72e6e7e23c9"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "filesystem-experience-archive",
+      "new_digest": "sha256:dcc6a39fec9c2cbf01c0f91b13c0d552bafc9bb53120c2374560da78fe2af4be",
+      "new_id": "rec_d234356d-7611-53c6-88ec-a53c9bbdee60",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:a66a8778b1e868e66ff3ba5c3faf27647b2a0817c1a5a9a500517e1a531cde63",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:a3f9f7eb7dcdcba34e5a78a267dbc00f94db1cfe4b795479d154efa0f05fdfe3"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "filesystem-state-machine-pipeline",
+      "new_digest": "sha256:882c1d25bc230ff8cab80d94425d8f91d859acbb90942a07d2ac7df64cea3676",
+      "new_id": "rec_c5f1632f-7ed2-52af-88c0-44b3943a74c5",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:2f14de61a7c182f227c584877f39cd064945db563286ef0167c549c7066c9a4a",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:a4f1a0afe13d4e86ec90dde628e257544d4c895278aa0e76e0079fd6f5db99d8"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "independent-portfolio-approach-registry",
+      "new_digest": "sha256:59b2629077da6e5bbac923edadf4861cb24e21fef3ddb5fb83a0d69b9a0bfca5",
+      "new_id": "rec_286c0214-d9ea-5986-84f7-2e32ad3e0194",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:6a89c45aab0733f8e7c463dbe2a316916f944404800192e1c7fcb86a427b1c93",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:803a4a0c55b0682bf6f7e7d9b075a926ea0950026e5d8fbe55ee217e7491a9f4"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "locked-editable-surfaces",
+      "new_digest": "sha256:9b39cab44d84aa692531522d0916a8799f8c28c9217e051e5da3ff5c4b148de7",
+      "new_id": "rec_13639fa8-e4b2-5902-90f8-c5cde327cab5",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:7934ac357aec53b1588a3b429baa7e4daa399671f66c7db123ea01ac0c3f26a7",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:f2fd81b7191f97724f0d1722d8c4d014913ab24dfbdc7f6cae14fcb9ebd6c5bd"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "pairwise-skill-revision",
+      "new_digest": "sha256:a3385cea2c12a7d06752e31d1cbf33dc29c58f59beecb52faaaabfa717efd5e8",
+      "new_id": "rec_03f66a00-6896-5bf1-a9c8-504bf3f53602",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:667679016f7ea64ad67f903b6c7ea8b4938f6445b50224f0417bc748074fa694",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:077da23b5ceedcf53464dde46ea2fff03e11216f784a9c93076bd46802738d9c"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "prebuilt-warm-sandbox-pool",
+      "new_digest": "sha256:1e4929e90628552dae99d510d280a95a1e937897d457f12ed015f2810adfe4f8",
+      "new_id": "rec_ec29eb60-9a9c-5314-a751-756c186e8348",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:80d68006db0dba74a614f767d737536ac78fa08e66aee14107c2e58dddb3982f",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:ff74c3f3071693479cf46130759d49a5808b1680fa6b86626f7d56d809e3d8c8"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "progressive-disclosure-loading",
+      "new_digest": "sha256:fc10c1f94a3076d92956c45542ea83fcd3b465fdb8009585cceb5a0da54678a0",
+      "new_id": "rec_01703efe-dc21-5073-892c-98b5686ceba2",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:e49419b579ac99ebed3227a31a999afef55cff2a5c61f32f89cd3f7222329fe8",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:a3ba4928cbf74b80ab5046c24a1856466e71214a83044549d5d0f8b5fa26a9ee"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "pseudo-formal-task-specification",
+      "new_digest": "sha256:e6a4851d1a1d36c373428e7cfc0e835bca817276b4840510a96bf0fa1afdd128",
+      "new_id": "rec_176f2f11-8529-5245-afb6-244d88aff811",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:5e2d034b177ab2daf211e48204331f5833d8bedbf6e337ae5cea112a27f8d284",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:719643503e694a44aa6bbcfa4f6714a7020ef2cb80e9bfcf45763e35e1d0fbee"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "retrievable-observation-masking",
+      "new_digest": "sha256:a4361101a50bdbd8ffdc54ef7c3dcbef4726017865708b9b963b41af3b25ee06",
+      "new_id": "rec_d35ad154-22ae-5639-bec8-a0d18e293909",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:0d577e59cc6942abab1cfdf5ec683b7123207fd7fb47658804a553a139dadb52",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:eee7d6d7c629d59958f9eb8a5199370dcf9dcf99f46b503d63dc5235258fdad4"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "runtime-enforced-loop-constraints",
+      "new_digest": "sha256:b134615b296af320e8b2c3475b868469bbaa8a157e2339cd318de05c9f8b1085",
+      "new_id": "rec_34f4ba6f-bb8d-5ed2-b912-f5856744e4d4",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:72b0b3206fa9adf5dc7f11190ed054b58e69710f957592fdf7ac719c54096b5e",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:e8379986979d5a8b7fe9cf6f99eea3d38577a13144c7dbd32625606a6711b3e7"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "shallowest-viable-memory-layer",
+      "new_digest": "sha256:949a825a61090fe7c3b2ad41ac8ea881e20a235aabc38480524f75e5d4dace39",
+      "new_id": "rec_bb6d9d87-c7c4-5670-8355-bda532dd0435",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:870cb9cd8fa5a11e5c83afe78b3ea38b58c5b1bea003b90e4e53b6fe69d07328",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:304985ca519999213d0000d99c46a2c207ec81c1a3d122b39b9ce218652f8032"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "structured-novelty-gate",
+      "new_digest": "sha256:27175b9a8db54005228afad094b731b6fd600e8ddcb72d5e6d3105f3f54dc4b5",
+      "new_id": "rec_d49010e2-2018-5794-a976-123b48ee796b",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:639e47716e11aaaf85a93c70ee9526b414ec6ed53e019ffb7266d771141ff8a2",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:c00a81550f5a8491611b8136ea3b08a11266aa7aed7d07fb290055f2777dbacd"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "task-guided-kv-cache-compaction",
+      "new_digest": "sha256:42910450b8a55681dcccd3ecd2cbab30bf39988a6d3beffbe7bee2b1b81c327d",
+      "new_id": "rec_997fb4df-e3ff-5366-b655-e9e64381ac90",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:26d348ba9bef4093346556f5adfe32b63852dc7ef197ee16121de0f93ece86da",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:618e4da9ec4e3e87f110ea193140bfe9e8c949edce73cba6d3897e6f475eb0d8"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "tool-contract-description",
+      "new_digest": "sha256:98f5053e312a184bef69d2e8e36198662cb14eb3890f1f79a8d2a218498d2dca",
+      "new_id": "rec_a0bc139d-bb7a-547a-80f8-ac1129c60089",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:d1db9f331feb1971ab6608b1350a76c4644ba1d44ab083668ad2608b5e85ddd0",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:ba5ad2c14ada1e3e0edbc30566a28c9ef40203a122377ef66329d7c083684501"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "two-split-no-regression-acceptance",
+      "new_digest": "sha256:9c500e6d61cfe4a63b0b962d086b76cb42de91d1da8eed076c78e7a4f93bd198",
+      "new_id": "rec_d0ee7f2f-114e-50be-a4c8-ea96fe7fd050",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:3628ea6e26676f9d9997b0059c5638bc6337ae358775e7fb7314f3c8669b791e",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:6cd5fd96c25a27e98dc1f1a31b01041647d551abe8f0a5c0e09232e04dc54132"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "world-state-grounded-bdi-chain",
+      "new_digest": "sha256:b53bae9086c7f9e55029a022ab4c1d7bb4e7bd6e1ff5c7a005f211d450d2312f",
+      "new_id": "rec_5a575972-20df-5a90-85ba-e1b1c831c3b0",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:7f8d3e4aacde24d348494a428dd35d8b3f7fb51d379356ccdf57f3e80a223a54",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:83f39a38066d6cb5e4b19dfc1f7e6277c8ee59d15c6fc05daff682ec729f3942"
+    },
+    {
+      "kind": "LegacyQueueRecord",
+      "legacy_key": "S001",
+      "new_digest": "sha256:7768d69d21041e95a2e2cb533823b6dc9ee04d07607c7894358261a864599d71",
+      "new_id": "rec_bfc7c90f-6a1b-5bd6-a108-efad022789fa",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:f9ba2299717cc1b10c64da93a709ccc21b60c55057076168aabd3c48b689dd4a",
+      "source_path": "researcher/runs/20260515-035228-executable-autonomous-research-frameworks/sources/queue.jsonl",
+      "source_record_digest": "sha256:f96283b154fd05e466e69e3ae4801e92c366856dad2d3bd39848b4c2e98688f0"
+    },
+    {
+      "kind": "LegacyRunState",
+      "legacy_key": "20260515-035228-executable-autonomous-research-frameworks",
+      "new_digest": "sha256:df4594461ab43fa07d92c2b9f999321798d36f40050408b9bd5187b2767f099c",
+      "new_id": "rec_55becfa9-c211-5f3e-8c14-d0908a38a0db",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:7ee9d902f7ad9a410074ac0e65788bb71c16b2b2f214b79e39f562438b5ad36e",
+      "source_path": "researcher/runs/20260515-035228-executable-autonomous-research-frameworks/run-state.json",
+      "source_record_digest": "sha256:e8ccf12edd075a1e634708a9d11351ad89dd8aa8ac71562e705298541ee4dbc0"
+    }
+  ],
+  "migrated_count": 50,
+  "mode": "dry-run",
+  "quarantined": [],
+  "quarantined_count": 0,
+  "report_digest": "sha256:6eeae0e8cc652c7a4d19e46e34f3486aa1b03b9df40ca4fde2cc168b1cc8e50f",
+  "schema_version": "1.0.0"
+}

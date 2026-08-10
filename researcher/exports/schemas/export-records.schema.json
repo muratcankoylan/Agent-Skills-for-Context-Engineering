@@ -105,6 +105,37 @@
         "pull_request": {"type": "integer", "minimum": 1}
       }
     },
+    "exportRenderReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "id", "kind", "state", "classification", "retention", "policy_version", "policy_digest", "plan_digest", "manifest_digest", "sources"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "id": {"type": "string"},
+        "kind": {"const": "ExportRenderReceipt"},
+        "state": {"const": "rendered"},
+        "classification": {"const": "private_operational"},
+        "retention": {"const": "review_cycle"},
+        "policy_version": {"type": "string"},
+        "policy_digest": {"$ref": "#/$defs/digest"},
+        "plan_digest": {"$ref": "#/$defs/digest"},
+        "manifest_digest": {"$ref": "#/$defs/digest"},
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["entry_id", "source_digest", "source_size_bytes"],
+            "properties": {
+              "entry_id": {"type": "string"},
+              "source_digest": {"$ref": "#/$defs/digest"},
+              "source_size_bytes": {"type": "integer", "minimum": 0, "maximum": 9007199254740991}
+            }
+          }
+        }
+      }
+    },
     "exportCorrection": {
       "type": "object",
       "additionalProperties": false,
@@ -129,6 +160,7 @@
     {"$ref": "#/$defs/exportValidation"},
     {"$ref": "#/$defs/exportApproval"},
     {"$ref": "#/$defs/exportReceipt"},
+    {"$ref": "#/$defs/exportRenderReceipt"},
     {"$ref": "#/$defs/exportCorrection"}
   ]
 }

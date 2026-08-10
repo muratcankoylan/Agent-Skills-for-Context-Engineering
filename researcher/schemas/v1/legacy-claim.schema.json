@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/legacy-claim.schema.json",
+  "title": "LegacyClaim 1.0.0 adapter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["claim_id", "claim_text", "owning_skill", "section", "source_url", "retrieved_at", "evidence_strength", "volatility", "last_reviewed"],
+  "properties": {
+    "claim_id": {"type": "string", "pattern": "^claim-[a-z0-9-]+$"},
+    "claim_text": {"type": "string", "minLength": 1},
+    "owning_skill": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+    "section": {"type": "string", "minLength": 1},
+    "source_url": {"type": "string", "minLength": 1},
+    "retrieved_at": {"type": "string", "format": "date"},
+    "evidence_strength": {"enum": ["primary", "secondary", "tertiary", "derived"]},
+    "volatility": {"enum": ["low", "medium", "high"]},
+    "last_reviewed": {"type": "string", "format": "date"}
+  }
+}

@@ -4,6 +4,8 @@ Current corpus counts, source digests, compatibility status, and unresolved-refe
 
 The public/private boundary is defined by `governance/export-policy.yaml` and `scripts/validate_export.py`. Real private plans and receipts stay under ignored local paths; only validated projection trees are proposed for public review.
 
+Cross-runtime records, typed IDs, private artifact references, and candidate freeze receipts use the SPEC-003 contracts in [`schemas/README.md`](schemas/README.md). Existing claims, mechanisms, run state, and queues remain in place behind validated legacy adapters.
+
 This directory defines the repo-native workflow for turning external research into skill changes. It is intentionally file-based so agents can inspect, resume, and audit work without requiring a hosted scheduler.
 
 ## Mission
@@ -43,6 +45,8 @@ discover -> triage -> evaluate -> extract -> map -> draft -> validate -> prepare
 - `claims/index.jsonl` - provenance for volatile, numeric, or benchmark claims.
 - `corpus/index.json` - machine-readable map of skills, mechanisms, claims, and activation scenarios.
 - `benchmarks/` - adversarial scenarios and goldens for the researcher harness.
+- `schemas/` - digest-pinned durable-record schemas and cross-language conformance evidence.
+- `artifacts/` - private CAS contract and ignored runtime root.
 - `rubrics/content-curation.md` - gates for accepting external content.
 - `rubrics/skill-change.md` - gates for changing skills.
 - `rubrics/harness-change.md` - gates for changing research or evaluation harnesses.

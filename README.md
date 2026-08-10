@@ -283,6 +283,7 @@ Current counts and compatibility status are generated in the [live corpus invent
 - **Continuous loop** (`researcher/scripts/loop_*.py` + `researcher/orchestration/launchd/`): inbox, source discovery, one-state-at-a-time advancement, daily ops, parked review queue, launchd service definitions.
 - **Skill health gate** (`researcher/scripts/skill_health.py`): deterministic body-quality scoring. Published scores remain dated evidence; local runs produce ignored runtime reports.
 - **Public export boundary** (`governance/export-policy.yaml` + `researcher/scripts/validate_export.py`): allowlisted projections from private or restricted records into reviewable public staging trees without publishing private source locators or digests.
+- **Schema and artifact contract** (`researcher/schemas/` + `researcher/scripts/artifact_store.py`): digest-pinned cross-runtime schemas, typed IDs, private bindings, exact-byte CAS, candidate freeze receipts, and Python/TypeScript conformance.
 
 ### Operator commands
 

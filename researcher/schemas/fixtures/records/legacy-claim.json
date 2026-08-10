@@ -1,0 +1,11 @@
+{
+  "claim_id": "claim-example-contract",
+  "claim_text": "A synthetic claim validates the legacy adapter.",
+  "evidence_strength": "primary",
+  "last_reviewed": "2026-08-10",
+  "owning_skill": "evaluation",
+  "retrieved_at": "2026-08-10",
+  "section": "Contract fixture",
+  "source_url": "researcher/schemas/README.md",
+  "volatility": "low"
+}

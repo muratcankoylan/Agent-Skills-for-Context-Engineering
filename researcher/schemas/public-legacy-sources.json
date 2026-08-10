@@ -1,0 +1,26 @@
+{
+  "classification": "public",
+  "schema_version": "1.0.0",
+  "sources": [
+    {
+      "format": "jsonl",
+      "kind": "LegacyClaim",
+      "path": "researcher/claims/index.jsonl"
+    },
+    {
+      "format": "jsonl",
+      "kind": "LegacyMechanism",
+      "path": "researcher/mechanisms/registry.jsonl"
+    },
+    {
+      "format": "json",
+      "kind": "LegacyRunState",
+      "path": "researcher/runs/20260515-035228-executable-autonomous-research-frameworks/run-state.json"
+    },
+    {
+      "format": "jsonl",
+      "kind": "LegacyQueueRecord",
+      "path": "researcher/runs/20260515-035228-executable-autonomous-research-frameworks/sources/queue.jsonl"
+    }
+  ]
+}

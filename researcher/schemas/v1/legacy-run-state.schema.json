@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/legacy-run-state.schema.json",
+  "title": "LegacyRunState 1.0.0 adapter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "title", "source_url", "current_state", "locked_surfaces", "editable_surfaces", "state_history", "created_at", "updated_at"],
+  "properties": {
+    "run_id": {"type": "string", "pattern": "^[0-9]{8}-[0-9]{6}-[a-z0-9-]+$"},
+    "title": {"type": "string", "minLength": 1},
+    "source_url": {"type": "string"},
+    "current_state": {"enum": ["initialized", "retrieved", "evaluated", "proposed", "novelty_checked", "validated", "pr_ready", "closed"]},
+    "close_status": {"type": ["string", "null"]},
+    "close_reason": {"type": ["string", "null"]},
+    "locked_surfaces": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "editable_surfaces": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "state_history": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state", "timestamp", "reason", "evidence"],
+        "properties": {
+          "state": {"type": "string", "minLength": 1},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "reason": {"type": "string"},
+          "evidence": {"type": "string"}
+        }
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

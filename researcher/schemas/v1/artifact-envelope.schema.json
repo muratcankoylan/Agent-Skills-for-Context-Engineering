@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/artifact-envelope.schema.json",
+  "title": "ArtifactEnvelope 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "id_origin",
+    "kind",
+    "artifact_kind",
+    "artifact_schema_version",
+    "created_at",
+    "producer_actor_id",
+    "classification",
+    "retention",
+    "input_digests",
+    "aliases",
+    "payload",
+    "integrity"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "id": {"type": "string", "pattern": "^rec_[0-9a-f]{8}-[0-9a-f]{4}-[57][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "id_origin": {"enum": ["native", "legacy_import"]},
+    "kind": {"const": "ArtifactEnvelope"},
+    "artifact_kind": {"type": "string", "minLength": 1},
+    "artifact_schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "created_at": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "producer_actor_id": {"type": "string", "minLength": 1},
+    "authority_decision_id": {"type": "string", "minLength": 1},
+    "correlation_id": {"type": "string", "minLength": 1},
+    "causation_id": {"type": "string", "minLength": 1},
+    "classification": {"$ref": "#/$defs/classification"},
+    "retention": {"type": "string", "minLength": 1},
+    "input_digests": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/digest"}
+    },
+    "aliases": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "supersedes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "payload": {"type": "object"},
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonicalization_profile", "digest"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "canonicalization_profile": {"const": "jcs-rfc8785-integer-v1"},
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    }
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "classification": {
+      "enum": ["public", "public_derived", "private_operational", "private_human", "restricted_source", "secret_reference"]
+    }
+  }
+}
