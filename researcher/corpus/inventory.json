@@ -1,0 +1,2605 @@
+{
+  "artifacts": {
+    "activation_cases": {
+      "count": 23,
+      "owner": "researcher/fixtures/activation-cases.jsonl",
+      "records": [
+        {
+          "digest": "sha256:9e84b1140ddf77e60af3e2e236d5d5a62dd3ca4fd7ad59932e281ad466554db8",
+          "expected_primary_skill": "bdi-mental-states",
+          "id": "activation-bdi-vs-memory",
+          "line": 15
+        },
+        {
+          "digest": "sha256:ac5786d2d1b2866d903f2df56be2d2458e979f8fe5e67f1d8021b092654649f3",
+          "expected_primary_skill": "context-compression",
+          "id": "activation-compression-vs-optimization",
+          "line": 3
+        },
+        {
+          "digest": "sha256:284a7f7dc3fe7da6364a5f9f9f1f9b77773f783b00400ae51db07ddfe81f039b",
+          "expected_primary_skill": "context-degradation",
+          "id": "activation-degradation-poisoning",
+          "line": 16
+        },
+        {
+          "digest": "sha256:b452f5dc7910a48ac388f01ddf455fa36dce84564bfdd0c7902ae0dc1fd6ae97",
+          "expected_primary_skill": "evaluation",
+          "id": "activation-evaluation-general-quality-gate",
+          "line": 2
+        },
+        {
+          "digest": "sha256:a13f96f409c041e7a79db8dcfc4f6f16546adb3e73257de9a0bb8cda8eb968fb",
+          "expected_primary_skill": "advanced-evaluation",
+          "id": "activation-evaluation-vs-advanced-judge",
+          "line": 1
+        },
+        {
+          "digest": "sha256:84ef54be54ef8bfe40510ebc4ad262228308b8cda41d750c049ad607b6136c0f",
+          "expected_primary_skill": "filesystem-context",
+          "id": "activation-filesystem-vs-memory",
+          "line": 5
+        },
+        {
+          "digest": "sha256:11b3418ee65209d9dfd72656fe85bd07cb4c7027608f6c4fe79c8825314642bb",
+          "expected_primary_skill": "context-fundamentals",
+          "id": "activation-fundamentals-onboarding",
+          "line": 10
+        },
+        {
+          "digest": "sha256:d861a44539acf68d65de8fa1369bbfeaa619787ffa0f069bfc79d7d3ab24d72f",
+          "expected_primary_skill": "context-fundamentals",
+          "id": "activation-fundamentals-vs-degradation",
+          "line": 9
+        },
+        {
+          "digest": "sha256:e69ccf3440044653c0e4023234a285d64aa4b8dea7a46f1e9eca5428de064b91",
+          "expected_primary_skill": "context-fundamentals",
+          "id": "activation-fundamentals-vs-optimization",
+          "line": 11
+        },
+        {
+          "digest": "sha256:c93c1142dfc36398c716f10dc7ae6ed8dcb4b5d7a3d252a297e70952cf219e06",
+          "expected_primary_skill": "harness-engineering",
+          "id": "activation-harness-vs-project",
+          "line": 7
+        },
+        {
+          "digest": "sha256:6609906b44c920e61e558d18845bbe9102f1bd68a66b0b8588ae66100999fef7",
+          "expected_primary_skill": "hosted-agents",
+          "id": "activation-hosted-vs-harness",
+          "line": 17
+        },
+        {
+          "digest": "sha256:42cfcae3dc69ea624c9231063f71c825b9fe819a29c33e8dc33e90515abb5476",
+          "expected_primary_skill": "latent-briefing",
+          "id": "activation-latent-briefing-vs-memory",
+          "line": 18
+        },
+        {
+          "digest": "sha256:9cb5207bd3f823630e62dc632b1ebd4bc5bfa3fb90968ad71dc29c8f3dee63ee",
+          "expected_primary_skill": "long-horizon-prompting",
+          "id": "activation-long-horizon-orchestrator-brief",
+          "line": 23
+        },
+        {
+          "digest": "sha256:3265d232f4415113799f4e32ff172a32673e5fa0fedc787259a4de050cc0909e",
+          "expected_primary_skill": "long-horizon-prompting",
+          "id": "activation-long-horizon-vs-multi-agent",
+          "line": 22
+        },
+        {
+          "digest": "sha256:79cc936e39cbcbf35bae50010e19614cf404ad39fd8839b463c081ad1e531368",
+          "expected_primary_skill": "memory-systems",
+          "id": "activation-memory-vs-filesystem",
+          "line": 6
+        },
+        {
+          "digest": "sha256:cf0523636dd07604980ec4a4add7460ddfa2a82b296e1e4bd8d6efa1ff27f4f3",
+          "expected_primary_skill": "multi-agent-patterns",
+          "id": "activation-multi-agent-topology",
+          "line": 19
+        },
+        {
+          "digest": "sha256:4b3e4760f303706452d8f8acd9dd8dd54836083bb9be57de1c4ba078b20de590",
+          "expected_primary_skill": "context-optimization",
+          "id": "activation-optimization-vs-compression",
+          "line": 4
+        },
+        {
+          "digest": "sha256:eb17cc7739511022e4eaae9819ab65d30b9a6ac2eb36c901e064997be3389a76",
+          "expected_primary_skill": "project-development",
+          "id": "activation-project-vs-harness",
+          "line": 8
+        },
+        {
+          "digest": "sha256:ff490ff825efd9f91fea70e185d0bc808f61d294361a7705edc15d25fdcecdcc",
+          "expected_primary_skill": "self-improvement-loops",
+          "id": "activation-self-improvement-evolutionary-search",
+          "line": 21
+        },
+        {
+          "digest": "sha256:777c66ea79a2b8a166086ab4f3255436fda2da0af5ba285bcbcc2ca63289b246",
+          "expected_primary_skill": "self-improvement-loops",
+          "id": "activation-self-improvement-vs-harness",
+          "line": 20
+        },
+        {
+          "digest": "sha256:569c70d63ac3f53acb93400db87bc099bfb1521a86df16d1bf72f155bb42cf29",
+          "expected_primary_skill": "tool-design",
+          "id": "activation-tool-consolidation",
+          "line": 14
+        },
+        {
+          "digest": "sha256:0cdc6d6c709ee9f24e627e36a219768c12ca548eb4cba4812e835b5c6bcca576",
+          "expected_primary_skill": "tool-design",
+          "id": "activation-tool-individual-tool",
+          "line": 13
+        },
+        {
+          "digest": "sha256:0f27b5bfe884491c3b1f8e81212ed143ee3d6dec3c64cbfb4eb4c6c66431bc08",
+          "expected_primary_skill": "project-development",
+          "id": "activation-tool-vs-project-structured-output",
+          "line": 12
+        }
+      ]
+    },
+    "adversarial_goldens": {
+      "count": 7,
+      "owner": "researcher/benchmarks/goldens/adversarial-goldens.json",
+      "records": [
+        {
+          "digest": "sha256:1d31958cac1f2f7e9d08e77e2a5964f7a2a19d7aa4f150dbfadb64d2d6c38c90",
+          "expected_gate": "content_reject",
+          "id": "adv-credible-generic-source"
+        },
+        {
+          "digest": "sha256:d4f32ef7cf95b5a5a0dd9fc5733817312887e9809d6a6a8a1bf942eb27bfc8a0",
+          "expected_gate": "novelty_human_review_or_duplicate",
+          "id": "adv-duplicate-mechanism-reworded"
+        },
+        {
+          "digest": "sha256:50eabccacd0f2d1e13c42a4f3c857c134d8909275b069e84ac3577d4f6c44690",
+          "expected_gate": "human_review",
+          "id": "adv-high-novelty-weak-evidence"
+        },
+        {
+          "digest": "sha256:718b6d02433b52726e2a173baa63ca887d10055a2229d4eed5b96c4109394f09",
+          "expected_gate": "human_review_stop",
+          "id": "adv-self-approved-rubric-change"
+        },
+        {
+          "digest": "sha256:267c5bb5394d32bf0758a04e35ce079c953bb25af4538a5b3918e1f2ed763b29",
+          "expected_gate": "run_readiness_fail",
+          "id": "adv-unretrieved-cited-evidence"
+        },
+        {
+          "digest": "sha256:2b62726f2908461375565d7e84fc61c339573db09cfd6d250db988cfe3d76956",
+          "expected_gate": "model_or_human_review",
+          "id": "adv-verbose-no-behavior"
+        },
+        {
+          "digest": "sha256:564083734bf1003321d6769f6c64e64a3356a7fb335ae4744d058a00d460d74f",
+          "expected_gate": "repo_validation_fail",
+          "id": "adv-wrong-rubric-math"
+        }
+      ]
+    },
+    "adversarial_scenarios": {
+      "count": 7,
+      "owner": "researcher/benchmarks/scenarios/*.jsonl",
+      "records": [
+        {
+          "digest": "sha256:7b55edc0360366e45138eb9dc310083cd7a9f6c782989f7ce3859dbce4d418c3",
+          "expected_gate": "content_reject",
+          "id": "adv-credible-generic-source",
+          "line": 2,
+          "path": "researcher/benchmarks/scenarios/adversarial.jsonl"
+        },
+        {
+          "digest": "sha256:29bfc7e265a6e01558d65e9b3168a145c606f9f17955099704bf756c190d260b",
+          "expected_gate": "novelty_human_review_or_duplicate",
+          "id": "adv-duplicate-mechanism-reworded",
+          "line": 1,
+          "path": "researcher/benchmarks/scenarios/adversarial.jsonl"
+        },
+        {
+          "digest": "sha256:e76ce8a4aed6a8682f415018a06b9dd3ef3d59094e74e50e86e9ed6a3edb12cf",
+          "expected_gate": "human_review",
+          "id": "adv-high-novelty-weak-evidence",
+          "line": 7,
+          "path": "researcher/benchmarks/scenarios/adversarial.jsonl"
+        },
+        {
+          "digest": "sha256:f1f33f8b377083bef5543ea55ab8fd9106824ea850a8d9063513db50bd665594",
+          "expected_gate": "human_review_stop",
+          "id": "adv-self-approved-rubric-change",
+          "line": 6,
+          "path": "researcher/benchmarks/scenarios/adversarial.jsonl"
+        },
+        {
+          "digest": "sha256:f049c65ae90422b7357c374d6165635c45d4447c4cebc7b93867f2d3eecdbcd2",
+          "expected_gate": "run_readiness_fail",
+          "id": "adv-unretrieved-cited-evidence",
+          "line": 3,
+          "path": "researcher/benchmarks/scenarios/adversarial.jsonl"
+        },
+        {
+          "digest": "sha256:19135d294c1a09054787d0832a144577de0527244c3e74b0b973f7cb011f9c12",
+          "expected_gate": "model_or_human_review",
+          "id": "adv-verbose-no-behavior",
+          "line": 5,
+          "path": "researcher/benchmarks/scenarios/adversarial.jsonl"
+        },
+        {
+          "digest": "sha256:c5933de0258c23144c56aa54c3dd26bbe145874249be44fcd203acce53741f02",
+          "expected_gate": "repo_validation_fail",
+          "id": "adv-wrong-rubric-math",
+          "line": 4,
+          "path": "researcher/benchmarks/scenarios/adversarial.jsonl"
+        }
+      ]
+    },
+    "benchmark_runners": {
+      "count": 6,
+      "owner": "researcher/benchmarks/sdk-runner",
+      "records": [
+        {
+          "digest": "sha256:1569152d710eb397858ae501c0e3b95e2ebf07a6e1783e2e68ca487edebeb56a",
+          "id": "package-lock.json",
+          "path": "researcher/benchmarks/sdk-runner/package-lock.json",
+          "size_bytes": 60243
+        },
+        {
+          "digest": "sha256:4849f4e325c6c6de51b35d698c2402556f2a0673757f676d252536ed8388b553",
+          "id": "package.json",
+          "path": "researcher/benchmarks/sdk-runner/package.json",
+          "size_bytes": 831
+        },
+        {
+          "digest": "sha256:44d472169cf8cc08a4da8c84bff3db907dc5a7f68a79848d931139c8a8750fb9",
+          "id": "src:common.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/common.ts",
+          "size_bytes": 10638
+        },
+        {
+          "digest": "sha256:d623d5a156a57d07bc1a91cfbe1fc4336f46ef413209395d2894fb3173a9b452",
+          "id": "src:runEffectiveness.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/runEffectiveness.ts",
+          "size_bytes": 4368
+        },
+        {
+          "digest": "sha256:ee40169ffccd9be901bb592a03d1eb9911ecb6e7e76ca06f13c5ff8d8baccc0e",
+          "id": "src:runRouter.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/runRouter.ts",
+          "size_bytes": 12576
+        },
+        {
+          "digest": "sha256:1bf42fa8545bc307e5371c58ffd5a1ac818a07b31da7038cbdb3b95f072a5ab1",
+          "id": "tsconfig.json",
+          "path": "researcher/benchmarks/sdk-runner/tsconfig.json",
+          "size_bytes": 611
+        }
+      ],
+      "status": {
+        "effectiveness": "scaffold",
+        "router": "operational"
+      }
+    },
+    "claims": {
+      "count": 26,
+      "owner": "researcher/claims/index.jsonl",
+      "records": [
+        {
+          "digest": "sha256:0e44b638988b12477c1f9446842db5aeec0b25ef95be058bead68dc9c1efe28e",
+          "id": "claim-advanced-evaluation-position-swap",
+          "line": 5,
+          "owning_skill": "advanced-evaluation",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:e0204364c0078631a8484c1cb9eeb53bf8197a3278d292a6f7e88df2f04f768f",
+          "id": "claim-context-compression-factory-benchmark",
+          "line": 7,
+          "owning_skill": "context-compression",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:795dd44cdadb32b80e517a6796f24080a963eb5c8085ebd4a81408bbc3c1e3c1",
+          "id": "claim-context-degradation-distractor-shuffled",
+          "line": 9,
+          "owning_skill": "context-degradation",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:1f1f67b6dfb6f87ed57e4e0cdca70fd00ad64dc4f89dc5680cc76835f6ab9b50",
+          "id": "claim-context-degradation-lost-middle-ruler",
+          "line": 8,
+          "owning_skill": "context-degradation",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:61d9fcb1fbb7939d701a924911c3e595547a610f98229e7ba5a1d0dd4226a88d",
+          "id": "claim-context-optimization-tool-output-dominance",
+          "line": 3,
+          "owning_skill": "context-optimization",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:db5f5a19f3eabb3b1f11bc81c0fedb55d004c792e726ca902a6a9b0eb196a2e8",
+          "id": "claim-evaluation-browsecomp-variance",
+          "line": 1,
+          "owning_skill": "evaluation",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:e9b98fba8ec5445a62696ac4aab2b19f7482f8858901aeff2c6caa93c740e28d",
+          "id": "claim-harness-locked-evaluator",
+          "line": 6,
+          "owning_skill": "harness-engineering",
+          "volatility": "low"
+        },
+        {
+          "digest": "sha256:adf99a5367f3747ed99083ba5899b27d7f6c5b1589109f78adf3e532c1b021f4",
+          "id": "claim-latent-briefing-public-results",
+          "line": 12,
+          "owning_skill": "latent-briefing",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:8746db6ae501c170a2bdb548d49b9cceee05af50696c8b6599a3f7fa1bfb39df",
+          "id": "claim-long-horizon-cdc-run",
+          "line": 19,
+          "owning_skill": "long-horizon-prompting",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:473133f006e4c231e8f4de39f7677de4bc9a63e5325fe85c24f85204f47f0929",
+          "id": "claim-long-horizon-diversity-collapse",
+          "line": 24,
+          "owning_skill": "long-horizon-prompting",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:eee0f18b3eb09224e4eab6790ea41344d0a5a2233389e02dd50465fd05fb108c",
+          "id": "claim-long-horizon-evidence-audit",
+          "line": 25,
+          "owning_skill": "long-horizon-prompting",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:3ff67003db9f13dd7be5bfd902e8347d67ee462662289aa4b38f3bd6c5e83c5d",
+          "id": "claim-long-horizon-give-up-drift",
+          "line": 23,
+          "owning_skill": "long-horizon-prompting",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:a6f5b8b849a7fc41a4aa58e16d5f6de43e97bae686837a2409f7d7460a0cf53d",
+          "id": "claim-long-horizon-lean-prompt",
+          "line": 26,
+          "owning_skill": "long-horizon-prompting",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:ff7403439b7dc7a99f9f47533e395e452293c8aae28d703c79e7e2508db25fd4",
+          "id": "claim-long-horizon-persistence-hacking",
+          "line": 20,
+          "owning_skill": "long-horizon-prompting",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:75794c8135ef3ef0305af54987ad20a72fd431491e7fbd26e7e72ba0fbc288d2",
+          "id": "claim-long-horizon-state-ledger",
+          "line": 22,
+          "owning_skill": "long-horizon-prompting",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:366734cb19d894c7ff698acaf83a018bf66dbe21744be053f47a87486b42c1da",
+          "id": "claim-long-horizon-verification-gap",
+          "line": 21,
+          "owning_skill": "long-horizon-prompting",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:fe345d65674bc68549d6349f1add91ceff90ef6390095a9903b986c9be64e4ac",
+          "id": "claim-memory-locomo-filesystem-baseline",
+          "line": 4,
+          "owning_skill": "memory-systems",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:625952d73ed61c2d9d1785f3e5e22420da37e475bad1f762e145d42869ef634d",
+          "id": "claim-multi-agent-token-multiplier",
+          "line": 2,
+          "owning_skill": "multi-agent-patterns",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:ecd3b693cd42174fb7275a367a834360e474cbe19c9961192bafa34d5ae4685c",
+          "id": "claim-project-development-vercel-d0-reduction",
+          "line": 11,
+          "owning_skill": "project-development",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:b335725c929ee946b07a11c62b22c6535c5c354a526ff58568ab7f765d2ccbff",
+          "id": "claim-self-improvement-capability-threshold",
+          "line": 14,
+          "owning_skill": "self-improvement-loops",
+          "volatility": "low"
+        },
+        {
+          "digest": "sha256:10ad2093a6d465f1f4f292e6bfafcbd452a9a1629b58e41f21d0dd82d2312ddb",
+          "id": "claim-self-improvement-context-collapse",
+          "line": 18,
+          "owning_skill": "self-improvement-loops",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:11e0163c80694cc00df441b421f0693199f1680b520e6650c99acb32a19a4617",
+          "id": "claim-self-improvement-raw-trace-ablation",
+          "line": 15,
+          "owning_skill": "self-improvement-loops",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:5ee59354df4f345ed7216f40952db1853fb4919e348d07260ea9b46bafb4fdb7",
+          "id": "claim-self-improvement-scorer-visibility",
+          "line": 17,
+          "owning_skill": "self-improvement-loops",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:a293e3e21a3abcf0dd353400db8f0340e96d43ffade44297cfa78f3f2bfa44a8",
+          "id": "claim-self-improvement-two-split-acceptance",
+          "line": 13,
+          "owning_skill": "self-improvement-loops",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:8167bbb73561416a0b1768273e2c673e5d76857960bccd867ada6e8727fb4764",
+          "id": "claim-self-improvement-visible-evaluator-hacking",
+          "line": 16,
+          "owning_skill": "self-improvement-loops",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:b0d241ff2a59a20926b682111619d39cc73f7a588af0d089efe2c75b93657de3",
+          "id": "claim-tool-design-vercel-d0-reduction",
+          "line": 10,
+          "owning_skill": "tool-design",
+          "volatility": "medium"
+        }
+      ]
+    },
+    "corpus_index": {
+      "count": 17,
+      "owner": "researcher/corpus/index.json",
+      "records": [
+        {
+          "activation_scenarios": [
+            "LLM-as-judge design",
+            "pairwise comparison",
+            "judge calibration",
+            "bias mitigation"
+          ],
+          "claim_ids": [
+            "claim-advanced-evaluation-position-swap"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-advanced-evaluation-position-swap"
+          ],
+          "id": "advanced-evaluation",
+          "mechanism_ids": [
+            "pairwise-skill-revision"
+          ],
+          "path": "skills/advanced-evaluation/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "belief-desire-intention modeling",
+            "rational agency traces",
+            "neuro-symbolic state transformations"
+          ],
+          "claim_ids": [],
+          "explicit_body_claim_ids": [],
+          "id": "bdi-mental-states",
+          "mechanism_ids": [
+            "world-state-grounded-bdi-chain"
+          ],
+          "path": "skills/bdi-mental-states/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "conversation summarization",
+            "handoff compression",
+            "tokens-per-task reduction"
+          ],
+          "claim_ids": [
+            "claim-context-compression-factory-benchmark"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-context-compression-factory-benchmark"
+          ],
+          "id": "context-compression",
+          "mechanism_ids": [
+            "anchored-iterative-summary"
+          ],
+          "path": "skills/context-compression/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "lost-in-middle diagnosis",
+            "context poisoning",
+            "attention-pattern debugging"
+          ],
+          "claim_ids": [
+            "claim-context-degradation-distractor-shuffled",
+            "claim-context-degradation-lost-middle-ruler"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-context-degradation-distractor-shuffled",
+            "claim-context-degradation-lost-middle-ruler"
+          ],
+          "id": "context-degradation",
+          "mechanism_ids": [
+            "context-poisoning-circuit-breaker"
+          ],
+          "path": "skills/context-degradation/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "context-window mental models",
+            "agent architecture foundations",
+            "context budgeting"
+          ],
+          "claim_ids": [
+            "claim-context-degradation-lost-middle-ruler",
+            "claim-context-optimization-tool-output-dominance"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-context-degradation-lost-middle-ruler",
+            "claim-context-optimization-tool-output-dominance"
+          ],
+          "id": "context-fundamentals",
+          "mechanism_ids": [
+            "progressive-disclosure-loading"
+          ],
+          "path": "skills/context-fundamentals/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "observation masking",
+            "prefix cache strategy",
+            "context partitioning",
+            "token-budget optimization"
+          ],
+          "claim_ids": [
+            "claim-context-optimization-tool-output-dominance"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-context-optimization-tool-output-dominance"
+          ],
+          "id": "context-optimization",
+          "mechanism_ids": [
+            "retrievable-observation-masking"
+          ],
+          "path": "skills/context-optimization/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "deterministic checks",
+            "regression suites",
+            "quality gates",
+            "production monitoring"
+          ],
+          "claim_ids": [
+            "claim-evaluation-browsecomp-variance"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-evaluation-browsecomp-variance"
+          ],
+          "id": "evaluation",
+          "mechanism_ids": [
+            "deterministic-first-validation"
+          ],
+          "path": "skills/evaluation/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "tool-output offloading",
+            "durable scratchpads",
+            "just-in-time file discovery",
+            "cross-agent handoff files"
+          ],
+          "claim_ids": [],
+          "explicit_body_claim_ids": [],
+          "id": "filesystem-context",
+          "mechanism_ids": [
+            "durable-research-thread"
+          ],
+          "path": "skills/filesystem-context/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "autonomous research loops",
+            "locked evaluators",
+            "editable surfaces",
+            "novelty gates",
+            "human approval boundaries"
+          ],
+          "claim_ids": [
+            "claim-harness-locked-evaluator"
+          ],
+          "explicit_body_claim_ids": [],
+          "id": "harness-engineering",
+          "mechanism_ids": [
+            "locked-editable-surfaces",
+            "structured-novelty-gate"
+          ],
+          "path": "skills/harness-engineering/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "background agents",
+            "remote sandboxed execution",
+            "warm pools",
+            "multiplayer agent infrastructure"
+          ],
+          "claim_ids": [],
+          "explicit_body_claim_ids": [],
+          "id": "hosted-agents",
+          "mechanism_ids": [
+            "prebuilt-warm-sandbox-pool"
+          ],
+          "path": "skills/hosted-agents/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "orchestrator-worker KV cache sharing",
+            "Attention Matching compaction",
+            "cross-agent state transfer without summarization",
+            "token explosion in hierarchical agents"
+          ],
+          "claim_ids": [
+            "claim-latent-briefing-public-results"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-latent-briefing-public-results"
+          ],
+          "id": "latent-briefing",
+          "mechanism_ids": [
+            "task-guided-kv-cache-compaction"
+          ],
+          "path": "skills/latent-briefing/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "pseudo-formal task briefs",
+            "long-running agent launch prompts",
+            "parallel portfolio orchestration prompts",
+            "persistence and stop-condition design",
+            "pre-launch prompt evaluation"
+          ],
+          "claim_ids": [
+            "claim-long-horizon-cdc-run",
+            "claim-long-horizon-diversity-collapse",
+            "claim-long-horizon-evidence-audit",
+            "claim-long-horizon-give-up-drift",
+            "claim-long-horizon-lean-prompt",
+            "claim-long-horizon-persistence-hacking",
+            "claim-long-horizon-state-ledger",
+            "claim-long-horizon-verification-gap"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-long-horizon-cdc-run",
+            "claim-long-horizon-diversity-collapse",
+            "claim-long-horizon-evidence-audit",
+            "claim-long-horizon-give-up-drift",
+            "claim-long-horizon-lean-prompt",
+            "claim-long-horizon-persistence-hacking",
+            "claim-long-horizon-state-ledger",
+            "claim-long-horizon-verification-gap"
+          ],
+          "id": "long-horizon-prompting",
+          "mechanism_ids": [
+            "audit-gated-return-condition",
+            "independent-portfolio-approach-registry",
+            "pseudo-formal-task-specification"
+          ],
+          "path": "skills/long-horizon-prompting/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "cross-session memory",
+            "entity tracking",
+            "temporal knowledge graphs",
+            "memory benchmark selection"
+          ],
+          "claim_ids": [
+            "claim-memory-locomo-filesystem-baseline"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-memory-locomo-filesystem-baseline"
+          ],
+          "id": "memory-systems",
+          "mechanism_ids": [
+            "shallowest-viable-memory-layer"
+          ],
+          "path": "skills/memory-systems/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "context isolation across agents",
+            "supervisor coordination",
+            "swarm handoffs",
+            "parallel exploration"
+          ],
+          "claim_ids": [
+            "claim-evaluation-browsecomp-variance",
+            "claim-multi-agent-token-multiplier"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-evaluation-browsecomp-variance",
+            "claim-multi-agent-token-multiplier"
+          ],
+          "id": "multi-agent-patterns",
+          "mechanism_ids": [
+            "context-isolation-agent-partitioning"
+          ],
+          "path": "skills/multi-agent-patterns/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "task-model fit analysis",
+            "batch pipeline design",
+            "cost estimation",
+            "staged artifact flows"
+          ],
+          "claim_ids": [
+            "claim-project-development-vercel-d0-reduction"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-project-development-vercel-d0-reduction"
+          ],
+          "id": "project-development",
+          "mechanism_ids": [
+            "filesystem-state-machine-pipeline"
+          ],
+          "path": "skills/project-development/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "recursive self-improvement loops",
+            "meta-harness search",
+            "failure-driven harness self-edits",
+            "evolutionary scaffold search",
+            "acceptance gates for self-modification",
+            "context mechanism evolution"
+          ],
+          "claim_ids": [
+            "claim-self-improvement-capability-threshold",
+            "claim-self-improvement-context-collapse",
+            "claim-self-improvement-raw-trace-ablation",
+            "claim-self-improvement-scorer-visibility",
+            "claim-self-improvement-two-split-acceptance",
+            "claim-self-improvement-visible-evaluator-hacking"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-self-improvement-capability-threshold",
+            "claim-self-improvement-context-collapse",
+            "claim-self-improvement-raw-trace-ablation",
+            "claim-self-improvement-scorer-visibility",
+            "claim-self-improvement-two-split-acceptance",
+            "claim-self-improvement-visible-evaluator-hacking"
+          ],
+          "id": "self-improvement-loops",
+          "mechanism_ids": [
+            "filesystem-experience-archive",
+            "runtime-enforced-loop-constraints",
+            "two-split-no-regression-acceptance"
+          ],
+          "path": "skills/self-improvement-loops/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "agent-tool contracts",
+            "tool schema design",
+            "tool consolidation",
+            "actionable error recovery"
+          ],
+          "claim_ids": [
+            "claim-tool-design-vercel-d0-reduction"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-tool-design-vercel-d0-reduction"
+          ],
+          "id": "tool-design",
+          "mechanism_ids": [
+            "tool-contract-description"
+          ],
+          "path": "skills/tool-design/SKILL.md"
+        }
+      ],
+      "semantics": "curated_relationship_source"
+    },
+    "effectiveness_tasks": {
+      "count": 1,
+      "owner": "researcher/benchmarks/effectiveness/tasks/*",
+      "records": [
+        {
+          "id": "001",
+          "irrelevant_skill": "bdi-mental-states",
+          "metadata_digest": "sha256:ac52d309524035bc57c5c3d423c639d53687934cd6834e04cd8d3ea7cce9d43e",
+          "path": "researcher/benchmarks/effectiveness/tasks/001-filesystem-context-offload",
+          "slug": "filesystem-context-offload",
+          "target_skill": "filesystem-context"
+        }
+      ]
+    },
+    "examples": {
+      "count": 6,
+      "owner": "examples/*/README.md",
+      "records": [
+        {
+          "digest": "sha256:e80dc5fe7391c3a5745c574814a1502d24ba9acea91fcbb5dc7ec7d38eb43545",
+          "id": "book-sft-pipeline",
+          "path": "examples/book-sft-pipeline"
+        },
+        {
+          "digest": "sha256:4ac5d0f82bfa76166bad86e703f4e84c3f50d5d9592d356d46db5a6aa2f19855",
+          "id": "digital-brain-skill",
+          "path": "examples/digital-brain-skill"
+        },
+        {
+          "digest": "sha256:a4d8ae566b7ea9112a69b05ec35fefa40cb6cc27e8693ad41606a4cb6066e34e",
+          "id": "interleaved-thinking",
+          "path": "examples/interleaved-thinking"
+        },
+        {
+          "digest": "sha256:518fa7b815ecb40b05bb4240086ba9d388d7899b3d0ba24babe55b2af4e6dad1",
+          "id": "llm-as-judge-skills",
+          "path": "examples/llm-as-judge-skills"
+        },
+        {
+          "digest": "sha256:fbfb940a5866244f2bb10457f5876fd162e552d964b3ad000b03514a2d63cd94",
+          "id": "long-horizon-prompt-lab",
+          "path": "examples/long-horizon-prompt-lab"
+        },
+        {
+          "digest": "sha256:a819cf042650a3b5e458bf97b2697d4263bb08d7bd9a26fa0ba6c2381423cdf7",
+          "id": "x-to-book-system",
+          "path": "examples/x-to-book-system"
+        }
+      ]
+    },
+    "manifests": {
+      "count": 3,
+      "owner": "publication manifests",
+      "records": [
+        {
+          "id": "claude-marketplace",
+          "path": ".claude-plugin/marketplace.json",
+          "version": "2.5.0"
+        },
+        {
+          "id": "open-plugin",
+          "path": ".plugin/plugin.json",
+          "version": "2.5.0"
+        },
+        {
+          "digest": "sha256:fcec9d7318d6004a972fd4b3ad82e25bc9fcf41ac2c14cf6fb6cc74547f8710b",
+          "id": "collection-skill",
+          "path": "SKILL.md",
+          "version": "2.5.0"
+        }
+      ],
+      "skill_sets": {
+        "marketplace": [
+          "advanced-evaluation",
+          "bdi-mental-states",
+          "context-compression",
+          "context-degradation",
+          "context-fundamentals",
+          "context-optimization",
+          "evaluation",
+          "filesystem-context",
+          "harness-engineering",
+          "hosted-agents",
+          "latent-briefing",
+          "long-horizon-prompting",
+          "memory-systems",
+          "multi-agent-patterns",
+          "project-development",
+          "self-improvement-loops",
+          "tool-design"
+        ],
+        "published": [
+          "advanced-evaluation",
+          "bdi-mental-states",
+          "context-compression",
+          "context-degradation",
+          "context-fundamentals",
+          "context-optimization",
+          "evaluation",
+          "filesystem-context",
+          "harness-engineering",
+          "hosted-agents",
+          "latent-briefing",
+          "long-horizon-prompting",
+          "memory-systems",
+          "multi-agent-patterns",
+          "project-development",
+          "self-improvement-loops",
+          "tool-design"
+        ]
+      },
+      "versions": {
+        "collection_skill": "2.5.0",
+        "marketplace": "2.5.0",
+        "open_plugin": "2.5.0"
+      }
+    },
+    "mechanism_ledgers": {
+      "accepted_event_count": 28,
+      "accepted_mechanism_count": 22,
+      "count": 29,
+      "owner": "researcher/mechanisms/ledgers/*.jsonl",
+      "records": [
+        {
+          "digest": "sha256:d9e2cfbef18d70d5eb79ba9a8e472a8c13295cb2e5ee5aee4896a921eec911dc",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 1,
+          "mechanism_id": "locked-editable-surfaces"
+        },
+        {
+          "digest": "sha256:c9fb6cffaf8605059662941fd2be62cff05b2fb7dc494ae5e90159ccfe1deb1e",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 2,
+          "mechanism_id": "durable-research-thread"
+        },
+        {
+          "digest": "sha256:035791b881fa1f77e55e914b38c8c17a6179929aedc1408fe818b17309cd6eaa",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 3,
+          "mechanism_id": "deterministic-first-validation"
+        },
+        {
+          "digest": "sha256:354cc06b045a5af78662717dda29d6a1323b9908f1fbaaaf94591eb05ecf36a5",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 4,
+          "mechanism_id": "structured-novelty-gate"
+        },
+        {
+          "digest": "sha256:8a424170ca49c1fb247a6d1dae940a2a63e6b6c5dc23c9f53ed7a195c8c3d3ec",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 5,
+          "mechanism_id": "pairwise-skill-revision"
+        },
+        {
+          "digest": "sha256:fee0f3295d12716358273526b13c036775d81e84bafe4ae3e28bfcbdc0039496",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 6,
+          "mechanism_id": "two-split-no-regression-acceptance"
+        },
+        {
+          "digest": "sha256:f88b5cf5e4ee1e11b9be8df8a2acb3d7f846c97ae0275175163df5b9fd65106f",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 7,
+          "mechanism_id": "filesystem-experience-archive"
+        },
+        {
+          "digest": "sha256:6d59bc11128a589e15b909a80f48830c319e91400d06cbb02f61a43c5eb0a199",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 8,
+          "mechanism_id": "runtime-enforced-loop-constraints"
+        },
+        {
+          "digest": "sha256:7cebe93385a0be53a94908a0dbf1ddf5170332b4dc6901b82da79025d05d5a57",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 9,
+          "mechanism_id": "pseudo-formal-task-specification"
+        },
+        {
+          "digest": "sha256:528b7b398f03703f6298bfa6d5b3f80f73ec55ebb4fdbf5426d8ccb15ae0c799",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 10,
+          "mechanism_id": "audit-gated-return-condition"
+        },
+        {
+          "digest": "sha256:b86bbc152ef5513c147557d2e2b4d7bc0aa927475056aa41ed990979b6ba71cf",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "accepted",
+          "line": 11,
+          "mechanism_id": "independent-portfolio-approach-registry"
+        },
+        {
+          "digest": "sha256:ec2aa034e4844c360a3e70ce1801b5743e40f658cd6a3c7e4749b35fa299b93a",
+          "event_id": "reconcile-world-state-grounded-bdi-chain",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 12,
+          "mechanism_id": "world-state-grounded-bdi-chain"
+        },
+        {
+          "digest": "sha256:16b97f171a96847da8e29fba2271e92f186a36dce10c6fc48be44263b4c47846",
+          "event_id": "reconcile-anchored-iterative-summary",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 13,
+          "mechanism_id": "anchored-iterative-summary"
+        },
+        {
+          "digest": "sha256:dca724f1a055596b3fd0d0f42e4291ea61f22c601918ba4d6bcafc02616de29d",
+          "event_id": "reconcile-context-poisoning-circuit-breaker",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 14,
+          "mechanism_id": "context-poisoning-circuit-breaker"
+        },
+        {
+          "digest": "sha256:1ca713766d129266cfa5bf1ccb71138c3ec574a4913c548bc1433f21c1934807",
+          "event_id": "reconcile-progressive-disclosure-loading",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 15,
+          "mechanism_id": "progressive-disclosure-loading"
+        },
+        {
+          "digest": "sha256:b94d8e6d89740933a178e7888f98ace5d6941ae29678afee7eaa7a7b9cc649e8",
+          "event_id": "reconcile-retrievable-observation-masking",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 16,
+          "mechanism_id": "retrievable-observation-masking"
+        },
+        {
+          "digest": "sha256:c35e8c4abbf0e7db3d2503eb8ec83b747108bbc956c7d32410f85f614aac625a",
+          "event_id": "reconcile-prebuilt-warm-sandbox-pool",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 17,
+          "mechanism_id": "prebuilt-warm-sandbox-pool"
+        },
+        {
+          "digest": "sha256:b719ca336d833ebaa2ff8d11121415890efd74c002ed04186a13bf64906be451",
+          "event_id": "reconcile-task-guided-kv-cache-compaction",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 18,
+          "mechanism_id": "task-guided-kv-cache-compaction"
+        },
+        {
+          "digest": "sha256:764b7b6dba9008149d9f251cf922c8d614e24681b1c3aaed7c277483db48f80c",
+          "event_id": "reconcile-shallowest-viable-memory-layer",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 19,
+          "mechanism_id": "shallowest-viable-memory-layer"
+        },
+        {
+          "digest": "sha256:c16e5586fe9a4312d5585117eba59245f6744b2e4045b26a429e378cb21a71f3",
+          "event_id": "reconcile-context-isolation-agent-partitioning",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 20,
+          "mechanism_id": "context-isolation-agent-partitioning"
+        },
+        {
+          "digest": "sha256:8be3b5255b6263e4c810862b0844c02c1c9bb82d979bcd593ae5420aa243c05a",
+          "event_id": "reconcile-filesystem-state-machine-pipeline",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 21,
+          "mechanism_id": "filesystem-state-machine-pipeline"
+        },
+        {
+          "digest": "sha256:7256d25489d97c5c4d6170b004426f37516344c1e8cdaed3794a4cc16d72e694",
+          "event_id": "reconcile-tool-contract-description",
+          "event_type": "historical_state_reconciliation",
+          "ledger": "accepted",
+          "line": 22,
+          "mechanism_id": "tool-contract-description"
+        },
+        {
+          "digest": "sha256:8945afd006dd6dbbf668081ec24b3e99bd90ef49d50b4caa7267647874389f00",
+          "event_id": "correct-two-split-no-regression-acceptance-provenance",
+          "event_type": "provenance_correction",
+          "ledger": "accepted",
+          "line": 23,
+          "mechanism_id": "two-split-no-regression-acceptance"
+        },
+        {
+          "digest": "sha256:caff13757f91bd4367493d4dc65301e843a238cdffd99e2d8b0663a0742781a1",
+          "event_id": "correct-filesystem-experience-archive-provenance",
+          "event_type": "provenance_correction",
+          "ledger": "accepted",
+          "line": 24,
+          "mechanism_id": "filesystem-experience-archive"
+        },
+        {
+          "digest": "sha256:e060bddc128c05f087aaf91fd04220bb8353218dab0f5c17c95d5e13bd1faaf4",
+          "event_id": "correct-runtime-enforced-loop-constraints-provenance",
+          "event_type": "provenance_correction",
+          "ledger": "accepted",
+          "line": 25,
+          "mechanism_id": "runtime-enforced-loop-constraints"
+        },
+        {
+          "digest": "sha256:aba0d06e0bb18bffa0cf0dd676c0533b5abe8f6e60e6d4a8628680cd2b18fdec",
+          "event_id": "correct-pseudo-formal-task-specification-provenance",
+          "event_type": "provenance_correction",
+          "ledger": "accepted",
+          "line": 26,
+          "mechanism_id": "pseudo-formal-task-specification"
+        },
+        {
+          "digest": "sha256:04d467932a3261cc40beba93532828ba5164d80401a8406b6089bf16b43134e4",
+          "event_id": "correct-audit-gated-return-condition-provenance",
+          "event_type": "provenance_correction",
+          "ledger": "accepted",
+          "line": 27,
+          "mechanism_id": "audit-gated-return-condition"
+        },
+        {
+          "digest": "sha256:6720b024128c8986e6ae8629bf394a86f0f07439ffa6d6ea40a3caa8e313c992",
+          "event_id": "correct-independent-portfolio-approach-registry-provenance",
+          "event_type": "provenance_correction",
+          "ledger": "accepted",
+          "line": 28,
+          "mechanism_id": "independent-portfolio-approach-registry"
+        },
+        {
+          "digest": "sha256:aae0055e5aa409e789d5701dd1e8fd13ea21bdd3082994dc660786520090324c",
+          "event_id": null,
+          "event_type": "legacy",
+          "ledger": "rejected",
+          "line": 1,
+          "mechanism_id": "generic-context-advice"
+        }
+      ],
+      "rejected_event_count": 1
+    },
+    "mechanisms": {
+      "count": 22,
+      "owner": "researcher/mechanisms/registry.jsonl",
+      "records": [
+        {
+          "digest": "sha256:2027776beaef782ebcf0d8912667ccb0d44fdc28beb6de52615ab0e2362622ab",
+          "id": "anchored-iterative-summary",
+          "line": 7,
+          "owning_skill": "context-compression",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:4b5fd015db03752a838f0cf9417105342b27acdfb9b66aeaa909b1cc0db3cbf4",
+          "id": "audit-gated-return-condition",
+          "line": 21,
+          "owning_skill": "long-horizon-prompting",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:8fd18701cee32ff08eae0afb974d36c574cfbe7ea83bdd1547f7e84373f51a2e",
+          "id": "context-isolation-agent-partitioning",
+          "line": 14,
+          "owning_skill": "multi-agent-patterns",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:cd98f8eb355df5cfc5cfc7774d9ab71a622ea6e61045a80ee7c284c70321c93e",
+          "id": "context-poisoning-circuit-breaker",
+          "line": 8,
+          "owning_skill": "context-degradation",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:409286746ae63f4e7f8e14843a075d7a380d46b2bd95d59bbbeba7636e98e456",
+          "id": "deterministic-first-validation",
+          "line": 3,
+          "owning_skill": "evaluation",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:fbb0e436b028c5b3403982f94ab7970324eb79ccd81a1775fdafe72e6e7e23c9",
+          "id": "durable-research-thread",
+          "line": 2,
+          "owning_skill": "filesystem-context",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:a3f9f7eb7dcdcba34e5a78a267dbc00f94db1cfe4b795479d154efa0f05fdfe3",
+          "id": "filesystem-experience-archive",
+          "line": 18,
+          "owning_skill": "self-improvement-loops",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:a4f1a0afe13d4e86ec90dde628e257544d4c895278aa0e76e0079fd6f5db99d8",
+          "id": "filesystem-state-machine-pipeline",
+          "line": 15,
+          "owning_skill": "project-development",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:803a4a0c55b0682bf6f7e7d9b075a926ea0950026e5d8fbe55ee217e7491a9f4",
+          "id": "independent-portfolio-approach-registry",
+          "line": 22,
+          "owning_skill": "long-horizon-prompting",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:f2fd81b7191f97724f0d1722d8c4d014913ab24dfbdc7f6cae14fcb9ebd6c5bd",
+          "id": "locked-editable-surfaces",
+          "line": 1,
+          "owning_skill": "harness-engineering",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:077da23b5ceedcf53464dde46ea2fff03e11216f784a9c93076bd46802738d9c",
+          "id": "pairwise-skill-revision",
+          "line": 5,
+          "owning_skill": "advanced-evaluation",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:ff74c3f3071693479cf46130759d49a5808b1680fa6b86626f7d56d809e3d8c8",
+          "id": "prebuilt-warm-sandbox-pool",
+          "line": 11,
+          "owning_skill": "hosted-agents",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:a3ba4928cbf74b80ab5046c24a1856466e71214a83044549d5d0f8b5fa26a9ee",
+          "id": "progressive-disclosure-loading",
+          "line": 9,
+          "owning_skill": "context-fundamentals",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:719643503e694a44aa6bbcfa4f6714a7020ef2cb80e9bfcf45763e35e1d0fbee",
+          "id": "pseudo-formal-task-specification",
+          "line": 20,
+          "owning_skill": "long-horizon-prompting",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:eee7d6d7c629d59958f9eb8a5199370dcf9dcf99f46b503d63dc5235258fdad4",
+          "id": "retrievable-observation-masking",
+          "line": 10,
+          "owning_skill": "context-optimization",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:e8379986979d5a8b7fe9cf6f99eea3d38577a13144c7dbd32625606a6711b3e7",
+          "id": "runtime-enforced-loop-constraints",
+          "line": 19,
+          "owning_skill": "self-improvement-loops",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:304985ca519999213d0000d99c46a2c207ec81c1a3d122b39b9ce218652f8032",
+          "id": "shallowest-viable-memory-layer",
+          "line": 13,
+          "owning_skill": "memory-systems",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:c00a81550f5a8491611b8136ea3b08a11266aa7aed7d07fb290055f2777dbacd",
+          "id": "structured-novelty-gate",
+          "line": 4,
+          "owning_skill": "harness-engineering",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:618e4da9ec4e3e87f110ea193140bfe9e8c949edce73cba6d3897e6f475eb0d8",
+          "id": "task-guided-kv-cache-compaction",
+          "line": 12,
+          "owning_skill": "latent-briefing",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:ba5ad2c14ada1e3e0edbc30566a28c9ef40203a122377ef66329d7c083684501",
+          "id": "tool-contract-description",
+          "line": 16,
+          "owning_skill": "tool-design",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:6cd5fd96c25a27e98dc1f1a31b01041647d551abe8f0a5c0e09232e04dc54132",
+          "id": "two-split-no-regression-acceptance",
+          "line": 17,
+          "owning_skill": "self-improvement-loops",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:83f39a38066d6cb5e4b19dfc1f7e6277c8ee59d15c6fc05daff682ec729f3942",
+          "id": "world-state-grounded-bdi-chain",
+          "line": 6,
+          "owning_skill": "bdi-mental-states",
+          "status": "accepted"
+        }
+      ]
+    },
+    "router_prompts": {
+      "count": 56,
+      "owner": "researcher/benchmarks/router/prompts.jsonl",
+      "records": [
+        {
+          "digest": "sha256:6ae10602510d88115b166bc2c305331169b696797c901a6f9eaa4346714408da",
+          "expected_primary_skill": "context-fundamentals",
+          "id": "p001",
+          "line": 1
+        },
+        {
+          "digest": "sha256:cf479f1b6ccc0ffec3348cef539d1b6e1cccbbdc7777fe2800091029d950654a",
+          "expected_primary_skill": "context-degradation",
+          "id": "p002",
+          "line": 2
+        },
+        {
+          "digest": "sha256:350fa9c5d30b47dd566bdfff88cd459536b5689dbb5ab3703cc45a9e6ef76375",
+          "expected_primary_skill": "context-compression",
+          "id": "p003",
+          "line": 3
+        },
+        {
+          "digest": "sha256:39b202f93d9a02900d0080a96ba0948f771ea2979647fcaebe02b15dc967a018",
+          "expected_primary_skill": "context-optimization",
+          "id": "p004",
+          "line": 4
+        },
+        {
+          "digest": "sha256:1e858f478486f8efa2315e8a13334f5d911b8692c168d83048c2e5538aeb1e92",
+          "expected_primary_skill": "latent-briefing",
+          "id": "p005",
+          "line": 5
+        },
+        {
+          "digest": "sha256:e060ed8a2588e8ada57986af7a7b4cfcfaed125c74b6a3593fea9fe603adc595",
+          "expected_primary_skill": "multi-agent-patterns",
+          "id": "p006",
+          "line": 6
+        },
+        {
+          "digest": "sha256:4840148d88e169a7577a866a0019bd4dfecb9c56614853ca46a5fdb4b010cf9a",
+          "expected_primary_skill": "memory-systems",
+          "id": "p007",
+          "line": 7
+        },
+        {
+          "digest": "sha256:c8df4b3eb6ddc1995b42980e74806fc1c8c6da4c3df0c3534840a2ddb2b6def0",
+          "expected_primary_skill": "tool-design",
+          "id": "p008",
+          "line": 8
+        },
+        {
+          "digest": "sha256:df288bea77ae22a45e3edf8fea91a5852a141e2d3ee33b88b1404960f3ac60e7",
+          "expected_primary_skill": "filesystem-context",
+          "id": "p009",
+          "line": 9
+        },
+        {
+          "digest": "sha256:93544bac869ac0b062284f07739a486a5f833a7bba6ec966649fe2d4935daf9c",
+          "expected_primary_skill": "hosted-agents",
+          "id": "p010",
+          "line": 10
+        },
+        {
+          "digest": "sha256:457b2b8f149cb464adbfac751bfca357b5d870a17e69b1d2d8080ead1dfc99b6",
+          "expected_primary_skill": "evaluation",
+          "id": "p011",
+          "line": 11
+        },
+        {
+          "digest": "sha256:886273da70ec5f491493e1df8785242418b1c1c970916e45d56fc26de0ad15b7",
+          "expected_primary_skill": "advanced-evaluation",
+          "id": "p012",
+          "line": 12
+        },
+        {
+          "digest": "sha256:9d44cbce96a8301004960bcc8c0851f839e47a11b6e9dbd414e4968ec908c815",
+          "expected_primary_skill": "harness-engineering",
+          "id": "p013",
+          "line": 13
+        },
+        {
+          "digest": "sha256:a1a415c73879c0cdad030eed58eeb5fda26d8f4e5b83aa19e9010b97b36e3ff0",
+          "expected_primary_skill": "project-development",
+          "id": "p014",
+          "line": 14
+        },
+        {
+          "digest": "sha256:f8913fb0308ee8cef253aa8e9e6efc8a0ff4b5af0179a9583ffd82fb723e7d17",
+          "expected_primary_skill": "bdi-mental-states",
+          "id": "p015",
+          "line": 15
+        },
+        {
+          "digest": "sha256:942495f9292bb7ad5f949676149c5a7777f999b2a69065534e13f28d8f91fdb6",
+          "expected_primary_skill": "evaluation",
+          "id": "p016",
+          "line": 16
+        },
+        {
+          "digest": "sha256:574699c49aec2efe31cfcae809fb5d688a0acf760bf75fba725cb2c5d0e8cdc0",
+          "expected_primary_skill": "advanced-evaluation",
+          "id": "p017",
+          "line": 17
+        },
+        {
+          "digest": "sha256:8c3df872d07c8c6fd5b0b1fadbbb2bbb6d2d047a37d60051f60cbe0d4d5663a4",
+          "expected_primary_skill": "context-compression",
+          "id": "p018",
+          "line": 18
+        },
+        {
+          "digest": "sha256:8062786b81159ece081ce1d707873bde910e19896dd5fbf0b9bcf56782478575",
+          "expected_primary_skill": "context-optimization",
+          "id": "p019",
+          "line": 19
+        },
+        {
+          "digest": "sha256:740a93c1cf53499083b01b5a4f1336deac55b879dd128cf423e2e5d423fdf8ad",
+          "expected_primary_skill": "memory-systems",
+          "id": "p020",
+          "line": 20
+        },
+        {
+          "digest": "sha256:52d41debfb689fe29765b35b5a4a3a572f0785f1c3298e04e536d40dcd3e0f54",
+          "expected_primary_skill": "filesystem-context",
+          "id": "p021",
+          "line": 21
+        },
+        {
+          "digest": "sha256:bdf81112566064bfb498acd3db4b438e5d738ad64c2ee95d14f2a14447e8601a",
+          "expected_primary_skill": "harness-engineering",
+          "id": "p022",
+          "line": 22
+        },
+        {
+          "digest": "sha256:34bd65935e74f8a2e857fe491be7188387e2681aa48ca5683f3bde99503c9b9b",
+          "expected_primary_skill": "project-development",
+          "id": "p023",
+          "line": 23
+        },
+        {
+          "digest": "sha256:62a503ec33b0873656ec4903795b160b91eec8de02679b17e580847a2cbe5142",
+          "expected_primary_skill": "latent-briefing",
+          "id": "p024",
+          "line": 24
+        },
+        {
+          "digest": "sha256:2990aec17b9a0c747fc6da8fb7c1b32ae1ffb2d624257f7b0fa7bdf363e77f94",
+          "expected_primary_skill": "multi-agent-patterns",
+          "id": "p025",
+          "line": 25
+        },
+        {
+          "digest": "sha256:d59c33459901aabf9af6d2533a83cc556c2b9c7df550ddabf437d734b5d455b6",
+          "expected_primary_skill": "project-development",
+          "id": "p026",
+          "line": 26
+        },
+        {
+          "digest": "sha256:a41671073f097ee8be8845c5f9de03df172b5c41af12bc612899475e4a8d1ab0",
+          "expected_primary_skill": "tool-design",
+          "id": "p027",
+          "line": 27
+        },
+        {
+          "digest": "sha256:4e4fc355ff88c0261f53b3a6e36fb64fff7a65f2b4dc24ba35b8748923ea2b32",
+          "expected_primary_skill": "context-degradation",
+          "id": "p028",
+          "line": 28
+        },
+        {
+          "digest": "sha256:0694528152f6d0a02ec72423f0ad106fb4c53996e65e0dcc0d3b982d0a39a8c7",
+          "expected_primary_skill": "multi-agent-patterns",
+          "id": "p029",
+          "line": 29
+        },
+        {
+          "digest": "sha256:da7243823d732a24226d44f6b6ea4e56116ecc31d13304f9e19e65766015f486",
+          "expected_primary_skill": "context-compression",
+          "id": "p030",
+          "line": 30
+        },
+        {
+          "digest": "sha256:efe9583a4e5f1b71e732cf38cd66b39b62026ebbc83228b318688a6d7dbe7fe2",
+          "expected_primary_skill": "filesystem-context",
+          "id": "p031",
+          "line": 31
+        },
+        {
+          "digest": "sha256:219bbdad1a4bafbccaab0b0c37593fd308067fdb72dde7478e2b69ad000bbf51",
+          "expected_primary_skill": "memory-systems",
+          "id": "p032",
+          "line": 32
+        },
+        {
+          "digest": "sha256:ce9fad1eb90c05ed6891aa67fe45ed332351b300c76a7d50df2c2419c16dcb03",
+          "expected_primary_skill": "evaluation",
+          "id": "p033",
+          "line": 33
+        },
+        {
+          "digest": "sha256:fad3e5a3720dd861a6c53fcaed404c5baa3143ca78dc05caf1741b51f30a4b22",
+          "expected_primary_skill": "advanced-evaluation",
+          "id": "p034",
+          "line": 34
+        },
+        {
+          "digest": "sha256:8c78f2fba110690faea00025cc831025ea76fbdb91b7e346f9f843e2411be9b8",
+          "expected_primary_skill": "hosted-agents",
+          "id": "p035",
+          "line": 35
+        },
+        {
+          "digest": "sha256:b14b879eb681a903769d29058b32ae9cac61c4debc8a778d2980a069dfaee090",
+          "expected_primary_skill": "harness-engineering",
+          "id": "p036",
+          "line": 36
+        },
+        {
+          "digest": "sha256:e2bbf422020aeeb899187bf14e343c9be36bfd61d03ec920a0153a1b32501a59",
+          "expected_primary_skill": "project-development",
+          "id": "p037",
+          "line": 37
+        },
+        {
+          "digest": "sha256:c0e012be9f62cbc63a16ca701538f10d5521b302c6c602187dd4a7461f997df4",
+          "expected_primary_skill": "bdi-mental-states",
+          "id": "p038",
+          "line": 38
+        },
+        {
+          "digest": "sha256:26f67c07588636a8908436d264401c48d56f685b6074ac1257477d333f7fac7f",
+          "expected_primary_skill": "context-degradation",
+          "id": "p039",
+          "line": 39
+        },
+        {
+          "digest": "sha256:6d4edd9ebc520fa56fc62313886bbb641382667d0707859300b693d9b0ef202d",
+          "expected_primary_skill": "context-fundamentals",
+          "id": "p040",
+          "line": 40
+        },
+        {
+          "digest": "sha256:f71abfd96ce4ab8055da860d4aab5e1b0a1b87dd4d7f81f377c0e95c00893f9d",
+          "expected_primary_skill": "tool-design",
+          "id": "p041",
+          "line": 41
+        },
+        {
+          "digest": "sha256:9e526e688e99f3a3368da48afe4785c2f84f7e9c3425b8c2c4c241546cbde104",
+          "expected_primary_skill": "advanced-evaluation",
+          "id": "p042",
+          "line": 42
+        },
+        {
+          "digest": "sha256:9fdbde99a71d5f336119559273b30fe55ee080211c618812b4f4dfb4844cd84e",
+          "expected_primary_skill": "context-optimization",
+          "id": "p043",
+          "line": 43
+        },
+        {
+          "digest": "sha256:f9ef5d50ffd840a2cb6a630f4e22380fdc9349473f243b3531e4409928dc746e",
+          "expected_primary_skill": "multi-agent-patterns",
+          "id": "p044",
+          "line": 44
+        },
+        {
+          "digest": "sha256:a3b84862c04e21951dd7a1fbbd9d1b5d67e1598de65faca6426286cb8adb7740",
+          "expected_primary_skill": "context-fundamentals",
+          "id": "p045",
+          "line": 45
+        },
+        {
+          "digest": "sha256:d378b06803e3acc17a84166853bcd8993944f9db30873fb6bd62b1768300902d",
+          "expected_primary_skill": "tool-design",
+          "id": "p046",
+          "line": 46
+        },
+        {
+          "digest": "sha256:d7aeb2ee8998f36ee4cbc55191a629daa5ffc6666a721ab3640fe4d563b071f2",
+          "expected_primary_skill": "context-fundamentals",
+          "id": "p047",
+          "line": 47
+        },
+        {
+          "digest": "sha256:a1992f139568506cd0f015a2eb8006295b780584a87b6f686ab1eda79ebbc6b0",
+          "expected_primary_skill": "advanced-evaluation",
+          "id": "p048",
+          "line": 48
+        },
+        {
+          "digest": "sha256:8fd7f42e198893b2053b226e22890f8d9d0d8e043de4213e11f280f9db6630a9",
+          "expected_primary_skill": "filesystem-context",
+          "id": "p049",
+          "line": 49
+        },
+        {
+          "digest": "sha256:071551a905adc0f357f39aca0ecae20245c5e8a95acd0af9d10964df15334990",
+          "expected_primary_skill": "tool-design",
+          "id": "p050",
+          "line": 50
+        },
+        {
+          "digest": "sha256:f95ee163331b5f3eaaa0c9159350b934becbd2f6f0a25c34462b872ef58079c6",
+          "expected_primary_skill": "self-improvement-loops",
+          "id": "p051",
+          "line": 51
+        },
+        {
+          "digest": "sha256:1712e5c5fec03acfaa1b727026a612187d1ed2103f293ee1c78ad304c3cdd36a",
+          "expected_primary_skill": "self-improvement-loops",
+          "id": "p052",
+          "line": 52
+        },
+        {
+          "digest": "sha256:8fc78399d18b2f27b7951c447eff433421385cd792f5cb3ca786392de371e1dc",
+          "expected_primary_skill": "self-improvement-loops",
+          "id": "p053",
+          "line": 53
+        },
+        {
+          "digest": "sha256:9e9fc056472f4f636602520258815bd1b031d785ea92ead3fa66c7c31176f01a",
+          "expected_primary_skill": "long-horizon-prompting",
+          "id": "p054",
+          "line": 54
+        },
+        {
+          "digest": "sha256:7540284df87cab4081de6ccaed6291828c068ca7478825253f9f9c8913c145f1",
+          "expected_primary_skill": "long-horizon-prompting",
+          "id": "p055",
+          "line": 55
+        },
+        {
+          "digest": "sha256:edddd99881288343aea935ea4dc516b602fc7c7cf610bb5703d9dc70fbd3ed00",
+          "expected_primary_skill": "long-horizon-prompting",
+          "id": "p056",
+          "line": 56
+        }
+      ]
+    },
+    "schemas": {
+      "count": 1,
+      "owner": "researcher/corpus/inventory.schema.json",
+      "records": [
+        {
+          "digest": "sha256:68bf28099bcc3581395935ff2fadda4a6cbe11e30e2bd6cad136e6e0da80805c",
+          "id": "repository-inventory-v1",
+          "path": "researcher/corpus/inventory.schema.json",
+          "schema_id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/corpus/inventory.schema.json"
+        }
+      ]
+    },
+    "skills": {
+      "count": 17,
+      "owner": "skills/*/SKILL.md",
+      "records": [
+        {
+          "digest": "sha256:8b9e3d9de07a0505ae2b42df2e15dd75bab5f2486e336194481c558e0648ded0",
+          "id": "advanced-evaluation",
+          "path": "skills/advanced-evaluation/SKILL.md"
+        },
+        {
+          "digest": "sha256:2a68bf11815b166a508141c6ecb24a2007808e6d46557c0b111bb9b10b87cbe6",
+          "id": "bdi-mental-states",
+          "path": "skills/bdi-mental-states/SKILL.md"
+        },
+        {
+          "digest": "sha256:c4111db0514e24f69dbcc8f3fe434a057f69cdb8e8d13994791fa8a26aecf9f2",
+          "id": "context-compression",
+          "path": "skills/context-compression/SKILL.md"
+        },
+        {
+          "digest": "sha256:4e1896f641ddc99cc9cb14322606c6133b9fd520c84d3af0541e64f553c7f928",
+          "id": "context-degradation",
+          "path": "skills/context-degradation/SKILL.md"
+        },
+        {
+          "digest": "sha256:03b56e1c40edc6314b1f204498c3ba40163a32e63bdbceaeba93513ccddcaba6",
+          "id": "context-fundamentals",
+          "path": "skills/context-fundamentals/SKILL.md"
+        },
+        {
+          "digest": "sha256:8cecc30872ec76752aadd7b6dceb40033e3b3efbc5dd2ee52c5d09bb4229b706",
+          "id": "context-optimization",
+          "path": "skills/context-optimization/SKILL.md"
+        },
+        {
+          "digest": "sha256:1f31cda0910dfd48d928e1485b303b739608ceeb0babca0e9a6f821cbf4320ff",
+          "id": "evaluation",
+          "path": "skills/evaluation/SKILL.md"
+        },
+        {
+          "digest": "sha256:bbde98d3481f1f51394e9fa84bbfff6807d9cce1f91dcf9161280fef17ae7f94",
+          "id": "filesystem-context",
+          "path": "skills/filesystem-context/SKILL.md"
+        },
+        {
+          "digest": "sha256:dde3d8f46d4d09dbab41358baa3e8310d7fdfcd2fbefa127153ac4f6b5ef7b16",
+          "id": "harness-engineering",
+          "path": "skills/harness-engineering/SKILL.md"
+        },
+        {
+          "digest": "sha256:4786dad600b063378410de444a77f4b22cc80e673b5cd6e426cbe9d6fb2c0273",
+          "id": "hosted-agents",
+          "path": "skills/hosted-agents/SKILL.md"
+        },
+        {
+          "digest": "sha256:d84e7abe51f037a353dc3ccf18498498099fc633373a0d223bd6cc45277fd0bd",
+          "id": "latent-briefing",
+          "path": "skills/latent-briefing/SKILL.md"
+        },
+        {
+          "digest": "sha256:75f8c53453fb526a4b4dc6f3c7d8870af87d68aeba12a7c3e77f19c44f27ad82",
+          "id": "long-horizon-prompting",
+          "path": "skills/long-horizon-prompting/SKILL.md"
+        },
+        {
+          "digest": "sha256:9e2b38ffe9474ba19c93b3d75c80e683705d82e8a4b59af16d603d133bab8d2f",
+          "id": "memory-systems",
+          "path": "skills/memory-systems/SKILL.md"
+        },
+        {
+          "digest": "sha256:786ff9345eb49f1d8e1bc5183e437a6d882f15b50bdb2ce0055a9d54390a3ce2",
+          "id": "multi-agent-patterns",
+          "path": "skills/multi-agent-patterns/SKILL.md"
+        },
+        {
+          "digest": "sha256:acfeda3048cf6213be2d0c4699c1884914a1a044ca2707094483ca6423d17a11",
+          "id": "project-development",
+          "path": "skills/project-development/SKILL.md"
+        },
+        {
+          "digest": "sha256:6999267207013a8daee32d43f7428944e3666cb879c797217f27ebd5e89a9d6e",
+          "id": "self-improvement-loops",
+          "path": "skills/self-improvement-loops/SKILL.md"
+        },
+        {
+          "digest": "sha256:14f5a12b69113bc6450da69c5b4d408fe91601832ab1055ae25311339c84a06b",
+          "id": "tool-design",
+          "path": "skills/tool-design/SKILL.md"
+        }
+      ]
+    },
+    "validators": {
+      "count": 7,
+      "owner": "declared validator ownership",
+      "records": [
+        {
+          "digest": "sha256:7f189e876bc7cba64683a187d1f4f0699864602802cb73cccb30084eaa5d8c08",
+          "id": "governance-policy",
+          "owns": [
+            "authority vocabulary",
+            "constitutional invariants",
+            "generated authority view"
+          ],
+          "path": "researcher/scripts/validate_governance.py"
+        },
+        {
+          "digest": "sha256:7a2fd204985b43715950d2ef406de3b6841b23c77d52eba470f32f5be327cfb3",
+          "id": "repository-inventory",
+          "owns": [
+            "identifier uniqueness",
+            "cross-artifact references",
+            "live counts",
+            "generated inventory"
+          ],
+          "path": "researcher/scripts/build_inventory.py"
+        },
+        {
+          "digest": "sha256:facebf497d771a018adff8c0bbbbcbb1b28cf38a797c82d48e47fcc9c46fd81f",
+          "id": "platform-compatibility",
+          "owns": [
+            "Agent Skills format",
+            "platform install layouts",
+            "reference validator"
+          ],
+          "path": "researcher/scripts/validate_platform_compat.py"
+        },
+        {
+          "digest": "sha256:578c88644d0839ba8e9846108f48c6e36d56e1bbda4b733d760cc2865834bdb7",
+          "id": "repository-structure",
+          "owns": [
+            "content invariants",
+            "rubric math",
+            "source evaluations",
+            "run fixtures"
+          ],
+          "path": "researcher/scripts/validate_repo.py"
+        },
+        {
+          "digest": "sha256:3dc2d0f0daa6327914bc733731723631bbd0f2a52b192a54762715a05ff343d7",
+          "id": "skill-health",
+          "owns": [
+            "skill body quality score"
+          ],
+          "path": "researcher/scripts/skill_health.py"
+        },
+        {
+          "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
+          "id": "activation-cases",
+          "owns": [
+            "activation boundary smoke tests"
+          ],
+          "path": "researcher/scripts/check_activation_cases.py"
+        },
+        {
+          "digest": "sha256:ef6cb1f2f03ebd77c6ba56b2adc7dc0f6d0ba3e260272ea7620d744de0f01f3a",
+          "id": "adversarial-benchmarks",
+          "owns": [
+            "deterministic benchmark composition",
+            "adversarial scenario execution"
+          ],
+          "path": "researcher/scripts/run_benchmarks.py"
+        }
+      ]
+    }
+  },
+  "compatibility": {
+    "benchmark_runner": {
+      "effectiveness": "scaffold",
+      "paid_results": "runtime_or_published_only",
+      "router": "operational"
+    },
+    "historical_reports_are_snapshots": true,
+    "manifest_skill_sets": {
+      "marketplace": [
+        "advanced-evaluation",
+        "bdi-mental-states",
+        "context-compression",
+        "context-degradation",
+        "context-fundamentals",
+        "context-optimization",
+        "evaluation",
+        "filesystem-context",
+        "harness-engineering",
+        "hosted-agents",
+        "latent-briefing",
+        "long-horizon-prompting",
+        "memory-systems",
+        "multi-agent-patterns",
+        "project-development",
+        "self-improvement-loops",
+        "tool-design"
+      ],
+      "published": [
+        "advanced-evaluation",
+        "bdi-mental-states",
+        "context-compression",
+        "context-degradation",
+        "context-fundamentals",
+        "context-optimization",
+        "evaluation",
+        "filesystem-context",
+        "harness-engineering",
+        "hosted-agents",
+        "latent-briefing",
+        "long-horizon-prompting",
+        "memory-systems",
+        "multi-agent-patterns",
+        "project-development",
+        "self-improvement-loops",
+        "tool-design"
+      ]
+    },
+    "plugin_versions": {
+      "collection_skill": "2.5.0",
+      "marketplace": "2.5.0",
+      "open_plugin": "2.5.0"
+    }
+  },
+  "relationships": {
+    "skill_activation_cases": [
+      {
+        "case_id": "activation-evaluation-vs-advanced-judge",
+        "skill_id": "advanced-evaluation"
+      },
+      {
+        "case_id": "activation-bdi-vs-memory",
+        "skill_id": "bdi-mental-states"
+      },
+      {
+        "case_id": "activation-compression-vs-optimization",
+        "skill_id": "context-compression"
+      },
+      {
+        "case_id": "activation-degradation-poisoning",
+        "skill_id": "context-degradation"
+      },
+      {
+        "case_id": "activation-fundamentals-onboarding",
+        "skill_id": "context-fundamentals"
+      },
+      {
+        "case_id": "activation-fundamentals-vs-degradation",
+        "skill_id": "context-fundamentals"
+      },
+      {
+        "case_id": "activation-fundamentals-vs-optimization",
+        "skill_id": "context-fundamentals"
+      },
+      {
+        "case_id": "activation-optimization-vs-compression",
+        "skill_id": "context-optimization"
+      },
+      {
+        "case_id": "activation-evaluation-general-quality-gate",
+        "skill_id": "evaluation"
+      },
+      {
+        "case_id": "activation-filesystem-vs-memory",
+        "skill_id": "filesystem-context"
+      },
+      {
+        "case_id": "activation-harness-vs-project",
+        "skill_id": "harness-engineering"
+      },
+      {
+        "case_id": "activation-hosted-vs-harness",
+        "skill_id": "hosted-agents"
+      },
+      {
+        "case_id": "activation-latent-briefing-vs-memory",
+        "skill_id": "latent-briefing"
+      },
+      {
+        "case_id": "activation-long-horizon-orchestrator-brief",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "case_id": "activation-long-horizon-vs-multi-agent",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "case_id": "activation-memory-vs-filesystem",
+        "skill_id": "memory-systems"
+      },
+      {
+        "case_id": "activation-multi-agent-topology",
+        "skill_id": "multi-agent-patterns"
+      },
+      {
+        "case_id": "activation-project-vs-harness",
+        "skill_id": "project-development"
+      },
+      {
+        "case_id": "activation-tool-vs-project-structured-output",
+        "skill_id": "project-development"
+      },
+      {
+        "case_id": "activation-self-improvement-evolutionary-search",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "case_id": "activation-self-improvement-vs-harness",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "case_id": "activation-tool-consolidation",
+        "skill_id": "tool-design"
+      },
+      {
+        "case_id": "activation-tool-individual-tool",
+        "skill_id": "tool-design"
+      }
+    ],
+    "skill_claims": [
+      {
+        "claim_id": "claim-advanced-evaluation-position-swap",
+        "relationship": "owned",
+        "skill_id": "advanced-evaluation"
+      },
+      {
+        "claim_id": "claim-context-compression-factory-benchmark",
+        "relationship": "owned",
+        "skill_id": "context-compression"
+      },
+      {
+        "claim_id": "claim-context-degradation-distractor-shuffled",
+        "relationship": "owned",
+        "skill_id": "context-degradation"
+      },
+      {
+        "claim_id": "claim-context-degradation-lost-middle-ruler",
+        "relationship": "owned",
+        "skill_id": "context-degradation"
+      },
+      {
+        "claim_id": "claim-context-degradation-lost-middle-ruler",
+        "relationship": "related",
+        "skill_id": "context-fundamentals"
+      },
+      {
+        "claim_id": "claim-context-optimization-tool-output-dominance",
+        "relationship": "related",
+        "skill_id": "context-fundamentals"
+      },
+      {
+        "claim_id": "claim-context-optimization-tool-output-dominance",
+        "relationship": "owned",
+        "skill_id": "context-optimization"
+      },
+      {
+        "claim_id": "claim-evaluation-browsecomp-variance",
+        "relationship": "owned",
+        "skill_id": "evaluation"
+      },
+      {
+        "claim_id": "claim-harness-locked-evaluator",
+        "relationship": "owned",
+        "skill_id": "harness-engineering"
+      },
+      {
+        "claim_id": "claim-latent-briefing-public-results",
+        "relationship": "owned",
+        "skill_id": "latent-briefing"
+      },
+      {
+        "claim_id": "claim-long-horizon-cdc-run",
+        "relationship": "owned",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "claim_id": "claim-long-horizon-diversity-collapse",
+        "relationship": "owned",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "claim_id": "claim-long-horizon-evidence-audit",
+        "relationship": "owned",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "claim_id": "claim-long-horizon-give-up-drift",
+        "relationship": "owned",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "claim_id": "claim-long-horizon-lean-prompt",
+        "relationship": "owned",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "claim_id": "claim-long-horizon-persistence-hacking",
+        "relationship": "owned",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "claim_id": "claim-long-horizon-state-ledger",
+        "relationship": "owned",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "claim_id": "claim-long-horizon-verification-gap",
+        "relationship": "owned",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "claim_id": "claim-memory-locomo-filesystem-baseline",
+        "relationship": "owned",
+        "skill_id": "memory-systems"
+      },
+      {
+        "claim_id": "claim-evaluation-browsecomp-variance",
+        "relationship": "related",
+        "skill_id": "multi-agent-patterns"
+      },
+      {
+        "claim_id": "claim-multi-agent-token-multiplier",
+        "relationship": "owned",
+        "skill_id": "multi-agent-patterns"
+      },
+      {
+        "claim_id": "claim-project-development-vercel-d0-reduction",
+        "relationship": "owned",
+        "skill_id": "project-development"
+      },
+      {
+        "claim_id": "claim-self-improvement-capability-threshold",
+        "relationship": "owned",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "claim_id": "claim-self-improvement-context-collapse",
+        "relationship": "owned",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "claim_id": "claim-self-improvement-raw-trace-ablation",
+        "relationship": "owned",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "claim_id": "claim-self-improvement-scorer-visibility",
+        "relationship": "owned",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "claim_id": "claim-self-improvement-two-split-acceptance",
+        "relationship": "owned",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "claim_id": "claim-self-improvement-visible-evaluator-hacking",
+        "relationship": "owned",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "claim_id": "claim-tool-design-vercel-d0-reduction",
+        "relationship": "owned",
+        "skill_id": "tool-design"
+      }
+    ],
+    "skill_mechanisms": [
+      {
+        "mechanism_id": "pairwise-skill-revision",
+        "skill_id": "advanced-evaluation"
+      },
+      {
+        "mechanism_id": "world-state-grounded-bdi-chain",
+        "skill_id": "bdi-mental-states"
+      },
+      {
+        "mechanism_id": "anchored-iterative-summary",
+        "skill_id": "context-compression"
+      },
+      {
+        "mechanism_id": "context-poisoning-circuit-breaker",
+        "skill_id": "context-degradation"
+      },
+      {
+        "mechanism_id": "progressive-disclosure-loading",
+        "skill_id": "context-fundamentals"
+      },
+      {
+        "mechanism_id": "retrievable-observation-masking",
+        "skill_id": "context-optimization"
+      },
+      {
+        "mechanism_id": "deterministic-first-validation",
+        "skill_id": "evaluation"
+      },
+      {
+        "mechanism_id": "durable-research-thread",
+        "skill_id": "filesystem-context"
+      },
+      {
+        "mechanism_id": "locked-editable-surfaces",
+        "skill_id": "harness-engineering"
+      },
+      {
+        "mechanism_id": "structured-novelty-gate",
+        "skill_id": "harness-engineering"
+      },
+      {
+        "mechanism_id": "prebuilt-warm-sandbox-pool",
+        "skill_id": "hosted-agents"
+      },
+      {
+        "mechanism_id": "task-guided-kv-cache-compaction",
+        "skill_id": "latent-briefing"
+      },
+      {
+        "mechanism_id": "audit-gated-return-condition",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "mechanism_id": "independent-portfolio-approach-registry",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "mechanism_id": "pseudo-formal-task-specification",
+        "skill_id": "long-horizon-prompting"
+      },
+      {
+        "mechanism_id": "shallowest-viable-memory-layer",
+        "skill_id": "memory-systems"
+      },
+      {
+        "mechanism_id": "context-isolation-agent-partitioning",
+        "skill_id": "multi-agent-patterns"
+      },
+      {
+        "mechanism_id": "filesystem-state-machine-pipeline",
+        "skill_id": "project-development"
+      },
+      {
+        "mechanism_id": "filesystem-experience-archive",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "mechanism_id": "runtime-enforced-loop-constraints",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "mechanism_id": "two-split-no-regression-acceptance",
+        "skill_id": "self-improvement-loops"
+      },
+      {
+        "mechanism_id": "tool-contract-description",
+        "skill_id": "tool-design"
+      }
+    ]
+  },
+  "repository_revision": {
+    "digest": "sha256:f46f5cc8faccc4ab64a23f68aea2ac6a7c7802fa3f0860c1ce05392ea2ea1542",
+    "git_commit_excluded_to_avoid_self_reference": true,
+    "kind": "canonical_source_tree"
+  },
+  "schema_version": "1.0.0",
+  "source_tree_digest": "sha256:f46f5cc8faccc4ab64a23f68aea2ac6a7c7802fa3f0860c1ce05392ea2ea1542",
+  "sources": [
+    {
+      "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
+      "path": ".claude-plugin/marketplace.json",
+      "size_bytes": 1911
+    },
+    {
+      "digest": "sha256:d4827b154512a79ca4635f716d9d0a7d93f3c0b0f29355f67de9e004d968dc9c",
+      "path": ".plugin/plugin.json",
+      "size_bytes": 767
+    },
+    {
+      "digest": "sha256:fcec9d7318d6004a972fd4b3ad82e25bc9fcf41ac2c14cf6fb6cc74547f8710b",
+      "path": "SKILL.md",
+      "size_bytes": 10436
+    },
+    {
+      "digest": "sha256:e80dc5fe7391c3a5745c574814a1502d24ba9acea91fcbb5dc7ec7d38eb43545",
+      "path": "examples/book-sft-pipeline/README.md",
+      "size_bytes": 2795
+    },
+    {
+      "digest": "sha256:4ac5d0f82bfa76166bad86e703f4e84c3f50d5d9592d356d46db5a6aa2f19855",
+      "path": "examples/digital-brain-skill/README.md",
+      "size_bytes": 7416
+    },
+    {
+      "digest": "sha256:a4d8ae566b7ea9112a69b05ec35fefa40cb6cc27e8693ad41606a4cb6066e34e",
+      "path": "examples/interleaved-thinking/README.md",
+      "size_bytes": 20169
+    },
+    {
+      "digest": "sha256:518fa7b815ecb40b05bb4240086ba9d388d7899b3d0ba24babe55b2af4e6dad1",
+      "path": "examples/llm-as-judge-skills/README.md",
+      "size_bytes": 23890
+    },
+    {
+      "digest": "sha256:fbfb940a5866244f2bb10457f5876fd162e552d964b3ad000b03514a2d63cd94",
+      "path": "examples/long-horizon-prompt-lab/README.md",
+      "size_bytes": 6611
+    },
+    {
+      "digest": "sha256:a819cf042650a3b5e458bf97b2697d4263bb08d7bd9a26fa0ba6c2381423cdf7",
+      "path": "examples/x-to-book-system/README.md",
+      "size_bytes": 10108
+    },
+    {
+      "digest": "sha256:4ae1af9564863e50508b70e39965c31ddc034fef59dc887e8655736435f52dd6",
+      "path": "researcher/benchmarks/effectiveness/tasks/001-filesystem-context-offload/README.md",
+      "size_bytes": 1678
+    },
+    {
+      "digest": "sha256:f2d2a7e1faf3ec1fc5fc5da3a1b8154edd155653c12ca302dd642bea17723b8d",
+      "path": "researcher/benchmarks/effectiveness/tasks/001-filesystem-context-offload/metadata.json",
+      "size_bytes": 454
+    },
+    {
+      "digest": "sha256:0199d8d669ce3d8e468191db9da6a19dd7e5ef39234924077ec1c780267e5ae3",
+      "path": "researcher/benchmarks/effectiveness/tasks/001-filesystem-context-offload/starting/instructions.md",
+      "size_bytes": 248
+    },
+    {
+      "digest": "sha256:3dfe499328e039c100bac2a131fcac33be97da0033e96375e4e07877fb5c764c",
+      "path": "researcher/benchmarks/effectiveness/tasks/001-filesystem-context-offload/starting/tool_output.txt",
+      "size_bytes": 464976
+    },
+    {
+      "digest": "sha256:3ea1343f337c5d7263eb0db9367e46213da140dfc490f2275b93445137a95caf",
+      "path": "researcher/benchmarks/effectiveness/tasks/001-filesystem-context-offload/task.md",
+      "size_bytes": 501
+    },
+    {
+      "digest": "sha256:deceb09fad46a00a1ae681c9e617336e74884479721107a0f2279c4e2fd055cf",
+      "path": "researcher/benchmarks/effectiveness/tasks/001-filesystem-context-offload/verify.sh",
+      "size_bytes": 1344
+    },
+    {
+      "digest": "sha256:ca96c70fa6684409af5797d53947f3c802e4c366d50d7e8b5e21b12b522a871e",
+      "path": "researcher/benchmarks/goldens/adversarial-goldens.json",
+      "size_bytes": 591
+    },
+    {
+      "digest": "sha256:489d9670c58b3b84c63577e14ad434adf23d8d54da1d72c9d92d1b891da0f7a5",
+      "path": "researcher/benchmarks/router/prompts.jsonl",
+      "size_bytes": 22506
+    },
+    {
+      "digest": "sha256:aed93585626ea824524bd555cc459d95604b541ea8862f1e7e31a9d822b29a85",
+      "path": "researcher/benchmarks/scenarios/adversarial.jsonl",
+      "size_bytes": 1898
+    },
+    {
+      "digest": "sha256:1569152d710eb397858ae501c0e3b95e2ebf07a6e1783e2e68ca487edebeb56a",
+      "path": "researcher/benchmarks/sdk-runner/package-lock.json",
+      "size_bytes": 60243
+    },
+    {
+      "digest": "sha256:4849f4e325c6c6de51b35d698c2402556f2a0673757f676d252536ed8388b553",
+      "path": "researcher/benchmarks/sdk-runner/package.json",
+      "size_bytes": 831
+    },
+    {
+      "digest": "sha256:44d472169cf8cc08a4da8c84bff3db907dc5a7f68a79848d931139c8a8750fb9",
+      "path": "researcher/benchmarks/sdk-runner/src/common.ts",
+      "size_bytes": 10638
+    },
+    {
+      "digest": "sha256:d623d5a156a57d07bc1a91cfbe1fc4336f46ef413209395d2894fb3173a9b452",
+      "path": "researcher/benchmarks/sdk-runner/src/runEffectiveness.ts",
+      "size_bytes": 4368
+    },
+    {
+      "digest": "sha256:ee40169ffccd9be901bb592a03d1eb9911ecb6e7e76ca06f13c5ff8d8baccc0e",
+      "path": "researcher/benchmarks/sdk-runner/src/runRouter.ts",
+      "size_bytes": 12576
+    },
+    {
+      "digest": "sha256:1bf42fa8545bc307e5371c58ffd5a1ac818a07b31da7038cbdb3b95f072a5ab1",
+      "path": "researcher/benchmarks/sdk-runner/tsconfig.json",
+      "size_bytes": 611
+    },
+    {
+      "digest": "sha256:9bd449e2e2b61599976fb31cf07e10fef3b9ca4e4bd7c31653c49c7a8a990db9",
+      "path": "researcher/claims/index.jsonl",
+      "size_bytes": 14452
+    },
+    {
+      "digest": "sha256:29851b898570f76950cb62ec9abc804369de78ba68f5a997c55ec149b6a1363f",
+      "path": "researcher/corpus/index.json",
+      "size_bytes": 7371
+    },
+    {
+      "digest": "sha256:a8a2d73c1d22f496702737d572dedadfc63298fd4e658d9a5574d58690fba0e5",
+      "path": "researcher/corpus/inventory.schema.json",
+      "size_bytes": 2054
+    },
+    {
+      "digest": "sha256:a6f79df5cbfe39617aa6ce349548821d59d9b7cee363edbbc4d8640a90d88b0a",
+      "path": "researcher/fixtures/activation-cases.jsonl",
+      "size_bytes": 11684
+    },
+    {
+      "digest": "sha256:e658564d470a184b5062a17bde5e265096458922b2405870c6394498427bffbf",
+      "path": "researcher/mechanisms/ledgers/accepted.jsonl",
+      "size_bytes": 12802
+    },
+    {
+      "digest": "sha256:1dba51f3178d0497b69d9b25dd0bfecc894552b56056d33281e981eeb45db8c5",
+      "path": "researcher/mechanisms/ledgers/rejected.jsonl",
+      "size_bytes": 302
+    },
+    {
+      "digest": "sha256:4fdfcfd93ee023ed6085e1b99ec3438b68bc46c6de5200dab4e6cfbdef76305e",
+      "path": "researcher/mechanisms/registry.jsonl",
+      "size_bytes": 14630
+    },
+    {
+      "digest": "sha256:7a2fd204985b43715950d2ef406de3b6841b23c77d52eba470f32f5be327cfb3",
+      "path": "researcher/scripts/build_inventory.py",
+      "size_bytes": 48407
+    },
+    {
+      "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
+      "path": "researcher/scripts/check_activation_cases.py",
+      "size_bytes": 4529
+    },
+    {
+      "digest": "sha256:ef6cb1f2f03ebd77c6ba56b2adc7dc0f6d0ba3e260272ea7620d744de0f01f3a",
+      "path": "researcher/scripts/run_benchmarks.py",
+      "size_bytes": 4917
+    },
+    {
+      "digest": "sha256:3dc2d0f0daa6327914bc733731723631bbd0f2a52b192a54762715a05ff343d7",
+      "path": "researcher/scripts/skill_health.py",
+      "size_bytes": 13616
+    },
+    {
+      "digest": "sha256:7f189e876bc7cba64683a187d1f4f0699864602802cb73cccb30084eaa5d8c08",
+      "path": "researcher/scripts/validate_governance.py",
+      "size_bytes": 10034
+    },
+    {
+      "digest": "sha256:facebf497d771a018adff8c0bbbbcbb1b28cf38a797c82d48e47fcc9c46fd81f",
+      "path": "researcher/scripts/validate_platform_compat.py",
+      "size_bytes": 8654
+    },
+    {
+      "digest": "sha256:578c88644d0839ba8e9846108f48c6e36d56e1bbda4b733d760cc2865834bdb7",
+      "path": "researcher/scripts/validate_repo.py",
+      "size_bytes": 33210
+    },
+    {
+      "digest": "sha256:8b9e3d9de07a0505ae2b42df2e15dd75bab5f2486e336194481c558e0648ded0",
+      "path": "skills/advanced-evaluation/SKILL.md",
+      "size_bytes": 16990
+    },
+    {
+      "digest": "sha256:2a68bf11815b166a508141c6ecb24a2007808e6d46557c0b111bb9b10b87cbe6",
+      "path": "skills/bdi-mental-states/SKILL.md",
+      "size_bytes": 17738
+    },
+    {
+      "digest": "sha256:c4111db0514e24f69dbcc8f3fe434a057f69cdb8e8d13994791fa8a26aecf9f2",
+      "path": "skills/context-compression/SKILL.md",
+      "size_bytes": 18214
+    },
+    {
+      "digest": "sha256:4e1896f641ddc99cc9cb14322606c6133b9fd520c84d3af0541e64f553c7f928",
+      "path": "skills/context-degradation/SKILL.md",
+      "size_bytes": 19180
+    },
+    {
+      "digest": "sha256:03b56e1c40edc6314b1f204498c3ba40163a32e63bdbceaeba93513ccddcaba6",
+      "path": "skills/context-fundamentals/SKILL.md",
+      "size_bytes": 17013
+    },
+    {
+      "digest": "sha256:8cecc30872ec76752aadd7b6dceb40033e3b3efbc5dd2ee52c5d09bb4229b706",
+      "path": "skills/context-optimization/SKILL.md",
+      "size_bytes": 15667
+    },
+    {
+      "digest": "sha256:1f31cda0910dfd48d928e1485b303b739608ceeb0babca0e9a6f821cbf4320ff",
+      "path": "skills/evaluation/SKILL.md",
+      "size_bytes": 16829
+    },
+    {
+      "digest": "sha256:bbde98d3481f1f51394e9fa84bbfff6807d9cce1f91dcf9161280fef17ae7f94",
+      "path": "skills/filesystem-context/SKILL.md",
+      "size_bytes": 15919
+    },
+    {
+      "digest": "sha256:dde3d8f46d4d09dbab41358baa3e8310d7fdfcd2fbefa127153ac4f6b5ef7b16",
+      "path": "skills/harness-engineering/SKILL.md",
+      "size_bytes": 11413
+    },
+    {
+      "digest": "sha256:4786dad600b063378410de444a77f4b22cc80e673b5cd6e426cbe9d6fb2c0273",
+      "path": "skills/hosted-agents/SKILL.md",
+      "size_bytes": 17717
+    },
+    {
+      "digest": "sha256:d84e7abe51f037a353dc3ccf18498498099fc633373a0d223bd6cc45277fd0bd",
+      "path": "skills/latent-briefing/SKILL.md",
+      "size_bytes": 13029
+    },
+    {
+      "digest": "sha256:75f8c53453fb526a4b4dc6f3c7d8870af87d68aeba12a7c3e77f19c44f27ad82",
+      "path": "skills/long-horizon-prompting/SKILL.md",
+      "size_bytes": 25666
+    },
+    {
+      "digest": "sha256:9e2b38ffe9474ba19c93b3d75c80e683705d82e8a4b59af16d603d133bab8d2f",
+      "path": "skills/memory-systems/SKILL.md",
+      "size_bytes": 16554
+    },
+    {
+      "digest": "sha256:786ff9345eb49f1d8e1bc5183e437a6d882f15b50bdb2ce0055a9d54390a3ce2",
+      "path": "skills/multi-agent-patterns/SKILL.md",
+      "size_bytes": 18649
+    },
+    {
+      "digest": "sha256:acfeda3048cf6213be2d0c4699c1884914a1a044ca2707094483ca6423d17a11",
+      "path": "skills/project-development/SKILL.md",
+      "size_bytes": 18960
+    },
+    {
+      "digest": "sha256:6999267207013a8daee32d43f7428944e3666cb879c797217f27ebd5e89a9d6e",
+      "path": "skills/self-improvement-loops/SKILL.md",
+      "size_bytes": 22244
+    },
+    {
+      "digest": "sha256:14f5a12b69113bc6450da69c5b4d408fe91601832ab1055ae25311339c84a06b",
+      "path": "skills/tool-design/SKILL.md",
+      "size_bytes": 20089
+    }
+  ],
+  "unresolved_references": [],
+  "validator_ownership": [
+    {
+      "digest": "sha256:7f189e876bc7cba64683a187d1f4f0699864602802cb73cccb30084eaa5d8c08",
+      "id": "governance-policy",
+      "owns": [
+        "authority vocabulary",
+        "constitutional invariants",
+        "generated authority view"
+      ],
+      "path": "researcher/scripts/validate_governance.py"
+    },
+    {
+      "digest": "sha256:7a2fd204985b43715950d2ef406de3b6841b23c77d52eba470f32f5be327cfb3",
+      "id": "repository-inventory",
+      "owns": [
+        "identifier uniqueness",
+        "cross-artifact references",
+        "live counts",
+        "generated inventory"
+      ],
+      "path": "researcher/scripts/build_inventory.py"
+    },
+    {
+      "digest": "sha256:facebf497d771a018adff8c0bbbbcbb1b28cf38a797c82d48e47fcc9c46fd81f",
+      "id": "platform-compatibility",
+      "owns": [
+        "Agent Skills format",
+        "platform install layouts",
+        "reference validator"
+      ],
+      "path": "researcher/scripts/validate_platform_compat.py"
+    },
+    {
+      "digest": "sha256:578c88644d0839ba8e9846108f48c6e36d56e1bbda4b733d760cc2865834bdb7",
+      "id": "repository-structure",
+      "owns": [
+        "content invariants",
+        "rubric math",
+        "source evaluations",
+        "run fixtures"
+      ],
+      "path": "researcher/scripts/validate_repo.py"
+    },
+    {
+      "digest": "sha256:3dc2d0f0daa6327914bc733731723631bbd0f2a52b192a54762715a05ff343d7",
+      "id": "skill-health",
+      "owns": [
+        "skill body quality score"
+      ],
+      "path": "researcher/scripts/skill_health.py"
+    },
+    {
+      "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
+      "id": "activation-cases",
+      "owns": [
+        "activation boundary smoke tests"
+      ],
+      "path": "researcher/scripts/check_activation_cases.py"
+    },
+    {
+      "digest": "sha256:ef6cb1f2f03ebd77c6ba56b2adc7dc0f6d0ba3e260272ea7620d744de0f01f3a",
+      "id": "adversarial-benchmarks",
+      "owns": [
+        "deterministic benchmark composition",
+        "adversarial scenario execution"
+      ],
+      "path": "researcher/scripts/run_benchmarks.py"
+    }
+  ]
+}

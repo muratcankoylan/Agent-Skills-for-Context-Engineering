@@ -21,6 +21,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: researcher/benchmarks/sdk-runner/package-lock.json
+
       - name: Install validation dependencies
         run: pip install -r requirements-dev.txt
 
@@ -29,7 +36,9 @@ jobs:
           python -m py_compile \
             researcher/scripts/skill_frontmatter.py \
             researcher/scripts/governance_policy.py \
+            researcher/scripts/build_inventory.py \
             researcher/scripts/tests/test_skill_frontmatter.py \
+            researcher/scripts/tests/test_build_inventory.py \
             researcher/scripts/tests/test_governance_policy.py \
             researcher/scripts/validate_governance.py \
             researcher/scripts/validate_platform_compat.py \
@@ -54,6 +63,17 @@ jobs:
 
       - name: Governance policy
         run: python researcher/scripts/validate_governance.py --check
+
+      - name: Generated repository inventory
+        run: python researcher/scripts/build_inventory.py --check
+
+      - name: Benchmark runner contract
+        working-directory: researcher/benchmarks/sdk-runner
+        run: |
+          npm ci --ignore-scripts
+          npm run typecheck
+          npm run router:dry-run -- --models gpt-5.5 --reps 1 --max-runs 112 --max-budget-usd 2
+          npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 12 --max-budget-usd 2
 
       - name: Build and validate long-horizon prompting site
         run: |

@@ -1,5 +1,7 @@
 # Researcher Operating System
 
+Current corpus counts, source digests, compatibility status, and unresolved-reference status are generated in the [live corpus inventory](generated/corpus-summary.md). Historical reports retain the values measured at their dated snapshot.
+
 This directory defines the repo-native workflow for turning external research into skill changes. It is intentionally file-based so agents can inspect, resume, and audit work without requiring a hosted scheduler.
 
 ## Mission

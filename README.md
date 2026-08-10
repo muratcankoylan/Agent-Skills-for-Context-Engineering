@@ -116,7 +116,7 @@ Option B - Direct install via command:
 /plugin install context-engineering@context-engineering-marketplace
 ```
 
-This installs all 17 skills in a single plugin. Skills are activated automatically based on your task context.
+This installs all published skills in a single plugin. Skills are activated automatically based on your task context.
 
 ### Skill Activation Scenarios
 
@@ -155,7 +155,7 @@ This repository ships as an [Open Plugins](https://open-plugins.com) plugin. Hos
 **Codex / GitHub Copilot CLI / other Open Plugins hosts:**
 
 1. Clone or add this repository as a plugin directory.
-2. The host reads `.plugin/plugin.json` and discovers all 17 skills under `skills/`.
+2. The host reads `.plugin/plugin.json` and discovers all published skills under `skills/`.
 3. For project-local manual installs, copy skill directories into `.codex/skills/` or the host's documented Agent Skills directory.
 
 ### Using Individual Skills
@@ -270,16 +270,18 @@ Reproduce any of these numbers exactly via the runner under `researcher/benchmar
 
 ### What it includes
 
+Current counts and compatibility status are generated in the [live corpus inventory](researcher/generated/corpus-summary.md). Dated benchmark and release reports retain their original snapshot counts.
+
 - **Source registry** (`researcher/source-registry.md`): priority sources, exclusion rules, monitoring queries.
 - **Rubrics** (`researcher/rubrics/`): content curation, skill change, harness change, pairwise skill revision.
-- **Mechanism registry** (`researcher/mechanisms/registry.jsonl` + `ledgers/`): 16 accepted behavior changes used as the primary novelty signal, with append-only accepted/rejected ledgers for institutional memory.
-- **Claim provenance** (`researcher/claims/index.jsonl`): 12 provenance-tracked claims with source URL, evidence strength, volatility, and last reviewed date.
+- **Mechanism registry** (`researcher/mechanisms/registry.jsonl` + `ledgers/`): accepted behavior changes used as the primary novelty signal, with append-only accepted/rejected ledgers for institutional memory.
+- **Claim provenance** (`researcher/claims/index.jsonl`): provenance-tracked claims with source URL, evidence strength, volatility, and last reviewed date.
 - **Corpus index** (`researcher/corpus/index.json`): canonical machine-readable map of skills, activation scenarios, mechanism IDs, and claim IDs.
 - **Run state machine** (`researcher/runs/<run-id>/run-state.json`): `initialized -> retrieved -> evaluated -> proposed -> novelty_checked -> validated -> pr_ready -> closed`.
-- **Activation regression tests** (`researcher/fixtures/activation-cases.jsonl`): 19 deterministic prompts that catch skill-boundary confusion.
+- **Activation regression tests** (`researcher/fixtures/activation-cases.jsonl`): deterministic prompts that catch skill-boundary confusion.
 - **Adversarial benchmark harness** (`researcher/benchmarks/`): scenarios that try to game the loop (duplicate mechanisms, unretrieved evidence, wrong rubric math, self-approved rubric changes, weak-evidence novelty).
 - **Continuous loop** (`researcher/scripts/loop_*.py` + `researcher/orchestration/launchd/`): inbox, source discovery, one-state-at-a-time advancement, daily ops, parked review queue, launchd service definitions.
-- **Skill health gate** (`researcher/scripts/skill_health.py`): deterministic body-quality scoring; current strict corpus score is 0.9117 with 0 flagged skills.
+- **Skill health gate** (`researcher/scripts/skill_health.py`): deterministic body-quality scoring. Published scores remain dated evidence; local runs produce ignored runtime reports.
 
 ### Operator commands
 

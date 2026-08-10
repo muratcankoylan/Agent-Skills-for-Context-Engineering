@@ -186,7 +186,7 @@ Loading a relevant skill into an agent's context improves outcome quality, token
    - `control`: `settingSources: []`. No skills loaded.
    - `target`: `settingSources: ["project"]` with only the target skill present. Other skills are temporarily moved out.
    - `negative`: `settingSources: ["project"]` with only a known-irrelevant skill present.
-   - `full`: `settingSources: ["project"]` with all 15 skills present.
+   - `full`: `settingSources: ["project"]` with all currently published skills present.
    - `target_plus_one`: target skill plus one related skill.
    - `target_plus_unrelated`: target skill plus one unrelated skill (interaction control).
 
