@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/exports/schemas/export-records.schema.json",
+  "title": "Export boundary records",
+  "$defs": {
+    "classification": {
+      "enum": ["public", "public_derived", "private_operational", "private_human", "restricted_source", "secret_reference"]
+    },
+    "retention": {"type": "string", "minLength": 1},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "exportRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "id", "kind", "classification", "retention", "entries"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "id": {"type": "string", "pattern": "^export_[0-9A-Za-z_-]+$"},
+        "kind": {"const": "ExportRequest"},
+        "classification": {"enum": ["private_operational", "private_human"]},
+        "retention": {"$ref": "#/$defs/retention"},
+        "entries": {"type": "array", "minItems": 1}
+      }
+    },
+    "exportPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "id", "kind", "state", "classification", "retention", "policy_version", "policy_digest", "request_digest", "entries"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "id": {"type": "string"},
+        "kind": {"const": "ExportPlan"},
+        "state": {"const": "planned"},
+        "classification": {"const": "private_operational"},
+        "retention": {"$ref": "#/$defs/retention"},
+        "policy_version": {"type": "string"},
+        "policy_digest": {"$ref": "#/$defs/digest"},
+        "request_digest": {"$ref": "#/$defs/digest"},
+        "entries": {"type": "array", "minItems": 1}
+      }
+    },
+    "exportManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "id", "kind", "state", "classification", "retention", "policy_version", "policy_digest", "entries"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "id": {"type": "string"},
+        "kind": {"const": "ExportManifest"},
+        "state": {"const": "rendered"},
+        "classification": {"const": "public_derived"},
+        "retention": {"const": "durable"},
+        "policy_version": {"type": "string"},
+        "policy_digest": {"$ref": "#/$defs/digest"},
+        "entries": {"type": "array", "minItems": 1}
+      }
+    },
+    "exportValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "id", "kind", "state", "classification", "retention", "policy_version", "policy_digest", "manifest_digest", "outputs", "result"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "id": {"type": "string"},
+        "kind": {"const": "ExportValidation"},
+        "state": {"const": "validated"},
+        "classification": {"const": "public_derived"},
+        "retention": {"const": "durable"},
+        "policy_version": {"type": "string"},
+        "policy_digest": {"$ref": "#/$defs/digest"},
+        "manifest_digest": {"$ref": "#/$defs/digest"},
+        "outputs": {"type": "array", "minItems": 1},
+        "result": {"const": "pass"}
+      }
+    },
+    "exportApproval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "id", "kind", "state", "classification", "retention", "manifest_digest", "decision", "reviewer_ref", "reason_code"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "id": {"type": "string"},
+        "kind": {"const": "ExportApproval"},
+        "state": {"enum": ["approved", "rejected"]},
+        "classification": {"const": "private_human"},
+        "retention": {"const": "durable"},
+        "manifest_digest": {"$ref": "#/$defs/digest"},
+        "decision": {"enum": ["approve", "reject"]},
+        "reviewer_ref": {"type": "string", "minLength": 1},
+        "reason_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]+$"}
+      }
+    },
+    "exportReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "id", "kind", "state", "classification", "retention", "manifest_digest", "public_commit", "pull_request"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "id": {"type": "string"},
+        "kind": {"const": "ExportReceipt"},
+        "state": {"const": "merged"},
+        "classification": {"const": "public_derived"},
+        "retention": {"const": "durable"},
+        "manifest_digest": {"$ref": "#/$defs/digest"},
+        "public_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "pull_request": {"type": "integer", "minimum": 1}
+      }
+    },
+    "exportCorrection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "id", "kind", "classification", "retention", "projection_id", "supersedes_manifest_digest", "reason_code", "disposition"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "id": {"type": "string"},
+        "kind": {"const": "ExportCorrection"},
+        "classification": {"const": "public_derived"},
+        "retention": {"const": "durable"},
+        "projection_id": {"type": "string", "pattern": "^proj_[0-9A-Za-z_-]+$"},
+        "supersedes_manifest_digest": {"$ref": "#/$defs/digest"},
+        "reason_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]+$"},
+        "disposition": {"enum": ["corrected", "removed", "tombstoned"]}
+      }
+    }
+  },
+  "oneOf": [
+    {"$ref": "#/$defs/exportRequest"},
+    {"$ref": "#/$defs/exportPlan"},
+    {"$ref": "#/$defs/exportManifest"},
+    {"$ref": "#/$defs/exportValidation"},
+    {"$ref": "#/$defs/exportApproval"},
+    {"$ref": "#/$defs/exportReceipt"},
+    {"$ref": "#/$defs/exportCorrection"}
+  ]
+}

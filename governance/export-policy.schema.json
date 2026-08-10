@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/governance/export-policy.schema.json",
+  "title": "Public export policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy_version",
+    "default_export",
+    "max_source_bytes",
+    "classifications",
+    "public_output_classifications",
+    "artifact_kinds",
+    "transforms",
+    "forbidden_public_fields",
+    "allowed_public_digest_fields",
+    "public_manifest_fields",
+    "public_manifest_entry_fields",
+    "supplementary_detectors",
+    "correction_policy"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "policy_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "default_export": {"const": "deny"},
+    "max_source_bytes": {"type": "integer", "minimum": 1},
+    "classifications": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["default_retention", "exportable"],
+        "properties": {
+          "default_retention": {"type": "string"},
+          "exportable": {"type": "boolean"}
+        }
+      }
+    },
+    "public_output_classifications": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "artifact_kinds": {"type": "object"},
+    "transforms": {"type": "object"},
+    "forbidden_public_fields": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "allowed_public_digest_fields": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "public_manifest_fields": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "public_manifest_entry_fields": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "supplementary_detectors": {"type": "object"},
+    "correction_policy": {"type": "object"}
+  }
+}

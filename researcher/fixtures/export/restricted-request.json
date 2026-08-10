@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "id": "export_restricted_fixture_v1",
+  "kind": "ExportRequest",
+  "classification": "private_operational",
+  "retention": "review_cycle",
+  "entries": [
+    {
+      "entry_id": "entry_restricted_fixture",
+      "projection_id": "proj_restricted_fixture",
+      "source_path": "restricted-source.json",
+      "source_classification": "restricted_source",
+      "artifact_kind": "citation_metadata",
+      "transformation_id": "restricted_citation_v1",
+      "output_path": "citation/restricted-fixture.json"
+    }
+  ]
+}

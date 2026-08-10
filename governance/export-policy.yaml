@@ -1,0 +1,154 @@
+schema_version: "1.0.0"
+policy_version: "1.0.0"
+default_export: deny
+max_source_bytes: 1500000
+
+classifications:
+  public:
+    default_retention: durable
+    exportable: true
+  public_derived:
+    default_retention: durable
+    exportable: true
+  private_operational:
+    default_retention: review_cycle
+    exportable: true
+  private_human:
+    default_retention: until_superseded
+    exportable: true
+  restricted_source:
+    default_retention: source_policy
+    exportable: true
+  secret_reference:
+    default_retention: key_lifetime
+    exportable: false
+
+public_output_classifications:
+  - public
+  - public_derived
+
+artifact_kinds:
+  citation_metadata:
+    output_prefix: citation/
+    allowed_transforms:
+      - restricted_citation_v1
+  research_summary:
+    output_prefix: research-summary/
+    allowed_transforms:
+      - research_summary_v1
+
+transforms:
+  restricted_citation_v1:
+    source_classifications:
+      - restricted_source
+    input_media_type: application/json
+    output_media_type: application/json
+    required_source_fields:
+      - title
+      - url
+      - source_type
+    allowed_source_fields:
+      - title
+      - url
+      - source_type
+      - authors
+      - published_at
+      - license_note
+    output_fields:
+      - schema_version
+      - id
+      - kind
+      - classification
+      - retention
+      - title
+      - url
+      - source_type
+      - authors
+      - published_at
+      - license_note
+  research_summary_v1:
+    source_classifications:
+      - private_operational
+      - private_human
+      - public_derived
+    input_media_type: application/json
+    output_media_type: application/json
+    required_source_fields:
+      - title
+      - summary
+      - reason_code
+    allowed_source_fields:
+      - title
+      - summary
+      - reason_code
+      - evidence_links
+      - uncertainty
+    output_fields:
+      - schema_version
+      - id
+      - kind
+      - classification
+      - retention
+      - title
+      - summary
+      - reason_code
+      - evidence_links
+      - uncertainty
+
+forbidden_public_fields:
+  - source_path
+  - source_digest
+  - private_digest
+  - storage_binding
+  - storage_locator
+  - signed_url
+  - credential
+  - credential_ref
+  - credential_value
+  - capability_token
+  - email_destination
+  - phone_destination
+  - private_reason
+  - raw_body
+  - raw_content
+  - body
+  - content
+
+allowed_public_digest_fields:
+  - output_digest
+  - policy_digest
+  - transformation_digest
+  - manifest_digest
+
+public_manifest_fields:
+  - schema_version
+  - id
+  - kind
+  - state
+  - classification
+  - retention
+  - policy_version
+  - policy_digest
+  - entries
+
+public_manifest_entry_fields:
+  - entry_id
+  - projection_id
+  - artifact_kind
+  - transformation_id
+  - transformation_digest
+  - output_path
+  - output_digest
+  - media_type
+  - size_bytes
+
+supplementary_detectors:
+  pem_private_key: true
+  authorization_header: true
+  signed_url: true
+  private_absolute_path: true
+
+correction_policy:
+  rewrite_git_history_by_default: false
+  correction_requires_new_record: true
+  removal_requires_public_tombstone: true

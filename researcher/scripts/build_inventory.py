@@ -43,6 +43,11 @@ VALIDATOR_OWNERSHIP = (
         "owns": ["identifier uniqueness", "cross-artifact references", "live counts", "generated inventory"],
     },
     {
+        "id": "export-policy",
+        "path": "researcher/scripts/validate_export.py",
+        "owns": ["classification export routes", "public projections", "staged export closure"],
+    },
+    {
         "id": "platform-compatibility",
         "path": "researcher/scripts/validate_platform_compat.py",
         "owns": ["Agent Skills format", "platform install layouts", "reference validator"],
@@ -275,6 +280,7 @@ class InventoryBuilder:
         manifests = self.build_manifests()
         validators = self.build_validators()
         schemas = self.build_schemas()
+        export_contracts = self.build_export_contracts()
         self.validate_live_document_links()
 
         artifacts = {
@@ -293,6 +299,7 @@ class InventoryBuilder:
             "manifests": manifests,
             "validators": validators,
             "schemas": schemas,
+            "export_contracts": export_contracts,
         }
         source_records = sorted(self.sources.values(), key=lambda item: item["path"])
         source_tree_digest = sha256_bytes(
@@ -931,6 +938,27 @@ class InventoryBuilder:
                 }
             )
         return self._category("researcher/corpus/inventory.schema.json", records)
+
+    def build_export_contracts(self) -> dict[str, Any]:
+        paths = [
+            "governance/export-policy.yaml",
+            "governance/export-policy.schema.json",
+            "researcher/exports/schemas/export-records.schema.json",
+            "researcher/fixtures/export/restricted-request.json",
+            "researcher/fixtures/export/private-root/restricted-source.json",
+            "researcher/exports/examples/restricted-citation-v1/export-manifest.json",
+            "researcher/exports/examples/restricted-citation-v1/citation/restricted-fixture.json",
+            "researcher/scripts/export_policy.py",
+        ]
+        records: list[dict[str, Any]] = []
+        for relative in paths:
+            path = self.root / relative
+            if not path.exists():
+                self.add_finding("PARSE_ERROR", path, "export contract artifact is missing", relative)
+                continue
+            digest, size = self.add_source(path)
+            records.append({"id": relative, "path": relative, "digest": digest, "size_bytes": size})
+        return self._category("governance/export-policy.yaml and export fixtures", records)
 
     def validate_live_document_links(self) -> None:
         for relative, required_link in LIVE_DOCUMENT_LINKS.items():

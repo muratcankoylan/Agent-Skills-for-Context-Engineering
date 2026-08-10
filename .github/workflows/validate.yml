@@ -37,10 +37,13 @@ jobs:
             researcher/scripts/skill_frontmatter.py \
             researcher/scripts/governance_policy.py \
             researcher/scripts/build_inventory.py \
+            researcher/scripts/export_policy.py \
             researcher/scripts/tests/test_skill_frontmatter.py \
             researcher/scripts/tests/test_build_inventory.py \
+            researcher/scripts/tests/test_export_policy.py \
             researcher/scripts/tests/test_governance_policy.py \
             researcher/scripts/validate_governance.py \
+            researcher/scripts/validate_export.py \
             researcher/scripts/validate_platform_compat.py \
             researcher/scripts/validate_repo.py \
             researcher/scripts/validate_run.py \
@@ -66,6 +69,11 @@ jobs:
 
       - name: Generated repository inventory
         run: python researcher/scripts/build_inventory.py --check
+
+      - name: Public export boundary
+        run: >-
+          python researcher/scripts/validate_export.py check
+          --staging-dir researcher/exports/examples/restricted-citation-v1
 
       - name: Benchmark runner contract
         working-directory: researcher/benchmarks/sdk-runner

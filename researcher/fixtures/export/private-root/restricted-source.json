@@ -1,0 +1,11 @@
+{
+  "title": "Synthetic Restricted Harness Study",
+  "url": "https://example.invalid/restricted-harness-study",
+  "source_type": "restricted_fixture",
+  "authors": [
+    "Fixture Author"
+  ],
+  "published_at": "2026-08-10",
+  "license_note": "Metadata may be redistributed; raw body may not.",
+  "body": "SYNTHETIC_RESTRICTED_BODY_MUST_NOT_EXPORT_42"
+}

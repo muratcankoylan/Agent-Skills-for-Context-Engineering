@@ -875,6 +875,60 @@
         }
       ]
     },
+    "export_contracts": {
+      "count": 8,
+      "owner": "governance/export-policy.yaml and export fixtures",
+      "records": [
+        {
+          "digest": "sha256:bbc9a19a969246698c80a69c0692108a2ffabf84dbdbcb02a5ed127c1de2ced1",
+          "id": "governance/export-policy.yaml",
+          "path": "governance/export-policy.yaml",
+          "size_bytes": 3091
+        },
+        {
+          "digest": "sha256:500c1d138249a135e462e2fcbdbab0874e6ef841c7ca005560106bb727359722",
+          "id": "governance/export-policy.schema.json",
+          "path": "governance/export-policy.schema.json",
+          "size_bytes": 1982
+        },
+        {
+          "digest": "sha256:cbece8b7d22d83de802cb2c4484a82dc529808a8e6f6f67eac5c8d2a2727c14a",
+          "id": "researcher/exports/schemas/export-records.schema.json",
+          "path": "researcher/exports/schemas/export-records.schema.json",
+          "size_bytes": 5921
+        },
+        {
+          "digest": "sha256:a9d63b7a247082485f84e2a9df51e9b7b009f2e6841c05bb41bc275bf75a7304",
+          "id": "researcher/fixtures/export/restricted-request.json",
+          "path": "researcher/fixtures/export/restricted-request.json",
+          "size_bytes": 553
+        },
+        {
+          "digest": "sha256:6a0ee2e312f7798802bbc159120c8b621edc3cb0b52d17c9f337a8f61bfbf33b",
+          "id": "researcher/fixtures/export/private-root/restricted-source.json",
+          "path": "researcher/fixtures/export/private-root/restricted-source.json",
+          "size_bytes": 353
+        },
+        {
+          "digest": "sha256:6db00594ea7cac8b8a467be57e0407bb8d737ab70279132aaa2569d48123d9bd",
+          "id": "researcher/exports/examples/restricted-citation-v1/export-manifest.json",
+          "path": "researcher/exports/examples/restricted-citation-v1/export-manifest.json",
+          "size_bytes": 860
+        },
+        {
+          "digest": "sha256:3cd4d08885889eb70364bb5a3bfbff76ddcf49d5ebc5e9d11cc4bd79f6fd66dd",
+          "id": "researcher/exports/examples/restricted-citation-v1/citation/restricted-fixture.json",
+          "path": "researcher/exports/examples/restricted-citation-v1/citation/restricted-fixture.json",
+          "size_bytes": 453
+        },
+        {
+          "digest": "sha256:826eb51007060a637823c454e79460caf1478de7f1fa1e7371ab1d8573cccb57",
+          "id": "researcher/scripts/export_policy.py",
+          "path": "researcher/scripts/export_policy.py",
+          "size_bytes": 40910
+        }
+      ]
+    },
     "manifests": {
       "count": 3,
       "owner": "publication manifests",
@@ -1789,7 +1843,7 @@
       ]
     },
     "validators": {
-      "count": 7,
+      "count": 8,
       "owner": "declared validator ownership",
       "records": [
         {
@@ -1803,7 +1857,7 @@
           "path": "researcher/scripts/validate_governance.py"
         },
         {
-          "digest": "sha256:7a2fd204985b43715950d2ef406de3b6841b23c77d52eba470f32f5be327cfb3",
+          "digest": "sha256:c354b8821c9651458703d8e235730c36c485f02ba50405673ccaa274c8e69eb1",
           "id": "repository-inventory",
           "owns": [
             "identifier uniqueness",
@@ -1812,6 +1866,16 @@
             "generated inventory"
           ],
           "path": "researcher/scripts/build_inventory.py"
+        },
+        {
+          "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
+          "id": "export-policy",
+          "owns": [
+            "classification export routes",
+            "public projections",
+            "staged export closure"
+          ],
+          "path": "researcher/scripts/validate_export.py"
         },
         {
           "digest": "sha256:facebf497d771a018adff8c0bbbbcbb1b28cf38a797c82d48e47fcc9c46fd81f",
@@ -2249,12 +2313,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:f46f5cc8faccc4ab64a23f68aea2ac6a7c7802fa3f0860c1ce05392ea2ea1542",
+    "digest": "sha256:2b5adf00cf1c92aabaff97aba86e2b21956faf4f1eb6357e4faa8c1271ffa22b",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:f46f5cc8faccc4ab64a23f68aea2ac6a7c7802fa3f0860c1ce05392ea2ea1542",
+  "source_tree_digest": "sha256:2b5adf00cf1c92aabaff97aba86e2b21956faf4f1eb6357e4faa8c1271ffa22b",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -2300,6 +2364,16 @@
       "digest": "sha256:a819cf042650a3b5e458bf97b2697d4263bb08d7bd9a26fa0ba6c2381423cdf7",
       "path": "examples/x-to-book-system/README.md",
       "size_bytes": 10108
+    },
+    {
+      "digest": "sha256:500c1d138249a135e462e2fcbdbab0874e6ef841c7ca005560106bb727359722",
+      "path": "governance/export-policy.schema.json",
+      "size_bytes": 1982
+    },
+    {
+      "digest": "sha256:bbc9a19a969246698c80a69c0692108a2ffabf84dbdbcb02a5ed127c1de2ced1",
+      "path": "governance/export-policy.yaml",
+      "size_bytes": 3091
     },
     {
       "digest": "sha256:4ae1af9564863e50508b70e39965c31ddc034fef59dc887e8655736435f52dd6",
@@ -2392,9 +2466,34 @@
       "size_bytes": 2054
     },
     {
+      "digest": "sha256:3cd4d08885889eb70364bb5a3bfbff76ddcf49d5ebc5e9d11cc4bd79f6fd66dd",
+      "path": "researcher/exports/examples/restricted-citation-v1/citation/restricted-fixture.json",
+      "size_bytes": 453
+    },
+    {
+      "digest": "sha256:6db00594ea7cac8b8a467be57e0407bb8d737ab70279132aaa2569d48123d9bd",
+      "path": "researcher/exports/examples/restricted-citation-v1/export-manifest.json",
+      "size_bytes": 860
+    },
+    {
+      "digest": "sha256:cbece8b7d22d83de802cb2c4484a82dc529808a8e6f6f67eac5c8d2a2727c14a",
+      "path": "researcher/exports/schemas/export-records.schema.json",
+      "size_bytes": 5921
+    },
+    {
       "digest": "sha256:a6f79df5cbfe39617aa6ce349548821d59d9b7cee363edbbc4d8640a90d88b0a",
       "path": "researcher/fixtures/activation-cases.jsonl",
       "size_bytes": 11684
+    },
+    {
+      "digest": "sha256:6a0ee2e312f7798802bbc159120c8b621edc3cb0b52d17c9f337a8f61bfbf33b",
+      "path": "researcher/fixtures/export/private-root/restricted-source.json",
+      "size_bytes": 353
+    },
+    {
+      "digest": "sha256:a9d63b7a247082485f84e2a9df51e9b7b009f2e6841c05bb41bc275bf75a7304",
+      "path": "researcher/fixtures/export/restricted-request.json",
+      "size_bytes": 553
     },
     {
       "digest": "sha256:e658564d470a184b5062a17bde5e265096458922b2405870c6394498427bffbf",
@@ -2412,14 +2511,19 @@
       "size_bytes": 14630
     },
     {
-      "digest": "sha256:7a2fd204985b43715950d2ef406de3b6841b23c77d52eba470f32f5be327cfb3",
+      "digest": "sha256:c354b8821c9651458703d8e235730c36c485f02ba50405673ccaa274c8e69eb1",
       "path": "researcher/scripts/build_inventory.py",
-      "size_bytes": 48407
+      "size_bytes": 49862
     },
     {
       "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
       "path": "researcher/scripts/check_activation_cases.py",
       "size_bytes": 4529
+    },
+    {
+      "digest": "sha256:826eb51007060a637823c454e79460caf1478de7f1fa1e7371ab1d8573cccb57",
+      "path": "researcher/scripts/export_policy.py",
+      "size_bytes": 40910
     },
     {
       "digest": "sha256:ef6cb1f2f03ebd77c6ba56b2adc7dc0f6d0ba3e260272ea7620d744de0f01f3a",
@@ -2430,6 +2534,11 @@
       "digest": "sha256:3dc2d0f0daa6327914bc733731723631bbd0f2a52b192a54762715a05ff343d7",
       "path": "researcher/scripts/skill_health.py",
       "size_bytes": 13616
+    },
+    {
+      "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
+      "path": "researcher/scripts/validate_export.py",
+      "size_bytes": 5382
     },
     {
       "digest": "sha256:7f189e876bc7cba64683a187d1f4f0699864602802cb73cccb30084eaa5d8c08",
@@ -2545,7 +2654,7 @@
       "path": "researcher/scripts/validate_governance.py"
     },
     {
-      "digest": "sha256:7a2fd204985b43715950d2ef406de3b6841b23c77d52eba470f32f5be327cfb3",
+      "digest": "sha256:c354b8821c9651458703d8e235730c36c485f02ba50405673ccaa274c8e69eb1",
       "id": "repository-inventory",
       "owns": [
         "identifier uniqueness",
@@ -2554,6 +2663,16 @@
         "generated inventory"
       ],
       "path": "researcher/scripts/build_inventory.py"
+    },
+    {
+      "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
+      "id": "export-policy",
+      "owns": [
+        "classification export routes",
+        "public projections",
+        "staged export closure"
+      ],
+      "path": "researcher/scripts/validate_export.py"
     },
     {
       "digest": "sha256:facebf497d771a018adff8c0bbbbcbb1b28cf38a797c82d48e47fcc9c46fd81f",
