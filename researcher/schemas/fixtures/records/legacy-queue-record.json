@@ -1,0 +1,10 @@
+{
+  "author_or_org": "Example",
+  "candidate_reason": "Schema fixture",
+  "created_at": "2026-08-10T12:00:00Z",
+  "id": "source-fixture",
+  "retrieval_status": "partial",
+  "source_type": "specification",
+  "title": "Schema contract",
+  "url": "https://example.com/schema-contract"
+}

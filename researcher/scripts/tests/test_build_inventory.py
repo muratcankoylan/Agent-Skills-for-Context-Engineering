@@ -60,6 +60,14 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/scripts/build_inventory.py",
         "researcher/scripts/validate_export.py",
         "researcher/scripts/export_policy.py",
+        "researcher/artifacts/README.md",
+        "researcher/runbooks/schema-migration.md",
+        "researcher/scripts/validate_schemas.py",
+        "researcher/scripts/schema_contract.py",
+        "researcher/scripts/artifact_store.py",
+        "researcher/scripts/migrate_legacy.py",
+        "researcher/scripts/tests/test_schema_contract.py",
+        "researcher/scripts/tests/test_artifact_store.py",
         "researcher/scripts/validate_platform_compat.py",
         "researcher/scripts/validate_repo.py",
         "researcher/scripts/skill_health.py",
@@ -70,6 +78,13 @@ def copy_fixture(source: Path, target: Path) -> None:
         target_path = target / relative
         target_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source_path, target_path)
+
+    for schema_file in sorted((source / "researcher/schemas").rglob("*")):
+        if not schema_file.is_file() or "node_modules" in schema_file.parts:
+            continue
+        target_path = target / schema_file.relative_to(source)
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(schema_file, target_path)
 
     for skill_file in sorted((source / "skills").glob("*/SKILL.md")):
         target_path = target / skill_file.relative_to(source)

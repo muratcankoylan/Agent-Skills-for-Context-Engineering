@@ -1,0 +1,9 @@
+{
+  "activation_scenario": "A durable record crosses runtime boundaries.",
+  "behavior_change": "Validate it against a registered schema before execution.",
+  "evidence": ["researcher/schemas/README.md"],
+  "failure_modes": ["schema drift"],
+  "mechanism_id": "registered-durable-record",
+  "owning_skill": "harness-engineering",
+  "status": "accepted"
+}

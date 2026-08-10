@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/candidate-artifact.schema.json",
+  "title": "CandidateArtifact 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "kind",
+    "candidate_type",
+    "parent_candidate_ids",
+    "root_production_epoch",
+    "target_editable_surface",
+    "declared_changed_surfaces",
+    "artifact_ref_ids",
+    "draft_tree_digest",
+    "causal_hypothesis_ref",
+    "preservation_obligations",
+    "proposed_by",
+    "classification",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "id": {"type": "string", "pattern": "^cand_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "kind": {"const": "CandidateArtifact"},
+    "candidate_type": {"enum": ["skill_change", "harness_change", "schema_change", "organization_change", "content_change"]},
+    "parent_candidate_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^cand_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"}
+    },
+    "root_production_epoch": {"type": "string", "minLength": 1},
+    "target_editable_surface": {"type": "string", "minLength": 1},
+    "declared_changed_surfaces": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "artifact_ref_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^aref_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"}
+    },
+    "draft_tree_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "causal_hypothesis_ref": {"type": "string", "minLength": 1},
+    "preservation_obligations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "proposed_by": {"type": "string", "minLength": 1},
+    "classification": {"enum": ["public", "public_derived", "private_operational"]},
+    "created_at": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "revision_of": {"type": "string", "pattern": "^cand_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"}
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "classification": "private_operational",
+  "entries": [{"entry_id": "entry_fixture"}],
+  "id": "export_schema_fixture",
+  "kind": "ExportPlan",
+  "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "policy_version": "1.0.0",
+  "request_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "retention": "review_cycle",
+  "schema_version": "1.0.0",
+  "state": "planned"
+}

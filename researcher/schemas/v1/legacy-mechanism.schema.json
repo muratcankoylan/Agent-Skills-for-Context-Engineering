@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/legacy-mechanism.schema.json",
+  "title": "LegacyMechanism 1.0.0 adapter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mechanism_id", "owning_skill", "status", "activation_scenario", "behavior_change", "evidence", "failure_modes"],
+  "properties": {
+    "mechanism_id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+    "owning_skill": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+    "status": {"enum": ["proposed", "accepted", "rejected", "superseded"]},
+    "activation_scenario": {"type": "string", "minLength": 1},
+    "behavior_change": {"type": "string", "minLength": 1},
+    "evidence": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "failure_modes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  }
+}

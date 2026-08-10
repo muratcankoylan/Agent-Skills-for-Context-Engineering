@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/capability-grant-spec.schema.json",
+  "title": "CapabilityGrantSpec 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "kind",
+    "actor_id",
+    "credential_ref_id",
+    "work_order_id",
+    "attempt_id",
+    "operations",
+    "resources",
+    "classification_ceiling",
+    "policy_version",
+    "audience",
+    "issued_at",
+    "expires_at",
+    "classification",
+    "grant_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "id": {"type": "string", "pattern": "^grant_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "kind": {"const": "CapabilityGrantSpec"},
+    "actor_id": {"type": "string", "minLength": 1},
+    "credential_ref_id": {"type": "string", "pattern": "^credref_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "work_order_id": {"type": "string", "minLength": 1},
+    "attempt_id": {"type": "string", "minLength": 1},
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_.:-]+$"}
+    },
+    "resources": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "classification_ceiling": {"enum": ["public", "public_derived", "private_operational", "private_human", "restricted_source"]},
+    "policy_version": {"type": "string", "minLength": 1},
+    "audience": {"type": "string", "minLength": 1},
+    "issued_at": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "expires_at": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "classification": {"const": "private_operational"},
+    "grant_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

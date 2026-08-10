@@ -1,0 +1,11 @@
+{
+  "locked_paths": ["skills/locked"],
+  "policy_id": "test-editable-surfaces-v1",
+  "schema_version": "1.0.0",
+  "surfaces": [
+    {
+      "name": "skill-body",
+      "roots": ["skills"]
+    }
+  ]
+}

@@ -892,10 +892,10 @@
           "size_bytes": 1982
         },
         {
-          "digest": "sha256:cbece8b7d22d83de802cb2c4484a82dc529808a8e6f6f67eac5c8d2a2727c14a",
+          "digest": "sha256:4f3bcfce27675b4a4b9ef84616237ec6f548821a3486118dc95188a2f0f6e2ce",
           "id": "researcher/exports/schemas/export-records.schema.json",
           "path": "researcher/exports/schemas/export-records.schema.json",
-          "size_bytes": 5921
+          "size_bytes": 7258
         },
         {
           "digest": "sha256:a9d63b7a247082485f84e2a9df51e9b7b009f2e6841c05bb41bc275bf75a7304",
@@ -1739,6 +1739,234 @@
         }
       ]
     },
+    "schema_contracts": {
+      "canonicalization_profile": "jcs-rfc8785-integer-v1",
+      "count": 20,
+      "id_prefix_count": 7,
+      "owner": "researcher/schemas/registry.json",
+      "records": [
+        {
+          "compatibility": "exact",
+          "id": "ArtifactEnvelope@1.0.0",
+          "id_prefix": "rec",
+          "kind": "ArtifactEnvelope",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:168714e765e6d3c1ce52c8434911b92a68253dc02cc7c663d182b22d74d27142",
+          "schema_path": "researcher/schemas/v1/artifact-envelope.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "ArtifactRef@1.0.0",
+          "id_prefix": "aref",
+          "kind": "ArtifactRef",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:7a04b529ba835dc8db603426a78bff47c5cce5ae1c99d6b012b1b0c849fbb316",
+          "schema_path": "researcher/schemas/v1/artifact-ref.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "CandidateArtifact@1.0.0",
+          "id_prefix": "cand",
+          "kind": "CandidateArtifact",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:d0c6b019c96c7601bff0dfb2c3f0e3fbfdc57f395be60eee8bc99d2ad36dff15",
+          "schema_path": "researcher/schemas/v1/candidate-artifact.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "CapabilityGrantSpec@1.0.0",
+          "id_prefix": "grant",
+          "kind": "CapabilityGrantSpec",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:1b92d37fcf1b0f139b9fffc1f142e6b42b13a4cdd554bda36427514bbf667746",
+          "schema_path": "researcher/schemas/v1/capability-grant-spec.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "CredentialRef@1.0.0",
+          "id_prefix": "credref",
+          "kind": "CredentialRef",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:e24bedc655654f46b0a70465e2f09043beccf9754b85e302d3c60336af7348da",
+          "schema_path": "researcher/schemas/v1/credential-ref.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "ExportApproval@1.0.0",
+          "id_prefix": null,
+          "kind": "ExportApproval",
+          "owner_spec": "SPEC-002",
+          "schema_digest": "sha256:4f3bcfce27675b4a4b9ef84616237ec6f548821a3486118dc95188a2f0f6e2ce",
+          "schema_path": "researcher/exports/schemas/export-records.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "ExportCorrection@1.0.0",
+          "id_prefix": null,
+          "kind": "ExportCorrection",
+          "owner_spec": "SPEC-002",
+          "schema_digest": "sha256:4f3bcfce27675b4a4b9ef84616237ec6f548821a3486118dc95188a2f0f6e2ce",
+          "schema_path": "researcher/exports/schemas/export-records.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "ExportManifest@1.0.0",
+          "id_prefix": null,
+          "kind": "ExportManifest",
+          "owner_spec": "SPEC-002",
+          "schema_digest": "sha256:4f3bcfce27675b4a4b9ef84616237ec6f548821a3486118dc95188a2f0f6e2ce",
+          "schema_path": "researcher/exports/schemas/export-records.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "ExportPlan@1.0.0",
+          "id_prefix": null,
+          "kind": "ExportPlan",
+          "owner_spec": "SPEC-002",
+          "schema_digest": "sha256:4f3bcfce27675b4a4b9ef84616237ec6f548821a3486118dc95188a2f0f6e2ce",
+          "schema_path": "researcher/exports/schemas/export-records.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "ExportReceipt@1.0.0",
+          "id_prefix": null,
+          "kind": "ExportReceipt",
+          "owner_spec": "SPEC-002",
+          "schema_digest": "sha256:4f3bcfce27675b4a4b9ef84616237ec6f548821a3486118dc95188a2f0f6e2ce",
+          "schema_path": "researcher/exports/schemas/export-records.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "ExportRenderReceipt@1.0.0",
+          "id_prefix": null,
+          "kind": "ExportRenderReceipt",
+          "owner_spec": "SPEC-002",
+          "schema_digest": "sha256:4f3bcfce27675b4a4b9ef84616237ec6f548821a3486118dc95188a2f0f6e2ce",
+          "schema_path": "researcher/exports/schemas/export-records.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "ExportRequest@1.0.0",
+          "id_prefix": null,
+          "kind": "ExportRequest",
+          "owner_spec": "SPEC-002",
+          "schema_digest": "sha256:4f3bcfce27675b4a4b9ef84616237ec6f548821a3486118dc95188a2f0f6e2ce",
+          "schema_path": "researcher/exports/schemas/export-records.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "ExportValidation@1.0.0",
+          "id_prefix": null,
+          "kind": "ExportValidation",
+          "owner_spec": "SPEC-002",
+          "schema_digest": "sha256:4f3bcfce27675b4a4b9ef84616237ec6f548821a3486118dc95188a2f0f6e2ce",
+          "schema_path": "researcher/exports/schemas/export-records.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "FreezeReceipt@1.0.0",
+          "id_prefix": "freeze",
+          "kind": "FreezeReceipt",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:d649b719cb7ad19437aee930fd73aeccc90204fe6fa3165ee3af77bcf1cd09b4",
+          "schema_path": "researcher/schemas/v1/freeze-receipt.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "legacy-adapter",
+          "id": "LegacyClaim@1.0.0",
+          "id_prefix": null,
+          "kind": "LegacyClaim",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:b475ed94073e46f630ea9f261da04c952f0f16eee54809efdb17d2dbefe11f50",
+          "schema_path": "researcher/schemas/v1/legacy-claim.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "legacy-adapter",
+          "id": "LegacyMechanism@1.0.0",
+          "id_prefix": null,
+          "kind": "LegacyMechanism",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:31e7a0194c2fabd5ae85b2f68992f248ff223cde17671fc5ba574cc6868a98da",
+          "schema_path": "researcher/schemas/v1/legacy-mechanism.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "legacy-adapter",
+          "id": "LegacyQueueRecord@1.0.0",
+          "id_prefix": null,
+          "kind": "LegacyQueueRecord",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:a3707702f57476b72e907c15b3fc15e30b9ebe105e3d13de458cf87124ec4fa0",
+          "schema_path": "researcher/schemas/v1/legacy-queue-record.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "legacy-adapter",
+          "id": "LegacyRunState@1.0.0",
+          "id_prefix": null,
+          "kind": "LegacyRunState",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:db4da334d84a6da386cf5d65d5afb3c1f1a24a5b394ed214d9eab5d5f5a9e232",
+          "schema_path": "researcher/schemas/v1/legacy-run-state.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "SchemaRegistry@1.0.0",
+          "id_prefix": null,
+          "kind": "SchemaRegistry",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:b872675a4d792e68e51f268c442dbe4bd73d4770f84d3ed70a66b151a73ddf34",
+          "schema_path": "researcher/schemas/registry.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        },
+        {
+          "compatibility": "exact",
+          "id": "StorageBinding@1.0.0",
+          "id_prefix": "bind",
+          "kind": "StorageBinding",
+          "owner_spec": "SPEC-003",
+          "schema_digest": "sha256:fb016c033436662adf00ecefa8fc82c10520180bc0f6b7f0f47efcbd61474f53",
+          "schema_path": "researcher/schemas/v1/storage-binding.schema.json",
+          "status": "active",
+          "version": "1.0.0"
+        }
+      ]
+    },
     "schemas": {
       "count": 1,
       "owner": "researcher/corpus/inventory.schema.json",
@@ -1843,7 +2071,7 @@
       ]
     },
     "validators": {
-      "count": 8,
+      "count": 9,
       "owner": "declared validator ownership",
       "records": [
         {
@@ -1857,7 +2085,7 @@
           "path": "researcher/scripts/validate_governance.py"
         },
         {
-          "digest": "sha256:c354b8821c9651458703d8e235730c36c485f02ba50405673ccaa274c8e69eb1",
+          "digest": "sha256:5ea42cd39cf030d35c44075e76b1be615bd1c6b717e67ff3a7e161e518876388",
           "id": "repository-inventory",
           "owns": [
             "identifier uniqueness",
@@ -1876,6 +2104,17 @@
             "staged export closure"
           ],
           "path": "researcher/scripts/validate_export.py"
+        },
+        {
+          "digest": "sha256:ba09b1c3ff4ad79de01c5d2bb308edbdc9658ba07114d1e3e0165b0bddb0e65a",
+          "id": "schema-contract",
+          "owns": [
+            "schema registry",
+            "canonical records",
+            "legacy adapters",
+            "conformance evidence"
+          ],
+          "path": "researcher/scripts/validate_schemas.py"
         },
         {
           "digest": "sha256:facebf497d771a018adff8c0bbbbcbb1b28cf38a797c82d48e47fcc9c46fd81f",
@@ -2313,12 +2552,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:2b5adf00cf1c92aabaff97aba86e2b21956faf4f1eb6357e4faa8c1271ffa22b",
+    "digest": "sha256:cdd6e53336fa690cfaf9ee97ba4da08225611477c0addf2e2d4c392b5ed5c49d",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:2b5adf00cf1c92aabaff97aba86e2b21956faf4f1eb6357e4faa8c1271ffa22b",
+  "source_tree_digest": "sha256:cdd6e53336fa690cfaf9ee97ba4da08225611477c0addf2e2d4c392b5ed5c49d",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -2374,6 +2613,11 @@
       "digest": "sha256:bbc9a19a969246698c80a69c0692108a2ffabf84dbdbcb02a5ed127c1de2ced1",
       "path": "governance/export-policy.yaml",
       "size_bytes": 3091
+    },
+    {
+      "digest": "sha256:6b8795d5245c17235d45c433b0a32d7b1bf85a89f744cb5108963c86579dc847",
+      "path": "researcher/artifacts/README.md",
+      "size_bytes": 1970
     },
     {
       "digest": "sha256:4ae1af9564863e50508b70e39965c31ddc034fef59dc887e8655736435f52dd6",
@@ -2476,9 +2720,9 @@
       "size_bytes": 860
     },
     {
-      "digest": "sha256:cbece8b7d22d83de802cb2c4484a82dc529808a8e6f6f67eac5c8d2a2727c14a",
+      "digest": "sha256:4f3bcfce27675b4a4b9ef84616237ec6f548821a3486118dc95188a2f0f6e2ce",
       "path": "researcher/exports/schemas/export-records.schema.json",
-      "size_bytes": 5921
+      "size_bytes": 7258
     },
     {
       "digest": "sha256:a6f79df5cbfe39617aa6ce349548821d59d9b7cee363edbbc4d8640a90d88b0a",
@@ -2511,9 +2755,294 @@
       "size_bytes": 14630
     },
     {
-      "digest": "sha256:c354b8821c9651458703d8e235730c36c485f02ba50405673ccaa274c8e69eb1",
+      "digest": "sha256:0ac5456af9a440308082b4f730cb69f5a4bbfc9cb32928db1f8d4c656243e7ba",
+      "path": "researcher/runbooks/schema-migration.md",
+      "size_bytes": 2622
+    },
+    {
+      "digest": "sha256:08f6885d0cb8ece581ad74cea95966fbb0facb9a6df066d6e37f42b1a9f5176b",
+      "path": "researcher/schemas/README.md",
+      "size_bytes": 3918
+    },
+    {
+      "digest": "sha256:f85913b47745ef1e028a1f36988ce33419658bdcdb382402f76e316386244091",
+      "path": "researcher/schemas/fixtures/canonicalization-v1.json",
+      "size_bytes": 2531
+    },
+    {
+      "digest": "sha256:57de5249aba83cae6b8159662dadf61e1fb76bd21e9f369d47de04f94549da70",
+      "path": "researcher/schemas/fixtures/editable-surface-policy-v1.json",
+      "size_bytes": 200
+    },
+    {
+      "digest": "sha256:df39d7de074dc71a153e5012a893a48f0a2c089e26b97e8e644f7ce64770ca42",
+      "path": "researcher/schemas/fixtures/records/artifact-envelope.json",
+      "size_bytes": 1462
+    },
+    {
+      "digest": "sha256:906d303da2d93130a1aed9300247a7ba0e14ffba89b22fb1f2628f0d436af631",
+      "path": "researcher/schemas/fixtures/records/artifact-ref.json",
+      "size_bytes": 654
+    },
+    {
+      "digest": "sha256:eea482336dc4fc5245a19f70ba07100376ef848973cf0a94ca5f27f57c338c2b",
+      "path": "researcher/schemas/fixtures/records/candidate-artifact.json",
+      "size_bytes": 704
+    },
+    {
+      "digest": "sha256:ed03852c3ba14b1df80628499704aee452b459e02551daa3f0fd9b365cd983d1",
+      "path": "researcher/schemas/fixtures/records/capability-grant-spec.json",
+      "size_bytes": 741
+    },
+    {
+      "digest": "sha256:f2fe309bd31d6bc0728fae3e0b6c9eec42b25a77c44a09d6c735b591991e3b11",
+      "path": "researcher/schemas/fixtures/records/credential-ref.json",
+      "size_bytes": 366
+    },
+    {
+      "digest": "sha256:acf6bf4d7f8ac6620c1a727ab149487f83522feccc09d0616d088d55ce260623",
+      "path": "researcher/schemas/fixtures/records/export-approval.json",
+      "size_bytes": 378
+    },
+    {
+      "digest": "sha256:6229af27e55ab4b719c45e0d2aed387c66c5edcab7d6c6fcb6dcf9ca70339a8f",
+      "path": "researcher/schemas/fixtures/records/export-correction.json",
+      "size_bytes": 395
+    },
+    {
+      "digest": "sha256:675a866fb49e309f8a111a31c0bfa94a492c2dfcbb22d448717b16bf24c4b3b0",
+      "path": "researcher/schemas/fixtures/records/export-manifest.json",
+      "size_bytes": 349
+    },
+    {
+      "digest": "sha256:87bd8ff2f49b932fbf70a0a10ea7e2ab728c71898e0f4740f0fbbd335e22a1dc",
+      "path": "researcher/schemas/fixtures/records/export-plan.json",
+      "size_bytes": 449
+    },
+    {
+      "digest": "sha256:fe4e8c83489d9907c68386f6634b20fdc2f7e2b0fa254c3c7efedf4f3e87494f",
+      "path": "researcher/schemas/fixtures/records/export-receipt.json",
+      "size_bytes": 357
+    },
+    {
+      "digest": "sha256:e40c792af6482af267f74ee62940bab35d35a5c9ce74a23198a76cf620e670d3",
+      "path": "researcher/schemas/fixtures/records/export-render-receipt.json",
+      "size_bytes": 702
+    },
+    {
+      "digest": "sha256:6e4768445c8cf7e9d2f2187848462c9f6ae15b3675d79c72ff89cefa58781d39",
+      "path": "researcher/schemas/fixtures/records/export-request.json",
+      "size_bytes": 221
+    },
+    {
+      "digest": "sha256:3f9ae20e1ca1539fd7e3812700cc98be6e5afe7f648de63186c6c24cb2d28486",
+      "path": "researcher/schemas/fixtures/records/export-validation.json",
+      "size_bytes": 468
+    },
+    {
+      "digest": "sha256:7512a4accddcb23559e0f9a91ccb2135faa0b37c18e3664de69d0a97875a068f",
+      "path": "researcher/schemas/fixtures/records/freeze-receipt-utf16.json",
+      "size_bytes": 1272
+    },
+    {
+      "digest": "sha256:a18cedddb63dfaf8053988d47c042475ab6bfa1d330388235c8c3e3807f65d96",
+      "path": "researcher/schemas/fixtures/records/freeze-receipt.json",
+      "size_bytes": 1106
+    },
+    {
+      "digest": "sha256:03475ade72cfc44bb1d2f7f248d0f7ae682037c574bc57199d93e0440a02479e",
+      "path": "researcher/schemas/fixtures/records/legacy-claim.json",
+      "size_bytes": 345
+    },
+    {
+      "digest": "sha256:6432fef0252cd712649c129986e49841466c096c7c36734fbf7e855134f559d9",
+      "path": "researcher/schemas/fixtures/records/legacy-mechanism.json",
+      "size_bytes": 355
+    },
+    {
+      "digest": "sha256:7bb5c8ba8a1d23e5a559f529e69fb9953bc050aa1c18ca7b9ac8f8299a593ed3",
+      "path": "researcher/schemas/fixtures/records/legacy-queue-record.json",
+      "size_bytes": 284
+    },
+    {
+      "digest": "sha256:05a63e1825367d8a37abdd058a830f4317660be6657852c3516779047d6cc7cb",
+      "path": "researcher/schemas/fixtures/records/legacy-run-state.json",
+      "size_bytes": 569
+    },
+    {
+      "digest": "sha256:c53438104bdfcacbe9aa8a16f291390e9faffc4043a7d1e16af60b5e5cbfda7e",
+      "path": "researcher/schemas/fixtures/records/schema-registry.json",
+      "size_bytes": 998
+    },
+    {
+      "digest": "sha256:30b134c42ec5dcfb951cbdd3f810a2bb2fd3299c28a724e3913f377f1d1c072c",
+      "path": "researcher/schemas/fixtures/records/storage-binding.json",
+      "size_bytes": 401
+    },
+    {
+      "digest": "sha256:238e9161ed1e860de1d738e083a67461b453c8e207d8f238bfa22b19a7129a7b",
+      "path": "researcher/schemas/generated/compatibility-matrix.md",
+      "size_bytes": 2311
+    },
+    {
+      "digest": "sha256:5fb86d1aa14fcd9f892a8473438056896848d02009e2367dd8a4311850dfdfe3",
+      "path": "researcher/schemas/generated/conformance-report.json",
+      "size_bytes": 2240
+    },
+    {
+      "digest": "sha256:ce9fdcde1467aa6e346349a0edcbcff5c86464a504c392f3fb7f2c3421792eca",
+      "path": "researcher/schemas/generated/current-artifacts-report.json",
+      "size_bytes": 603
+    },
+    {
+      "digest": "sha256:08f0b0bbb9401d9a41cced21fcf92e5e81c8aacebf00ce666584d2fcaa81a351",
+      "path": "researcher/schemas/generated/migration-dry-run.json",
+      "size_bytes": 27833
+    },
+    {
+      "digest": "sha256:38983589a7cb0d6763831d6c842b5c97d5b519393637e620ed3b454cc4d86d69",
+      "path": "researcher/schemas/public-legacy-sources.json",
+      "size_bytes": 675
+    },
+    {
+      "digest": "sha256:2bf3242fd6b4cbf9e42ef2470bceff7787b870fdd08842fc1a4d90fadc9806e0",
+      "path": "researcher/schemas/registry.json",
+      "size_bytes": 14454
+    },
+    {
+      "digest": "sha256:b872675a4d792e68e51f268c442dbe4bd73d4770f84d3ed70a66b151a73ddf34",
+      "path": "researcher/schemas/registry.schema.json",
+      "size_bytes": 3077
+    },
+    {
+      "digest": "sha256:58aea3d6b4b0f8799c1e00c3b023898516997f6369ee8e13d8d4b4215f70a62b",
+      "path": "researcher/schemas/typescript/.gitignore",
+      "size_bytes": 20
+    },
+    {
+      "digest": "sha256:6ea4caff853a872cda4a8a3d4a0157f7baa56de664189c77e5cd705b74e91db6",
+      "path": "researcher/schemas/typescript/package-lock.json",
+      "size_bytes": 3614
+    },
+    {
+      "digest": "sha256:9dcd08b9923eb473957748d3a33ff869cde68a05f6076820fa97b2c8466944c2",
+      "path": "researcher/schemas/typescript/package.json",
+      "size_bytes": 466
+    },
+    {
+      "digest": "sha256:3011e8799158638acbba222ae9bff6b12526fb5266131a022e65148ae1fb5661",
+      "path": "researcher/schemas/typescript/src/canonicalize.ts",
+      "size_bytes": 3483
+    },
+    {
+      "digest": "sha256:2362a922bfabdf65ce058dfc3edb9add579bec1455a3226de60c15f580c8624c",
+      "path": "researcher/schemas/typescript/src/conformance.ts",
+      "size_bytes": 4212
+    },
+    {
+      "digest": "sha256:d677f668345525daaaaaed8b0413991aa40d802c487b2a0262c66d52bc706b64",
+      "path": "researcher/schemas/typescript/src/errors.ts",
+      "size_bytes": 1261
+    },
+    {
+      "digest": "sha256:e3d69efc25377f507334d50b9f883f464bcbe5251027e041f6a6da09ffb52a24",
+      "path": "researcher/schemas/typescript/src/index.ts",
+      "size_bytes": 716
+    },
+    {
+      "digest": "sha256:c82803e0249a03ac0419bb66e9cb1ce77b287dccda7f11ee8079361244650710",
+      "path": "researcher/schemas/typescript/src/json.ts",
+      "size_bytes": 9441
+    },
+    {
+      "digest": "sha256:59b2ad7c35d0fd0313e81792b22ee7dd595f68e2d7fa7b73076b19387032fdf6",
+      "path": "researcher/schemas/typescript/src/registry.ts",
+      "size_bytes": 23069
+    },
+    {
+      "digest": "sha256:be652c8f8ffac2dc3a0a1afe062054b84f087c533ccc98f20aa69a40a3024ea2",
+      "path": "researcher/schemas/typescript/src/semantics.ts",
+      "size_bytes": 6719
+    },
+    {
+      "digest": "sha256:efd202a8e6843a03f1005e16e357fa75482d9b642fac471fcaaa69c8a46c50bd",
+      "path": "researcher/schemas/typescript/test/conformance.test.ts",
+      "size_bytes": 6393
+    },
+    {
+      "digest": "sha256:ed79a023b85a99369e0e4e2acd630b7592cb7997702636f2f8fb0cee5d792bbe",
+      "path": "researcher/schemas/typescript/test/runtime-registry.test.ts",
+      "size_bytes": 11661
+    },
+    {
+      "digest": "sha256:ffa578dd0d7c3494152715b7c4b0986d15ffc2a582b4d6ece61e07a1e703bbdd",
+      "path": "researcher/schemas/typescript/tsconfig.json",
+      "size_bytes": 575
+    },
+    {
+      "digest": "sha256:168714e765e6d3c1ce52c8434911b92a68253dc02cc7c663d182b22d74d27142",
+      "path": "researcher/schemas/v1/artifact-envelope.schema.json",
+      "size_bytes": 2432
+    },
+    {
+      "digest": "sha256:7a04b529ba835dc8db603426a78bff47c5cce5ae1c99d6b012b1b0c849fbb316",
+      "path": "researcher/schemas/v1/artifact-ref.schema.json",
+      "size_bytes": 2207
+    },
+    {
+      "digest": "sha256:d0c6b019c96c7601bff0dfb2c3f0e3fbfdc57f395be60eee8bc99d2ad36dff15",
+      "path": "researcher/schemas/v1/candidate-artifact.schema.json",
+      "size_bytes": 2364
+    },
+    {
+      "digest": "sha256:1b92d37fcf1b0f139b9fffc1f142e6b42b13a4cdd554bda36427514bbf667746",
+      "path": "researcher/schemas/v1/capability-grant-spec.schema.json",
+      "size_bytes": 1992
+    },
+    {
+      "digest": "sha256:e24bedc655654f46b0a70465e2f09043beccf9754b85e302d3c60336af7348da",
+      "path": "researcher/schemas/v1/credential-ref.schema.json",
+      "size_bytes": 1189
+    },
+    {
+      "digest": "sha256:d649b719cb7ad19437aee930fd73aeccc90204fe6fa3165ee3af77bcf1cd09b4",
+      "path": "researcher/schemas/v1/freeze-receipt.schema.json",
+      "size_bytes": 2271
+    },
+    {
+      "digest": "sha256:b475ed94073e46f630ea9f261da04c952f0f16eee54809efdb17d2dbefe11f50",
+      "path": "researcher/schemas/v1/legacy-claim.schema.json",
+      "size_bytes": 1011
+    },
+    {
+      "digest": "sha256:31e7a0194c2fabd5ae85b2f68992f248ff223cde17671fc5ba574cc6868a98da",
+      "path": "researcher/schemas/v1/legacy-mechanism.schema.json",
+      "size_bytes": 973
+    },
+    {
+      "digest": "sha256:a3707702f57476b72e907c15b3fc15e30b9ebe105e3d13de458cf87124ec4fa0",
+      "path": "researcher/schemas/v1/legacy-queue-record.schema.json",
+      "size_bytes": 1007
+    },
+    {
+      "digest": "sha256:db4da334d84a6da386cf5d65d5afb3c1f1a24a5b394ed214d9eab5d5f5a9e232",
+      "path": "researcher/schemas/v1/legacy-run-state.schema.json",
+      "size_bytes": 1679
+    },
+    {
+      "digest": "sha256:fb016c033436662adf00ecefa8fc82c10520180bc0f6b7f0f47efcbd61474f53",
+      "path": "researcher/schemas/v1/storage-binding.schema.json",
+      "size_bytes": 1129
+    },
+    {
+      "digest": "sha256:be7130cc2248aab2aa72b3719721a448b181cf22840181974af90a5917c9abe8",
+      "path": "researcher/scripts/artifact_store.py",
+      "size_bytes": 54898
+    },
+    {
+      "digest": "sha256:5ea42cd39cf030d35c44075e76b1be615bd1c6b717e67ff3a7e161e518876388",
       "path": "researcher/scripts/build_inventory.py",
-      "size_bytes": 49862
+      "size_bytes": 56436
     },
     {
       "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
@@ -2526,14 +3055,34 @@
       "size_bytes": 40910
     },
     {
+      "digest": "sha256:bdd1f338ed58ebd43edfa805190cf16c2eb92c6e62a1efcd7479edfafa50c904",
+      "path": "researcher/scripts/migrate_legacy.py",
+      "size_bytes": 17446
+    },
+    {
       "digest": "sha256:ef6cb1f2f03ebd77c6ba56b2adc7dc0f6d0ba3e260272ea7620d744de0f01f3a",
       "path": "researcher/scripts/run_benchmarks.py",
       "size_bytes": 4917
     },
     {
+      "digest": "sha256:3e3a205adf14e3b325a169585e1eb971337d368302ff12b0f432929b94e3fc02",
+      "path": "researcher/scripts/schema_contract.py",
+      "size_bytes": 30084
+    },
+    {
       "digest": "sha256:3dc2d0f0daa6327914bc733731723631bbd0f2a52b192a54762715a05ff343d7",
       "path": "researcher/scripts/skill_health.py",
       "size_bytes": 13616
+    },
+    {
+      "digest": "sha256:081a7c4b21db5a77e108c39f1b7b82abd92249bce3bc66a9fb8eea4bef7db3e3",
+      "path": "researcher/scripts/tests/test_artifact_store.py",
+      "size_bytes": 36042
+    },
+    {
+      "digest": "sha256:7e7bc28b04098d2d07b9f344c2e5923cef99a28ce64570bef7820380c3b2ff69",
+      "path": "researcher/scripts/tests/test_schema_contract.py",
+      "size_bytes": 24900
     },
     {
       "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
@@ -2554,6 +3103,11 @@
       "digest": "sha256:578c88644d0839ba8e9846108f48c6e36d56e1bbda4b733d760cc2865834bdb7",
       "path": "researcher/scripts/validate_repo.py",
       "size_bytes": 33210
+    },
+    {
+      "digest": "sha256:ba09b1c3ff4ad79de01c5d2bb308edbdc9658ba07114d1e3e0165b0bddb0e65a",
+      "path": "researcher/scripts/validate_schemas.py",
+      "size_bytes": 9310
     },
     {
       "digest": "sha256:8b9e3d9de07a0505ae2b42df2e15dd75bab5f2486e336194481c558e0648ded0",
@@ -2654,7 +3208,7 @@
       "path": "researcher/scripts/validate_governance.py"
     },
     {
-      "digest": "sha256:c354b8821c9651458703d8e235730c36c485f02ba50405673ccaa274c8e69eb1",
+      "digest": "sha256:5ea42cd39cf030d35c44075e76b1be615bd1c6b717e67ff3a7e161e518876388",
       "id": "repository-inventory",
       "owns": [
         "identifier uniqueness",
@@ -2673,6 +3227,17 @@
         "staged export closure"
       ],
       "path": "researcher/scripts/validate_export.py"
+    },
+    {
+      "digest": "sha256:ba09b1c3ff4ad79de01c5d2bb308edbdc9658ba07114d1e3e0165b0bddb0e65a",
+      "id": "schema-contract",
+      "owns": [
+        "schema registry",
+        "canonical records",
+        "legacy adapters",
+        "conformance evidence"
+      ],
+      "path": "researcher/scripts/validate_schemas.py"
     },
     {
       "digest": "sha256:facebf497d771a018adff8c0bbbbcbb1b28cf38a797c82d48e47fcc9c46fd81f",

@@ -1,0 +1,13 @@
+{
+  "classification": "public_derived",
+  "id": "export_schema_fixture",
+  "kind": "ExportValidation",
+  "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "outputs": [{"entry_id": "entry_fixture"}],
+  "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "policy_version": "1.0.0",
+  "result": "pass",
+  "retention": "durable",
+  "schema_version": "1.0.0",
+  "state": "validated"
+}

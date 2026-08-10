@@ -1,0 +1,19 @@
+{
+  "classification": "private_operational",
+  "id": "export_schema_fixture",
+  "kind": "ExportRenderReceipt",
+  "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "plan_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "policy_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "policy_version": "1.0.0",
+  "retention": "review_cycle",
+  "schema_version": "1.0.0",
+  "sources": [
+    {
+      "entry_id": "entry_fixture",
+      "source_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "source_size_bytes": 128
+    }
+  ],
+  "state": "rendered"
+}

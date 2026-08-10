@@ -1,0 +1,11 @@
+{
+  "classification": "public_derived",
+  "id": "export_schema_fixture",
+  "kind": "ExportReceipt",
+  "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "public_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "pull_request": 1,
+  "retention": "durable",
+  "schema_version": "1.0.0",
+  "state": "merged"
+}

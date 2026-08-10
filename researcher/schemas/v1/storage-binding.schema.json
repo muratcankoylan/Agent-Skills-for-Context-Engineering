@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/storage-binding.schema.json",
+  "title": "StorageBinding 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "kind", "artifact_ref_id", "storage_class", "locator", "classification", "created_at"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "id": {"type": "string", "pattern": "^bind_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "kind": {"const": "StorageBinding"},
+    "artifact_ref_id": {"type": "string", "pattern": "^aref_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "storage_class": {"enum": ["git_public", "private_content_addressed", "derived_projection"]},
+    "locator": {"type": "string", "pattern": "^(sha256/[0-9a-f]{2}/[0-9a-f]{64}|repo/[A-Za-z0-9._/-]+)$"},
+    "classification": {"enum": ["private_operational", "restricted_source"]},
+    "created_at": {"type": "string", "format": "date-time", "pattern": "Z$"}
+  }
+}

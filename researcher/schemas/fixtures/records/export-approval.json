@@ -1,0 +1,12 @@
+{
+  "classification": "private_human",
+  "decision": "approve",
+  "id": "export_schema_fixture",
+  "kind": "ExportApproval",
+  "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "reason_code": "APPROVED_FOR_REVIEW",
+  "retention": "durable",
+  "reviewer_ref": "human-maintainer",
+  "schema_version": "1.0.0",
+  "state": "approved"
+}

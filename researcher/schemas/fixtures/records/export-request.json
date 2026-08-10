@@ -1,0 +1,8 @@
+{
+  "classification": "private_operational",
+  "entries": [{"artifact_kind": "citation_metadata"}],
+  "id": "export_schema_fixture",
+  "kind": "ExportRequest",
+  "retention": "review_cycle",
+  "schema_version": "1.0.0"
+}

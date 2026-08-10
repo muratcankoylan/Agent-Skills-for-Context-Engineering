@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/artifact-ref.schema.json",
+  "title": "ArtifactRef 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "kind",
+    "artifact_id",
+    "artifact_id_origin",
+    "artifact_kind",
+    "artifact_schema_version",
+    "digest",
+    "media_type",
+    "size_bytes",
+    "classification",
+    "storage_class",
+    "created_by",
+    "created_at",
+    "provenance_parents",
+    "availability"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "id": {"type": "string", "pattern": "^aref_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "kind": {"const": "ArtifactRef"},
+    "artifact_id": {"type": "string", "pattern": "^[a-z][a-z0-9]*_[0-9a-f]{8}-[0-9a-f]{4}-[57][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "artifact_id_origin": {"enum": ["native", "legacy_import"]},
+    "artifact_kind": {"type": "string", "minLength": 1},
+    "artifact_schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "digest": {"$ref": "#/$defs/digest"},
+    "media_type": {"type": "string", "pattern": "^[a-z0-9.+-]+/[a-z0-9.+-]+$"},
+    "size_bytes": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+    "classification": {"$ref": "#/$defs/classification"},
+    "storage_class": {"enum": ["git_public", "private_content_addressed", "derived_projection"]},
+    "created_by": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "provenance_parents": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^aref_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"}
+    },
+    "availability": {"enum": ["available", "tombstoned", "unavailable"]}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "classification": {
+      "enum": ["public", "public_derived", "private_operational", "private_human", "restricted_source", "secret_reference"]
+    }
+  }
+}

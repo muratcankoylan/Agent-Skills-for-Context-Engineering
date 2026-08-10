@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/registry.schema.json",
+  "title": "Organization schema registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "canonicalization_profile",
+    "compatibility_policy",
+    "id_prefixes",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "canonicalization_profile": {"const": "jcs-rfc8785-integer-v1"},
+    "compatibility_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["major", "minor", "patch", "unknown_kind", "deprecated"],
+      "properties": {
+        "major": {"const": "reject-unless-exactly-registered"},
+        "minor": {"const": "schema-declared-only"},
+        "patch": {"const": "schema-compatible"},
+        "unknown_kind": {"const": "quarantine"},
+        "deprecated": {"const": "read-only"}
+      }
+    },
+    "id_prefixes": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[a-z][a-z0-9]*$"},
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/entry"}
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "version",
+        "schema_path",
+        "schema_id",
+        "schema_digest",
+        "owner_spec",
+        "status",
+        "compatibility",
+        "canonicalization_profile",
+        "classifications",
+        "golden_paths"
+      ],
+      "properties": {
+        "kind": {"type": "string", "pattern": "^[A-Z][A-Za-z0-9]+$"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "schema_path": {"type": "string", "pattern": "^researcher/(schemas|exports/schemas)/"},
+        "schema_id": {"type": "string", "format": "uri"},
+        "schema_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "owner_spec": {"type": "string", "pattern": "^SPEC-[0-9]{3}$"},
+        "status": {"enum": ["draft", "registered", "active", "deprecated", "retired"]},
+        "compatibility": {"enum": ["exact", "backward-additive", "legacy-adapter"]},
+        "canonicalization_profile": {"const": "jcs-rfc8785-integer-v1"},
+        "classifications": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/classification"}
+        },
+        "golden_paths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^researcher/schemas/fixtures/"}
+        },
+        "id_prefix": {"type": "string", "pattern": "^[a-z][a-z0-9]*$"}
+      }
+    },
+    "classification": {
+      "enum": [
+        "public",
+        "public_derived",
+        "private_operational",
+        "private_human",
+        "restricted_source",
+        "secret_reference"
+      ]
+    }
+  }
+}

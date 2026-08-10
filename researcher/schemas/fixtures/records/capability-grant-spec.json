@@ -1,0 +1,18 @@
+{
+  "actor_id": "skill_builder",
+  "attempt_id": "attempt-example-1",
+  "audience": "github-adapter",
+  "classification": "private_operational",
+  "classification_ceiling": "private_operational",
+  "credential_ref_id": "credref_018f3e40-7b80-7a21-8000-000000000006",
+  "expires_at": "2026-08-10T13:00:00Z",
+  "grant_digest": "sha256:0069ca70c514fa80156e27f0b64d5a1220391dbe239ed6970675f9472f340df7",
+  "id": "grant_018f3e40-7b80-7a21-8000-000000000007",
+  "issued_at": "2026-08-10T12:00:00Z",
+  "kind": "CapabilityGrantSpec",
+  "operations": ["github.open_pr"],
+  "policy_version": "1.0.0",
+  "resources": ["repo:muratcankoylan/Agent-Skills-for-Context-Engineering"],
+  "schema_version": "1.0.0",
+  "work_order_id": "work-order-example-1"
+}

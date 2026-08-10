@@ -1,0 +1,27 @@
+{
+  "canonicalization_profile": "jcs-rfc8785-integer-v1",
+  "compatibility_policy": {
+    "deprecated": "read-only",
+    "major": "reject-unless-exactly-registered",
+    "minor": "schema-declared-only",
+    "patch": "schema-compatible",
+    "unknown_kind": "quarantine"
+  },
+  "entries": [
+    {
+      "canonicalization_profile": "jcs-rfc8785-integer-v1",
+      "classifications": [],
+      "compatibility": "exact",
+      "golden_paths": ["researcher/schemas/fixtures/records/schema-registry.json"],
+      "kind": "SchemaRegistry",
+      "owner_spec": "SPEC-003",
+      "schema_digest": "sha256:b872675a4d792e68e51f268c442dbe4bd73d4770f84d3ed70a66b151a73ddf34",
+      "schema_id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/registry.schema.json",
+      "schema_path": "researcher/schemas/registry.schema.json",
+      "status": "active",
+      "version": "1.0.0"
+    }
+  ],
+  "id_prefixes": {"rec": "ArtifactEnvelope"},
+  "schema_version": "1.0.0"
+}

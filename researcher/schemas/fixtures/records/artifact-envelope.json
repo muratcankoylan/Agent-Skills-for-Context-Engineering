@@ -1,0 +1,36 @@
+{
+  "aliases": ["claim-evaluation-browsecomp-variance"],
+  "artifact_kind": "LegacyClaim",
+  "artifact_schema_version": "1.0.0",
+  "classification": "public",
+  "created_at": "2026-05-15T00:00:00Z",
+  "id": "rec_c7b61002-ecd2-5fa9-9b43-68c50ad3d953",
+  "id_origin": "legacy_import",
+  "input_digests": ["sha256:db5f5a19f3eabb3b1f11bc81c0fedb55d004c792e726ca902a6a9b0eb196a2e8"],
+  "integrity": {
+    "algorithm": "sha256",
+    "canonicalization_profile": "jcs-rfc8785-integer-v1",
+    "digest": "sha256:389b81f7b4799b7912ec430e976889a59229a8ae1f246e66954f579017d49f52"
+  },
+  "kind": "ArtifactEnvelope",
+  "payload": {
+    "legacy_key": "claim-evaluation-browsecomp-variance",
+    "legacy_kind": "LegacyClaim",
+    "source_digest": "sha256:db5f5a19f3eabb3b1f11bc81c0fedb55d004c792e726ca902a6a9b0eb196a2e8",
+    "source_path": "researcher/claims/index.jsonl",
+    "source_record": {
+      "claim_id": "claim-evaluation-browsecomp-variance",
+      "claim_text": "BrowseComp-style browsing performance is dominated by token usage, with tool calls and model choice as secondary drivers.",
+      "evidence_strength": "secondary",
+      "last_reviewed": "2026-05-15",
+      "owning_skill": "evaluation",
+      "retrieved_at": "2026-05-15",
+      "section": "Core Concepts / Performance Drivers",
+      "source_url": "docs/blogs.md",
+      "volatility": "high"
+    }
+  },
+  "producer_actor_id": "legacy_adapter",
+  "retention": "durable",
+  "schema_version": "1.0.0"
+}

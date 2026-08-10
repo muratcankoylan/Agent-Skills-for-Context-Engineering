@@ -48,6 +48,11 @@ VALIDATOR_OWNERSHIP = (
         "owns": ["classification export routes", "public projections", "staged export closure"],
     },
     {
+        "id": "schema-contract",
+        "path": "researcher/scripts/validate_schemas.py",
+        "owns": ["schema registry", "canonical records", "legacy adapters", "conformance evidence"],
+    },
+    {
         "id": "platform-compatibility",
         "path": "researcher/scripts/validate_platform_compat.py",
         "owns": ["Agent Skills format", "platform install layouts", "reference validator"],
@@ -281,6 +286,7 @@ class InventoryBuilder:
         validators = self.build_validators()
         schemas = self.build_schemas()
         export_contracts = self.build_export_contracts()
+        schema_contracts = self.build_schema_contracts()
         self.validate_live_document_links()
 
         artifacts = {
@@ -300,6 +306,7 @@ class InventoryBuilder:
             "validators": validators,
             "schemas": schemas,
             "export_contracts": export_contracts,
+            "schema_contracts": schema_contracts,
         }
         source_records = sorted(self.sources.values(), key=lambda item: item["path"])
         source_tree_digest = sha256_bytes(
@@ -959,6 +966,125 @@ class InventoryBuilder:
             digest, size = self.add_source(path)
             records.append({"id": relative, "path": relative, "digest": digest, "size_bytes": size})
         return self._category("governance/export-policy.yaml and export fixtures", records)
+
+    def build_schema_contracts(self) -> dict[str, Any]:
+        registry_path = self.root / "researcher/schemas/registry.json"
+        registry = self.load_json(registry_path)
+        records: list[dict[str, Any]] = []
+        if not isinstance(registry, dict) or not isinstance(registry.get("entries"), list):
+            self.add_finding("UNKNOWN_SCHEMA", registry_path, "schema registry has no entries array")
+            return self._category("researcher/schemas/registry.json", records)
+        seen: set[tuple[str, str]] = set()
+        id_prefixes = registry.get("id_prefixes")
+        registered_prefixes: dict[str, str] = {}
+        for index, entry in enumerate(registry["entries"]):
+            if not isinstance(entry, dict):
+                self.add_finding("UNKNOWN_SCHEMA", registry_path, f"entry {index} is not an object")
+                continue
+            kind = entry.get("kind")
+            version = entry.get("version")
+            key = (kind, version)
+            if not isinstance(kind, str) or not isinstance(version, str):
+                self.add_finding("UNKNOWN_SCHEMA", registry_path, f"entry {index} lacks kind/version")
+                continue
+            if key in seen:
+                self.add_finding("DUPLICATE_SCHEMA_ID", registry_path, "kind/version is duplicated", kind)
+            seen.add(key)
+            prefix = entry.get("id_prefix")
+            if isinstance(prefix, str):
+                registered_prefixes[prefix] = kind
+            schema_relative = entry.get("schema_path")
+            expected_digest = entry.get("schema_digest")
+            if not isinstance(schema_relative, str) or not isinstance(expected_digest, str):
+                self.add_finding("UNKNOWN_SCHEMA", registry_path, "schema path or digest is missing", kind)
+                continue
+            schema_path = self.root / schema_relative
+            if not schema_path.is_file():
+                self.add_finding("PARSE_ERROR", schema_path, "registered schema file is missing", kind)
+                continue
+            digest, _ = self.add_source(schema_path)
+            if digest != expected_digest:
+                self.add_finding(
+                    "SCHEMA_DIGEST_MISMATCH",
+                    schema_path,
+                    f"registry={expected_digest}, actual={digest}",
+                    kind,
+                )
+            golden_paths = entry.get("golden_paths")
+            if not isinstance(golden_paths, list) or not golden_paths:
+                self.add_finding("UNKNOWN_SCHEMA", registry_path, "schema has no golden", kind)
+            else:
+                for golden_relative in golden_paths:
+                    if not isinstance(golden_relative, str):
+                        self.add_finding("UNKNOWN_SCHEMA", registry_path, "golden path is not text", kind)
+                        continue
+                    golden_path = self.root / golden_relative
+                    if not golden_path.is_file():
+                        self.add_finding("PARSE_ERROR", golden_path, "registered golden is missing", kind)
+                    else:
+                        self.add_source(golden_path)
+            records.append(
+                {
+                    "id": f"{kind}@{version}",
+                    "kind": kind,
+                    "version": version,
+                    "schema_path": schema_relative,
+                    "schema_digest": digest,
+                    "owner_spec": entry.get("owner_spec"),
+                    "status": entry.get("status"),
+                    "compatibility": entry.get("compatibility"),
+                    "id_prefix": prefix,
+                }
+            )
+        if id_prefixes != registered_prefixes:
+            self.add_finding(
+                "SCHEMA_PREFIX_MISMATCH",
+                registry_path,
+                "registry id_prefixes disagree with schema entries",
+            )
+        supporting_paths = [
+            "researcher/schemas/registry.schema.json",
+            "researcher/schemas/fixtures/canonicalization-v1.json",
+            "researcher/schemas/fixtures/editable-surface-policy-v1.json",
+            "researcher/schemas/public-legacy-sources.json",
+            "researcher/schemas/generated/conformance-report.json",
+            "researcher/schemas/generated/current-artifacts-report.json",
+            "researcher/schemas/generated/migration-dry-run.json",
+            "researcher/schemas/generated/compatibility-matrix.md",
+            "researcher/schemas/README.md",
+            "researcher/artifacts/README.md",
+            "researcher/runbooks/schema-migration.md",
+            "researcher/scripts/schema_contract.py",
+            "researcher/scripts/artifact_store.py",
+            "researcher/scripts/migrate_legacy.py",
+            "researcher/scripts/tests/test_schema_contract.py",
+            "researcher/scripts/tests/test_artifact_store.py",
+            "researcher/schemas/typescript/.gitignore",
+            "researcher/schemas/typescript/package.json",
+            "researcher/schemas/typescript/package-lock.json",
+            "researcher/schemas/typescript/tsconfig.json",
+            "researcher/schemas/typescript/src/canonicalize.ts",
+            "researcher/schemas/typescript/src/conformance.ts",
+            "researcher/schemas/typescript/src/errors.ts",
+            "researcher/schemas/typescript/src/index.ts",
+            "researcher/schemas/typescript/src/json.ts",
+            "researcher/schemas/typescript/src/registry.ts",
+            "researcher/schemas/typescript/src/semantics.ts",
+            "researcher/schemas/typescript/test/conformance.test.ts",
+            "researcher/schemas/typescript/test/runtime-registry.test.ts",
+        ]
+        for relative in supporting_paths:
+            path = self.root / relative
+            if not path.is_file():
+                self.add_finding("PARSE_ERROR", path, "schema contract artifact is missing", relative)
+            else:
+                self.add_source(path)
+        return self._category(
+            "researcher/schemas/registry.json",
+            sorted(records, key=lambda item: item["id"]),
+            canonicalization_profile=registry.get("canonicalization_profile"),
+            id_prefix_count=len(registered_prefixes),
+        )
 
     def validate_live_document_links(self) -> None:
         for relative, required_link in LIVE_DOCUMENT_LINKS.items():

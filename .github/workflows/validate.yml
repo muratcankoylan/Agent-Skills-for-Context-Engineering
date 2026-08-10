@@ -26,7 +26,9 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: researcher/benchmarks/sdk-runner/package-lock.json
+          cache-dependency-path: |
+            researcher/benchmarks/sdk-runner/package-lock.json
+            researcher/schemas/typescript/package-lock.json
 
       - name: Install validation dependencies
         run: pip install -r requirements-dev.txt
@@ -38,12 +40,18 @@ jobs:
             researcher/scripts/governance_policy.py \
             researcher/scripts/build_inventory.py \
             researcher/scripts/export_policy.py \
+            researcher/scripts/schema_contract.py \
+            researcher/scripts/artifact_store.py \
+            researcher/scripts/migrate_legacy.py \
             researcher/scripts/tests/test_skill_frontmatter.py \
             researcher/scripts/tests/test_build_inventory.py \
             researcher/scripts/tests/test_export_policy.py \
             researcher/scripts/tests/test_governance_policy.py \
+            researcher/scripts/tests/test_schema_contract.py \
+            researcher/scripts/tests/test_artifact_store.py \
             researcher/scripts/validate_governance.py \
             researcher/scripts/validate_export.py \
+            researcher/scripts/validate_schemas.py \
             researcher/scripts/validate_platform_compat.py \
             researcher/scripts/validate_repo.py \
             researcher/scripts/validate_run.py \
@@ -74,6 +82,18 @@ jobs:
         run: >-
           python researcher/scripts/validate_export.py check
           --staging-dir researcher/exports/examples/restricted-citation-v1
+
+      - name: Python schema and artifact contract
+        run: |
+          python researcher/scripts/validate_schemas.py --check
+          python researcher/scripts/migrate_legacy.py --dry-run
+
+      - name: TypeScript schema conformance
+        working-directory: researcher/schemas/typescript
+        run: |
+          npm ci --ignore-scripts
+          npm run typecheck
+          npm test
 
       - name: Benchmark runner contract
         working-directory: researcher/benchmarks/sdk-runner
