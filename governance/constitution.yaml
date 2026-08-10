@@ -1,0 +1,552 @@
+schema_version: "1.0.0"
+constitution_version: "1.0.0"
+lifecycle_state: effective
+effective_commit: "$SELF"
+default_effect: deny
+promotion_event: human_merged_commit
+
+identity_bindings:
+  human_maintainer:
+    - "github:muratcankoylan"
+  automated_contributors: []
+
+actor_classes:
+  human_maintainer:
+    automated: false
+    conflicts_with: []
+  research_proposer:
+    automated: true
+    conflicts_with:
+      - human_maintainer
+      - independent_verifier
+      - release_attestor
+  change_author:
+    automated: true
+    conflicts_with:
+      - human_maintainer
+      - independent_verifier
+      - release_attestor
+  independent_verifier:
+    automated: true
+    conflicts_with:
+      - human_maintainer
+      - change_author
+  release_attestor:
+    automated: true
+    conflicts_with:
+      - human_maintainer
+      - change_author
+  runtime_operator:
+    automated: true
+    conflicts_with:
+      - human_maintainer
+  community_contributor:
+    automated: false
+    conflicts_with: []
+
+actions:
+  - read
+  - research
+  - propose_change
+  - evaluate
+  - attest_release
+  - execute_work
+  - push_proposal
+  - open_pull_request
+  - respond_to_review
+  - publish_draft
+  - merge
+  - amend_constitution
+  - change_protected_surface
+  - activate_production
+  - emergency_disable
+  - expose_private_record
+  - authorize_credential_destination
+  - approve_weight_training
+
+resource_classes:
+  - public_repository
+  - research_artifact
+  - candidate_artifact
+  - proposal_branch
+  - pull_request
+  - default_branch
+  - protected_surface
+  - constitution
+  - evaluator_policy
+  - hidden_evaluation
+  - public_private_boundary
+  - production_deployment
+  - emergency_control
+  - private_record
+  - credential_destination
+  - weight_training
+  - public_content_draft
+
+protected_surfaces:
+  - governance/**
+  - .github/workflows/**
+  - .github/CODEOWNERS
+  - researcher/rubrics/**
+  - researcher/benchmarks/**/hidden/**
+  - researcher/scripts/validate_*.py
+  - researcher/scripts/run_benchmarks.py
+
+separation_of_duty:
+  - author_role: change_author
+    prohibited_role: independent_verifier
+  - author_role: change_author
+    prohibited_role: release_attestor
+  - author_role: research_proposer
+    prohibited_role: independent_verifier
+
+rules:
+  - rule_id: public-read
+    effect: allow
+    actors:
+      - human_maintainer
+      - research_proposer
+      - change_author
+      - independent_verifier
+      - release_attestor
+      - runtime_operator
+      - community_contributor
+    actions:
+      - read
+    resources:
+      - public_repository
+      - research_artifact
+      - candidate_artifact
+      - pull_request
+      - public_content_draft
+    reason_code: PUBLIC_READ_ALLOWED
+
+  - rule_id: proposer-research
+    effect: allow
+    actors:
+      - research_proposer
+    actions:
+      - research
+      - propose_change
+    resources:
+      - research_artifact
+      - candidate_artifact
+    conditions:
+      - key: automated_identity_disclosed
+        operator: equals
+        value: true
+    reason_code: DISCLOSED_RESEARCH_PROPOSAL_ALLOWED
+
+  - rule_id: author-candidate-change
+    effect: allow
+    actors:
+      - change_author
+    actions:
+      - propose_change
+    resources:
+      - candidate_artifact
+    conditions:
+      - key: automated_identity_disclosed
+        operator: equals
+        value: true
+    reason_code: DISCLOSED_CANDIDATE_CHANGE_ALLOWED
+
+  - rule_id: agent-proposal-branch-push
+    effect: allow
+    actors:
+      - research_proposer
+      - change_author
+    actions:
+      - push_proposal
+    resources:
+      - proposal_branch
+    conditions:
+      - key: automated_identity_disclosed
+        operator: equals
+        value: true
+      - key: human_review_path
+        operator: equals
+        value: pull_request
+    reason_code: GOVERNED_PROPOSAL_DELIVERY_ALLOWED
+
+  - rule_id: agent-pull-request-work
+    effect: allow
+    actors:
+      - research_proposer
+      - change_author
+    actions:
+      - open_pull_request
+      - respond_to_review
+    resources:
+      - pull_request
+    conditions:
+      - key: automated_identity_disclosed
+        operator: equals
+        value: true
+      - key: human_review_path
+        operator: equals
+        value: pull_request
+    reason_code: GOVERNED_PROPOSAL_DELIVERY_ALLOWED
+
+  - rule_id: independent-evaluation
+    effect: allow
+    actors:
+      - independent_verifier
+    actions:
+      - evaluate
+    resources:
+      - candidate_artifact
+      - research_artifact
+    conditions:
+      - key: independent_of_author
+        operator: equals
+        value: true
+    reason_code: INDEPENDENT_EVALUATION_ALLOWED
+
+  - rule_id: independent-release-attestation
+    effect: allow
+    actors:
+      - release_attestor
+    actions:
+      - attest_release
+    resources:
+      - candidate_artifact
+      - pull_request
+    conditions:
+      - key: independent_of_author
+        operator: equals
+        value: true
+      - key: candidate_digest_verified
+        operator: equals
+        value: true
+    reason_code: INDEPENDENT_ATTESTATION_ALLOWED
+
+  - rule_id: bounded-runtime-execution
+    effect: allow
+    actors:
+      - runtime_operator
+    actions:
+      - execute_work
+    resources:
+      - research_artifact
+      - candidate_artifact
+    conditions:
+      - key: capability_grant_valid
+        operator: equals
+        value: true
+    reason_code: CAPABILITY_BOUND_EXECUTION_ALLOWED
+
+  - rule_id: emergency-stop
+    effect: allow
+    actors:
+      - human_maintainer
+      - runtime_operator
+    actions:
+      - emergency_disable
+    resources:
+      - emergency_control
+    reason_code: EMERGENCY_DISABLE_ALLOWED
+
+  - rule_id: community-candidate-proposal
+    effect: allow
+    actors:
+      - community_contributor
+    actions:
+      - propose_change
+    resources:
+      - candidate_artifact
+    conditions:
+      - key: human_review_path
+        operator: equals
+        value: pull_request
+    reason_code: COMMUNITY_PROPOSAL_ALLOWED
+
+  - rule_id: community-pull-request-work
+    effect: allow
+    actors:
+      - community_contributor
+    actions:
+      - open_pull_request
+      - respond_to_review
+    resources:
+      - pull_request
+    conditions:
+      - key: human_review_path
+        operator: equals
+        value: pull_request
+    reason_code: COMMUNITY_PROPOSAL_ALLOWED
+
+  - rule_id: agent-social-draft
+    effect: allow
+    actors:
+      - research_proposer
+      - change_author
+    actions:
+      - publish_draft
+    resources:
+      - public_content_draft
+    conditions:
+      - key: automated_identity_disclosed
+        operator: equals
+        value: true
+    reason_code: PUBLIC_DRAFT_ALLOWED
+
+  - rule_id: human-research-work
+    effect: allow
+    actors:
+      - human_maintainer
+    actions:
+      - research
+      - propose_change
+    resources:
+      - research_artifact
+      - candidate_artifact
+    conditions:
+      - key: authenticated
+        operator: equals
+        value: true
+    reason_code: AUTHENTICATED_HUMAN_WORK_ALLOWED
+
+  - rule_id: human-proposal-branch-push
+    effect: allow
+    actors:
+      - human_maintainer
+    actions:
+      - push_proposal
+    resources:
+      - proposal_branch
+    conditions:
+      - key: authenticated
+        operator: equals
+        value: true
+    reason_code: AUTHENTICATED_HUMAN_WORK_ALLOWED
+
+  - rule_id: human-pull-request-work
+    effect: allow
+    actors:
+      - human_maintainer
+    actions:
+      - open_pull_request
+      - respond_to_review
+    resources:
+      - pull_request
+    conditions:
+      - key: authenticated
+        operator: equals
+        value: true
+    reason_code: AUTHENTICATED_HUMAN_WORK_ALLOWED
+
+  - rule_id: human-governed-merge
+    effect: allow
+    actors:
+      - human_maintainer
+    actions:
+      - merge
+    resources:
+      - pull_request
+      - default_branch
+    conditions:
+      - key: authenticated
+        operator: equals
+        value: true
+      - key: latest_commit_reviewed
+        operator: equals
+        value: true
+      - key: required_checks_passed
+        operator: equals
+        value: true
+    reason_code: HUMAN_GOVERNED_PROMOTION_ALLOWED
+
+  - rule_id: human-production-activation
+    effect: allow
+    actors:
+      - human_maintainer
+    actions:
+      - activate_production
+    resources:
+      - production_deployment
+    conditions:
+      - key: authenticated
+        operator: equals
+        value: true
+      - key: latest_commit_reviewed
+        operator: equals
+        value: true
+      - key: required_checks_passed
+        operator: equals
+        value: true
+    reason_code: HUMAN_GOVERNED_PROMOTION_ALLOWED
+
+  - rule_id: human-constitution-amendment
+    effect: allow
+    actors:
+      - human_maintainer
+    actions:
+      - amend_constitution
+    resources:
+      - constitution
+    conditions:
+      - key: authenticated
+        operator: equals
+        value: true
+      - key: human_review_path
+        operator: equals
+        value: pull_request
+    reason_code: HUMAN_CONSTITUTIONAL_CHANGE_ALLOWED
+
+  - rule_id: human-protected-surface-change
+    effect: allow
+    actors:
+      - human_maintainer
+    actions:
+      - change_protected_surface
+    resources:
+      - protected_surface
+      - evaluator_policy
+      - hidden_evaluation
+      - public_private_boundary
+    conditions:
+      - key: authenticated
+        operator: equals
+        value: true
+      - key: human_review_path
+        operator: equals
+        value: pull_request
+    reason_code: HUMAN_CONSTITUTIONAL_CHANGE_ALLOWED
+
+  - rule_id: human-private-export-authority
+    effect: allow
+    actors:
+      - human_maintainer
+    actions:
+      - expose_private_record
+    resources:
+      - private_record
+    conditions:
+      - key: authenticated
+        operator: equals
+        value: true
+    reason_code: HUMAN_SENSITIVE_AUTHORITY_ALLOWED
+
+  - rule_id: human-credential-destination-authority
+    effect: allow
+    actors:
+      - human_maintainer
+    actions:
+      - authorize_credential_destination
+    resources:
+      - credential_destination
+    conditions:
+      - key: authenticated
+        operator: equals
+        value: true
+    reason_code: HUMAN_SENSITIVE_AUTHORITY_ALLOWED
+
+  - rule_id: human-training-authority
+    effect: allow
+    actors:
+      - human_maintainer
+    actions:
+      - approve_weight_training
+    resources:
+      - weight_training
+    conditions:
+      - key: authenticated
+        operator: equals
+        value: true
+    reason_code: HUMAN_SENSITIVE_AUTHORITY_ALLOWED
+
+  - rule_id: non-human-merge-denied
+    effect: deny
+    actors:
+      - research_proposer
+      - change_author
+      - independent_verifier
+      - release_attestor
+      - runtime_operator
+      - community_contributor
+    actions:
+      - merge
+      - activate_production
+    resources:
+      - pull_request
+      - default_branch
+      - production_deployment
+    reason_code: HUMAN_MERGE_REQUIRED
+
+  - rule_id: ordinary-protected-change-denied
+    effect: deny
+    actors:
+      - research_proposer
+      - change_author
+      - independent_verifier
+      - release_attestor
+      - runtime_operator
+      - community_contributor
+    actions:
+      - amend_constitution
+      - change_protected_surface
+    resources:
+      - constitution
+      - protected_surface
+      - evaluator_policy
+      - hidden_evaluation
+      - public_private_boundary
+    reason_code: PROTECTED_SURFACE_REQUIRES_HUMAN
+
+  - rule_id: non-human-sensitive-authority-denied
+    effect: deny
+    actors:
+      - research_proposer
+      - change_author
+      - independent_verifier
+      - release_attestor
+      - runtime_operator
+      - community_contributor
+    actions:
+      - expose_private_record
+      - authorize_credential_destination
+      - approve_weight_training
+    resources:
+      - private_record
+      - credential_destination
+      - weight_training
+    reason_code: SENSITIVE_AUTHORITY_REQUIRES_HUMAN
+
+  - rule_id: self-evaluation-denied
+    effect: deny
+    actors:
+      - independent_verifier
+      - release_attestor
+    actions:
+      - evaluate
+      - attest_release
+    resources:
+      - candidate_artifact
+      - research_artifact
+      - pull_request
+    conditions:
+      - key: independent_of_author
+        operator: equals
+        value: false
+    reason_code: SEPARATION_OF_DUTY_REQUIRED
+
+emergency_controls:
+  disable_stops_new_work: true
+  disable_mutates_history: false
+  disable_changes_authority: false
+
+amendment_procedure:
+  required_actor: human_maintainer
+  required_transport: pull_request
+  required_state_sequence:
+    - draft
+    - reviewed
+    - merged
+    - effective
+  prior_versions_retained: true
+
+non_constitutional_guidance:
+  - Writing style and tone preferences remain in AGENTS.md.
+  - Benchmark methodology details remain in researcher/benchmarks/PLAN.md.
+  - Operational command sequences remain in researcher/runbooks/.
