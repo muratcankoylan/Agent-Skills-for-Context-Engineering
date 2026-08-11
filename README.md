@@ -284,19 +284,21 @@ Current counts and compatibility status are generated in the [live corpus invent
 - **Skill health gate** (`researcher/scripts/skill_health.py`): deterministic body-quality scoring. Published scores remain dated evidence; local runs produce ignored runtime reports.
 - **Public export boundary** (`governance/export-policy.yaml` + `researcher/scripts/validate_export.py`): allowlisted projections from private or restricted records into reviewable public staging trees without publishing private source locators or digests.
 - **Schema and artifact contract** (`researcher/schemas/` + `researcher/scripts/artifact_store.py`): digest-pinned cross-runtime schemas, typed IDs, private bindings, exact-byte CAS, candidate freeze receipts, and Python/TypeScript conformance.
+- **Autonomous-organization specification program** ([`docs/specs/README.md`](docs/specs/README.md)): machine-checked implementation contracts from the durable control substrate through evidence, evaluation, meta-harness improvement, governance, and deployment.
 
 ### Operator commands
 
 Install the validation dependencies once before running local gates:
 
 ```bash
-python3 -m pip install -r requirements-dev.txt
+python3 -m pip install --require-hashes -r requirements-dev.txt
 ```
 
 ```bash
 # Deterministic gates (also run in CI on every PR)
 python3 -m unittest researcher.scripts.tests.test_skill_frontmatter
 python3 researcher/scripts/validate_platform_compat.py --require-reference-validator
+python3 researcher/scripts/validate_public_repo.py
 python3 researcher/scripts/validate_repo.py --strict
 python3 researcher/scripts/skill_health.py --strict --no-history
 python3 researcher/scripts/run_benchmarks.py

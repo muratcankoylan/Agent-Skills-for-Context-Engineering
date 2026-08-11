@@ -28,10 +28,13 @@ def copy_fixture(source: Path, target: Path) -> None:
     for relative in [
         ".claude-plugin/marketplace.json",
         ".plugin/plugin.json",
+        ".github/workflows/validate.yml",
         "SKILL.md",
         "README.md",
         "AGENTS.md",
         "CLAUDE.md",
+        "requirements-dev.in",
+        "requirements-dev.txt",
         "researcher/README.md",
         "researcher/mechanisms/registry.jsonl",
         "researcher/mechanisms/ledgers/accepted.jsonl",
@@ -60,6 +63,8 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/scripts/build_inventory.py",
         "researcher/scripts/validate_export.py",
         "researcher/scripts/export_policy.py",
+        "researcher/scripts/validate_public_repo.py",
+        "researcher/scripts/tests/test_public_repo.py",
         "researcher/artifacts/README.md",
         "researcher/runbooks/schema-migration.md",
         "researcher/scripts/validate_schemas.py",
@@ -95,6 +100,9 @@ def copy_fixture(source: Path, target: Path) -> None:
         target_path = target / readme.relative_to(source)
         target_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(readme, target_path)
+
+    shutil.copytree(source / "docs" / "specs", target / "docs" / "specs")
+    shutil.copytree(source / "docs" / "decisions", target / "docs" / "decisions")
 
     source_tasks = source / "researcher" / "benchmarks" / "effectiveness" / "tasks"
     target_tasks = target / "researcher" / "benchmarks" / "effectiveness" / "tasks"
@@ -158,6 +166,383 @@ class RepositoryInventoryTests(unittest.TestCase):
         skill.write_text(skill.read_text(encoding="utf-8") + "\n", encoding="utf-8")
         second = InventoryBuilder(root).build()["source_tree_digest"]
         self.assertNotEqual(first, second)
+
+    def test_specification_program_is_inventory_backed(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        specifications = inventory["artifacts"]["specifications"]
+        self.assertEqual(specifications["count"], 27)
+        self.assertEqual(
+            {record["id"] for record in specifications["records"]},
+            {f"SPEC-{number:03d}" for number in range(27)},
+        )
+
+    def test_architecture_decisions_are_inventory_backed(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        decisions = inventory["artifacts"]["architecture_decisions"]
+        self.assertEqual(decisions["count"], 6)
+        self.assertEqual(
+            {record["id"] for record in decisions["records"]},
+            {f"ADR-{number:04d}" for number in range(1, 7)},
+        )
+
+    def test_architecture_decision_change_updates_source_tree_digest(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        path = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\nAmendment candidate.\n", encoding="utf-8")
+        after = InventoryBuilder(root).build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+
+    def test_unindexed_architecture_decision_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        source = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        extra = root / "docs/decisions/0007-unindexed.md"
+        extra.write_text(
+            source.read_text(encoding="utf-8")
+            .replace("ADR-0006", "ADR-0007", 1)
+            .replace("SPEC-000, SPEC-002", "SPEC-000", 1),
+            encoding="utf-8",
+        )
+        self.assertIn("MISSING_ADR_INDEX_LINK", finding_codes(root))
+
+    def test_hidden_architecture_decision_link_cannot_satisfy_index_coverage(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/README.md"
+        row = (
+            "- [ADR-0006: Validate the complete public release boundary]"
+            "(0006-validate-public-release-boundary.md)"
+        )
+        text = path.read_text(encoding="utf-8").replace(
+            row,
+            f"<!-- {row} -->\n   ```markdown\n{row}\n   ```",
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("MISSING_ADR_INDEX_LINK", finding_codes(root))
+
+    def test_case_variant_architecture_decision_extension_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        source = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        invalid = root / "docs/decisions/0007-shadow.MD"
+        invalid.write_text(
+            source.read_text(encoding="utf-8").replace("ADR-0006", "ADR-0007", 1),
+            encoding="utf-8",
+        )
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_ADR_FILENAME", {finding.code for finding in builder.findings})
+
+    def test_alternate_architecture_decision_extension_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        invalid = root / "docs/decisions/0007-shadow.markdown"
+        invalid.write_text("# ADR-0007: Shadow decision\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_ADR_FILENAME", {finding.code for finding in builder.findings})
+
+    def test_raw_html_cannot_hide_architecture_decision_index(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/README.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "## Records",
+            "<pre>\n## Records",
+            1,
+        )
+        path.write_text(text + "\n</pre>\n", encoding="utf-8")
+        self.assertIn("INVALID_ADR_INDEX", finding_codes(root))
+
+    def test_architecture_decision_metadata_is_strict_and_calendar_valid(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        text = path.read_text(encoding="utf-8")
+        text = text.replace("- Status: accepted", "- Status: accepted\n- Status: proposed", 1)
+        text = text.replace("- Date: 2026-08-10", "- Date: 2026-99-99", 1)
+        path.write_text(text, encoding="utf-8")
+        codes = finding_codes(root)
+        self.assertIn("INVALID_ADR_METADATA", codes)
+        self.assertIn("INVALID_ADR_DATE", codes)
+
+    def test_spec_heading_must_match_filename(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        path.write_text(
+            path.read_text(encoding="utf-8").replace("# SPEC-004:", "# SPEC-005:", 1),
+            encoding="utf-8",
+        )
+        self.assertIn("SPEC_FILENAME_MISMATCH", finding_codes(root))
+
+    def test_duplicate_specification_id_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        source = root / "docs/specs/SPEC-004-event-journal.md"
+        duplicate = root / "docs/specs/SPEC-027-duplicate.md"
+        shutil.copy2(source, duplicate)
+        self.assertIn("DUPLICATE_SPEC_ID", finding_codes(root))
+
+    def test_nonconforming_specification_filename_is_not_silently_ignored(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        source = root / "docs/specs/SPEC-026-training-rl-lab.md"
+        invalid = root / "docs/specs/SPEC-027.md"
+        invalid.write_text(
+            source.read_text(encoding="utf-8").replace("SPEC-026", "SPEC-027"),
+            encoding="utf-8",
+        )
+        self.assertIn("INVALID_SPEC_FILENAME", finding_codes(root))
+
+    def test_lowercase_specification_filename_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        source = root / "docs/specs/SPEC-026-training-rl-lab.md"
+        invalid = root / "docs/specs/spec-027-shadow.md"
+        invalid.write_text(
+            source.read_text(encoding="utf-8").replace("SPEC-026", "SPEC-027"),
+            encoding="utf-8",
+        )
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_SPEC_FILENAME", {finding.code for finding in builder.findings})
+
+    def test_case_variant_specification_extension_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        source = root / "docs/specs/SPEC-026-training-rl-lab.md"
+        invalid = root / "docs/specs/SPEC-027-shadow.MD"
+        invalid.write_text(
+            source.read_text(encoding="utf-8").replace("SPEC-026", "SPEC-027"),
+            encoding="utf-8",
+        )
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_SPEC_FILENAME", {finding.code for finding in builder.findings})
+
+    def test_alternate_specification_extension_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        invalid = root / "docs/specs/SPEC-027-shadow.markdown"
+        invalid.write_text("# SPEC-027: Shadow specification\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_SPEC_FILENAME", {finding.code for finding in builder.findings})
+
+    def test_raw_html_cannot_hide_specification_index(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "## Specification index",
+            "<pre>\n## Specification index",
+            1,
+        )
+        path.write_text(text + "\n</pre>\n", encoding="utf-8")
+        self.assertIn("INVALID_SPEC_INDEX", finding_codes(root))
+
+    def test_nested_specification_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        source = root / "docs/specs/SPEC-004-event-journal.md"
+        nested = root / "docs/specs/archive/SPEC-004-conflict.md"
+        nested.parent.mkdir(parents=True)
+        shutil.copy2(source, nested)
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_SPEC_PATH", {finding.code for finding in builder.findings})
+
+    def test_invalid_specification_metadata_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        text = path.read_text(encoding="utf-8")
+        text = text.replace("Status: draft", "Status: maybe", 1)
+        text = text.replace("Classification: split", "Classification: unknown", 1)
+        text = text.replace("Wave: 1", "Wave: nine", 1)
+        path.write_text(text, encoding="utf-8")
+        codes = finding_codes(root)
+        self.assertIn("INVALID_SPEC_STATUS", codes)
+        self.assertIn("INVALID_SPEC_CLASSIFICATION", codes)
+        self.assertIn("INVALID_SPEC_WAVE", codes)
+
+    def test_dangling_specification_dependency_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        path.write_text(
+            path.read_text(encoding="utf-8").replace("Depends on: SPEC-003", "Depends on: SPEC-999", 1),
+            encoding="utf-8",
+        )
+        self.assertIn("DANGLING_SPEC_DEPENDENCY", finding_codes(root))
+
+    def test_duplicate_specification_dependency_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        path.write_text(
+            path.read_text(encoding="utf-8").replace(
+                "Depends on: SPEC-003",
+                "Depends on: SPEC-003, SPEC-003",
+                1,
+            ),
+            encoding="utf-8",
+        )
+        self.assertIn("DUPLICATE_SPEC_DEPENDENCY", finding_codes(root))
+
+    def test_specification_dependency_cycle_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-000-program-constitution.md"
+        path.write_text(
+            path.read_text(encoding="utf-8").replace("Depends on: none", "Depends on: SPEC-004", 1),
+            encoding="utf-8",
+        )
+        codes = finding_codes(root)
+        self.assertIn("SPEC_DEPENDENCY_CYCLE", codes)
+        self.assertIn("INVALID_SPEC_WAVE", codes)
+
+    def test_missing_and_duplicate_specification_index_links_are_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8")
+        missing_link = "[SPEC-004](SPEC-004-event-journal.md)"
+        duplicate_row = (
+            "| [SPEC-005](SPEC-005-work-orders.md) | Work orders and recovery | "
+            "Queue, immutable attempts, leases, retries, checkpoints, and recovery |"
+        )
+        text = text.replace(missing_link, "SPEC-004", 1)
+        text = text.replace(duplicate_row, f"{duplicate_row}\n{duplicate_row}", 1)
+        path.write_text(text, encoding="utf-8")
+        codes = finding_codes(root)
+        self.assertIn("MISSING_SPEC_INDEX_LINK", codes)
+        self.assertIn("DUPLICATE_SPEC_INDEX_LINK", codes)
+
+    def test_comments_and_fenced_code_cannot_satisfy_spec_index_coverage(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8")
+        row = (
+            "| [SPEC-004](SPEC-004-event-journal.md) | Event journal and projections | "
+            "Append-only journal plus reproducible projectors |"
+        )
+        text = text.replace(row, "| SPEC-004 | Event journal | Missing visible link |", 1)
+        hidden_row = f"<!--\n{row}\n-->\n   ```markdown\n{row}\n   ```\n"
+        text = text.replace("## Critical path", f"{hidden_row}\n## Critical path", 1)
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("MISSING_SPEC_INDEX_LINK", finding_codes(root))
+
+    def test_unclosed_fence_invalidates_specification_index(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "## Critical path",
+            "   ```markdown\n## Critical path",
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("INVALID_SPEC_INDEX", finding_codes(root))
+
+    def test_unindexed_specification_file_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        source = root / "docs/specs/SPEC-026-training-rl-lab.md"
+        extra = root / "docs/specs/SPEC-027-unindexed.md"
+        extra.write_text(
+            source.read_text(encoding="utf-8").replace("SPEC-026", "SPEC-027").replace("Wave: 6", "Wave: 6"),
+            encoding="utf-8",
+        )
+        self.assertIn("MISSING_SPEC_INDEX_LINK", finding_codes(root))
+
+    def test_specification_graph_must_include_every_declared_dependency(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8")
+        text = text.replace(
+            '    S003 --> S004["SPEC-004 Event Journal and State Projections"]\n',
+            "",
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("MISSING_SPEC_GRAPH_EDGE", finding_codes(root))
+
+    def test_specification_graph_requires_one_flowchart_declaration_first(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8").replace("flowchart TD\n", "", 1)
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("INVALID_SPEC_GRAPH", finding_codes(root))
+
+    def test_commented_mermaid_block_cannot_supply_missing_dependency(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        edge = '    S003 --> S004["SPEC-004 Event Journal and State Projections"]\n'
+        text = path.read_text(encoding="utf-8").replace(edge, "", 1)
+        hidden = f"<!--\n```mermaid\nflowchart TD\n{edge}```\n-->\n"
+        text = text.replace("The graph expresses", f"{hidden}\nThe graph expresses", 1)
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("MISSING_SPEC_GRAPH_EDGE", finding_codes(root))
+
+    def test_specification_graph_rejects_undeclared_and_duplicate_edges(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8")
+        text = text.replace(
+            "flowchart TD\n",
+            "flowchart TD\n    S026 --> S000\n    S003 --> S004\n",
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+        codes = finding_codes(root)
+        self.assertIn("EXTRA_SPEC_GRAPH_EDGE", codes)
+        self.assertIn("DUPLICATE_SPEC_GRAPH_EDGE", codes)
+
+    def test_specification_graph_labels_bind_exact_identity_and_title(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8").replace(
+            'S003 --> S004["SPEC-004 Event Journal and State Projections"]',
+            'S003 --> S004["SPEC-999 Wrong contract"]',
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("SPEC_GRAPH_LABEL_MISMATCH", finding_codes(root))
+
+    def test_specification_graph_rejects_standalone_label_override(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "flowchart TD\n",
+            'flowchart TD\n    S004["SPEC-999 Wrong contract"]\n',
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("INVALID_SPEC_GRAPH_LINE", finding_codes(root))
 
     def test_duplicate_mechanism_has_stable_reason_code(self) -> None:
         temporary, root = self.fixture()

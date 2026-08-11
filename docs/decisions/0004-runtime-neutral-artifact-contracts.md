@@ -1,6 +1,6 @@
 # ADR-0004: Make schemas, identity, and frozen bytes runtime-neutral
 
-- Status: accepted for proposal
+- Status: accepted
 - Date: 2026-08-10
 - Spec: SPEC-003
 

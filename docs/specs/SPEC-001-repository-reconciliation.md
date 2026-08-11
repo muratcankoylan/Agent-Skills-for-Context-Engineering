@@ -1,9 +1,10 @@
 # SPEC-001: Repository reconciliation and generated corpus inventory
 
-- Status: implementing
-- Wave: 0
-- Classification: public
-- Depends on: SPEC-000
+Status: implemented
+Wave: 0
+Classification: public
+Owners: corpus steward agent; human maintainer
+Depends on: SPEC-000
 
 ## Decision
 

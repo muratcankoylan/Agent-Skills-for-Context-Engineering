@@ -8,21 +8,33 @@ on:
   pull_request: {}
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Repository secret scan
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_VERSION: "8.30.1"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.12"
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: "22"
           cache: npm
@@ -31,7 +43,7 @@ jobs:
             researcher/schemas/typescript/package-lock.json
 
       - name: Install validation dependencies
-        run: pip install -r requirements-dev.txt
+        run: pip install --require-hashes -r requirements-dev.txt
 
       - name: Compile researcher scripts
         run: |
@@ -49,8 +61,10 @@ jobs:
             researcher/scripts/tests/test_governance_policy.py \
             researcher/scripts/tests/test_schema_contract.py \
             researcher/scripts/tests/test_artifact_store.py \
+            researcher/scripts/tests/test_public_repo.py \
             researcher/scripts/validate_governance.py \
             researcher/scripts/validate_export.py \
+            researcher/scripts/validate_public_repo.py \
             researcher/scripts/validate_schemas.py \
             researcher/scripts/validate_platform_compat.py \
             researcher/scripts/validate_repo.py \
@@ -71,6 +85,9 @@ jobs:
 
       - name: Researcher unit tests
         run: python -m unittest discover -s researcher/scripts/tests -p 'test_*.py'
+
+      - name: Public repository boundary
+        run: python researcher/scripts/validate_public_repo.py
 
       - name: Governance policy
         run: python researcher/scripts/validate_governance.py --check

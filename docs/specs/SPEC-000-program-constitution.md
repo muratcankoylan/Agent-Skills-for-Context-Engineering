@@ -1,9 +1,10 @@
 # SPEC-000: Program constitution and authority model
 
-- Status: implementing
-- Wave: 0
-- Classification: public
-- Depends on: none
+Status: implemented
+Wave: 0
+Classification: public
+Owners: human maintainer; governance agent
+Depends on: none
 
 ## Decision
 

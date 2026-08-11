@@ -1,9 +1,10 @@
 # SPEC-003: Schema registry and artifact identity
 
-- Status: implemented
-- Wave: 0
-- Classification: split
-- Depends on: SPEC-001, SPEC-002
+Status: implemented
+Wave: 0
+Classification: split
+Owners: platform steward agent; human maintainer
+Depends on: SPEC-001, SPEC-002
 
 ## Decision
 
