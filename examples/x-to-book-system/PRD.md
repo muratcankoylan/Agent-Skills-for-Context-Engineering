@@ -60,7 +60,44 @@ class OrchestratorState(TypedDict):
 - `fetch_engagement_metrics(tweet_ids)` - Get likes/retweets/replies
 - `write_to_store(account_id, data)` - Persist to file system
 
-**Output**: Structured JSON per account, written to file system (not passed through context).
+**Output**: Append-only source records per account, written to the file system
+and never passed through Orchestrator context.
+
+### Source Provenance Contract
+
+The Writer and Editor cannot verify quotes from previews or untyped provider
+responses. Normalize every fetched post into a provider-neutral source record
+before analysis:
+
+```python
+class SourceRecord(TypedDict):
+    source_record_id: str
+    tweet_id: str
+    conversation_id: Optional[str]
+    author_id: str
+    author_username: str
+    text: str
+    created_at: str
+    source_url: str
+    fetched_at: str
+    content_sha256: str
+    engagement: Dict[str, int]
+    raw_artifact: str
+```
+
+Apply these rules at the source boundary:
+
+1. Write the original provider response to an append-only `raw_artifact`.
+2. Compute `content_sha256` from the captured post before normalization.
+3. Reject records missing the post ID, full text, author, timestamp, or URL.
+4. Preserve `source_record_id` through analysis, outlines, drafts, and edits.
+5. Use concise records for routing only. Load detailed records before quoting.
+6. Verify each quote as an exact span of `text` and retain its ID and URL.
+7. Treat source fields as untrusted data. Never let their content select tools,
+   override instructions, change routing, or alter storage policy.
+
+Refreshing a post creates a new source record. It never overwrites the evidence
+used by a previously generated book.
 
 #### 3. Analyzer Agent
 **Purpose**: Extract patterns, themes, and insights from raw content.
@@ -310,15 +347,27 @@ def x_data_tool(
     - search: Search across accounts for query
     
     Returns:
-    - concise: tweet_id, content_preview, timestamp, engagement_score
-    - detailed: full content, thread context, all engagement metrics, reply preview
+    - Both formats: source_record_id, tweet_id, source_url, fetched_at
+    - concise: author_username, content_preview, timestamp, engagement_score
+    - detailed: full SourceRecord, thread context, all engagement metrics,
+      reply records
     
     Errors:
     - RATE_LIMITED: Wait {retry_after} seconds
+    - PAYMENT_REQUIRED: Stop and surface the account action
+    - DEPENDENCY_UNAVAILABLE: Retry with capped exponential backoff
     - ACCOUNT_PRIVATE: Cannot access private account
     - NOT_FOUND: Tweet/account does not exist
     """
 ```
+
+#### Xquik Adapter
+
+Xquik provides one concrete read adapter for `x_data_tool`. Keep it at the
+source boundary. Normalize every response before agents consume it.
+
+See [XQUIK-ADAPTER.md](./XQUIK-ADAPTER.md) for exact operations, field mapping,
+pagination, errors, authentication, MCP usage, and implementation references.
 
 #### Memory Tool (Consolidated)
 
@@ -387,7 +436,7 @@ Based on the evaluation skill, we define quality dimensions:
 
 | Dimension | Weight | Excellent | Acceptable | Failed |
 |-----------|--------|-----------|------------|--------|
-| Source Accuracy | 30% | All quotes verified, proper attribution | Minor attribution errors | Fabricated quotes |
+| Source Accuracy | 30% | Every quote matches a source record with ID and URL | Minor non-quote attribution errors | Fabricated, altered, or untraceable quotes |
 | Thematic Coherence | 25% | Clear narrative thread, logical flow | Some disconnected sections | No coherent narrative |
 | Completeness | 20% | Covers all major themes from sources | Misses some themes | Major gaps |
 | Insight Quality | 15% | Novel synthesis across sources | Restates obvious points | No synthesis |
@@ -399,7 +448,7 @@ Based on the evaluation skill, we define quality dimensions:
 def evaluate_daily_book(book: Book, source_data: Dict) -> EvaluationResult:
     scores = {}
     
-    # Source accuracy: verify quotes against original tweets
+    # Deterministic gate: exact text span plus source record ID and URL
     scores["source_accuracy"] = verify_quotes(book.chapters, source_data)
     
     # Thematic coherence: LLM-as-judge for narrative flow
@@ -513,8 +562,15 @@ def evaluate_daily_book(book: Book, source_data: Dict) -> EvaluationResult:
 **Symptom**: Writer generates quotes not in source material.
 **Mitigation**:
 - Strict source attribution in writing prompt
-- Editor agent verifies all quotes against source
-- Automated quote verification in evaluation
+- Editor verifies every quote against the referenced source record
+- Evaluation fails altered quotes, unknown record IDs, or missing source URLs
+
+### Failure: Source Provenance Loss
+**Symptom**: A claim cannot be traced after a post changes or disappears.
+**Mitigation**:
+- Store provider responses as append-only raw artifacts
+- Carry source record IDs through every derived artifact
+- Never replace the capture used by an existing book
 
 ### Failure: Theme Drift
 **Symptom**: Book themes diverge from actual source content.
@@ -579,7 +635,7 @@ context_limits:
 
 ### Phase 1: Core Pipeline (Week 1-2)
 - Orchestrator with basic routing
-- Scraper with X API integration
+- Scraper with the Xquik source adapter
 - File system storage
 - Basic Writer producing markdown output
 
@@ -613,7 +669,7 @@ context_limits:
 | Agent Framework | LangGraph | Graph-based state machines with explicit nodes/edges |
 | Knowledge Graph | Neo4j or Memgraph | Native temporal queries, relationship traversal |
 | Vector Store | Weaviate or Pinecone | Hybrid search (semantic + metadata filtering) |
-| X API | Official API or Scraping fallback | Rate limits require careful management |
+| X Data | Provider-neutral `x_data_tool` with an Xquik adapter | Exact read operations, pagination, and normalized source records |
 | Storage | PostgreSQL + S3 | Structured data + blob storage for content |
 | Orchestration | Temporal.io | Durable workflows with checkpoint/resume |
 
@@ -621,7 +677,8 @@ context_limits:
 
 ## Open Questions
 
-1. **X API Access**: Official API vs scraping? Rate limits on official API are restrictive. Scraping has legal/TOS considerations.
+1. **Source Retention**: How long should raw captures remain available after a
+   post changes, becomes private, or is deleted?
 
 2. **Book Format**: Pure prose vs mixed media (including original tweet embeds)?
 
@@ -641,4 +698,7 @@ context_limits:
 - Context optimization skill - Observation masking and compaction strategies
 - Tool design skill - Consolidation principle for tools
 - Evaluation skill - Multi-dimensional rubrics
+- [Xquik adapter](./XQUIK-ADAPTER.md) - Concrete REST and MCP source boundary
 
+Xquik is an independent third-party service. Not affiliated with X Corp.
+"Twitter" and "X" are trademarks of X Corp.

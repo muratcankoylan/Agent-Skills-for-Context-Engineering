@@ -121,6 +121,7 @@ PRD implementation: All raw tweet data (potentially 100k+ tokens/day) is masked 
 | Description structure | "Effective tool descriptions answer four questions: What does the tool do? When should it be used? What inputs does it accept? What does it return?" | All tools have explicit usage triggers and error recovery |
 | Response format options | "Implementing response format options gives agents control over verbosity." | Tools support "concise" and "detailed" format parameters |
 | Error message design | "Error messages must be actionable. They must tell the agent what went wrong and how to correct it." | Errors include recovery guidance (RATE_LIMITED includes retry_after) |
+| Source record contract | "Tools are contracts between deterministic systems and non-deterministic agents." | Provider responses become validated, append-only records with stable IDs and source URLs |
 
 ### Tool Consolidation
 
@@ -164,7 +165,7 @@ PRD implementation:
 
 | Dimension | Weight | Measurement |
 |-----------|--------|-------------|
-| Source Accuracy | 30% | Automated quote verification against original tweets |
+| Source Accuracy | 30% | Deterministic quote verification against preserved source records |
 | Thematic Coherence | 25% | LLM-as-judge for narrative flow |
 | Completeness | 20% | Theme coverage calculation |
 | Insight Quality | 15% | LLM-as-judge for synthesis beyond restating |
@@ -184,4 +185,3 @@ The skills are designed to work together. This example demonstrates integration 
 | Quality-driven routing | evaluation + multi-agent-patterns | Orchestrator uses quality scores for phase gates |
 
 This integration is the core value proposition of the skills collection: they provide complementary patterns that address different aspects of context engineering while working together cohesively.
-
