@@ -72,6 +72,29 @@ These skills cover formal cognitive modeling for rational agent systems.
 |-------|-------------|
 | [bdi-mental-states](skills/bdi-mental-states/) | **NEW** Transform external RDF context into agent mental states (beliefs, desires, intentions) using formal BDI ontology patterns for deliberative reasoning and explainability |
 
+### SaaS App Automation Skills (via Rube MCP)
+
+78 automation skills for SaaS apps powered by [Rube MCP](https://rube.app/mcp) (Composio). Each skill covers workflow patterns, tool sequences, common pitfalls, and parameter guidance for a specific app integration. These skills complement context engineering by providing production-ready context for real-world tool use across business applications. Source: [ComposioHQ/awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills). Install all with `npx skills add ComposioHQ/awesome-claude-skills --all`.
+
+| Category | Skills |
+|----------|--------|
+| CRM | salesforce, hubspot, pipedrive, zoho-crm, close |
+| Project Management | jira, asana, trello, clickup, monday, linear, wrike, basecamp, coda |
+| Communication | slack, discord, microsoft-teams, telegram, whatsapp |
+| Email | gmail, outlook, sendgrid, mailchimp, postmark, brevo, convertkit, activecampaign, klaviyo |
+| Code & DevOps | github, gitlab, bitbucket, vercel, render, sentry, datadog, pagerduty, circleci, posthog |
+| Storage & Docs | google-drive, dropbox, box, one-drive, notion, confluence, airtable |
+| Spreadsheets | googlesheets |
+| Calendar | google-calendar, outlook-calendar, calendly, cal-com |
+| Social Media | linkedin, twitter, reddit, instagram, tiktok, youtube |
+| Support | zendesk, freshdesk, freshservice, helpdesk, intercom |
+| E-commerce & Payments | shopify, stripe, square |
+| Design | figma, canva, miro |
+| Analytics | google-analytics, mixpanel, amplitude, segment |
+| HR | bamboohr |
+| Automation | make |
+| Other | supabase, webflow, todoist, docusign |
+
 ## Design Philosophy
 
 ### Progressive Disclosure
