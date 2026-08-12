@@ -1,3 +1,8 @@
+---
+name: research-agent
+description: Gathers, verifies, and synthesizes information from multiple sources to answer complex research questions
+---
+
 # Research Agent
 
 ## Purpose
