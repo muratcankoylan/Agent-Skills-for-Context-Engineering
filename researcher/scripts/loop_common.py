@@ -2,23 +2,31 @@
 """Shared helpers for the continuous research loop scripts.
 
 All queue mutations go through atomic writes (`write_json`, `write_jsonl`) and
-optional file locks (`queue_lock`). The lock uses fcntl exclusive flock so
-concurrent loop_step + loop_discover invocations cannot race on the inbox or
-parked queue.
+optional file locks (`queue_lock`). On Unix, locking uses `fcntl.flock`
+exclusive locks so concurrent loop_step + loop_discover invocations cannot
+race on the inbox or parked queue. On Windows `fcntl` is unavailable, so the
+fallback is an in-process `threading.Lock`; this protects against races
+between threads in the same process but does not provide inter-process
+locking.
 """
 
 from __future__ import annotations
 
 import errno
-import fcntl
 import hashlib
 import json
 import os
 import tempfile
+import threading
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Iterator
+
+try:
+    import fcntl
+except ModuleNotFoundError:  # pragma: no cover
+    fcntl = None  # type: ignore[assignment]
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,6 +38,44 @@ RUNS_DIR = RESEARCHER / "runs"
 SNAPSHOTS_DIR = REPORTS_DIR / "snapshots"
 LOCK_DIR = QUEUE_DIR / ".locks"
 JSONL_QUARANTINE_DIR = REPORTS_DIR / "jsonl-quarantine"
+
+# On Windows `fcntl` is unavailable, so fall back to an in-process lock.
+# Each named queue lock gets its own `threading.Lock`; `append_jsonl` uses a
+# per-path lock for best-effort in-process serialization.
+_FALLBACK_LOCKS: dict[str, threading.Lock] = {}
+_GLOBAL_FALLBACK_LOCK = threading.Lock()
+
+
+def _fallback_lock(name: str | None = None) -> threading.Lock:
+    if name is None:
+        return _GLOBAL_FALLBACK_LOCK
+    lock = _FALLBACK_LOCKS.get(name)
+    if lock is None:
+        lock = _FALLBACK_LOCKS[name] = threading.Lock()
+    return lock
+
+
+def _lock_acquire(handle, *, name: str | None = None) -> None:
+    """Acquire an exclusive lock using fcntl when available, else a thread lock."""
+    if fcntl is not None:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        except OSError as exc:
+            if exc.errno not in {errno.EACCES, errno.EAGAIN}:
+                raise
+    else:
+        _fallback_lock(name).acquire()
+
+
+def _lock_release(handle, *, name: str | None = None) -> None:
+    """Release the lock acquired by `_lock_acquire`."""
+    if fcntl is not None:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        except OSError:
+            pass
+    else:
+        _fallback_lock(name).release()
 
 
 def utc_now() -> str:
@@ -108,37 +154,30 @@ def write_jsonl(path: Path, records: Iterable[dict[str, Any]]) -> None:
 def append_jsonl(path: Path, record: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
+        _lock_acquire(handle, name=str(path))
         try:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-        except OSError:
-            pass
-        handle.write(json.dumps(record, sort_keys=True) + "\n")
-        handle.flush()
-        try:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
-        except OSError:
-            pass
+            handle.write(json.dumps(record, sort_keys=True) + "\n")
+            handle.flush()
+        finally:
+            _lock_release(handle, name=str(path))
 
 
 @contextmanager
 def queue_lock(name: str) -> Iterator[None]:
-    """Exclusive lock for queue mutations. Use one lock per queue file family."""
+    """Exclusive lock for queue mutations. Use one lock per queue file family.
+
+    On Unix this is an advisory fcntl flock; on Windows it falls back to an
+    in-process threading lock.
+    """
 
     LOCK_DIR.mkdir(parents=True, exist_ok=True)
     lock_path = LOCK_DIR / f"{name}.lock"
     handle = open(lock_path, "a+")
     try:
-        try:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-        except OSError as exc:
-            if exc.errno not in {errno.EACCES, errno.EAGAIN}:
-                raise
+        _lock_acquire(handle, name=name)
         yield
     finally:
-        try:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
-        except OSError:
-            pass
+        _lock_release(handle, name=name)
         handle.close()
 
 
