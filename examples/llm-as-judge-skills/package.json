@@ -55,11 +55,11 @@
   },
   "homepage": "https://github.com/muratcankoylan/llm-as-judge-skills#readme",
   "dependencies": {
-    "ai": "^4.0.0",
-    "@ai-sdk/openai": "^1.0.0",
-    "@ai-sdk/anthropic": "^1.0.0",
-    "zod": "^3.23.0",
-    "dotenv": "^16.4.0"
+    "ai": "~4.0.0",
+    "@ai-sdk/openai": "~1.0.0",
+    "@ai-sdk/anthropic": "~1.0.0",
+    "zod": "~3.23.0",
+    "dotenv": "~16.4.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
