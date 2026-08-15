@@ -61,6 +61,7 @@ discover -> triage -> evaluate -> extract -> map -> draft -> validate -> prepare
 - `runbooks/pr-readiness.md` - pre-PR checklist.
 - `scripts/validate_repo.py` - deterministic repository and harness validator.
 - `scripts/validate_public_repo.py` - tracked-tree guard against workstation paths and credential material; CI also runs Gitleaks over Git history.
+- `scripts/validate_spec_lifecycle.py` - compares proposed specification status and revision changes with an exact protected Git base.
 - `scripts/validate_run.py` - publish-readiness validator for a single research run.
 - `scripts/research_loop.py` - creates durable run directories and validation reports.
 - `scripts/novelty_check.py` - checks proposal overlap against existing skills and prior runs.
@@ -81,6 +82,7 @@ discover -> triage -> evaluate -> extract -> map -> draft -> validate -> prepare
 
 ```bash
 python researcher/scripts/validate_repo.py
+python researcher/scripts/validate_spec_lifecycle.py --base-ref origin/main
 python researcher/scripts/validate_run.py --run-dir researcher/runs/<run-id>
 python researcher/scripts/research_loop.py init --title "Source title" --url "https://example.com/source"
 python researcher/scripts/novelty_check.py --file researcher/fixtures/skill-proposals/harness-engineering-proposal.md

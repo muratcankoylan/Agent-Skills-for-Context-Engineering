@@ -27,6 +27,39 @@ try:
 except ModuleNotFoundError:  # Imported as researcher.scripts.build_inventory.
     from researcher.scripts.skill_frontmatter import parse_frontmatter
 
+try:
+    from validate_spec_lifecycle import (  # type: ignore[import-not-found]
+        AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+        AUTHORITY_CONSTITUTION_POLICY_PATH,
+        AUTHORITY_FIXTURE_MANIFEST_PATH,
+        AUTHORITY_IMPLEMENTED_STATUSES,
+        AUTHORITY_VALIDATOR_PATH,
+        AUTHORITY_VOCABULARY_MIN_REVISION,
+        AUTHORITY_VOCABULARY_PATH,
+        AUTHORITY_VOCABULARY_READY_STATUSES,
+        AUTHORITY_VOCABULARY_SPEC,
+        AuthorityVocabularyBinding,
+        SpecRevision,
+        load_candidate_authority_vocabulary,
+        parse_spec_revision,
+    )
+except ModuleNotFoundError:  # Imported as researcher.scripts.build_inventory.
+    from researcher.scripts.validate_spec_lifecycle import (
+        AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+        AUTHORITY_CONSTITUTION_POLICY_PATH,
+        AUTHORITY_FIXTURE_MANIFEST_PATH,
+        AUTHORITY_IMPLEMENTED_STATUSES,
+        AUTHORITY_VALIDATOR_PATH,
+        AUTHORITY_VOCABULARY_MIN_REVISION,
+        AUTHORITY_VOCABULARY_PATH,
+        AUTHORITY_VOCABULARY_READY_STATUSES,
+        AUTHORITY_VOCABULARY_SPEC,
+        AuthorityVocabularyBinding,
+        SpecRevision,
+        load_candidate_authority_vocabulary,
+        parse_spec_revision,
+    )
+
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_INVENTORY = ROOT / "researcher" / "corpus" / "inventory.json"
@@ -48,7 +81,6 @@ SPEC_STATUSES = {
     "draft",
     "architecture_reviewed",
     "accepted",
-    "implementing",
     "implemented",
     "verified",
     "operational",
@@ -57,7 +89,54 @@ SPEC_STATUSES = {
     "retired",
 }
 SPEC_CLASSIFICATIONS = {"public", "private", "split"}
-SPEC_REQUIRED_METADATA = ("Status", "Wave", "Classification", "Owners", "Depends on")
+SPEC_REQUIRED_METADATA = (
+    "Status",
+    "Revision",
+    "Revises",
+    "Wave",
+    "Classification",
+    "Owners",
+    "Depends on",
+)
+SPEC_OPTIONAL_METADATA = {
+    "Activation",
+    "Adoption decision",
+    "Authority vocabulary",
+    "Authority vocabulary digest",
+    "Authority vocabulary version",
+    "Dependency revisions",
+    "Lifecycle decision",
+    "Replacement",
+}
+SPEC_METADATA_ORDER = (
+    "Status",
+    "Revision",
+    "Revises",
+    "Activation",
+    "Wave",
+    "Classification",
+    "Owners",
+    "Depends on",
+    "Dependency revisions",
+    "Authority vocabulary",
+    "Authority vocabulary digest",
+    "Authority vocabulary version",
+    "Adoption decision",
+    "Lifecycle decision",
+    "Replacement",
+)
+SPEC_REVISION_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+SPEC_LIFECYCLE_DECISION_RE = re.compile(r"^ADR-[0-9]{4}$")
+SPEC_REPLACEMENT_RE = re.compile(r"^SPEC-[0-9]{3}@[1-9][0-9]*$")
+SPEC_DEPENDENCY_REVISION_RE = re.compile(r"^(SPEC-[0-9]{3})@([1-9][0-9]*)$")
+SPEC_TERMINAL_STATUSES = {"amended", "superseded", "retired"}
+AUTHORITY_VOCABULARY_METADATA_KEYS = frozenset(
+    {
+        "Authority vocabulary",
+        "Authority vocabulary digest",
+        "Authority vocabulary version",
+    }
+)
 ADR_FILENAME_RE = re.compile(r"^(?P<number>[0-9]{4})-(?P<slug>[a-z0-9-]+)\.md$")
 ADR_HEADING_RE = re.compile(r"^# ADR-(?P<number>[0-9]{4}): (?P<title>.+)$")
 ADR_INDEX_ROW_RE = re.compile(
@@ -65,7 +144,20 @@ ADR_INDEX_ROW_RE = re.compile(
     r"\((?P<path>[0-9]{4}-[^)]+\.md)\)$"
 )
 ADR_STATUSES = {"accepted", "deprecated", "proposed", "superseded"}
-ADR_ALLOWED_METADATA = {"Status", "Date", "Spec", "Specs"}
+ADR_ALLOWED_METADATA = {
+    "Status",
+    "Date",
+    "Spec",
+    "Specs",
+    "Supersedes",
+    "Lifecycle transition",
+}
+ADR_ID_RE = re.compile(r"^ADR-[0-9]{4}$")
+ADR_LIFECYCLE_TRANSITION_RE = re.compile(
+    r"^(?P<spec>SPEC-[0-9]{3})@(?P<revision>[1-9][0-9]*) -> "
+    r"(?P<status>amended|superseded|retired) -> "
+    r"(?P<replacement>SPEC-[0-9]{3}@[1-9][0-9]*|none)$"
+)
 FENCE_OPEN_RE = re.compile(r"^ {0,3}(?P<fence>`{3,}|~{3,})(?P<info>.*)$")
 LEVEL_TWO_HEADING_RE = re.compile(r"^## (?P<title>.+?)\s*$")
 RAW_HTML_BLOCK_START_RE = re.compile(
@@ -77,7 +169,11 @@ VALIDATOR_OWNERSHIP = (
     {
         "id": "governance-policy",
         "path": "researcher/scripts/validate_governance.py",
-        "owns": ["authority vocabulary", "constitutional invariants", "generated authority view"],
+        "owns": [
+            "Constitution decision evaluation",
+            "constitutional invariants",
+            "generated authority view",
+        ],
     },
     {
         "id": "repository-inventory",
@@ -86,8 +182,21 @@ VALIDATOR_OWNERSHIP = (
             "identifier uniqueness",
             "cross-artifact references",
             "specification graph",
+            "authority artifact parity and source binding",
             "live counts",
             "generated inventory",
+        ],
+    },
+    {
+        "id": "specification-lifecycle",
+        "path": "researcher/scripts/validate_spec_lifecycle.py",
+        "owns": [
+            "base-aware specification status transitions",
+            "accepted contract revision identity",
+            "authority registry, fixture, and semantic profile validation",
+            "structural authority-policy closure",
+            "authority conformance receipt validation",
+            "terminal specification decisions",
         ],
     },
     {
@@ -470,6 +579,81 @@ class InventoryBuilder:
         architecture_decisions = self.build_architecture_decisions(
             {record["id"] for record in specifications["records"]}
         )
+        decisions_by_id = {
+            record["id"]: record for record in architecture_decisions["records"]
+        }
+        for record in specifications["records"]:
+            adoption_decision = record.get("adoption_decision")
+            if adoption_decision is None:
+                continue
+            decision = decisions_by_id.get(adoption_decision)
+            if decision is None:
+                self.add_finding(
+                    "DANGLING_SPEC_ADOPTION_DECISION",
+                    self.root / record["path"],
+                    f"adoption decision does not exist: {adoption_decision}",
+                    record["id"],
+                )
+                continue
+            if decision["status"] != "accepted":
+                self.add_finding(
+                    "UNACCEPTED_SPEC_ADOPTION_DECISION",
+                    self.root / record["path"],
+                    f"adoption decision must be accepted: {adoption_decision}",
+                    record["id"],
+                )
+            if record["id"] not in decision["specifications"]:
+                self.add_finding(
+                    "OUT_OF_SCOPE_SPEC_ADOPTION_DECISION",
+                    self.root / record["path"],
+                    f"{adoption_decision} does not scope {record['id']}",
+                    record["id"],
+                )
+        for record in specifications["records"]:
+            lifecycle_decision = record.get("lifecycle_decision")
+            if lifecycle_decision is None:
+                continue
+            decision = decisions_by_id.get(lifecycle_decision)
+            if decision is None:
+                self.add_finding(
+                    "DANGLING_SPEC_LIFECYCLE_DECISION",
+                    self.root / record["path"],
+                    f"lifecycle decision does not exist: {lifecycle_decision}",
+                    record["id"],
+                )
+                continue
+            if decision["status"] != "accepted":
+                self.add_finding(
+                    "UNACCEPTED_SPEC_LIFECYCLE_DECISION",
+                    self.root / record["path"],
+                    f"lifecycle decision must be accepted: {lifecycle_decision}",
+                    record["id"],
+                )
+            if record["id"] not in decision["specifications"]:
+                self.add_finding(
+                    "OUT_OF_SCOPE_SPEC_LIFECYCLE_DECISION",
+                    self.root / record["path"],
+                    f"{lifecycle_decision} does not scope {record['id']}",
+                    record["id"],
+                )
+            if record["status"] in SPEC_TERMINAL_STATUSES:
+                expected_target = (
+                    record.get("replacement")
+                    if record["status"] in {"amended", "superseded"}
+                    else "none"
+                )
+                expected_transition = (
+                    f"{record['id']}@{record['revision']} -> "
+                    f"{record['status']} -> {expected_target}"
+                )
+                if decision.get("lifecycle_transition") != expected_transition:
+                    self.add_finding(
+                        "SPEC_LIFECYCLE_DECISION_MISMATCH",
+                        self.root / record["path"],
+                        f"{lifecycle_decision} must bind exact transition "
+                        f"{expected_transition!r}",
+                        record["id"],
+                    )
         self.validate_live_document_links()
 
         artifacts = {
@@ -1297,7 +1481,16 @@ class InventoryBuilder:
         specs_dir = self.root / "docs" / "specs"
         index_path = specs_dir / "README.md"
         template_path = specs_dir / "SPEC-TEMPLATE.md"
-        for supporting_path in (index_path, template_path):
+        lifecycle_validator_path = self.root / "researcher" / "scripts" / "validate_spec_lifecycle.py"
+        lifecycle_test_path = (
+            self.root / "researcher" / "scripts" / "tests" / "test_spec_lifecycle.py"
+        )
+        for supporting_path in (
+            index_path,
+            template_path,
+            lifecycle_validator_path,
+            lifecycle_test_path,
+        ):
             if supporting_path.is_file():
                 self.add_source(supporting_path)
             else:
@@ -1349,6 +1542,7 @@ class InventoryBuilder:
         records: list[dict[str, Any]] = []
         specs_by_id: dict[str, dict[str, Any]] = {}
         paths_by_id: dict[str, Path] = {}
+        lifecycle_specs: dict[str, SpecRevision] = {}
         candidate_paths = sorted(
             path
             for path in specs_dir.rglob("*")
@@ -1379,10 +1573,18 @@ class InventoryBuilder:
             filename_number = filename_match.group("number")
             filename_id = f"SPEC-{filename_number}"
             try:
-                text = path.read_text(encoding="utf-8")
+                exact_bytes = path.read_bytes()
+                text = exact_bytes.decode("utf-8")
             except (OSError, UnicodeError) as exc:
                 self.add_finding("PARSE_ERROR", path, str(exc), filename_id)
                 continue
+            if b"\r" in exact_bytes:
+                self.add_finding(
+                    "INVALID_SPEC_ENCODING",
+                    path,
+                    "canonical specifications must use LF line endings",
+                    filename_id,
+                )
             lines = text.splitlines()
             heading_match = SPEC_HEADING_RE.fullmatch(lines[0] if lines else "")
             if heading_match is None:
@@ -1403,7 +1605,19 @@ class InventoryBuilder:
                     spec_id,
                 )
 
+            try:
+                lifecycle_record = parse_spec_revision(
+                    self.relative(path),
+                    exact_bytes,
+                    allow_legacy=False,
+                )
+            except ValueError:
+                lifecycle_record = None
+            if lifecycle_record is not None and lifecycle_record.spec_id not in lifecycle_specs:
+                lifecycle_specs[lifecycle_record.spec_id] = lifecycle_record
+
             metadata: dict[str, str] = {}
+            metadata_order: list[str] = []
             for raw_line in lines[1:]:
                 stripped = raw_line.strip()
                 if stripped.startswith("## "):
@@ -1419,6 +1633,13 @@ class InventoryBuilder:
                     )
                     continue
                 key, value = (part.strip() for part in stripped.split(":", 1))
+                if raw_line != f"{key}: {value}":
+                    self.add_finding(
+                        "INVALID_SPEC_METADATA_FORMAT",
+                        path,
+                        "metadata must use canonical 'Key: value' serialization without extra whitespace",
+                        spec_id,
+                    )
                 if key in metadata:
                     self.add_finding(
                         "INVALID_SPEC_METADATA",
@@ -1426,10 +1647,24 @@ class InventoryBuilder:
                         f"duplicate metadata key: {key}",
                         spec_id,
                     )
+                else:
+                    metadata_order.append(key)
                 metadata[key] = value
 
+            order_index = {key: index for index, key in enumerate(SPEC_METADATA_ORDER)}
+            known_order = [key for key in metadata_order if key in order_index]
+            if known_order != sorted(known_order, key=order_index.__getitem__):
+                self.add_finding(
+                    "INVALID_SPEC_METADATA_ORDER",
+                    path,
+                    "specification metadata must use canonical header order",
+                    spec_id,
+                )
+
             missing = [key for key in SPEC_REQUIRED_METADATA if not metadata.get(key)]
-            unknown = sorted(set(metadata) - set(SPEC_REQUIRED_METADATA) - {"Activation"})
+            unknown = sorted(
+                set(metadata) - set(SPEC_REQUIRED_METADATA) - SPEC_OPTIONAL_METADATA
+            )
             if missing:
                 self.add_finding(
                     "INVALID_SPEC_METADATA",
@@ -1444,6 +1679,16 @@ class InventoryBuilder:
                     f"unknown metadata: {', '.join(unknown)}",
                     spec_id,
                 )
+            if (
+                spec_id != AUTHORITY_VOCABULARY_SPEC
+                and AUTHORITY_VOCABULARY_METADATA_KEYS.intersection(metadata)
+            ):
+                self.add_finding(
+                    "INVALID_SPEC_METADATA",
+                    path,
+                    "Authority vocabulary metadata is valid only on SPEC-000",
+                    spec_id,
+                )
 
             status_value = metadata.get("Status", "")
             if status_value not in SPEC_STATUSES:
@@ -1451,6 +1696,116 @@ class InventoryBuilder:
                     "INVALID_SPEC_STATUS",
                     path,
                     f"unsupported status: {status_value!r}",
+                    spec_id,
+                )
+            try:
+                revision = int(metadata.get("Revision", ""))
+            except ValueError:
+                revision = -1
+            if revision < 1:
+                self.add_finding(
+                    "INVALID_SPEC_REVISION",
+                    path,
+                    f"Revision must be a positive integer: {metadata.get('Revision')!r}",
+                    spec_id,
+                )
+            revises = metadata.get("Revises", "")
+            if revision == 1 and revises != "none":
+                self.add_finding(
+                    "INVALID_SPEC_REVISION",
+                    path,
+                    "revision 1 must declare Revises: none",
+                    spec_id,
+                )
+            elif revision > 1 and SPEC_REVISION_DIGEST_RE.fullmatch(revises) is None:
+                self.add_finding(
+                    "INVALID_SPEC_REVISION",
+                    path,
+                    "revision greater than 1 must bind the prior file digest",
+                    spec_id,
+                )
+            if spec_id == "SPEC-026" and revision == 1 and metadata.get("Activation") != "deferred":
+                self.add_finding(
+                    "INVALID_SPEC_ACTIVATION",
+                    path,
+                    "SPEC-026 revision 1 must remain Activation: deferred",
+                    spec_id,
+                )
+            lifecycle_decision = metadata.get("Lifecycle decision")
+            adoption_decision = metadata.get("Adoption decision")
+            if adoption_decision is not None and (
+                SPEC_LIFECYCLE_DECISION_RE.fullmatch(adoption_decision) is None
+            ):
+                self.add_finding(
+                    "INVALID_SPEC_ADOPTION_DECISION",
+                    path,
+                    f"Adoption decision must be ADR-NNNN: {adoption_decision!r}",
+                    spec_id,
+                )
+            if (
+                lifecycle_decision is not None
+                and SPEC_LIFECYCLE_DECISION_RE.fullmatch(lifecycle_decision) is None
+            ):
+                self.add_finding(
+                    "INVALID_SPEC_LIFECYCLE_DECISION",
+                    path,
+                    f"Lifecycle decision must be ADR-NNNN: {lifecycle_decision!r}",
+                    spec_id,
+                )
+            if status_value not in SPEC_TERMINAL_STATUSES and lifecycle_decision is not None:
+                self.add_finding(
+                    "INVALID_SPEC_LIFECYCLE_DECISION",
+                    path,
+                    "Lifecycle decision is valid only on a terminal specification revision",
+                    spec_id,
+                )
+            replacement = metadata.get("Replacement")
+            if replacement is not None and replacement != "none" and (
+                SPEC_REPLACEMENT_RE.fullmatch(replacement) is None
+            ):
+                self.add_finding(
+                    "INVALID_SPEC_REPLACEMENT",
+                    path,
+                    f"Replacement must be none or SPEC-NNN@revision: {replacement!r}",
+                    spec_id,
+                )
+            if status_value in SPEC_TERMINAL_STATUSES and lifecycle_decision is None:
+                self.add_finding(
+                    "MISSING_SPEC_LIFECYCLE_DECISION",
+                    path,
+                    f"{status_value} specifications require a Lifecycle decision",
+                    spec_id,
+                )
+            if status_value in {"amended", "superseded"} and (
+                replacement is None or replacement == "none"
+            ):
+                self.add_finding(
+                    "MISSING_SPEC_REPLACEMENT",
+                    path,
+                    f"{status_value} specifications require a replacement revision",
+                    spec_id,
+                )
+            elif status_value in {"amended", "superseded"}:
+                expected_replacement = f"{spec_id}@{revision + 1}"
+                if replacement != expected_replacement:
+                    self.add_finding(
+                        "INVALID_SPEC_REPLACEMENT",
+                        path,
+                        f"{status_value} must name {expected_replacement}",
+                        spec_id,
+                    )
+            if status_value == "retired" and replacement not in {None, "none"}:
+                self.add_finding(
+                    "INVALID_SPEC_REPLACEMENT",
+                    path,
+                    "retired specifications cannot name a replacement revision",
+                    spec_id,
+                )
+            if status_value not in SPEC_TERMINAL_STATUSES and replacement is not None:
+                self.add_finding(
+                    "INVALID_SPEC_REPLACEMENT",
+                    path,
+                    "Replacement is valid only on a terminal specification revision",
                     spec_id,
                 )
             try:
@@ -1494,6 +1849,13 @@ class InventoryBuilder:
                     f"duplicate dependency identifiers: {', '.join(duplicate_dependencies)}",
                     spec_id,
                 )
+            if depends_value != "none" and depends_value != ", ".join(dependencies):
+                self.add_finding(
+                    "INVALID_SPEC_DEPENDENCY",
+                    path,
+                    "dependencies must be comma-and-space separated in canonical order",
+                    spec_id,
+                )
             invalid_dependencies = [dependency for dependency in dependencies if not SPEC_ID_RE.fullmatch(dependency)]
             if invalid_dependencies:
                 self.add_finding(
@@ -1507,6 +1869,8 @@ class InventoryBuilder:
                 "id": spec_id,
                 "title": heading_match.group("title"),
                 "status": status_value,
+                "revision": revision,
+                "revises": revises,
                 "wave": wave,
                 "classification": classification,
                 "owners": owners,
@@ -1516,6 +1880,14 @@ class InventoryBuilder:
             }
             if "Activation" in metadata:
                 record["activation"] = metadata["Activation"]
+            if adoption_decision is not None:
+                record["adoption_decision"] = adoption_decision
+            if "Dependency revisions" in metadata:
+                record["dependency_revisions"] = metadata["Dependency revisions"]
+            if lifecycle_decision is not None:
+                record["lifecycle_decision"] = lifecycle_decision
+            if replacement is not None:
+                record["replacement"] = replacement
             if spec_id in specs_by_id:
                 self.add_finding(
                     "DUPLICATE_SPEC_ID",
@@ -1527,6 +1899,135 @@ class InventoryBuilder:
                 specs_by_id[spec_id] = record
                 paths_by_id[spec_id] = path
             records.append(record)
+
+        authority_binding: AuthorityVocabularyBinding | None = None
+        authority_binding_error = False
+        canonical_authority_paths = (
+            AUTHORITY_VOCABULARY_PATH,
+            AUTHORITY_FIXTURE_MANIFEST_PATH,
+            AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+        )
+        present_authority_paths: list[str] = []
+        for relative in canonical_authority_paths:
+            authority_path = self.root / relative
+            if os.path.lexists(authority_path):
+                present_authority_paths.append(relative)
+                self.add_source(authority_path)
+        conformance_path = self.root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+        if os.path.lexists(conformance_path):
+            for relative in (
+                AUTHORITY_CONSTITUTION_POLICY_PATH,
+                AUTHORITY_VALIDATOR_PATH,
+            ):
+                authority_input = self.root / relative
+                if os.path.lexists(authority_input):
+                    self.add_source(authority_input)
+        try:
+            authority_binding = load_candidate_authority_vocabulary(
+                self.root,
+                lifecycle_specs,
+            )
+        except (OSError, UnicodeError, ValueError) as exc:
+            authority_binding_error = True
+            authority_spec_path = paths_by_id.get(
+                AUTHORITY_VOCABULARY_SPEC,
+                self.root / AUTHORITY_VOCABULARY_PATH,
+            )
+            self.add_finding(
+                "SPEC_AUTHORITY_VOCABULARY_INVALID",
+                authority_spec_path,
+                str(exc),
+                AUTHORITY_VOCABULARY_SPEC,
+            )
+
+        authority_spec_record = specs_by_id.get(AUTHORITY_VOCABULARY_SPEC)
+        authority_spec_revision = lifecycle_specs.get(AUTHORITY_VOCABULARY_SPEC)
+        authority_artifacts_declared = (
+            authority_spec_revision is not None
+            and authority_spec_revision.revision >= AUTHORITY_VOCABULARY_MIN_REVISION
+            and AUTHORITY_VOCABULARY_METADATA_KEYS.issubset(
+                authority_spec_revision.metadata
+            )
+        )
+        if not authority_artifacts_declared:
+            for relative in present_authority_paths:
+                self.add_finding(
+                    "UNEXPECTED_AUTHORITY_ARTIFACT",
+                    self.root / relative,
+                    "authority artifacts require the complete canonical metadata binding "
+                    "on SPEC-000 revision 2 or later",
+                    AUTHORITY_VOCABULARY_SPEC,
+                )
+        if (
+            AUTHORITY_CONFORMANCE_RECEIPT_PATH in present_authority_paths
+            and authority_spec_record is not None
+            and authority_spec_record["status"]
+            in {"draft", "architecture_reviewed", "accepted"}
+        ):
+            self.add_finding(
+                "UNEXPECTED_AUTHORITY_ARTIFACT",
+                self.root / AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+                "authority-policy conformance is an implementation-stage artifact and "
+                "must be absent before SPEC-000 is implemented",
+                AUTHORITY_VOCABULARY_SPEC,
+            )
+        if authority_binding is not None and authority_spec_record is not None:
+            authority_record: dict[str, Any] = {
+                "path": authority_binding.path,
+                "digest": authority_binding.digest,
+                "schema_version": authority_binding.schema_version,
+                "constitution_revision": authority_binding.constitution_revision,
+                "registry_version": authority_binding.registry_version,
+                "fixture_manifest": {
+                    "path": authority_binding.fixture_manifest_path,
+                    "digest": authority_binding.fixture_manifest_digest,
+                    "version": authority_binding.fixture_manifest_version,
+                },
+            }
+            conformance = authority_binding.policy_conformance
+            if conformance is not None:
+                authority_record["policy_conformance"] = {
+                    "path": conformance.path,
+                    "digest": conformance.digest,
+                    "schema_version": conformance.schema_version,
+                    "constitution_policy_digest": conformance.constitution_policy_digest,
+                    "registry_digest": conformance.registry_digest,
+                    "fixture_manifest_digest": conformance.fixture_manifest_digest,
+                    "validator_digest": conformance.validator_digest,
+                    "validator_version": conformance.validator_version,
+                    "case_count": conformance.case_count,
+                }
+            authority_spec_record["authority_vocabulary"] = authority_record
+
+        if (
+            authority_spec_record is not None
+            and authority_spec_record["revision"] >= AUTHORITY_VOCABULARY_MIN_REVISION
+            and authority_binding is None
+            and not authority_binding_error
+        ):
+            self.add_finding(
+                "SPEC_AUTHORITY_VOCABULARY_INVALID",
+                paths_by_id[AUTHORITY_VOCABULARY_SPEC],
+                "SPEC-000 revision 2 or later requires the exact revision-bound, "
+                "digest-pinned AuthorityVocabularyRegistry and fixture manifest",
+                AUTHORITY_VOCABULARY_SPEC,
+            )
+        if (
+            authority_spec_record is not None
+            and authority_spec_record["revision"] >= AUTHORITY_VOCABULARY_MIN_REVISION
+            and authority_spec_record["status"] in AUTHORITY_IMPLEMENTED_STATUSES
+            and (
+                authority_binding is None
+                or authority_binding.policy_conformance is None
+            )
+        ):
+            self.add_finding(
+                "SPEC_AUTHORITY_POLICY_CONFORMANCE_REQUIRED",
+                paths_by_id[AUTHORITY_VOCABULARY_SPEC],
+                "implemented, verified, and operational SPEC-000 revisions require "
+                "the exact validated authority-policy conformance receipt",
+                AUTHORITY_VOCABULARY_SPEC,
+            )
 
         for spec_id, record in sorted(specs_by_id.items()):
             for dependency in record["dependencies"]:
@@ -1739,6 +2240,105 @@ class InventoryBuilder:
                 f"index links an unknown specification: {filename}",
             )
 
+        for record in records:
+            if record["status"] not in {
+                "architecture_reviewed",
+                "accepted",
+                "implemented",
+                "verified",
+                "operational",
+            }:
+                continue
+            raw_bindings = record.get("dependency_revisions")
+            parsed_bindings: dict[str, int] = {}
+            if raw_bindings == "none":
+                binding_parts: list[str] = []
+            elif isinstance(raw_bindings, str):
+                binding_parts = [part.strip() for part in raw_bindings.split(",")]
+                if raw_bindings != ", ".join(binding_parts):
+                    self.add_finding(
+                        "INVALID_SPEC_DEPENDENCY_REVISIONS",
+                        self.root / record["path"],
+                        "dependency revision bindings must be comma-and-space separated",
+                        record["id"],
+                    )
+            else:
+                binding_parts = []
+                self.add_finding(
+                    "MISSING_SPEC_DEPENDENCY_REVISIONS",
+                    self.root / record["path"],
+                    "architecture-reviewed and later specifications must bind exact dependency revisions",
+                    record["id"],
+                )
+            for part in binding_parts:
+                match = SPEC_DEPENDENCY_REVISION_RE.fullmatch(part)
+                if match is None:
+                    self.add_finding(
+                        "INVALID_SPEC_DEPENDENCY_REVISIONS",
+                        self.root / record["path"],
+                        f"invalid dependency revision binding: {part!r}",
+                        record["id"],
+                    )
+                    continue
+                dependency_id = match.group(1)
+                if dependency_id in parsed_bindings:
+                    self.add_finding(
+                        "INVALID_SPEC_DEPENDENCY_REVISIONS",
+                        self.root / record["path"],
+                        f"duplicate dependency revision binding: {dependency_id}",
+                        record["id"],
+                    )
+                    continue
+                parsed_bindings[dependency_id] = int(match.group(2))
+            expected_ids = set(record["dependencies"])
+            if set(parsed_bindings) != expected_ids:
+                self.add_finding(
+                    "SPEC_DEPENDENCY_REVISION_MISMATCH",
+                    self.root / record["path"],
+                    "dependency revision bindings must cover the direct dependency set exactly",
+                    record["id"],
+                )
+            if int(record["id"][-3:]) >= 4:
+                authority_spec = specs_by_id.get(AUTHORITY_VOCABULARY_SPEC)
+                if (
+                    authority_spec is None
+                    or authority_spec["revision"] < AUTHORITY_VOCABULARY_MIN_REVISION
+                    or authority_spec["status"]
+                    not in AUTHORITY_VOCABULARY_READY_STATUSES
+                    or authority_binding is None
+                    or authority_binding.constitution_revision
+                    != authority_spec["revision"]
+                ):
+                    self.add_finding(
+                        "SPEC_AUTHORITY_VOCABULARY_NOT_READY",
+                        self.root / record["path"],
+                        "SPEC-004 and later cannot be architecture-reviewed or active "
+                        "until accepted SPEC-000 revision 2 or later is current with "
+                        "its exact AuthorityVocabularyRegistry and fixture manifest",
+                        record["id"],
+                    )
+                if record["status"] in AUTHORITY_IMPLEMENTED_STATUSES and (
+                    authority_binding is None
+                    or authority_binding.policy_conformance is None
+                ):
+                    self.add_finding(
+                        "SPEC_AUTHORITY_POLICY_CONFORMANCE_REQUIRED",
+                        self.root / record["path"],
+                        "implemented, verified, and operational SPEC-004 and later "
+                        "require the exact validated authority-policy conformance receipt",
+                        record["id"],
+                    )
+                if (
+                    AUTHORITY_VOCABULARY_SPEC in expected_ids
+                    and parsed_bindings.get(AUTHORITY_VOCABULARY_SPEC, 0)
+                    < AUTHORITY_VOCABULARY_MIN_REVISION
+                ):
+                    self.add_finding(
+                        "SPEC_AUTHORITY_VOCABULARY_NOT_READY",
+                        self.root / record["path"],
+                        "the frozen SPEC-000 dependency must be revision 2 or later",
+                        record["id"],
+                    )
         return self._category(
             "docs/specs/",
             sorted(records, key=lambda item: (item["id"], item["path"])),
@@ -1886,6 +2486,8 @@ class InventoryBuilder:
 
             status = metadata.get("Status", "")
             date_value = metadata.get("Date", "")
+            supersedes = metadata.get("Supersedes")
+            lifecycle_transition = metadata.get("Lifecycle transition")
             if status not in ADR_STATUSES:
                 self.add_finding(
                     "INVALID_ADR_STATUS",
@@ -1905,6 +2507,54 @@ class InventoryBuilder:
                     f"date must be a real ISO calendar date: {date_value!r}",
                     adr_id,
                 )
+            if supersedes is not None and (
+                ADR_ID_RE.fullmatch(supersedes) is None or supersedes == adr_id
+            ):
+                self.add_finding(
+                    "INVALID_ADR_SUPERSESSION",
+                    path,
+                    f"Supersedes must name a different ADR-NNNN: {supersedes!r}",
+                    adr_id,
+                )
+            elif supersedes is not None and int(supersedes[-4:]) >= int(adr_id[-4:]):
+                self.add_finding(
+                    "INVALID_ADR_SUPERSESSION",
+                    path,
+                    "Supersedes must point backward to a lower append-only ADR number",
+                    adr_id,
+                )
+            if lifecycle_transition is not None:
+                transition_match = ADR_LIFECYCLE_TRANSITION_RE.fullmatch(
+                    lifecycle_transition
+                )
+                if transition_match is None:
+                    self.add_finding(
+                        "INVALID_ADR_LIFECYCLE_TRANSITION",
+                        path,
+                        "Lifecycle transition must be 'SPEC-NNN@revision -> "
+                        "amended|superseded|retired -> SPEC-NNN@next|none'",
+                        adr_id,
+                    )
+                else:
+                    transition_spec = transition_match.group("spec")
+                    transition_revision = int(transition_match.group("revision"))
+                    transition_status = transition_match.group("status")
+                    transition_replacement = transition_match.group("replacement")
+                    expected_replacement = f"{transition_spec}@{transition_revision + 1}"
+                    if (
+                        transition_status in {"amended", "superseded"}
+                        and transition_replacement != expected_replacement
+                    ) or (
+                        transition_status == "retired"
+                        and transition_replacement != "none"
+                    ):
+                        self.add_finding(
+                            "INVALID_ADR_LIFECYCLE_TRANSITION",
+                            path,
+                            "lifecycle transition replacement must be the next revision "
+                            "of the same specification, or none for retirement",
+                            adr_id,
+                        )
 
             scope_keys = [key for key in ("Spec", "Specs") if metadata.get(key)]
             if len(scope_keys) != 1:
@@ -1986,6 +2636,21 @@ class InventoryBuilder:
                         adr_id,
                     )
 
+            if lifecycle_transition is not None:
+                transition_match = ADR_LIFECYCLE_TRANSITION_RE.fullmatch(
+                    lifecycle_transition
+                )
+                if transition_match is not None:
+                    transition_spec = transition_match.group("spec")
+                    if scope_keys != ["Spec"] or referenced_specs != [transition_spec]:
+                        self.add_finding(
+                            "INVALID_ADR_LIFECYCLE_TRANSITION_SCOPE",
+                            path,
+                            "a lifecycle-transition ADR is one-purpose: Spec must "
+                            f"name exactly {transition_spec}",
+                            adr_id,
+                        )
+
             record = {
                 "id": adr_id,
                 "title": heading_match.group("title"),
@@ -1996,6 +2661,10 @@ class InventoryBuilder:
                 "path": self.relative(path),
                 "digest": digest,
             }
+            if supersedes is not None:
+                record["supersedes"] = supersedes
+            if lifecycle_transition is not None:
+                record["lifecycle_transition"] = lifecycle_transition
             if adr_id in decisions_by_id:
                 self.add_finding(
                     "DUPLICATE_ADR_ID",
@@ -2007,6 +2676,43 @@ class InventoryBuilder:
                 decisions_by_id[adr_id] = record
                 paths_by_id[adr_id] = path
             records.append(record)
+
+        for record in records:
+            supersedes = record.get("supersedes")
+            if supersedes is None or ADR_ID_RE.fullmatch(supersedes) is None:
+                continue
+            target = decisions_by_id.get(supersedes)
+            if target is None:
+                self.add_finding(
+                    "DANGLING_ADR_SUPERSESSION",
+                    self.root / record["path"],
+                    f"Supersedes references unknown decision: {supersedes}",
+                    record["id"],
+                )
+            elif target["status"] != "accepted":
+                self.add_finding(
+                    "INVALID_ADR_SUPERSESSION",
+                    self.root / record["path"],
+                    f"Supersedes target must be accepted: {supersedes}",
+                    record["id"],
+                )
+
+        accepted_successors: dict[str, list[str]] = {}
+        for record in records:
+            supersedes = record.get("supersedes")
+            if record["status"] == "accepted" and isinstance(supersedes, str):
+                accepted_successors.setdefault(supersedes, []).append(record["id"])
+        for target_id, successors in sorted(accepted_successors.items()):
+            if len(successors) > 1:
+                for successor_id in successors:
+                    successor = decisions_by_id[successor_id]
+                    self.add_finding(
+                        "AMBIGUOUS_ADR_SUPERSESSION",
+                        self.root / successor["path"],
+                        f"{target_id} has multiple accepted direct successors: "
+                        f"{', '.join(sorted(successors))}",
+                        successor_id,
+                    )
 
         known_filenames = {path.name for path in direct_paths}
         for filename in sorted(known_filenames):

@@ -300,7 +300,7 @@
         },
         {
           "date": "2026-08-10",
-          "digest": "sha256:8b6733b5ad4f404c9950bd2a047e819e914ce3c5d269616e2195d40e435e585f",
+          "digest": "sha256:8d72698f0374d9f471c1f2aba5b4b6865f52fc79a680a3318f3012cce8047e1f",
           "id": "ADR-0005",
           "path": "docs/decisions/0005-canonical-specification-program.md",
           "spec_scope": "SPEC-000 through SPEC-026",
@@ -2189,7 +2189,6 @@
         "architecture_reviewed",
         "draft",
         "implemented",
-        "implementing",
         "operational",
         "retired",
         "superseded",
@@ -2198,64 +2197,80 @@
       "owner": "docs/specs/",
       "records": [
         {
+          "adoption_decision": "ADR-0005",
           "classification": "public",
           "dependencies": [],
-          "digest": "sha256:fd169e015c761f91c20b03164e72ccc110083828c994f251eaf0e5d4cc4c5fac",
+          "dependency_revisions": "none",
+          "digest": "sha256:be3255f4de01abd3f3326d88916ea9d10e14b364bf7d08ca62eb3093d6e215bf",
           "id": "SPEC-000",
           "owners": [
             "human maintainer",
             "governance agent"
           ],
           "path": "docs/specs/SPEC-000-program-constitution.md",
+          "revises": "none",
+          "revision": 1,
           "status": "implemented",
           "title": "Program constitution and authority model",
           "wave": 0
         },
         {
+          "adoption_decision": "ADR-0005",
           "classification": "public",
           "dependencies": [
             "SPEC-000"
           ],
-          "digest": "sha256:3e48822c76edb84d775864fd36d1dba1c28cab4ccb97d9b0f644e815981da763",
+          "dependency_revisions": "SPEC-000@1",
+          "digest": "sha256:e6109fb747cffc920d3fe48c9bab939bdc9ce7d0dd1130f5ce50367b4d218e28",
           "id": "SPEC-001",
           "owners": [
             "corpus steward agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-001-repository-reconciliation.md",
+          "revises": "none",
+          "revision": 1,
           "status": "implemented",
           "title": "Repository reconciliation and generated corpus inventory",
           "wave": 0
         },
         {
+          "adoption_decision": "ADR-0005",
           "classification": "split",
           "dependencies": [
             "SPEC-000"
           ],
-          "digest": "sha256:332dfee3f4813082559def161cb49d7c7f749297b35979aaf73a94fb86404b8c",
+          "dependency_revisions": "SPEC-000@1",
+          "digest": "sha256:32fb944b014b961123d9929e64a735add82d1dfb1d105093326564275a163e38",
           "id": "SPEC-002",
           "owners": [
             "human maintainer",
             "export steward agent"
           ],
           "path": "docs/specs/SPEC-002-public-private-boundary.md",
+          "revises": "none",
+          "revision": 1,
           "status": "implemented",
           "title": "Public and private boundary",
           "wave": 0
         },
         {
+          "adoption_decision": "ADR-0005",
           "classification": "split",
           "dependencies": [
             "SPEC-001",
             "SPEC-002"
           ],
-          "digest": "sha256:f49a2baec3d1d3f8ab687082786fbb5611c5425fc648091cd92faafd72fd3e48",
+          "dependency_revisions": "SPEC-001@1, SPEC-002@1",
+          "digest": "sha256:95a91c9356d2f6f3c3ba13086e882020511faf2f0403da7fb833c142677a96d0",
           "id": "SPEC-003",
           "owners": [
             "platform steward agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-003-schema-registry.md",
+          "revises": "none",
+          "revision": 1,
           "status": "implemented",
           "title": "Schema registry and artifact identity",
           "wave": 0
@@ -2263,15 +2278,20 @@
         {
           "classification": "split",
           "dependencies": [
+            "SPEC-000",
+            "SPEC-001",
+            "SPEC-002",
             "SPEC-003"
           ],
-          "digest": "sha256:22c3f313c97efd7e257b6adf9ccf538d441d13c311380c24fc22fbc20b88e22e",
+          "digest": "sha256:d5c4f86026b617ed94d79b702d3f88cf6c0f53da316677156dd5deda6009eac5",
           "id": "SPEC-004",
           "owners": [
             "orchestration steward agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-004-event-journal.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Event Journal and State Projections",
           "wave": 1
@@ -2279,16 +2299,19 @@
         {
           "classification": "split",
           "dependencies": [
+            "SPEC-000",
             "SPEC-003",
             "SPEC-004"
           ],
-          "digest": "sha256:ddb615bd22e824f22e31fbf10bdd39bf849c0cc2606d30a43799d17334174fec",
+          "digest": "sha256:1f4011039a622d208efc8c53e01bfbabddb5e196de5a9ad21adf77e4312a7604",
           "id": "SPEC-005",
           "owners": [
             "orchestration steward agent",
             "runtime operator"
           ],
           "path": "docs/specs/SPEC-005-work-orders.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Work Orders, Scheduling, Leases, and Recovery",
           "wave": 1
@@ -2296,10 +2319,13 @@
         {
           "classification": "split",
           "dependencies": [
+            "SPEC-000",
+            "SPEC-002",
+            "SPEC-003",
             "SPEC-004",
             "SPEC-005"
           ],
-          "digest": "sha256:0e230d2a3e74a4f43775096f3fc847aeded2d2ef096a86fab478540f52f3fd3a",
+          "digest": "sha256:1e078f3508538e6754e2908be902e98f1eebb6a5d1c0682f900bb4491a989340",
           "id": "SPEC-006",
           "owners": [
             "governance agent",
@@ -2307,6 +2333,8 @@
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-006-command-feedback.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Command Bus and Human Feedback Ledger",
           "wave": 1
@@ -2315,17 +2343,21 @@
           "classification": "split",
           "dependencies": [
             "SPEC-000",
+            "SPEC-002",
+            "SPEC-003",
             "SPEC-004",
             "SPEC-005",
             "SPEC-006"
           ],
-          "digest": "sha256:253dc5e887d36816a968db3fa6b29803e0f210a7c3eef7095f698852f7100b6a",
+          "digest": "sha256:1c0b5ddd8d5cadf50317e6b78e80c5b2e76ceb2bc579082cb1405e00c2c4a324",
           "id": "SPEC-007",
           "owners": [
             "release steward agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-007-github-pr-lifecycle.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "GitHub App and Pull-Request Lifecycle",
           "wave": 1
@@ -2333,33 +2365,43 @@
         {
           "classification": "split",
           "dependencies": [
+            "SPEC-000",
+            "SPEC-002",
+            "SPEC-003",
             "SPEC-004",
             "SPEC-005",
-            "SPEC-006"
+            "SPEC-006",
+            "SPEC-007"
           ],
-          "digest": "sha256:c5d7aa9a9919ef458cd34c194a25063764ff1956ca8503d398091cc1e99ad51e",
+          "digest": "sha256:a3a3effb912c1752d655411b11dddbae084c7b183cd3cb6ad9d0265c29fa4883",
           "id": "SPEC-008",
           "owners": [
             "operations steward agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-008-status-observability.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Status, Observability, and Cost Accounting",
           "wave": 1
         },
         {
-          "classification": "public",
+          "classification": "split",
           "dependencies": [
-            "SPEC-003"
+            "SPEC-003",
+            "SPEC-005",
+            "SPEC-008"
           ],
-          "digest": "sha256:f4d44ce2038c69dfb87e51da41bad9e1d204ba61b85e2abf1feac99d6f1853b2",
+          "digest": "sha256:85273030026e204db41ea84bdc914e204e343d8e4a5521ebe6bb260ec0bad01b",
           "id": "SPEC-009",
           "owners": [
             "research director agent",
             "source steward agent"
           ],
           "path": "docs/specs/SPEC-009-source-registry.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Source Registry and Feed Policy",
           "wave": 2
@@ -2367,25 +2409,34 @@
         {
           "classification": "split",
           "dependencies": [
+            "SPEC-003",
+            "SPEC-005",
             "SPEC-009"
           ],
-          "digest": "sha256:96f992a52cbdd00a0705e6def0d3abc42acc4bec5bb3e0a811f5bf2a8cf5b260",
+          "digest": "sha256:348be779dcf0a9b9c9f18bbe34cca096e3ea04a797c353ee5b660a6e17f87c27",
           "id": "SPEC-010",
           "owners": [
             "retrieval agent",
             "evidence steward agent"
           ],
           "path": "docs/specs/SPEC-010-retrieval-evidence.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Retrieval and Immutable Evidence Capture",
           "wave": 2
         },
         {
-          "classification": "public",
+          "classification": "split",
           "dependencies": [
+            "SPEC-002",
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-006",
+            "SPEC-007",
             "SPEC-010"
           ],
-          "digest": "sha256:4cfb43c3d925016cf13c841df08ebee0f6fa2a5cf4371142b73eae782959f229",
+          "digest": "sha256:47d81911a0286a80419b4e912fc6beba324658af1ee72055e499d076d5218f04",
           "id": "SPEC-011",
           "owners": [
             "evidence steward agent",
@@ -2393,6 +2444,8 @@
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-011-evidence-graph.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Evidence Graph, Claims, Mechanisms, and Decisions",
           "wave": 2
@@ -2401,34 +2454,43 @@
           "classification": "split",
           "dependencies": [
             "SPEC-003",
+            "SPEC-004",
             "SPEC-005",
+            "SPEC-006",
+            "SPEC-008",
+            "SPEC-010",
             "SPEC-011"
           ],
-          "digest": "sha256:0eebb804b946eed821bb3f2622569f24277aab755eccd08560cc9ba25e7ff621",
+          "digest": "sha256:dcb6fb77fcd394e029668582a3fa68710b8b97195ce8bc87f24577767374b9fa",
           "id": "SPEC-012",
           "owners": [
             "context engineer agent",
             "evaluation steward agent"
           ],
           "path": "docs/specs/SPEC-012-context-compiler.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Context Compiler and Memory Planes",
           "wave": 2
         },
         {
-          "classification": "public",
+          "classification": "split",
           "dependencies": [
             "SPEC-000",
             "SPEC-005",
+            "SPEC-006",
             "SPEC-012"
           ],
-          "digest": "sha256:2decdce5821fe7c5eaa20e9e26bcca0b2eecf87e9b795acf8e7e44f14a9379ce",
+          "digest": "sha256:ccd5ae26e92a021bce0873ad0d3def4782779f5f38f5476571bd212ba730dd78",
           "id": "SPEC-013",
           "owners": [
             "organization designer agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-013-agent-role-contracts.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Agent Roles, Prompts, Skills, and Capability Contracts",
           "wave": 2
@@ -2436,16 +2498,22 @@
         {
           "classification": "split",
           "dependencies": [
+            "SPEC-003",
             "SPEC-005",
+            "SPEC-006",
+            "SPEC-008",
+            "SPEC-012",
             "SPEC-013"
           ],
-          "digest": "sha256:db4be855d3bf7b4629b614f189dc9a8174210b1daee67382d05893401ad1e0ea",
+          "digest": "sha256:6c07224ebb831ba8ecc671047512b184c167069b328a85bf4466b4e08c5881f3",
           "id": "SPEC-014",
           "owners": [
             "runtime integration agent",
             "operations steward agent"
           ],
           "path": "docs/specs/SPEC-014-runtime-hermes.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Execution Environment, Executor Protocol, and Hermes Integration",
           "wave": 2
@@ -2454,10 +2522,17 @@
           "classification": "split",
           "dependencies": [
             "SPEC-002",
+            "SPEC-003",
+            "SPEC-004",
+            "SPEC-005",
             "SPEC-006",
-            "SPEC-007"
+            "SPEC-007",
+            "SPEC-008",
+            "SPEC-011",
+            "SPEC-013",
+            "SPEC-014"
           ],
-          "digest": "sha256:e3af2afbd09c1d567192a3d7b5755a83d9a4a5c4cc610a7422b09a82d34fdf03",
+          "digest": "sha256:2a99c17c429ec0fa9fed2fde5a07001f319457354c46f113104a7a76805e861d",
           "id": "SPEC-015",
           "owners": [
             "community editor agent",
@@ -2465,6 +2540,8 @@
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-015-notifications-content.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Notification Outbox, Review Packets, and Content Drafts",
           "wave": 2
@@ -2472,16 +2549,20 @@
         {
           "classification": "split",
           "dependencies": [
+            "SPEC-006",
             "SPEC-011",
-            "SPEC-012"
+            "SPEC-012",
+            "SPEC-013"
           ],
-          "digest": "sha256:77140ac61de64d32dd986803ad1e7ea9daa4859c71cc9c01b1226979c2582fdb",
+          "digest": "sha256:4f73875e4bbda8483264e8d410b7e5fd1b76be8365587864384178f0fcbca362",
           "id": "SPEC-016",
           "owners": [
             "evaluation designer agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-016-evaluation-registry.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Evaluation Registry, Rubric Epochs, and Fixtures",
           "wave": 3
@@ -2490,16 +2571,21 @@
           "classification": "split",
           "dependencies": [
             "SPEC-003",
+            "SPEC-005",
+            "SPEC-008",
+            "SPEC-013",
             "SPEC-014",
             "SPEC-016"
           ],
-          "digest": "sha256:fa99fcd19c41dc2b7fcab22f82647b6ffd58e11c020daed1b2fec1de69b5875b",
+          "digest": "sha256:c819fecf534ffe474481c346ee9d6d472b8120c9b0f53f3f43930f4527b2cc18",
           "id": "SPEC-017",
           "owners": [
             "evaluation runner agent",
             "independent evaluator agent"
           ],
           "path": "docs/specs/SPEC-017-evaluation-runner.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Multi-Model Evaluation Runner and Statistical Gates",
           "wave": 3
@@ -2508,32 +2594,42 @@
           "classification": "split",
           "dependencies": [
             "SPEC-003",
+            "SPEC-012",
+            "SPEC-016",
             "SPEC-017"
           ],
-          "digest": "sha256:268c501a7ef22c7d627112f0844e557c3a2127a16d6393c0863cbf36c3e5cfb7",
+          "digest": "sha256:eeed13e853bd89f298d7832604cfcb46339e89596c41fa5606d4be397b20ae34",
           "id": "SPEC-018",
           "owners": [
             "meta-harness archivist agent",
             "evaluation steward agent"
           ],
           "path": "docs/specs/SPEC-018-candidate-archive.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Candidate Archive, Failure Memory, and Lineage",
           "wave": 3
         },
         {
-          "classification": "public",
+          "classification": "split",
           "dependencies": [
+            "SPEC-006",
             "SPEC-007",
+            "SPEC-008",
+            "SPEC-016",
+            "SPEC-017",
             "SPEC-018"
           ],
-          "digest": "sha256:ba50146882d5abc525dabd38f98784e337b6d0b93251d1b02c0d2d8bdda56f9e",
+          "digest": "sha256:dfad1c0da659a59ea2c1f3724f4ff67410bbe328f4b4985f37f6bc6a8faaa81d",
           "id": "SPEC-019",
           "owners": [
             "release attestor agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-019-promotion-release.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Pull-Request Quality Gate, Promotion, and Release",
           "wave": 3
@@ -2541,12 +2637,15 @@
         {
           "classification": "split",
           "dependencies": [
+            "SPEC-005",
+            "SPEC-008",
             "SPEC-014",
             "SPEC-016",
+            "SPEC-017",
             "SPEC-018",
             "SPEC-019"
           ],
-          "digest": "sha256:71ccfda4b820a8f7bec8541e30eec4d0491505da9a5f78fbea594712a19c1078",
+          "digest": "sha256:e4acac8ebaeb2f53330b6448499dabcf79470a9701417705c01c554c53ea00cb",
           "id": "SPEC-020",
           "owners": [
             "meta-harness scientist agent",
@@ -2554,33 +2653,48 @@
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-020-meta-harness-lab.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Meta-Harness Experiment Laboratory",
           "wave": 4
         },
         {
-          "classification": "public",
+          "classification": "split",
           "dependencies": [
+            "SPEC-008",
+            "SPEC-012",
+            "SPEC-016",
+            "SPEC-017",
+            "SPEC-019",
             "SPEC-020"
           ],
-          "digest": "sha256:b50f9821bb1555a2894ad46bb63318581f1adbb273edf5092b7705c0f1658838",
+          "digest": "sha256:1302081b6e12779338c8afc2552e39748be65049549e8fa8c498eb827b29c8ef",
           "id": "SPEC-021",
           "owners": [
             "harness routing scientist agent",
             "evaluation designer agent"
           ],
           "path": "docs/specs/SPEC-021-adaptive-routing.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Adaptive Harness Routing and Cross-Model Transfer",
           "wave": 4
         },
         {
-          "classification": "public",
+          "classification": "split",
           "dependencies": [
+            "SPEC-002",
+            "SPEC-005",
+            "SPEC-006",
             "SPEC-014",
+            "SPEC-016",
+            "SPEC-018",
+            "SPEC-019",
             "SPEC-021"
           ],
-          "digest": "sha256:400df633024e365c7f6709a7b83db3bb331df6fd133e4335fa76aa3baedb3e5d",
+          "digest": "sha256:e6f79962e2151f6b63519529835215cfbda4c2cc7b856338eb9390f8f2cf381e",
           "id": "SPEC-022",
           "owners": [
             "community research steward agent",
@@ -2588,6 +2702,8 @@
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-022-collaborative-evolution.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Collaborative Evolution and Community Contribution Packets",
           "wave": 4
@@ -2595,18 +2711,21 @@
         {
           "classification": "public",
           "dependencies": [
+            "SPEC-006",
             "SPEC-007",
             "SPEC-015",
             "SPEC-019",
             "SPEC-022"
           ],
-          "digest": "sha256:163f32f1db7e0eb92871bc83c3ec737e8a64cf2823047464f77c2378e5dc65b4",
+          "digest": "sha256:9a626734ed92110f041b923bd98326b765ff96106e661bbaa2b715c10659dc7c",
           "id": "SPEC-023",
           "owners": [
             "human maintainer",
             "community steward agent"
           ],
           "path": "docs/specs/SPEC-023-open-source-governance.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Open-Source Governance and Project Growth",
           "wave": 5
@@ -2616,20 +2735,27 @@
           "dependencies": [
             "SPEC-002",
             "SPEC-003",
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-006",
             "SPEC-007",
             "SPEC-008",
             "SPEC-009",
             "SPEC-014",
             "SPEC-015",
-            "SPEC-017"
+            "SPEC-016",
+            "SPEC-017",
+            "SPEC-019"
           ],
-          "digest": "sha256:01be03a9805efa11852339997f2f339704641a0f2cf2dd18d849daca88e1391a",
+          "digest": "sha256:08e7dc98718913c7318821cb233bcff71ff689c2c475d92fd73232f535188094",
           "id": "SPEC-024",
           "owners": [
             "human maintainer",
             "operations steward agent"
           ],
           "path": "docs/specs/SPEC-024-private-control-plane.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Private Control Plane, Identities, and Key Management",
           "wave": 5
@@ -2637,15 +2763,23 @@
         {
           "classification": "split",
           "dependencies": [
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-008",
+            "SPEC-014",
+            "SPEC-015",
+            "SPEC-019",
             "SPEC-024"
           ],
-          "digest": "sha256:49b1464e928e88c148bf059500c485978ce21b0f6dff8e842b48204bfc99df33",
+          "digest": "sha256:a46fd281d53bf3f8aba6ea0c421052b298fb63bb050630c7c78e4f5a9cf4715f",
           "id": "SPEC-025",
           "owners": [
             "operations steward agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-025-deployment-durable-workflows.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Deployment, Recovery, and Durable Workflow Migration",
           "wave": 5
@@ -2654,10 +2788,15 @@
           "activation": "deferred",
           "classification": "split",
           "dependencies": [
+            "SPEC-016",
+            "SPEC-017",
+            "SPEC-018",
+            "SPEC-019",
+            "SPEC-020",
             "SPEC-022",
             "SPEC-025"
           ],
-          "digest": "sha256:b7c99b266cb570417220b6041e0dcb88a1169f79e8b8be36d4880a2c6e181764",
+          "digest": "sha256:de3b88eaf66b7a08acabcc38cfe05cead66f4954a6428a4ed4f23a6bcb835014",
           "id": "SPEC-026",
           "owners": [
             "training research lead",
@@ -2665,6 +2804,8 @@
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-026-training-rl-lab.md",
+          "revises": "none",
+          "revision": 1,
           "status": "draft",
           "title": "Future Training and Reinforcement-Learning Laboratory",
           "wave": 6
@@ -2672,30 +2813,44 @@
       ]
     },
     "validators": {
-      "count": 10,
+      "count": 11,
       "owner": "declared validator ownership",
       "records": [
         {
-          "digest": "sha256:7f189e876bc7cba64683a187d1f4f0699864602802cb73cccb30084eaa5d8c08",
+          "digest": "sha256:c73ae97aad884c8c6dd0c778d90a5fbd85823a1f55e90f775677b3681e9f3ec2",
           "id": "governance-policy",
           "owns": [
-            "authority vocabulary",
+            "Constitution decision evaluation",
             "constitutional invariants",
             "generated authority view"
           ],
           "path": "researcher/scripts/validate_governance.py"
         },
         {
-          "digest": "sha256:f3571f2831a7da4b4f30054f3276b20529da7ce2fb330b9ec2239dc75a9d6ad0",
+          "digest": "sha256:0b19f6c45132a7a9378a3969842f41d95a22c1cbbb72ee2f7d4c6d78176ab82d",
           "id": "repository-inventory",
           "owns": [
             "identifier uniqueness",
             "cross-artifact references",
             "specification graph",
+            "authority artifact parity and source binding",
             "live counts",
             "generated inventory"
           ],
           "path": "researcher/scripts/build_inventory.py"
+        },
+        {
+          "digest": "sha256:ef2e83da9445bf92d4242042740defae03112536f04cc0f5cafd17f812591035",
+          "id": "specification-lifecycle",
+          "owns": [
+            "base-aware specification status transitions",
+            "accepted contract revision identity",
+            "authority registry, fixture, and semantic profile validation",
+            "structural authority-policy closure",
+            "authority conformance receipt validation",
+            "terminal specification decisions"
+          ],
+          "path": "researcher/scripts/validate_spec_lifecycle.py"
         },
         {
           "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
@@ -2778,9 +2933,9 @@
       ],
       "support_files": [
         {
-          "digest": "sha256:9a2acfa5b52f87f46ea3dcc3506f19ffd5de66c23fbdcd847827b45f9a2ee374",
+          "digest": "sha256:6188bbdfa638789f3614dfeac312c199931a9efafc74b9d3d62ba10cc0e3cbf9",
           "path": ".github/workflows/validate.yml",
-          "size_bytes": 6070
+          "size_bytes": 6857
         },
         {
           "digest": "sha256:fa38b9156fba7c5204e93923875cf1997dfb85b1ded2ebd3e96014d96e0dd78f",
@@ -3182,12 +3337,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:453fb096f78ef4017281ef80f61a687d4bc5a9c0cac4f44bafa5845f34b99689",
+    "digest": "sha256:140843a581e778a16c0da439e315370c7b1e8f5c5f42c055ded1494ecb8b8c88",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:453fb096f78ef4017281ef80f61a687d4bc5a9c0cac4f44bafa5845f34b99689",
+  "source_tree_digest": "sha256:140843a581e778a16c0da439e315370c7b1e8f5c5f42c055ded1494ecb8b8c88",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3195,9 +3350,9 @@
       "size_bytes": 1911
     },
     {
-      "digest": "sha256:9a2acfa5b52f87f46ea3dcc3506f19ffd5de66c23fbdcd847827b45f9a2ee374",
+      "digest": "sha256:6188bbdfa638789f3614dfeac312c199931a9efafc74b9d3d62ba10cc0e3cbf9",
       "path": ".github/workflows/validate.yml",
-      "size_bytes": 6070
+      "size_bytes": 6857
     },
     {
       "digest": "sha256:d4827b154512a79ca4635f716d9d0a7d93f3c0b0f29355f67de9e004d968dc9c",
@@ -3230,9 +3385,9 @@
       "size_bytes": 5943
     },
     {
-      "digest": "sha256:8b6733b5ad4f404c9950bd2a047e819e914ce3c5d269616e2195d40e435e585f",
+      "digest": "sha256:8d72698f0374d9f471c1f2aba5b4b6865f52fc79a680a3318f3012cce8047e1f",
       "path": "docs/decisions/0005-canonical-specification-program.md",
-      "size_bytes": 3159
+      "size_bytes": 5104
     },
     {
       "digest": "sha256:ab990f1f8a6f307015cb5fd8c421b610da05eab66603f244b9d6344f066d4c57",
@@ -3240,154 +3395,154 @@
       "size_bytes": 3850
     },
     {
-      "digest": "sha256:c3df316d8a3cd2a8303248ad8ccf04c3771805b59eeb9d0301fa185901ca37c4",
+      "digest": "sha256:27812a440a9561fee0679331e7dc7ed7ec6dca6d8cd90b06282f7d56719b3d3a",
       "path": "docs/decisions/README.md",
-      "size_bytes": 1370
+      "size_bytes": 2050
     },
     {
-      "digest": "sha256:70be7aaa27103b5ded3f20a83e739f8e6d48454afdda706fadd83895e8bb82ee",
+      "digest": "sha256:d68a4c87d16bf0beaa9d8dd6e04b664f274db923794b6d56b53ac2f0e6412c05",
       "path": "docs/specs/README.md",
-      "size_bytes": 17803
+      "size_bytes": 33175
     },
     {
-      "digest": "sha256:fd169e015c761f91c20b03164e72ccc110083828c994f251eaf0e5d4cc4c5fac",
+      "digest": "sha256:be3255f4de01abd3f3326d88916ea9d10e14b364bf7d08ca62eb3093d6e215bf",
       "path": "docs/specs/SPEC-000-program-constitution.md",
-      "size_bytes": 2722
+      "size_bytes": 2803
     },
     {
-      "digest": "sha256:3e48822c76edb84d775864fd36d1dba1c28cab4ccb97d9b0f644e815981da763",
+      "digest": "sha256:e6109fb747cffc920d3fe48c9bab939bdc9ce7d0dd1130f5ce50367b4d218e28",
       "path": "docs/specs/SPEC-001-repository-reconciliation.md",
-      "size_bytes": 3021
+      "size_bytes": 3108
     },
     {
-      "digest": "sha256:332dfee3f4813082559def161cb49d7c7f749297b35979aaf73a94fb86404b8c",
+      "digest": "sha256:32fb944b014b961123d9929e64a735add82d1dfb1d105093326564275a163e38",
       "path": "docs/specs/SPEC-002-public-private-boundary.md",
-      "size_bytes": 3513
+      "size_bytes": 3600
     },
     {
-      "digest": "sha256:f49a2baec3d1d3f8ab687082786fbb5611c5425fc648091cd92faafd72fd3e48",
+      "digest": "sha256:95a91c9356d2f6f3c3ba13086e882020511faf2f0403da7fb833c142677a96d0",
       "path": "docs/specs/SPEC-003-schema-registry.md",
-      "size_bytes": 7090
+      "size_bytes": 7189
     },
     {
-      "digest": "sha256:22c3f313c97efd7e257b6adf9ccf538d441d13c311380c24fc22fbc20b88e22e",
+      "digest": "sha256:d5c4f86026b617ed94d79b702d3f88cf6c0f53da316677156dd5deda6009eac5",
       "path": "docs/specs/SPEC-004-event-journal.md",
-      "size_bytes": 6367
+      "size_bytes": 25291
     },
     {
-      "digest": "sha256:ddb615bd22e824f22e31fbf10bdd39bf849c0cc2606d30a43799d17334174fec",
+      "digest": "sha256:1f4011039a622d208efc8c53e01bfbabddb5e196de5a9ad21adf77e4312a7604",
       "path": "docs/specs/SPEC-005-work-orders.md",
-      "size_bytes": 6486
+      "size_bytes": 28637
     },
     {
-      "digest": "sha256:0e230d2a3e74a4f43775096f3fc847aeded2d2ef096a86fab478540f52f3fd3a",
+      "digest": "sha256:1e078f3508538e6754e2908be902e98f1eebb6a5d1c0682f900bb4491a989340",
       "path": "docs/specs/SPEC-006-command-feedback.md",
-      "size_bytes": 5148
+      "size_bytes": 17895
     },
     {
-      "digest": "sha256:253dc5e887d36816a968db3fa6b29803e0f210a7c3eef7095f698852f7100b6a",
+      "digest": "sha256:1c0b5ddd8d5cadf50317e6b78e80c5b2e76ceb2bc579082cb1405e00c2c4a324",
       "path": "docs/specs/SPEC-007-github-pr-lifecycle.md",
-      "size_bytes": 5528
+      "size_bytes": 20100
     },
     {
-      "digest": "sha256:c5d7aa9a9919ef458cd34c194a25063764ff1956ca8503d398091cc1e99ad51e",
+      "digest": "sha256:a3a3effb912c1752d655411b11dddbae084c7b183cd3cb6ad9d0265c29fa4883",
       "path": "docs/specs/SPEC-008-status-observability.md",
-      "size_bytes": 5215
+      "size_bytes": 19388
     },
     {
-      "digest": "sha256:f4d44ce2038c69dfb87e51da41bad9e1d204ba61b85e2abf1feac99d6f1853b2",
+      "digest": "sha256:85273030026e204db41ea84bdc914e204e343d8e4a5521ebe6bb260ec0bad01b",
       "path": "docs/specs/SPEC-009-source-registry.md",
-      "size_bytes": 5218
+      "size_bytes": 10873
     },
     {
-      "digest": "sha256:96f992a52cbdd00a0705e6def0d3abc42acc4bec5bb3e0a811f5bf2a8cf5b260",
+      "digest": "sha256:348be779dcf0a9b9c9f18bbe34cca096e3ea04a797c353ee5b660a6e17f87c27",
       "path": "docs/specs/SPEC-010-retrieval-evidence.md",
-      "size_bytes": 4945
+      "size_bytes": 12022
     },
     {
-      "digest": "sha256:4cfb43c3d925016cf13c841df08ebee0f6fa2a5cf4371142b73eae782959f229",
+      "digest": "sha256:47d81911a0286a80419b4e912fc6beba324658af1ee72055e499d076d5218f04",
       "path": "docs/specs/SPEC-011-evidence-graph.md",
-      "size_bytes": 6059
+      "size_bytes": 14699
     },
     {
-      "digest": "sha256:0eebb804b946eed821bb3f2622569f24277aab755eccd08560cc9ba25e7ff621",
+      "digest": "sha256:dcb6fb77fcd394e029668582a3fa68710b8b97195ce8bc87f24577767374b9fa",
       "path": "docs/specs/SPEC-012-context-compiler.md",
-      "size_bytes": 8861
+      "size_bytes": 19486
     },
     {
-      "digest": "sha256:2decdce5821fe7c5eaa20e9e26bcca0b2eecf87e9b795acf8e7e44f14a9379ce",
+      "digest": "sha256:ccd5ae26e92a021bce0873ad0d3def4782779f5f38f5476571bd212ba730dd78",
       "path": "docs/specs/SPEC-013-agent-role-contracts.md",
-      "size_bytes": 5386
+      "size_bytes": 12703
     },
     {
-      "digest": "sha256:db4be855d3bf7b4629b614f189dc9a8174210b1daee67382d05893401ad1e0ea",
+      "digest": "sha256:6c07224ebb831ba8ecc671047512b184c167069b328a85bf4466b4e08c5881f3",
       "path": "docs/specs/SPEC-014-runtime-hermes.md",
-      "size_bytes": 8704
+      "size_bytes": 19358
     },
     {
-      "digest": "sha256:e3af2afbd09c1d567192a3d7b5755a83d9a4a5c4cc610a7422b09a82d34fdf03",
+      "digest": "sha256:2a99c17c429ec0fa9fed2fde5a07001f319457354c46f113104a7a76805e861d",
       "path": "docs/specs/SPEC-015-notifications-content.md",
-      "size_bytes": 5226
+      "size_bytes": 19408
     },
     {
-      "digest": "sha256:77140ac61de64d32dd986803ad1e7ea9daa4859c71cc9c01b1226979c2582fdb",
+      "digest": "sha256:4f73875e4bbda8483264e8d410b7e5fd1b76be8365587864384178f0fcbca362",
       "path": "docs/specs/SPEC-016-evaluation-registry.md",
-      "size_bytes": 7224
+      "size_bytes": 16720
     },
     {
-      "digest": "sha256:fa99fcd19c41dc2b7fcab22f82647b6ffd58e11c020daed1b2fec1de69b5875b",
+      "digest": "sha256:c819fecf534ffe474481c346ee9d6d472b8120c9b0f53f3f43930f4527b2cc18",
       "path": "docs/specs/SPEC-017-evaluation-runner.md",
-      "size_bytes": 6272
+      "size_bytes": 8762
     },
     {
-      "digest": "sha256:268c501a7ef22c7d627112f0844e557c3a2127a16d6393c0863cbf36c3e5cfb7",
+      "digest": "sha256:eeed13e853bd89f298d7832604cfcb46339e89596c41fa5606d4be397b20ae34",
       "path": "docs/specs/SPEC-018-candidate-archive.md",
-      "size_bytes": 5199
+      "size_bytes": 9278
     },
     {
-      "digest": "sha256:ba50146882d5abc525dabd38f98784e337b6d0b93251d1b02c0d2d8bdda56f9e",
+      "digest": "sha256:dfad1c0da659a59ea2c1f3724f4ff67410bbe328f4b4985f37f6bc6a8faaa81d",
       "path": "docs/specs/SPEC-019-promotion-release.md",
-      "size_bytes": 8235
+      "size_bytes": 21367
     },
     {
-      "digest": "sha256:71ccfda4b820a8f7bec8541e30eec4d0491505da9a5f78fbea594712a19c1078",
+      "digest": "sha256:e4acac8ebaeb2f53330b6448499dabcf79470a9701417705c01c554c53ea00cb",
       "path": "docs/specs/SPEC-020-meta-harness-lab.md",
-      "size_bytes": 7081
+      "size_bytes": 11991
     },
     {
-      "digest": "sha256:b50f9821bb1555a2894ad46bb63318581f1adbb273edf5092b7705c0f1658838",
+      "digest": "sha256:1302081b6e12779338c8afc2552e39748be65049549e8fa8c498eb827b29c8ef",
       "path": "docs/specs/SPEC-021-adaptive-routing.md",
-      "size_bytes": 6084
+      "size_bytes": 10348
     },
     {
-      "digest": "sha256:400df633024e365c7f6709a7b83db3bb331df6fd133e4335fa76aa3baedb3e5d",
+      "digest": "sha256:e6f79962e2151f6b63519529835215cfbda4c2cc7b856338eb9390f8f2cf381e",
       "path": "docs/specs/SPEC-022-collaborative-evolution.md",
-      "size_bytes": 5534
+      "size_bytes": 9305
     },
     {
-      "digest": "sha256:163f32f1db7e0eb92871bc83c3ec737e8a64cf2823047464f77c2378e5dc65b4",
+      "digest": "sha256:9a626734ed92110f041b923bd98326b765ff96106e661bbaa2b715c10659dc7c",
       "path": "docs/specs/SPEC-023-open-source-governance.md",
-      "size_bytes": 6130
+      "size_bytes": 10229
     },
     {
-      "digest": "sha256:01be03a9805efa11852339997f2f339704641a0f2cf2dd18d849daca88e1391a",
+      "digest": "sha256:08e7dc98718913c7318821cb233bcff71ff689c2c475d92fd73232f535188094",
       "path": "docs/specs/SPEC-024-private-control-plane.md",
-      "size_bytes": 6013
+      "size_bytes": 15525
     },
     {
-      "digest": "sha256:49b1464e928e88c148bf059500c485978ce21b0f6dff8e842b48204bfc99df33",
+      "digest": "sha256:a46fd281d53bf3f8aba6ea0c421052b298fb63bb050630c7c78e4f5a9cf4715f",
       "path": "docs/specs/SPEC-025-deployment-durable-workflows.md",
-      "size_bytes": 6106
+      "size_bytes": 22002
     },
     {
-      "digest": "sha256:b7c99b266cb570417220b6041e0dcb88a1169f79e8b8be36d4880a2c6e181764",
+      "digest": "sha256:de3b88eaf66b7a08acabcc38cfe05cead66f4954a6428a4ed4f23a6bcb835014",
       "path": "docs/specs/SPEC-026-training-rl-lab.md",
-      "size_bytes": 7589
+      "size_bytes": 14656
     },
     {
-      "digest": "sha256:e2ec6ffddd7435d66adf7090e98b4a028006ef92ea1b11bb26d795bb469d7895",
+      "digest": "sha256:17c792d8a9c27942233018b64069eb95b1346bf87da64d54fb3b62bc3389e384",
       "path": "docs/specs/SPEC-TEMPLATE.md",
-      "size_bytes": 3003
+      "size_bytes": 3721
     },
     {
       "digest": "sha256:e80dc5fe7391c3a5745c574814a1502d24ba9acea91fcbb5dc7ec7d38eb43545",
@@ -3865,9 +4020,9 @@
       "size_bytes": 54898
     },
     {
-      "digest": "sha256:f3571f2831a7da4b4f30054f3276b20529da7ce2fb330b9ec2239dc75a9d6ad0",
+      "digest": "sha256:0b19f6c45132a7a9378a3969842f41d95a22c1cbbb72ee2f7d4c6d78176ab82d",
       "path": "researcher/scripts/build_inventory.py",
-      "size_bytes": 95550
+      "size_bytes": 126609
     },
     {
       "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
@@ -3910,14 +4065,19 @@
       "size_bytes": 24900
     },
     {
+      "digest": "sha256:6939783a55ee7ceb0361e13b08ea4d9cd424a4850c82fd31af2998f44f074a4d",
+      "path": "researcher/scripts/tests/test_spec_lifecycle.py",
+      "size_bytes": 65020
+    },
+    {
       "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
       "path": "researcher/scripts/validate_export.py",
       "size_bytes": 5382
     },
     {
-      "digest": "sha256:7f189e876bc7cba64683a187d1f4f0699864602802cb73cccb30084eaa5d8c08",
+      "digest": "sha256:c73ae97aad884c8c6dd0c778d90a5fbd85823a1f55e90f775677b3681e9f3ec2",
       "path": "researcher/scripts/validate_governance.py",
-      "size_bytes": 10034
+      "size_bytes": 19155
     },
     {
       "digest": "sha256:facebf497d771a018adff8c0bbbbcbb1b28cf38a797c82d48e47fcc9c46fd81f",
@@ -3938,6 +4098,11 @@
       "digest": "sha256:ba09b1c3ff4ad79de01c5d2bb308edbdc9658ba07114d1e3e0165b0bddb0e65a",
       "path": "researcher/scripts/validate_schemas.py",
       "size_bytes": 9310
+    },
+    {
+      "digest": "sha256:ef2e83da9445bf92d4242042740defae03112536f04cc0f5cafd17f812591035",
+      "path": "researcher/scripts/validate_spec_lifecycle.py",
+      "size_bytes": 108917
     },
     {
       "digest": "sha256:8b9e3d9de07a0505ae2b42df2e15dd75bab5f2486e336194481c558e0648ded0",
@@ -4028,26 +4193,40 @@
   "unresolved_references": [],
   "validator_ownership": [
     {
-      "digest": "sha256:7f189e876bc7cba64683a187d1f4f0699864602802cb73cccb30084eaa5d8c08",
+      "digest": "sha256:c73ae97aad884c8c6dd0c778d90a5fbd85823a1f55e90f775677b3681e9f3ec2",
       "id": "governance-policy",
       "owns": [
-        "authority vocabulary",
+        "Constitution decision evaluation",
         "constitutional invariants",
         "generated authority view"
       ],
       "path": "researcher/scripts/validate_governance.py"
     },
     {
-      "digest": "sha256:f3571f2831a7da4b4f30054f3276b20529da7ce2fb330b9ec2239dc75a9d6ad0",
+      "digest": "sha256:0b19f6c45132a7a9378a3969842f41d95a22c1cbbb72ee2f7d4c6d78176ab82d",
       "id": "repository-inventory",
       "owns": [
         "identifier uniqueness",
         "cross-artifact references",
         "specification graph",
+        "authority artifact parity and source binding",
         "live counts",
         "generated inventory"
       ],
       "path": "researcher/scripts/build_inventory.py"
+    },
+    {
+      "digest": "sha256:ef2e83da9445bf92d4242042740defae03112536f04cc0f5cafd17f812591035",
+      "id": "specification-lifecycle",
+      "owns": [
+        "base-aware specification status transitions",
+        "accepted contract revision identity",
+        "authority registry, fixture, and semantic profile validation",
+        "structural authority-policy closure",
+        "authority conformance receipt validation",
+        "terminal specification decisions"
+      ],
+      "path": "researcher/scripts/validate_spec_lifecycle.py"
     },
     {
       "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",

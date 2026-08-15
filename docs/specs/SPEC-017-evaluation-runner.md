@@ -1,14 +1,16 @@
 # SPEC-017: Multi-Model Evaluation Runner and Statistical Gates
 
 Status: draft
+Revision: 1
+Revises: none
 Wave: 3
 Classification: split
 Owners: evaluation runner agent; independent evaluator agent
-Depends on: SPEC-003, SPEC-014, SPEC-016
+Depends on: SPEC-003, SPEC-005, SPEC-008, SPEC-013, SPEC-014, SPEC-016
 
 ## Decision
 
-Evaluation will use a provider-neutral run and result schema with the existing Cursor SDK as the only initially approved paid execution surface. Consequential comparisons are paired, repeated, budgeted, resumable, blinded where practical, and reported per task, skill, model, and failure type. Deterministic outcomes take precedence over model judges. Aggregate improvement cannot offset a critical regression.
+Evaluation will use a provider-neutral run and result schema with the existing Cursor SDK as the only initially approved paid execution surface. Consequential comparisons are preregistered, paired at the declared experimental unit, repeated according to a power or sensitivity rationale, budget-reserved, resumable, and blinded where practical. Results are reported per analysis unit, task family, skill, model, and failure type. Deterministic outcomes take precedence over model judges. Aggregate improvement cannot offset a critical regression.
 
 ## Context and current repository touchpoints
 
@@ -30,26 +32,29 @@ Evaluation will use a provider-neutral run and result schema with the existing C
 ## Invariants
 
 1. An `EvaluationObservation` binds a SPEC-003 frozen candidate digest, epoch, task, seed, replication, model, execution environment, runtime, context chain, harness, tools, and adapter. It does not bind a later PR SHA.
-2. Default minimum is three stochastic replications per condition unless the report says preliminary.
-3. Shared tasks use paired comparisons.
+2. Replication count follows the sealed epoch's power or sensitivity rationale; fewer than three stochastic replications is preliminary, while three repetitions alone never establishes adequate power or independent sample size.
+3. Shared tasks use paired comparisons at the preregistered unit; repeated seeds, turns, attempts, and calls within one task group do not create independent units.
 4. Fixed seeds, invalid results, timeouts, repairs, and retries are retained.
 5. Model judges are independent of authors; first-round judges are blind to each other.
 6. Pairwise judge order is swapped and calibration against human examples is reported.
 7. Paid loops require concurrency, resume, progress, and cost gates before execution.
+8. The scheduler atomically reserves worst-case run and retry cost before dispatch; the runner cannot spend an unreserved amount or transfer a reservation between candidates, epochs, or identities.
+9. Hidden tasks are materialized only inside the eligible evaluator environment. Candidate, search, author, and general runner contexts receive opaque run IDs and allowed aggregate decisions, not hidden bodies or task-level diagnostics.
+10. The score-bearing evaluator and final decision issuer are independent of candidate authors and search controllers; judge identity alone does not satisfy independence if they share disallowed context or workspace state.
 
 ## Interfaces and data
 
-`EvaluationPlan` expands an epoch and frozen candidates into atomic run records. A valid candidate freeze receipt is required before planning. Runner commands include `plan`, `dry-run`, `execute`, `resume`, `reconcile`, `analyze`, and `publish-report`. Required cost gates are `--max-runs` and `--max-budget-usd`, with a dry-run cost forecast before any SDK call.
+`EvaluationPlan` expands an epoch and frozen candidates into atomic run records and binds the experimental unit, analysis unit, pairing key, grouping factors, multiplicity family, stopping rule, and maximum attempts. A valid candidate freeze receipt is required before planning. Runner commands include `plan`, `dry-run`, `reserve`, `execute`, `resume`, `reconcile`, `analyze`, and `publish-report`. Required cost gates are `--max-runs` and `--max-budget-usd`, with a worst-case retry-aware forecast and an accepted SPEC-008 reservation before any SDK call. Dispatch consumes the reservation atomically; cancellation and provider reconciliation release only verified unused capacity.
 
 `EvaluationObservation` is the only score-bearing record. It contains candidate content digest, sealed epoch and task, exact attempt and environment identities, raw result references, metric vector, uncertainty, integrity and missingness status, usage, and evaluator identity. SPEC-019 later proves that a PR tree exactly materializes this candidate and creates a separate attestation.
 
 The matrix considers no-skill or no-intervention baseline, accepted production, candidate, unrelated-change negative control, target plus related skills, and target plus unrelated skills when context competition matters. Conditions span held-in, held-out, adversarial, and distribution-shift tasks within the epoch.
 
-Analysis reports paired effect estimates, bootstrap confidence intervals, Wilcoxon signed-rank or a justified alternative, practical-effect and non-inferiority decisions, per-task and per-model effects, confusion matrices where relevant, failure taxonomy, missingness, cost, latency, tokens, and Pareto position.
+Analysis reports paired effect estimates at the declared unit, cluster-aware bootstrap confidence intervals or a justified alternative, practical-effect and non-inferiority decisions, multiplicity handling, sensitivity to missing and invalid outcomes, per-task-family and per-model effects, confusion matrices where relevant, failure taxonomy, cost, latency, tokens, and Pareto position. It never treats repeated calls from one grouped fixture as independent evidence.
 
 ## State and failure behavior
 
-Atomic runs move `planned -> reserved -> running -> completed|invalid|timeout|failed|cancelled|unknown`. Resume skips terminal results with valid digests. Format repair is a separately counted attempt. Provider ambiguity reconciles by stored request ID when possible; otherwise it remains unknown and is never imputed as success.
+Atomic runs move `planned -> reservation_pending -> reserved -> running -> completed|invalid|timeout|failed|cancelled|unknown`, with terminal `budget_blocked` before dispatch. Resume skips terminal results with valid digests. Format repair is a separately counted and budgeted attempt. Provider ambiguity reconciles by stored request ID when possible; otherwise it remains unknown and is never imputed as success. No adaptive stop or extra run is permitted outside the sealed stopping rule and remaining reservation.
 
 ## Implementation sequence
 
@@ -76,6 +81,9 @@ Track progress per atomic run, call duration, stall age, retries, format failure
 - Negative control catches a biased evaluator fixture.
 - Reversed pairwise order reveals order-biased judge fixtures.
 - Worst-case retry forecast respects the budget gate.
+- Concurrent plans cannot oversubscribe an organization or evaluator budget, and restart reconstructs the remaining reservation from durable receipts.
+- Hidden-task fixtures remain absent from proposer-visible prompts, files, progress, errors, and task-level reports.
+- Treating replications as independent task units fails the analysis validator.
 
 ## Acceptance criteria
 
@@ -85,7 +93,10 @@ Track progress per atomic run, call duration, stall age, retries, format failure
 - [ ] Missing, invalid, timeout, repair, and retry results are explicit.
 - [ ] Judge calibration and disagreement are reported when judges are used.
 - [ ] No paid run starts without explicit plan and cost gates.
+- [ ] No paid run starts without a durable worst-case reservation, and all reservation consumption and release reconcile after restart.
 - [ ] Score-bearing observations bind frozen candidate content and execution environment, never an assumed future PR SHA.
+- [ ] Statistical units, pairing, multiplicity, stopping, exclusions, and missing-data policy match the sealed epoch exactly.
+- [ ] Hidden execution and final score decisions remain independent of candidate and search identities and contexts.
 
 ## Pull-request evidence
 

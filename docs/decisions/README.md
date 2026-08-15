@@ -2,9 +2,11 @@
 
 These records capture durable implementation choices for the autonomous research organization. They explain trade-offs and consequences; executable policy, schemas, tests, and merged Git history remain authoritative.
 
-Decision records are append-only in number. A later decision supersedes an earlier one explicitly rather than rewriting why the earlier choice was made.
+Decision records are append-only in strictly increasing number. Once accepted, an ADR is byte-immutable. A later accepted decision may point backward to one lower-numbered decision with explicit `Supersedes: ADR-NNNN` metadata rather than rewriting the earlier status, scope, or rationale. One accepted ADR may have at most one accepted direct successor; a further change supersedes that successor. Generated views derive the acyclic supersession chain.
 
 An ADR's recorded status is authoritative only when that exact file is reachable from the protected default branch. Copies on proposal branches carry no decision authority; human merge is the acceptance event.
+
+A specification terminal decision is one-purpose and revision-bound. Its ADR metadata uses `Lifecycle transition: SPEC-NNN@revision -> amended|superseded|retired -> SPEC-NNN@next-revision|none`. The replacement must be the next revision of the same specification, or `none` for retirement. A broad program ADR or a decision for another revision cannot authorize the transition.
 
 The dependency-ordered implementation contracts live in the [specification program](../specs/README.md).
 

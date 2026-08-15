@@ -1,44 +1,81 @@
 # SPEC-014: Execution Environment, Executor Protocol, and Hermes Integration
 
 Status: draft
+Revision: 1
+Revises: none
 Wave: 2
 Classification: split
 Owners: runtime integration agent; operations steward agent
-Depends on: SPEC-005, SPEC-013
+Depends on: SPEC-003, SPEC-005, SPEC-006, SPEC-008, SPEC-012, SPEC-013
 
 ## Decision
 
-Every execution will run under a versioned `ExecutionEnvironment` contract. Hermes Agent will be the first interactive and scheduled agent executor integrated through the runtime-neutral adapter. It will receive a frozen work attempt, context chain, capability grant, attested environment, and structured output contract. Hermes sessions, memory, cron state, and internal delegation traces are execution details, not canonical organizational state. The organization must remain operable through a reference local executor if Hermes is removed.
+Every model or tool execution will consume one immutable `ExecutionAttemptBundle` compiled against a SPEC-005 `AttemptReservation` and run under a versioned `ExecutionEnvironment` contract. SPEC-005 activates the lease only after it verifies and binds that bundle. Hermes Agent will be the first interactive and scheduled agent harness integrated through the runtime-neutral executor protocol. It receives frozen work, role, context, operation grants, environment, mode, and output contracts. Hermes sessions, ambient configuration, memory, cron state, and internal delegation are never canonical organizational state.
+
+The organization remains operable through a reference local executor if Hermes is removed. Lost or restarted execution is not resumed from chat or harness memory: the old attempt is reconciled and closed, and a new attempt is created from reducer state and a validated checkpoint.
 
 ## Context and current repository touchpoints
 
-The current loop is repo-native, Python-based, and launchd-scheduled. Hermes adds a capable agent harness, tool use, sessions, and scheduled entry points, but coupling state to those conveniences would prevent replay, cross-harness evaluation, and later Temporal migration.
+The current loop is repo-native, Python-based, and launchd-scheduled. Hermes can add model and tool execution, operator interaction, and bounded internal delegation, but coupling authority or state to those conveniences would prevent replay, cross-harness evaluation, safe recovery, and later workflow-engine comparison.
 
 ## Goals
 
-- Execute the same work order through Hermes and a deterministic reference adapter.
-- Preserve exact inputs, outputs, receipts, tool events, checkpoints, and cancellation state.
-- Use Hermes for operator interaction and bounded agent work without letting it own the queue.
-- Make runtime differences measurable through conformance and evaluation.
-- Make mounts, network, resources, process boundary, secrets, reset, cleanup, and artifact extraction reproducible.
+- Execute equivalent work-order contracts through Hermes and a reference adapter.
+- Preserve exact bundles, calls, outputs, costs, tool effects, checkpoints, cancellation, and reconciliation receipts.
+- Keep the queue, journal, reducers, and accepted decisions outside the harness.
+- Make runtime, model, tool, and environment differences measurable.
+- Make mounts, network, resources, process boundaries, credentials, reset, cleanup, and output extraction attestable.
 
 ## Non-goals
 
-- Forking Hermes or embedding organization policy inside it.
-- Making Hermes cron the sole durable scheduler.
-- Allowing Hermes memory to write canonical semantic or preference state.
+- Forking Hermes or embedding organizational policy inside it.
+- Making Hermes cron, session storage, or memory the durable scheduler or source of truth.
+- Letting an executor apply reducer state, accept a decision, merge a PR, or broaden its own grant.
+- Treating Hermes internal subagents as independent organizational reviewers.
 
 ## Invariants
 
-1. Adapter inputs and outputs use SPEC-003 schemas.
-2. Executors can emit results and receipts but cannot apply organizational state.
-3. Each run pins Hermes version or commit, adapter version, model, configuration digest, and tool-policy digest.
-4. Environments and workspaces are unique per attempt and are never reused without attested reset and identity checks.
-5. Timeout, cancellation, and unknown outcomes are distinct.
-6. Internal subagents may help a Hermes execution, but their relevant outputs and traces are returned under the parent work order.
-7. Cron may wake the dispatcher; it does not replace work-order durability.
-8. `trusted_local` may run reviewed deterministic repository code but cannot run untrusted community or self-modifying candidate code or own hidden-evaluation isolation.
-9. Only declared output paths are extracted; environment destruction or retention returns a receipt.
+1. Adapter inputs and outputs use registered SPEC-003 schemas and immutable artifact references.
+2. Executors emit results, effect proposals, and receipts; reducers alone apply organizational state.
+3. Every call pins attempt and work-order versions, role and context chain, model, harness, adapter, tools, environment, output contract, and effective operation grant.
+4. Workspaces are unique per attempt and cannot be reused without a verified reset and new attestation.
+5. Timeout, cancellation requested, cancelled, failed, lost, and unknown outcomes are distinct.
+6. Internal subagents inherit a subset of the parent bundle and cannot satisfy proposer-reviewer or evaluator independence requirements.
+7. Cron or any harness scheduler may wake the dispatcher only; it cannot own leases, cursors, retries, or research mutations.
+8. `trusted_local` runs only allowlisted reviewed deterministic repository code. Candidate, community, self-modifying, and hidden-evaluation code requires eligible isolation.
+9. Only declared outputs are frozen and collected; extraction, retention, reset, and destruction each return a receipt.
+10. Ambient Hermes memory, configuration, skills, plugins, MCP servers, and user or project settings are disabled by default or pinned explicitly in the bundle.
+11. Each side-effecting adapter operation uses a stable operation key plus canonical collision digest and declares whether it is provider-idempotent, reconcilable, or non-reconcilable.
+12. Exact operation-key and collision-digest replay returns the original receipt; reuse with a different digest is a collision and performs no effect.
+
+## ExecutionAttemptBundle
+
+The immutable bundle includes:
+
+- attempt-reservation ID and digest, work-order and proposed-attempt IDs and versions, causing event, expected stream version, preparation expiry, and fencing token;
+- exact `RolePackage`, accepted profile, prompt payload, `ContextPackage`, and any narrowing-delta digests;
+- mode and exact effective operation grants, including resource and destination scopes;
+- environment manifest and input artifact manifest;
+- output schema, declared output paths, maximum output count and bytes, and retention policy;
+- model, tokenizer, harness, adapter, tool, plugin, skill, and tool-schema versions and digests;
+- network, process, filesystem, credential-reference, call, retry, repair, token, time, and currency ceilings;
+- checkpoint policy, cancellation deadline, reconciliation policy, and result-classification policy; and
+- operation-key namespace, canonical collision-digest algorithm, and the adapter effect-class registry digest.
+
+The bundle contains portable credential references, never values or provider locators. Before activation, its reservation, role, context, prompt, environment, grant, fence, and budget digests must match the reservation exactly. SPEC-005 then binds the bundle digest into the immutable `AttemptDescriptor`; a bundle from an expired, superseded, or different reservation is never executable. No executor or environment mutation may run before that activation receipt exists and matches the bundle. A private `ExecutionLocator` binds the activated bundle and attempt to the provider instance, process or remote handle, attestation, and reconciliation metadata. It is reconstructable from private reducer state after a supervisor restart and cannot grant authority by possession.
+
+Effective capabilities are the intersection of constitutional policy, role ceiling, work order, deployment and mode policy, environment and executor support, and broker-issued operation grant. Any required operation absent from that intersection fails before start.
+
+## Modes and effects
+
+The normative lattice is `observe < shadow < proposal < production`. Mode is a maximum effect class, not a capability grant.
+
+- `observe` may inspect explicitly granted inputs and emit receipts and local results.
+- `shadow` may execute the same computation, but its outputs remain in an isolated namespace and may reach only shadow reducers and indexes; they cannot reach authoritative reducers, active indexes, the outbox, GitHub, or accepted decisions.
+- `proposal` may create candidate artifacts, branches, PRs, or review packets only when each operation is explicitly granted.
+- `production` permits approved operational effects within the same explicit grant; it never permits human-only merge.
+
+Moving upward requires deployment policy and evidence; lowering mode cannot be bypassed through a tool alias or internal subagent.
 
 ## Interfaces and data
 
@@ -46,80 +83,141 @@ Define `ExecutorAdapter`:
 
 ```text
 capabilities() -> ExecutorCapabilities
-prepare(work_order, context_package, capability_grant) -> ExecutionHandle
-start(handle) -> StartReceipt
+prepare(execution_attempt_bundle, operation_key, collision_digest)
+  -> ExecutionHandle + PrepareReceipt
+start(handle, operation_key, collision_digest) -> StartReceipt
 poll(handle) -> ExecutionStatus
-checkpoint(handle) -> CheckpointRef
-cancel(handle, reason) -> CancelReceipt
-collect(handle) -> StructuredResult
-reconcile(handle) -> ReconciliationResult
-cleanup(handle, retention_policy) -> CleanupReceipt
+checkpoint(handle, operation_key, collision_digest)
+  -> SPEC-005 CheckpointEnvelope + CheckpointOperationReceipt
+cancel(handle, reason, operation_key, collision_digest) -> CancelReceipt
+collect(handle, operation_key, collision_digest)
+  -> StructuredResult + CollectionReceipt
+reconcile(execution_locator) -> ReconciliationResult
+cleanup(handle, retention_policy, operation_key, collision_digest)
+  -> CleanupReceipt
 ```
 
 Define `EnvironmentProvider`:
 
 ```text
 capabilities() -> EnvironmentCapabilities
-provision(environment_manifest, attempt_id) -> EnvironmentHandle
+provision(environment_manifest, attempt_id, operation_key, collision_digest)
+  -> EnvironmentHandle + ProvisionReceipt
 attest(handle) -> EnvironmentAttestation
-materialize(handle, input_artifact_refs) -> MaterializationReceipt
-collect_outputs(handle, declared_paths) -> ArtifactRefs
-reset(handle, reset_policy) -> ResetReceipt
-destroy(handle, retention_policy) -> DestructionReceipt
+materialize(handle, input_manifest, operation_key, collision_digest)
+  -> MaterializationReceipt
+freeze_outputs(handle, declared_output_policy, operation_key, collision_digest)
+  -> ArtifactManifest + OutputFreezeReceipt
+reset(handle, reset_policy, operation_key, collision_digest) -> ResetReceipt
+destroy(handle, retention_policy, operation_key, collision_digest)
+  -> DestructionReceipt
+reconcile(execution_locator) -> EnvironmentReconciliation
 ```
 
-`ExecutionEnvironment` pins provider and version, platform, root filesystem or image digest, isolation class, read-only input mounts, read-write attempt workspace, declared output paths, default-deny or explicit network policy, tool and process policy, CPU, memory, process, disk and wall-time limits, credential references, reset and cleanup policy, and retention. `EnvironmentAttestation` reports the effective values observed before execution and fails on mismatch.
+The operation key is stable over process restart and unique to attempt, adapter, operation kind, and declared ordinal or purpose. The collision digest covers every semantic request input, including policy. Every mutating call returns an operation receipt in addition to any domain result. An adapter persists the key, digest, effect class, outcome knowledge, exact domain-result identity, and receipt before acknowledging success. Exact replay returns the same result and receipt. A key/digest collision fails closed. A lost response follows the declared provider-idempotent or reconciliation path; a non-reconcilable ambiguity becomes terminal and is never retried automatically.
 
-Initial environment classes are `trusted_local` for existing deterministic commands and `ephemeral_isolated` for candidate code, community contributions, and hidden evaluation. The latter has no ambient credentials, accepts only the attempt's capability grant, resets from a pinned image or root, and exports only declared artifacts. The specific container or sandbox provider remains replaceable behind conformance.
+`ExecutionEnvironment` pins provider and version, platform, root filesystem or image digest, isolation class, immutable input mounts, attempt workspace, output policy, default-deny or explicit network policy, process and tool policy, CPU, memory, process, file, disk and wall-time limits, credential references, reset, cleanup, and retention. `EnvironmentAttestation` reports effective values before any model or tool starts; a mismatch fails closed.
 
-Implement `reference-local` for deterministic trusted commands and `hermes-cli` for agent work. The Hermes adapter launches a pinned CLI or supported process interface inside the attested environment, passes task and context by immutable files, receives only broker-resolved operation capabilities, requests JSON output matching the work order, captures process and tool receipts, and normalizes exit conditions. Until SPEC-024, live credentials are explicitly supervised and continuous credentialed routing remains disabled; fake references cover conformance.
+Initial environment classes are `trusted_local` and `ephemeral_isolated`. The isolated class has no ambient credentials, accepts only bundle-authorized operations, starts from a pinned root, and exports only frozen declared artifacts. The provider remains replaceable behind conformance tests.
 
-Hermes operator commands create normal `Command` records. Hermes scheduled tasks call the dispatcher tick with a stable identity and do not directly run research mutations.
+Implement `reference-local` for allowlisted deterministic commands and `hermes-cli` for agent work. The Hermes adapter launches a pinned supported process interface inside the attested environment; supplies bundle, prompt, and context through immutable files or an equivalently attested channel; requests typed output; captures model, process, tool, and cost receipts; and normalizes exit conditions. Ambient Hermes memory, user settings, project skills, and global tool discovery are off unless every included source is enumerated and digested in the bundle.
+
+Until SPEC-024, fake credential references cover conformance and live credentials require one supervised invocation. Continuous credentialed execution remains disabled until SPEC-024 supplies authenticated brokering and SPEC-025 supplies supervised deployment and recovery.
+
+Hermes operator input enters the SPEC-006 authenticated path as `ChannelDelivery -> IngressReceipt -> CommandIntent`; Hermes cannot construct a trusted command intent directly. Scheduled Hermes tasks call a SPEC-008-observable dispatcher tick with stable identity and no direct mutation path.
+
+## Output freezing
+
+Output collection resolves every declared path beneath the attempt workspace using the SPEC-003 artifact freezer. It rejects path traversal, symlink and hardlink escapes, device nodes, sockets, unexpected file types, path and inode races, excess files, excess bytes, and sparse-file accounting violations. The collection receipt binds the pre-freeze workspace attestation, path-policy version, complete output manifest, and omitted or rejected paths. A model-reported path is never trusted without this resolution.
 
 ## State and failure behavior
 
-Environment states are `requested -> provisioned -> attested -> materialized -> active -> collecting -> destroyed|retained`, with terminal `mismatch`, `failed`, or `unknown`. Execution states are `prepared`, `starting`, `running`, `checkpointed`, `completed`, `failed`, `cancellation_requested`, `cancelled`, and `unknown`. Lost process, environment, or transport enters `unknown` and then reconciliation. A malformed result receives at most the role contract's bounded repair. Unsupported capabilities or environment mismatch fail before start.
+`ExecutionTransitionRegistry` is a registered immutable machine-readable artifact. Every entry binds machine kind and version, source state, event family, target state, required receipt and guard schemas, permitted effect class, terminal flag, cleanup obligation, and projector version. Reducers reject an event absent from the pinned registry or missing its guard receipt. A registry change creates a new compatibility version; it never changes historical replay.
+
+The initial environment machine contains at least:
+
+```text
+requested -> provisioned -> attested -> materialized -> active
+active -> freezing -> frozen
+frozen -> retained
+frozen -> destroying -> destroyed
+requested|provisioned|attested|materialized|active|freezing
+  -> failed | unknown
+unknown -> reconciling -> provisioned | active | frozen | failed | unknown_terminal
+failed|unknown_terminal -> retained
+failed|unknown_terminal -> destroying -> destroyed
+```
+
+The initial execution machine contains at least:
+
+```text
+prepared -> starting -> running -> completion_reported -> collecting -> completed
+running -> checkpoint_proposed -> running
+prepared|starting|running|completion_reported|collecting
+  -> cancellation_requested -> cancelling
+cancelling -> cancelled | unknown
+starting|running|completion_reported|collecting -> lost | unknown
+lost|unknown -> reconciling
+reconciling -> completion_reported | cancelled | failed | unknown_terminal
+prepared|starting|running|completion_reported|collecting -> failed
+```
+
+`checkpoint_proposed` is an event-backed transient projection; the returned object is the SPEC-005 checkpoint envelope with a registered SPEC-012 payload, not a second runtime-owned checkpoint type. `completed`, `cancelled`, `failed`, and `unknown_terminal` are terminal for that attempt. Every terminal execution state has a deterministic environment retention or destruction obligation, and no terminal state may retain a live unfenced process.
+
+Lost process, environment, or transport state enters `unknown`; the dispatcher performs bounded reconciliation before any retry. A retry after an ambiguous side effect requires adapter-specific reconciliation. Non-reconcilable ambiguity enters `unknown_terminal` and remains blocked until a SPEC-006 authenticated human command produces the shared SPEC-005 `AmbiguousEffectDisposition`. The runtime owns no human-disposition action. `confirmed_absent` may make a new fenced attempt eligible; `confirmed_applied` must pass the owning result reducer; `abandoned_unknown` remains permanently terminal. No transition reopens or retries the same attempt.
+
+After a process or supervisor loss, the old attempt is fenced, reconciled, and closed. A new attempt receives a new fencing token, newly authorized context and bundle, and reducer-validated checkpoint. Harness session reuse may be an implementation optimization only if its content is reset and attested; it never preserves organizational identity or authority.
+
+A malformed result receives only the bounded repair policy from SPEC-013, with separate call and cost receipts and no grant expansion. Unsupported capabilities, unpinned ambient configuration, environment mismatch, or invalid output policy fail before execution or collection.
 
 ## Implementation sequence
 
-1. Freeze environment and executor protocols and build trusted-local, fake-isolated, and reference-executor conformance tests.
-2. Implement one ephemeral isolated provider with attestation, materialization, output extraction, reset, and destruction.
-3. Pin and inventory a Hermes release, CLI surface, config, and license.
-4. Implement Hermes capability discovery, isolated execution, polling, cancellation, and collection.
-5. Run deterministic and research work orders through both adapters and environment classes.
-6. Add operator command and scheduled wake entry points after state parity.
+1. Freeze bundle, environment, locator, executor, operation-identity, transition-registry, and receipt schemas; build reference and fake-provider conformance tests.
+2. Implement one isolated provider with attestation, bounded materialization, output freezing, reset, destruction, and crash reconciliation.
+3. Pin and inventory an eligible Hermes release, process surface, defaults, configuration inputs, and license.
+4. Implement Hermes capability discovery, ambient-state suppression, execution, polling, SPEC-005 checkpoint-envelope proposal, cancellation, collection, transition reduction, and reconciliation.
+5. Run deterministic and research fixtures through reference and Hermes adapters in observe and shadow modes.
+6. Add proposal effects, operator commands, and scheduled wakes only after reducer and private-control dependencies are active.
 
 ## Migration and rollback
 
-Hermes starts in shadow for selected work-order kinds. The current loop remains executable. Rollback disables Hermes routing, cancels or reconciles active handles, and reschedules retryable work on the reference or prior executor.
+Hermes starts in shadow for selected work-order kinds. The current loop remains executable. Rollback disables new Hermes routing, fences and reconciles active handles, and creates new attempts on the prior executor from validated checkpoints. It never reassigns a live attempt handle across adapters.
 
 ## Observability
 
-Record queue-to-start latency, provisioning and cleanup, environment and policy mismatches, effective resources and limits, execution duration, model and tool calls, network denials, tokens, cost, output conformance, checkpoint rate, cancellation latency, unknown outcomes, workspace retention, and result differences by adapter and environment.
+Record queue-to-start, provisioning, attestation, materialization, freeze, reset, and cleanup latency; effective resources; policy mismatches; model and tool calls; network and operation denials; tokens and cost including repair; checkpoint rate; cancellation latency; unknown outcomes; reconciliation result; workspace retention; ambient-state suppressions; and result differences by adapter and environment.
 
 ## Verification
 
-- One work order produces schema-equivalent results on reference and Hermes adapters.
-- Kill and resume uses the organizational checkpoint, not chat memory.
-- Hermes cannot apply a result directly or expand its capability grant.
-- Cancellation and unknown outcome reconcile correctly.
+- One work-order fixture produces schema-equivalent results on reference and Hermes adapters.
+- A bundle compiled for an expired, superseded, mismatched, or unactivated attempt reservation is rejected before any provider effect.
+- Kill and recovery create a new attempt from reducer state, not from chat or Hermes memory.
+- Hermes, a tool, or an internal subagent cannot apply state, widen a grant, or satisfy independence.
+- Shadow outputs can reach only isolated shadow reducers and indexes, never authoritative reducers, active indexes, outbox, GitHub, or accepted decisions.
+- Cancellation, ambiguous effects, and unknown outcomes reconcile according to adapter class.
+- Exact lost-ack replay of prepare, start, checkpoint, cancel, collect, cleanup, provision, materialize, freeze, reset, and destroy returns one original receipt; key/digest collisions perform no effect.
+- Every registered execution and environment transition has positive, illegal-edge, missing-guard, crash, and cleanup-obligation coverage.
 - Removing Hermes leaves discovery, validation, status, and manual operation functional.
-- Adapter conformance runs offline except for an explicitly marked live test.
-- Environment root, mounts, network, process and resource limits, and secret absence match the manifest.
-- Undeclared output paths are not extracted; reset and destruction remove attempt state according to policy.
-- Candidate and community-code fixtures cannot use `trusted_local`.
+- Environment roots, mounts, network, processes, limits, and credential absence match the manifest.
+- Path traversal, hardlink, symlink, device, socket, excess-count, sparse-file, and race fixtures cannot escape output policy.
+- Candidate, community, and hidden-evaluation fixtures cannot use `trusted_local`.
+- Undeclared ambient Hermes settings, memory, skills, or tools cause conformance failure.
 
 ## Acceptance criteria
 
-- [ ] Adapter protocol has a public conformance suite.
-- [ ] Hermes version, configuration, model, tools, and receipts are pinned in provenance.
-- [ ] Canonical state survives session deletion.
-- [ ] Hermes cron is only a wake mechanism.
-- [ ] A non-Hermes executor remains usable.
-- [ ] Live smoke tests cover start, checkpoint, completion, cancellation, and recovery.
-- [ ] A versioned environment provider passes provision, attest, isolate, limit, collect, reset, destroy, and crash conformance.
-- [ ] Candidate, community, and hidden-evaluation jobs require an eligible ephemeral environment.
+- [ ] Executor and environment protocols have public offline conformance suites.
+- [ ] Every call consumes one immutable provenance-complete `ExecutionAttemptBundle`.
+- [ ] SPEC-005 activation binds the exact reservation and bundle before any runtime mutation.
+- [ ] Hermes version, configuration sources, model, tools, and receipts are pinned.
+- [ ] Canonical state survives session and workspace deletion.
+- [ ] Mode ceilings and operation grants are mechanically independent.
+- [ ] Hermes cron is only a wake mechanism and a non-Hermes executor remains usable.
+- [ ] Output freezing and environment lifecycle pass adversarial filesystem and crash tests.
+- [ ] All mutating runtime operations have stable operation keys, collision digests, persistent receipts, and declared ambiguity behavior.
+- [ ] A machine-readable transition registry rejects illegal edges and requires terminal cleanup or retention receipts.
+- [ ] Candidate, community, and hidden-evaluation jobs require eligible isolation.
+- [ ] Continuous credentialed operation remains gated on SPEC-024 and SPEC-025.
 
 ## Pull-request evidence
 
-Attach version and license inventory, environment and adapter conformance reports, effective-environment attestation, isolation and resource-limit tests, output-extraction and cleanup receipts, live Hermes smoke trace, session-deletion recovery, cancellation test, and Hermes-removal fallback demonstration.
+Attach version and license inventory, bundle golden, environment and adapter conformance reports, effective-environment attestation, ambient-state suppression test, mode-isolation tests, adversarial output-freezing suite, cleanup receipts, live supervised Hermes smoke trace, process-loss recovery, cancellation and unknown-outcome tests, and Hermes-removal fallback demonstration.

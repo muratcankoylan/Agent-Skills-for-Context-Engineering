@@ -1,10 +1,14 @@
 # SPEC-003: Schema registry and artifact identity
 
 Status: implemented
+Revision: 1
+Revises: none
 Wave: 0
 Classification: split
 Owners: platform steward agent; human maintainer
 Depends on: SPEC-001, SPEC-002
+Dependency revisions: SPEC-001@1, SPEC-002@1
+Adoption decision: ADR-0005
 
 ## Decision
 

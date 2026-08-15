@@ -1,6 +1,8 @@
 # SPEC-NNN: Title
 
 Status: draft
+Revision: 1
+Revises: none
 Wave: N
 Classification: public | private | split
 Owners: human maintainer; named agent role
@@ -36,6 +38,8 @@ Define commands, events, schemas, API methods, files, or adapter methods. Includ
 ## State and failure behavior
 
 Define the state machine, legal transitions, retry behavior, timeouts, reconciliation, recovery, and terminal states. State who may cause each privileged transition.
+
+Lifecycle status changes are isolated from contract edits. The transition into `architecture_reviewed` adds `Dependency revisions: SPEC-NNN@revision, ...` for the exact direct dependency set, or `none`; this binding is immutable for the revision. A terminal `amended`, `superseded`, or `retired` revision adds `Lifecycle decision: ADR-NNNN`; amended and superseded revisions also add `Replacement: SPEC-NNN@next-revision`. The accepted ADR must include `Lifecycle transition: SPEC-NNN@revision -> amended|superseded|retired -> SPEC-NNN@next-revision|none` that matches the transition exactly. The next draft increments `Revision` and binds the exact terminal predecessor bytes in `Revises`.
 
 ## Implementation sequence
 

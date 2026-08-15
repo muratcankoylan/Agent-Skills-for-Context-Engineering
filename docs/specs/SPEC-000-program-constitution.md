@@ -1,10 +1,14 @@
 # SPEC-000: Program constitution and authority model
 
 Status: implemented
+Revision: 1
+Revises: none
 Wave: 0
 Classification: public
 Owners: human maintainer; governance agent
 Depends on: none
+Dependency revisions: none
+Adoption decision: ADR-0005
 
 ## Decision
 

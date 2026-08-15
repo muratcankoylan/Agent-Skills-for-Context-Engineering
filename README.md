@@ -299,6 +299,7 @@ python3 -m pip install --require-hashes -r requirements-dev.txt
 python3 -m unittest researcher.scripts.tests.test_skill_frontmatter
 python3 researcher/scripts/validate_platform_compat.py --require-reference-validator
 python3 researcher/scripts/validate_public_repo.py
+python3 researcher/scripts/validate_spec_lifecycle.py --base-ref origin/main
 python3 researcher/scripts/validate_repo.py --strict
 python3 researcher/scripts/skill_health.py --strict --no-history
 python3 researcher/scripts/run_benchmarks.py
@@ -322,10 +323,10 @@ See [researcher/runbooks/continuous-operation.md](researcher/runbooks/continuous
 
 ### Guarantees
 
-- The loop never invokes paid LLMs or makes outbound writes; HTTP retrieval is stdlib-only with a 1.5 MB cap and a 30-second timeout.
+- The current continuous loop never invokes paid LLMs or makes outbound writes; HTTP retrieval is stdlib-only with a 1.5 MB cap and a 30-second timeout.
 - Mechanism promotion requires a recorded human reviewer and a passing run-readiness check.
 - All queue mutations are atomic (temp file + `os.replace`) and serialized via `fcntl` locks.
-- Agents may prepare PRs after gates pass; merge and push remain human-controlled.
+- Governed proposer agents may create candidate commits, push proposal branches, and open PRs after their gates pass. Only a verified human may merge or otherwise advance the accepted default-branch pointer.
 
 ## Star History
 <img width="3664" height="2808" alt="star-history-2026526" src="https://github.com/user-attachments/assets/c9f88769-21b8-4762-9472-d4cf1fe1c802" />
