@@ -22,39 +22,40 @@ from datetime import date
 from pathlib import Path, PurePosixPath
 from typing import Any, Iterable
 
-try:
-    from skill_frontmatter import parse_frontmatter  # type: ignore[import-not-found]
-except ModuleNotFoundError:  # Imported as researcher.scripts.build_inventory.
+if __package__:
     from researcher.scripts.skill_frontmatter import parse_frontmatter
-
-try:
-    from validate_spec_lifecycle import (  # type: ignore[import-not-found]
+    from researcher.scripts.validate_authority_contract import (
         AUTHORITY_CONFORMANCE_RECEIPT_PATH,
         AUTHORITY_CONSTITUTION_POLICY_PATH,
+        AUTHORITY_EVALUATOR_COMPONENT_PATHS,
         AUTHORITY_FIXTURE_MANIFEST_PATH,
         AUTHORITY_IMPLEMENTED_STATUSES,
-        AUTHORITY_VALIDATOR_PATH,
         AUTHORITY_VOCABULARY_MIN_REVISION,
         AUTHORITY_VOCABULARY_PATH,
         AUTHORITY_VOCABULARY_READY_STATUSES,
         AUTHORITY_VOCABULARY_SPEC,
         AuthorityVocabularyBinding,
+    )
+    from researcher.scripts.validate_spec_lifecycle import (
         SpecRevision,
         load_candidate_authority_vocabulary,
         parse_spec_revision,
     )
-except ModuleNotFoundError:  # Imported as researcher.scripts.build_inventory.
-    from researcher.scripts.validate_spec_lifecycle import (
+else:  # Direct script execution resolves siblings from this script's directory.
+    from skill_frontmatter import parse_frontmatter  # type: ignore[import-not-found]
+    from validate_authority_contract import (  # type: ignore[import-not-found]
         AUTHORITY_CONFORMANCE_RECEIPT_PATH,
         AUTHORITY_CONSTITUTION_POLICY_PATH,
+        AUTHORITY_EVALUATOR_COMPONENT_PATHS,
         AUTHORITY_FIXTURE_MANIFEST_PATH,
         AUTHORITY_IMPLEMENTED_STATUSES,
-        AUTHORITY_VALIDATOR_PATH,
         AUTHORITY_VOCABULARY_MIN_REVISION,
         AUTHORITY_VOCABULARY_PATH,
         AUTHORITY_VOCABULARY_READY_STATUSES,
         AUTHORITY_VOCABULARY_SPEC,
         AuthorityVocabularyBinding,
+    )
+    from validate_spec_lifecycle import (  # type: ignore[import-not-found]
         SpecRevision,
         load_candidate_authority_vocabulary,
         parse_spec_revision,
@@ -170,9 +171,27 @@ VALIDATOR_OWNERSHIP = (
         "id": "governance-policy",
         "path": "researcher/scripts/validate_governance.py",
         "owns": [
-            "Constitution decision evaluation",
             "constitutional invariants",
             "generated authority view",
+            "authority conformance orchestration",
+        ],
+    },
+    {
+        "id": "authority-policy-evaluator",
+        "path": "researcher/scripts/governance_policy.py",
+        "owns": [
+            "Constitution decision evaluation",
+            "fail-closed policy rule matching",
+        ],
+    },
+    {
+        "id": "authority-catalog-contract",
+        "path": "researcher/scripts/validate_authority_contract.py",
+        "owns": [
+            "authority registry, fixture, and semantic profile validation",
+            "structural authority-policy closure",
+            "authority evaluator-bundle identity",
+            "authority conformance receipt validation",
         ],
     },
     {
@@ -193,9 +212,7 @@ VALIDATOR_OWNERSHIP = (
         "owns": [
             "base-aware specification status transitions",
             "accepted contract revision identity",
-            "authority registry, fixture, and semantic profile validation",
-            "structural authority-policy closure",
-            "authority conformance receipt validation",
+            "promoted revision predecessor authority",
             "terminal specification decisions",
         ],
     },
@@ -2070,7 +2087,7 @@ class InventoryBuilder:
         if os.path.lexists(conformance_path):
             for relative in (
                 AUTHORITY_CONSTITUTION_POLICY_PATH,
-                AUTHORITY_VALIDATOR_PATH,
+                *AUTHORITY_EVALUATOR_COMPONENT_PATHS,
             ):
                 authority_input = self.root / relative
                 if os.path.lexists(authority_input):
@@ -2146,8 +2163,18 @@ class InventoryBuilder:
                     "constitution_policy_digest": conformance.constitution_policy_digest,
                     "registry_digest": conformance.registry_digest,
                     "fixture_manifest_digest": conformance.fixture_manifest_digest,
-                    "validator_digest": conformance.validator_digest,
-                    "validator_version": conformance.validator_version,
+                    "validator_bundle": {
+                        "algorithm": conformance.validator_bundle_algorithm,
+                        "version": conformance.validator_bundle_version,
+                        "components": [
+                            {
+                                "path": component.path,
+                                "digest": component.digest,
+                            }
+                            for component in conformance.validator_bundle_components
+                        ],
+                        "digest": conformance.validator_bundle_digest,
+                    },
                     "case_count": conformance.case_count,
                 }
             authority_spec_record["authority_vocabulary"] = authority_record

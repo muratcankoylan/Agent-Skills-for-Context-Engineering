@@ -26,13 +26,14 @@ from researcher.scripts.tests.test_spec_lifecycle import (
     canonical_json,
     conforming_constitution,
 )
-from researcher.scripts.validate_spec_lifecycle import (
+from researcher.scripts.validate_authority_contract import (
     AUTHORITY_CONFORMANCE_RECEIPT_PATH,
     AUTHORITY_CONSTITUTION_POLICY_PATH,
+    AUTHORITY_EVALUATOR_COMPONENT_PATHS,
     AUTHORITY_FIXTURE_MANIFEST_PATH,
-    AUTHORITY_VALIDATOR_PATH,
     AUTHORITY_VOCABULARY_PATH,
     AuthorityVocabularyBinding,
+    build_authority_evaluator_bundle,
     parse_authority_vocabulary,
 )
 
@@ -100,6 +101,8 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/benchmarks/sdk-runner/test/denyCursorSdkLoader.mjs",
         "researcher/benchmarks/sdk-runner/test/registerDenyCursorSdk.mjs",
         "researcher/scripts/validate_governance.py",
+        "researcher/scripts/governance_policy.py",
+        "researcher/scripts/validate_authority_contract.py",
         "researcher/scripts/build_inventory.py",
         "researcher/scripts/render_router_report.py",
         "researcher/scripts/tests/test_render_router_report.py",
@@ -228,11 +231,14 @@ def write_authority_revision(
             encoding="utf-8",
         )
         constitution = Constitution.load(policy_path)
-        validator_bytes = (root / AUTHORITY_VALIDATOR_PATH).read_bytes()
+        evaluator_components = tuple(
+            (relative, (root / relative).read_bytes())
+            for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS
+        )
         _receipt, receipt_bytes = authority_conformance_document(
             binding,
             constitution,
-            validator_bytes,
+            evaluator_components,
         )
         receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
         receipt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -474,6 +480,81 @@ class RepositoryInventoryTests(unittest.TestCase):
             "researcher/scripts/tests/test_render_router_report.py",
             support_paths,
         )
+
+    def test_authority_validator_ownership_and_sources_are_split_exactly(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        validators = {
+            record["id"]: record
+            for record in inventory["artifacts"]["validators"]["records"]
+        }
+        self.assertEqual(
+            validators["authority-policy-evaluator"],
+            {
+                "id": "authority-policy-evaluator",
+                "path": "researcher/scripts/governance_policy.py",
+                "owns": [
+                    "Constitution decision evaluation",
+                    "fail-closed policy rule matching",
+                ],
+                "digest": validators["authority-policy-evaluator"]["digest"],
+            },
+        )
+        self.assertEqual(
+            validators["authority-catalog-contract"],
+            {
+                "id": "authority-catalog-contract",
+                "path": "researcher/scripts/validate_authority_contract.py",
+                "owns": [
+                    "authority registry, fixture, and semantic profile validation",
+                    "structural authority-policy closure",
+                    "authority evaluator-bundle identity",
+                    "authority conformance receipt validation",
+                ],
+                "digest": validators["authority-catalog-contract"]["digest"],
+            },
+        )
+        self.assertEqual(
+            validators["specification-lifecycle"]["owns"],
+            [
+                "base-aware specification status transitions",
+                "accepted contract revision identity",
+                "promoted revision predecessor authority",
+                "terminal specification decisions",
+            ],
+        )
+        sources = {record["path"]: record for record in inventory["sources"]}
+        for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+            with self.subTest(relative=relative):
+                self.assertEqual(
+                    sources[relative]["digest"],
+                    f"sha256:{hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()}",
+                )
+
+    def test_authority_evaluator_mutations_update_inventory_source_identity(self) -> None:
+        for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+            with self.subTest(relative=relative):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                before = InventoryBuilder(root).build()
+                path = root / relative
+                path.write_bytes(path.read_bytes() + b"\n# inventory mutation\n")
+                builder = InventoryBuilder(root)
+                after = builder.build()
+                self.assertEqual(builder.findings, [])
+                before_sources = {
+                    record["path"]: record for record in before["sources"]
+                }
+                after_sources = {
+                    record["path"]: record for record in after["sources"]
+                }
+                self.assertNotEqual(
+                    before_sources[relative]["digest"],
+                    after_sources[relative]["digest"],
+                )
+                self.assertNotEqual(
+                    before["source_tree_digest"],
+                    after["source_tree_digest"],
+                )
 
     def test_specification_program_is_inventory_backed(self) -> None:
         inventory = InventoryBuilder(ROOT).build()
@@ -1068,6 +1149,15 @@ class RepositoryInventoryTests(unittest.TestCase):
         receipt_path.write_bytes(canonical_json(receipt))
         self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
 
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root, status="implemented", include_conformance=True)
+        receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        receipt["validator_bundle"]["digest"] = "sha256:" + "0" * 64
+        receipt_path.write_bytes(canonical_json(receipt))
+        self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
     def test_authority_inputs_are_inventory_source_bound(self) -> None:
         temporary, root = self.fixture()
         self.addCleanup(temporary.cleanup)
@@ -1085,7 +1175,7 @@ class RepositoryInventoryTests(unittest.TestCase):
             AUTHORITY_FIXTURE_MANIFEST_PATH,
             AUTHORITY_CONFORMANCE_RECEIPT_PATH,
             AUTHORITY_CONSTITUTION_POLICY_PATH,
-            AUTHORITY_VALIDATOR_PATH,
+            *AUTHORITY_EVALUATOR_COMPONENT_PATHS,
         }
         self.assertTrue(expected_paths.issubset(sources))
         for relative in expected_paths:
@@ -1106,6 +1196,16 @@ class RepositoryInventoryTests(unittest.TestCase):
             binding.fixture_manifest_digest,
         )
         self.assertIn("policy_conformance", authority_record)
+        expected_bundle = build_authority_evaluator_bundle(
+            tuple(
+                (relative, (root / relative).read_bytes())
+                for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS
+            )
+        )
+        self.assertEqual(
+            authority_record["policy_conformance"]["validator_bundle"],
+            expected_bundle.to_receipt_value(),
+        )
 
         before = inventory["source_tree_digest"]
         receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
@@ -1115,6 +1215,40 @@ class RepositoryInventoryTests(unittest.TestCase):
         )
         after = InventoryBuilder(root).build()["source_tree_digest"]
         self.assertNotEqual(before, after)
+
+    def test_bound_authority_evaluator_mutation_invalidates_receipt_and_source_tree(self) -> None:
+        for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+            with self.subTest(relative=relative):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                write_authority_revision(
+                    root,
+                    status="implemented",
+                    include_conformance=True,
+                )
+                before_builder = InventoryBuilder(root)
+                before = before_builder.build()
+                self.assertEqual(before_builder.findings, [])
+
+                component = root / relative
+                component.write_bytes(component.read_bytes() + b"\n# changed component\n")
+                after_builder = InventoryBuilder(root)
+                after = after_builder.build()
+                self.assertIn(
+                    "SPEC_AUTHORITY_VOCABULARY_INVALID",
+                    {finding.code for finding in after_builder.findings},
+                )
+                after_sources = {
+                    record["path"]: record for record in after["sources"]
+                }
+                self.assertEqual(
+                    after_sources[relative]["digest"],
+                    f"sha256:{hashlib.sha256(component.read_bytes()).hexdigest()}",
+                )
+                self.assertNotEqual(
+                    before["source_tree_digest"],
+                    after["source_tree_digest"],
+                )
 
     def test_downstream_stage_gates_use_validated_authority_binding(self) -> None:
         temporary, root = self.fixture()

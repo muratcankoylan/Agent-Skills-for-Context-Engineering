@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -22,13 +23,17 @@ from researcher.scripts.validate_governance import (
     validate_fixtures,
     validate_invariants,
 )
-from researcher.scripts.validate_spec_lifecycle import (
+from researcher.scripts.validate_authority_contract import (
     AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+    AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
+    AUTHORITY_EVALUATOR_BUNDLE_VERSION,
+    AUTHORITY_EVALUATOR_COMPONENT_PATHS,
     AUTHORITY_FIXTURE_MANIFEST_PATH,
-    AUTHORITY_VALIDATOR_PATH,
+    AUTHORITY_VALIDATOR_BUNDLE_ALGORITHM,
     AUTHORITY_VOCABULARY_PATH,
     POLICY_ONLY_READ_PROFILES,
     REQUIRED_AUTHORITY_PROFILES,
+    build_authority_evaluator_bundle,
     expected_authority_catalog_boundary_cases,
     expected_authority_fixture_cases,
     expected_authority_policy_conditions,
@@ -133,6 +138,15 @@ def conforming_policy_document() -> dict:
     }
 
 
+def evaluator_component_bytes(
+    root: Path = ROOT,
+) -> tuple[tuple[str, bytes], ...]:
+    return tuple(
+        (relative, (root / relative).read_bytes())
+        for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS
+    )
+
+
 def write_revision_two_root(
     root: Path,
     *,
@@ -165,9 +179,10 @@ def write_revision_two_root(
     fixture_path.parent.mkdir(parents=True, exist_ok=True)
     registry_path.write_bytes(registry_bytes)
     fixture_path.write_bytes(fixture_bytes)
-    validator_path = root / AUTHORITY_VALIDATOR_PATH
-    validator_path.parent.mkdir(parents=True, exist_ok=True)
-    validator_path.write_bytes((ROOT / AUTHORITY_VALIDATOR_PATH).read_bytes())
+    for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+        component_path = root / relative
+        component_path.parent.mkdir(parents=True, exist_ok=True)
+        component_path.write_bytes((ROOT / relative).read_bytes())
     constitution_path = root / "governance/constitution.yaml"
     constitution_path.write_text(
         yaml.safe_dump(
@@ -352,6 +367,53 @@ class ConstitutionTests(unittest.TestCase):
 
 
 class AuthorityConformanceIntegrationTests(unittest.TestCase):
+    def test_evaluator_bundle_manifest_is_exact_and_deterministic(self) -> None:
+        components = evaluator_component_bytes()
+        first = build_authority_evaluator_bundle(components)
+        second = build_authority_evaluator_bundle(components)
+
+        self.assertEqual(first, second)
+        self.assertEqual(first.algorithm, AUTHORITY_VALIDATOR_BUNDLE_ALGORITHM)
+        self.assertEqual(first.version, AUTHORITY_EVALUATOR_BUNDLE_VERSION)
+        self.assertEqual(
+            tuple(component.path for component in first.components),
+            AUTHORITY_EVALUATOR_COMPONENT_PATHS,
+        )
+        self.assertRegex(first.digest, r"^sha256:[0-9a-f]{64}$")
+
+        malformed_component_sets = {
+            "missing": components[:-1],
+            "extra": (
+                *components,
+                ("researcher/scripts/validate_spec_lifecycle.py", b"unrelated"),
+            ),
+            "relocated": (
+                ("researcher/scripts/relocated_governance_policy.py", components[0][1]),
+                components[1],
+            ),
+        }
+        for name, malformed in malformed_component_sets.items():
+            with self.subTest(name=name), self.assertRaisesRegex(
+                ValueError,
+                "exact canonical path set",
+            ):
+                build_authority_evaluator_bundle(malformed)
+        self.assertEqual(
+            build_authority_evaluator_bundle(tuple(reversed(components))),
+            first,
+        )
+        with self.assertRaisesRegex(ValueError, "paths must be unique"):
+            build_authority_evaluator_bundle((components[0], components[0]))
+
+        for index, (path, exact_bytes) in enumerate(components):
+            mutated = list(components)
+            mutated[index] = (path, exact_bytes + b"\n")
+            with self.subTest(component=path):
+                self.assertNotEqual(
+                    build_authority_evaluator_bundle(mutated).digest,
+                    first.digest,
+                )
+
     def test_current_revision_one_repository_remains_backward_compatible(self) -> None:
         policy = Constitution.load(CONSTITUTION_PATH)
         self.assertEqual(
@@ -474,9 +536,29 @@ class AuthorityConformanceIntegrationTests(unittest.TestCase):
             )
             self.assertEqual(receipt_path.read_bytes(), first)
             receipt = json.loads(first)
+            self.assertEqual(
+                receipt["schema_version"],
+                AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
+            )
             self.assertEqual(receipt["result"], "pass")
             self.assertEqual(receipt["skipped_case_count"], 0)
             self.assertEqual(receipt["case_count"], len(receipt["cases"]))
+            self.assertEqual(
+                receipt["validator_bundle"]["algorithm"],
+                AUTHORITY_VALIDATOR_BUNDLE_ALGORITHM,
+            )
+            self.assertEqual(
+                receipt["validator_bundle"]["version"],
+                AUTHORITY_EVALUATOR_BUNDLE_VERSION,
+            )
+            self.assertEqual(
+                tuple(
+                    component["path"]
+                    for component in receipt["validator_bundle"]["components"]
+                ),
+                AUTHORITY_EVALUATOR_COMPONENT_PATHS,
+            )
+            self.assertNotIn("validator", receipt)
             self.assertNotIn(str(root), first.decode("utf-8"))
             self.assertEqual(
                 list(receipt_path.parent.glob(f".{receipt_path.name}.*.tmp")),
@@ -566,8 +648,31 @@ class AuthorityConformanceIntegrationTests(unittest.TestCase):
             "fixture": lambda value: value.__setitem__(
                 "fixture_manifest_digest", "sha256:" + "0" * 64
             ),
-            "validator": lambda value: value["validator"].__setitem__(
+            "bundle_digest": lambda value: value["validator_bundle"].__setitem__(
                 "digest", "sha256:" + "0" * 64
+            ),
+            "component_digest": lambda value: value["validator_bundle"][
+                "components"
+            ][0].__setitem__("digest", "sha256:" + "0" * 64),
+            "component_missing": lambda value: value["validator_bundle"][
+                "components"
+            ].pop(),
+            "component_extra": lambda value: value["validator_bundle"][
+                "components"
+            ].append(
+                {
+                    "path": "researcher/scripts/validate_spec_lifecycle.py",
+                    "digest": "sha256:" + "0" * 64,
+                }
+            ),
+            "component_reordered": lambda value: value["validator_bundle"][
+                "components"
+            ].reverse(),
+            "component_relocated": lambda value: value["validator_bundle"][
+                "components"
+            ][0].__setitem__(
+                "path",
+                "researcher/scripts/relocated_governance_policy.py",
             ),
         }
         for name, mutate in mutations.items():
@@ -598,7 +703,7 @@ class AuthorityConformanceIntegrationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 validate_authority_conformance(root, policy, write=False)
 
-    def test_exact_policy_and_validator_source_bytes_are_bound(self) -> None:
+    def test_exact_policy_and_evaluator_component_source_bytes_are_bound(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             policy = write_revision_two_root(root, status="implemented")
@@ -628,14 +733,108 @@ class AuthorityConformanceIntegrationTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     validate_authority_conformance(root, policy, write=False)
 
+        for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                policy = write_revision_two_root(root, status="implemented")
+                validate_authority_conformance(root, policy, write=True)
+                component_path = root / relative
+                component_path.write_bytes(component_path.read_bytes() + b"\n")
+                with self.assertRaises(ValueError):
+                    validate_authority_conformance(root, policy, write=False)
+
+    def test_evaluator_component_relocation_via_symlink_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             policy = write_revision_two_root(root, status="implemented")
-            validate_authority_conformance(root, policy, write=True)
-            validator_path = root / AUTHORITY_VALIDATOR_PATH
-            validator_path.write_bytes(validator_path.read_bytes() + b"\n")
-            with self.assertRaises(ValueError):
-                validate_authority_conformance(root, policy, write=False)
+            component_path = root / AUTHORITY_EVALUATOR_COMPONENT_PATHS[0]
+            relocated_path = root / "relocated" / component_path.name
+            relocated_path.parent.mkdir(parents=True)
+            relocated_path.write_bytes(component_path.read_bytes())
+            component_path.unlink()
+            component_path.symlink_to(relocated_path)
+
+            with self.assertRaisesRegex(ValueError, "symlink ancestors"):
+                validate_authority_conformance(root, policy, write=True)
+
+    def test_evaluator_component_symlinked_ancestors_fail_closed(self) -> None:
+        for destination in ("external", "internal"):
+            with self.subTest(destination=destination), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary) / "repository"
+                policy = write_revision_two_root(root, status="implemented")
+                scripts_path = root / "researcher/scripts"
+                if destination == "external":
+                    relocated_path = ROOT / "researcher/scripts"
+                    shutil.rmtree(scripts_path)
+                else:
+                    relocated_path = root / "relocated-scripts"
+                    scripts_path.rename(relocated_path)
+                scripts_path.symlink_to(relocated_path, target_is_directory=True)
+
+                with self.assertRaisesRegex(ValueError, "symlink ancestors"):
+                    validate_authority_conformance(root, policy, write=True)
+
+    def test_receipt_cannot_bind_evaluator_bytes_that_are_not_executing(self) -> None:
+        for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                policy = write_revision_two_root(root, status="implemented")
+                component_path = root / relative
+                component_path.write_bytes(
+                    b'raise RuntimeError("POISONED_EVALUATOR_WAS_NOT_EXECUTED")\n'
+                )
+
+                with self.assertRaisesRegex(ValueError, "executing evaluator"):
+                    validate_authority_conformance(root, policy, write=True)
+                self.assertFalse((root / AUTHORITY_CONFORMANCE_RECEIPT_PATH).exists())
+
+    def test_receipt_write_rejects_a_symlinked_output_parent(self) -> None:
+        for destination in ("external", "internal"):
+            with self.subTest(destination=destination), tempfile.TemporaryDirectory() as temporary:
+                temporary_root = Path(temporary)
+                root = temporary_root / "repository"
+                policy = write_revision_two_root(root, status="implemented")
+                generated_path = root / "governance/generated"
+                if destination == "external":
+                    output_root = temporary_root / "external-output"
+                else:
+                    output_root = root / "relocated-output"
+                output_root.mkdir(parents=True)
+                generated_path.symlink_to(output_root, target_is_directory=True)
+
+                with self.assertRaisesRegex(ValueError, "symlink ancestor"):
+                    validate_authority_conformance(root, policy, write=True)
+                self.assertFalse(
+                    (output_root / Path(AUTHORITY_CONFORMANCE_RECEIPT_PATH).name).exists()
+                )
+
+    def test_unrelated_lifecycle_bytes_do_not_change_evaluator_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(root, status="implemented")
+            lifecycle_path = root / "researcher/scripts/validate_spec_lifecycle.py"
+            lifecycle_path.write_bytes(b"unrelated lifecycle implementation A\n")
+
+            self.assertEqual(
+                validate_authority_conformance(root, policy, write=True),
+                [],
+            )
+            receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+            first = receipt_path.read_bytes()
+            first_bundle = json.loads(first)["validator_bundle"]
+
+            lifecycle_path.write_bytes(b"unrelated lifecycle implementation B\n")
+            self.assertEqual(
+                validate_authority_conformance(root, policy, write=False),
+                [],
+            )
+            self.assertEqual(
+                validate_authority_conformance(root, policy, write=True),
+                [],
+            )
+            second = receipt_path.read_bytes()
+            self.assertEqual(second, first)
+            self.assertEqual(json.loads(second)["validator_bundle"], first_bundle)
 
     def test_structural_backdoor_and_overpermissive_policy_cannot_emit_receipt(
         self,
