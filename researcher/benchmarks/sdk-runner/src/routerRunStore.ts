@@ -16,6 +16,7 @@ import {
 import {
   DurableFsError,
   NodeDurableFileSystem,
+  type DurableDirectoryEntry,
   type DurableFileSystem,
 } from "./durableFs.ts";
 import {
@@ -102,6 +103,14 @@ export type RouterAttemptStatus =
   | "provider_error"
   | "cancelled"
   | "model_unavailable";
+
+const OUTCOME_STATUSES: ReadonlySet<RouterAttemptStatus> = new Set([
+  "finished",
+  "format_failure",
+  "provider_error",
+  "cancelled",
+  "model_unavailable",
+]);
 
 export interface RouterAttemptSettlement {
   readonly status: RouterAttemptStatus;
@@ -196,6 +205,14 @@ interface LeaseAuthority {
   readonly lockBody: Buffer;
 }
 
+interface RecordValidationAuthority {
+  readonly manifestDigest: Sha256Digest;
+  readonly maximumAttempts: number;
+  readonly unitCostMicrousd: number;
+  readonly itemsById: ReadonlyMap<Sha256Digest, RouterPlanItem>;
+  readonly skillIds: ReadonlySet<string>;
+}
+
 /**
  * Cooperative same-UID state store. A process with the same UID can still
  * tamper between syscalls; every detected ambiguity therefore blocks calls.
@@ -208,7 +225,11 @@ export class RouterRunStore {
 
   readonly #authorityManifest: BuiltRouterRunManifest;
   readonly #authorityPlanBytes: Buffer;
-  private readonly itemsById: ReadonlyMap<Sha256Digest, RouterPlanItem>;
+  // These authorities remove record x manifest membership scans and cap
+  // allocation. The prototype still performs a linear, in-memory state scan.
+  readonly #recordAuthority: RecordValidationAuthority;
+  readonly #maximumAttemptRecords: number;
+  readonly #maximumTerminalRecords: number;
   private readonly leaseAuthorities = new WeakMap<object, LeaseAuthority>();
   private readonly activeClaims = new WeakMap<object, RouterRunLease>();
 
@@ -237,9 +258,20 @@ export class RouterRunStore {
       throw new RouterRunStoreError("INVALID_RECORD", "manifest or plan exceeds the durable admin limit");
     }
     this.fileSystem = fileSystem ?? new NodeDurableFileSystem(this.resultsRoot);
-    this.itemsById = new Map(
+    const itemsById = new Map(
       reparsed.manifest.plan.items.map((item) => [item.item_id, item]),
     );
+    const skillIds = new Set(reparsed.manifest.inputs.skill_catalog.skill_ids);
+    this.#recordAuthority = Object.freeze({
+      manifestDigest: reparsed.digest,
+      maximumAttempts: reparsed.manifest.plan.max_format_attempts,
+      unitCostMicrousd: reparsed.manifest.cost.estimated_micro_usd_per_sdk_attempt,
+      itemsById,
+      skillIds,
+    });
+    this.#maximumAttemptRecords =
+      reparsed.manifest.plan.item_count * reparsed.manifest.plan.max_format_attempts;
+    this.#maximumTerminalRecords = reparsed.manifest.plan.item_count;
     Object.freeze(this);
   }
 
@@ -407,7 +439,7 @@ export class RouterRunStore {
       claim,
       sha256Bytes(stored.claimBytes),
       settlement,
-      this.#authorityManifest,
+      this.#recordAuthority,
     );
     const body = canonicalFileBytes(outcome as unknown as JsonValue);
     await this.writeExclusive(
@@ -571,7 +603,7 @@ export class RouterRunStore {
       }
     }
     for (const itemId of terminals.keys()) {
-      if (!this.itemsById.has(itemId)) {
+      if (!this.#recordAuthority.itemsById.has(itemId)) {
         throw new RouterRunStoreError("FOREIGN_STATE", "terminal record names a foreign plan item");
       }
     }
@@ -595,8 +627,11 @@ export class RouterRunStore {
 
   private async readClaims(): Promise<Map<string, { record: RouterInflightClaim; bytes: Buffer }>> {
     const result = new Map<string, { record: RouterInflightClaim; bytes: Buffer }>();
-    for (const { name, bytes, value } of await this.readRecordDirectory(CLAIMS_DIR)) {
-      const record = validateClaim(value, this.#authorityManifest);
+    for (const { name, bytes, value } of await this.readRecordDirectory(
+      CLAIMS_DIR,
+      this.#maximumAttemptRecords,
+    )) {
+      const record = validateClaim(value, this.#recordAuthority);
       const expected = attemptFileName(this.#authorityManifest.digest, record.item_id, record.attempt);
       if (name !== expected) wrongFilename(name);
       const key = attemptKey(record.item_id, record.attempt);
@@ -608,8 +643,11 @@ export class RouterRunStore {
 
   private async readOutcomes(): Promise<Map<string, { record: RouterAttemptOutcome; bytes: Buffer }>> {
     const result = new Map<string, { record: RouterAttemptOutcome; bytes: Buffer }>();
-    for (const { name, bytes, value } of await this.readRecordDirectory(OUTCOMES_DIR)) {
-      const record = validateOutcome(value, this.#authorityManifest);
+    for (const { name, bytes, value } of await this.readRecordDirectory(
+      OUTCOMES_DIR,
+      this.#maximumAttemptRecords,
+    )) {
+      const record = validateOutcome(value, this.#recordAuthority);
       const expected = attemptFileName(this.#authorityManifest.digest, record.item_id, record.attempt);
       if (name !== expected) wrongFilename(name);
       const key = attemptKey(record.item_id, record.attempt);
@@ -621,8 +659,11 @@ export class RouterRunStore {
 
   private async readTerminals(): Promise<Map<Sha256Digest, { record: RouterTerminalRecord; bytes: Buffer }>> {
     const result = new Map<Sha256Digest, { record: RouterTerminalRecord; bytes: Buffer }>();
-    for (const { name, bytes, value } of await this.readRecordDirectory(TERMINALS_DIR)) {
-      const record = validateTerminal(value, this.#authorityManifest);
+    for (const { name, bytes, value } of await this.readRecordDirectory(
+      TERMINALS_DIR,
+      this.#maximumTerminalRecords,
+    )) {
+      const record = validateTerminal(value, this.#recordAuthority);
       const expected = terminalFileName(this.#authorityManifest.digest, record.item_id);
       if (name !== expected) wrongFilename(name);
       if (result.has(record.item_id)) duplicateState();
@@ -633,10 +674,12 @@ export class RouterRunStore {
 
   private async readRecordDirectory(
     name: string,
+    maximumEntries: number,
   ): Promise<Array<{ name: string; bytes: Buffer; value: JsonValue }>> {
     const directory = join(this.runDirectory, name);
     const records: Array<{ name: string; bytes: Buffer; value: JsonValue }> = [];
-    for (const entry of await this.fileSystem.listDirectory(directory)) {
+    const entries = await this.listDirectoryBounded(directory, maximumEntries, name);
+    for (const entry of entries) {
       if (entry.kind !== "file" || !DIGEST_FILE.test(entry.name)) {
         throw new RouterRunStoreError(
           "UNEXPECTED_STATE_ENTRY",
@@ -669,7 +712,8 @@ export class RouterRunStore {
       [TERMINALS_DIR, "directory"],
     ]);
     const seen = new Set<string>();
-    for (const entry of await this.fileSystem.listDirectory(this.runDirectory)) {
+    const entries = await this.listDirectoryBounded(this.runDirectory, expected.size, "run-state");
+    for (const entry of entries) {
       const kind = expected.get(entry.name);
       if (!kind || kind !== entry.kind) {
         throw new RouterRunStoreError(
@@ -685,6 +729,32 @@ export class RouterRunStore {
           throw new RouterRunStoreError("INITIALIZATION_INCOMPLETE", `missing run-state entry ${name}`);
         }
       }
+    }
+  }
+
+  private async listDirectoryBounded(
+    path: string,
+    maximumEntries: number,
+    label: string,
+  ): Promise<readonly DurableDirectoryEntry[]> {
+    try {
+      const entries = await this.fileSystem.listDirectory(path, maximumEntries);
+      if (entries.length > maximumEntries) {
+        throw new DurableFsError(
+          "DIRECTORY_TOO_LARGE",
+          `${label} directory exceeds the ${maximumEntries}-entry limit`,
+        );
+      }
+      return entries;
+    } catch (error) {
+      if (error instanceof DurableFsError && error.code === "DIRECTORY_TOO_LARGE") {
+        throw new RouterRunStoreError(
+          "UNEXPECTED_STATE_ENTRY",
+          `${label} directory exceeds its manifest-derived entry limit`,
+          { cause: error },
+        );
+      }
+      throw error;
     }
   }
 
@@ -762,15 +832,18 @@ export class RouterRunStore {
   }
 }
 
-function validateClaim(value: JsonValue, manifest: BuiltRouterRunManifest): RouterInflightClaim {
+function validateClaim(
+  value: JsonValue,
+  authority: RecordValidationAuthority,
+): RouterInflightClaim {
   const record = closed(value, [
     "schema", "manifest_digest", "item_id", "attempt", "owner_id", "lock_generation", "claimed_at",
     "estimated_cost_microusd",
   ]);
   literal(record.schema, ROUTER_CLAIM_SCHEMA);
-  binding(record, manifest);
+  binding(record, authority);
   const attempt = positiveInteger(record.attempt, "attempt");
-  if (attempt > manifest.manifest.plan.max_format_attempts) invalid("attempt exceeds manifest maximum");
+  if (attempt > authority.maximumAttempts) invalid("attempt exceeds manifest maximum");
   const owner = nonempty(record.owner_id, "owner_id");
   requireOwner(owner);
   const lockGeneration = nonempty(record.lock_generation, "lock_generation");
@@ -778,7 +851,7 @@ function validateClaim(value: JsonValue, manifest: BuiltRouterRunManifest): Rout
   const claimedAt = nonempty(record.claimed_at, "claimed_at");
   requireTimestamp(claimedAt, "claimed_at");
   const cost = positiveInteger(record.estimated_cost_microusd, "estimated_cost_microusd");
-  if (cost !== manifest.manifest.cost.estimated_micro_usd_per_sdk_attempt) {
+  if (cost !== authority.unitCostMicrousd) {
     invalid("claim cost differs from manifest unit forecast");
   }
   return {
@@ -793,24 +866,27 @@ function validateClaim(value: JsonValue, manifest: BuiltRouterRunManifest): Rout
   };
 }
 
-function validateOutcome(value: JsonValue, manifest: BuiltRouterRunManifest): RouterAttemptOutcome {
+function validateOutcome(
+  value: JsonValue,
+  authority: RecordValidationAuthority,
+): RouterAttemptOutcome {
   const record = closed(value, [
     "schema", "manifest_digest", "item_id", "attempt", "claim_digest", "status",
     "finished_at", "duration_ms", "request_id", "resolved_model_id", "raw_text", "ranking",
     "confidence_millionths", "rationale", "error_code", "error_message", "usage",
   ]);
   literal(record.schema, ROUTER_OUTCOME_SCHEMA);
-  binding(record, manifest);
+  binding(record, authority);
   assertSha256Digest(record.claim_digest, "claim_digest");
   const status = outcomeStatus(record.status);
   const attempt = positiveInteger(record.attempt, "attempt");
-  if (attempt > manifest.manifest.plan.max_format_attempts) invalid("attempt exceeds manifest maximum");
+  if (attempt > authority.maximumAttempts) invalid("attempt exceeds manifest maximum");
   const finishedAt = nonempty(record.finished_at, "finished_at");
   requireTimestamp(finishedAt, "finished_at");
   const duration = nonNegativeInteger(record.duration_ms, "duration_ms");
   const ranking = stringArray(record.ranking, "ranking");
   if (new Set(ranking).size !== ranking.length) invalid("ranking must contain unique values");
-  assertKnownSkills(ranking, manifest);
+  assertKnownSkills(ranking, authority.skillIds);
   const confidence = nullableInteger(record.confidence_millionths, "confidence_millionths");
   if (confidence !== null && (confidence < 0 || confidence > 1_000_000)) invalid("confidence is out of range");
   const rationale = boundedNullableString(record.rationale, "rationale", MAX_MESSAGE_BYTES);
@@ -865,20 +941,23 @@ function validateOutcome(value: JsonValue, manifest: BuiltRouterRunManifest): Ro
   };
 }
 
-function validateTerminal(value: JsonValue, manifest: BuiltRouterRunManifest): RouterTerminalRecord {
+function validateTerminal(
+  value: JsonValue,
+  authority: RecordValidationAuthority,
+): RouterTerminalRecord {
   const record = closed(value, [
     "schema", "manifest_digest", "item_id", "prompt_id", "model_id", "rep", "shuffle_seed",
     "outcome_digests", "status", "completed_at", "total_duration_ms", "ranking",
     "confidence_millionths", "rationale",
   ]);
   literal(record.schema, ROUTER_TERMINAL_SCHEMA);
-  binding(record, manifest);
+  binding(record, authority);
   const digests = digestArray(record.outcome_digests, "outcome_digests");
   const status = outcomeStatus(record.status);
   const completedAt = nonempty(record.completed_at, "completed_at");
   requireTimestamp(completedAt, "completed_at");
   const ranking = stringArray(record.ranking, "ranking");
-  assertKnownSkills(ranking, manifest);
+  assertKnownSkills(ranking, authority.skillIds);
   const confidence = nullableInteger(record.confidence_millionths, "confidence_millionths");
   const rationale = boundedNullableString(record.rationale, "rationale", MAX_MESSAGE_BYTES);
   return {
@@ -934,7 +1013,7 @@ function buildOutcome(
   claim: RouterInflightClaim,
   claimDigest: Sha256Digest,
   settlement: RouterAttemptSettlement,
-  manifest: BuiltRouterRunManifest,
+  authority: RecordValidationAuthority,
 ): RouterAttemptOutcome {
   requireTimestamp(settlement.finished_at, "finished_at");
   const duration = nonNegativeInteger(settlement.duration_ms, "duration_ms");
@@ -958,14 +1037,17 @@ function buildOutcome(
     error_message: settlement.error_message ?? null,
     usage: settlement.usage ?? null,
   };
-  return validateOutcome(outcome as unknown as JsonValue, manifest);
+  return validateOutcome(outcome as unknown as JsonValue, authority);
 }
 
-function binding(record: Record<string, JsonValue>, manifest: BuiltRouterRunManifest): void {
+function binding(
+  record: Record<string, JsonValue>,
+  authority: RecordValidationAuthority,
+): void {
   assertSha256Digest(record.manifest_digest, "manifest_digest");
   assertSha256Digest(record.item_id, "item_id");
-  if (record.manifest_digest !== manifest.digest) invalid("record binds another manifest");
-  if (!manifest.manifest.plan.items.some((item) => item.item_id === record.item_id)) {
+  if (record.manifest_digest !== authority.manifestDigest) invalid("record binds another manifest");
+  if (!authority.itemsById.has(record.item_id)) {
     invalid("record binds a foreign plan item");
   }
 }
@@ -1034,19 +1116,17 @@ function stringArray(value: JsonValue, label: string): string[] {
 
 function assertKnownSkills(
   ranking: readonly string[],
-  manifest: BuiltRouterRunManifest,
+  allowed: ReadonlySet<string>,
 ): void {
-  const allowed = new Set(manifest.manifest.inputs.skill_catalog.skill_ids);
   if (ranking.some((skillId) => !allowed.has(skillId))) {
     invalid("ranking contains a skill outside the bound catalog");
   }
 }
 
 function outcomeStatus(value: JsonValue): RouterAttemptStatus {
-  const allowed = new Set<RouterAttemptStatus>([
-    "finished", "format_failure", "provider_error", "cancelled", "model_unavailable",
-  ]);
-  if (typeof value !== "string" || !allowed.has(value as RouterAttemptStatus)) invalid("unknown outcome status");
+  if (typeof value !== "string" || !OUTCOME_STATUSES.has(value as RouterAttemptStatus)) {
+    invalid("unknown outcome status");
+  }
   return value as RouterAttemptStatus;
 }
 

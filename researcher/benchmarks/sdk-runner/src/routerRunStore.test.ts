@@ -10,7 +10,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import { afterEach, test } from "node:test";
 
 import {
@@ -20,6 +20,7 @@ import {
   sha256Bytes,
   type JsonValue,
 } from "./durableJson.ts";
+import { NodeDurableFileSystem } from "./durableFs.ts";
 import {
   ROUTER_RUN_MANIFEST_SCHEMA,
   buildRouterPlanSeeds,
@@ -45,7 +46,10 @@ async function workspace(): Promise<string> {
   return path;
 }
 
-function builtManifest(promptIds: readonly string[] = ["p001"]) {
+function builtManifest(
+  promptIds: readonly string[] = ["p001"],
+  skillIds: readonly string[] = ["skill-a"],
+) {
   const models = ["model-a"];
   const reps = 1;
   const seed = 7;
@@ -85,8 +89,8 @@ function builtManifest(promptIds: readonly string[] = ["p001"]) {
       skill_catalog: {
         sha256: sha256Bytes(catalogBytes),
         size_bytes: catalogBytes.length,
-        skill_count: 1,
-        skill_ids: ["skill-a"],
+        skill_count: skillIds.length,
+        skill_ids: [...skillIds],
       },
       package_lock: {
         sha256: sha256Bytes(packageLockBytes),
@@ -558,6 +562,152 @@ test("closed-world scan rejects extra, symlink, hardlinked, and wrongly named st
     }
     await assert.rejects(store.preflight(lease));
   }
+});
+
+test("persisted records are checked against private plan and catalog membership authorities", async () => {
+  {
+    const root = await workspace();
+    const store = new RouterRunStore(join(root, "results"), builtManifest());
+    const lease = await store.acquire("owner-a", "2026-08-15T12:00:00Z");
+    await store.initialize(lease);
+    const foreignItem = sha256Bytes(Buffer.from("foreign-plan-item"));
+    const claim = {
+      schema: "router-inflight-claim/v1",
+      manifest_digest: store.manifest.digest,
+      item_id: foreignItem,
+      attempt: 1,
+      owner_id: lease.owner_id,
+      lock_generation: lease.lock_generation,
+      claimed_at: "2026-08-15T12:00:01Z",
+      estimated_cost_microusd: 10,
+    };
+    await writeFile(
+      join(
+        store.runDirectory,
+        "attempt-claims",
+        attemptStateFileName(store.manifest.digest, foreignItem, 1),
+      ),
+      canonicalFileBytes(claim as unknown as JsonValue),
+    );
+    await assert.rejects(
+      store.preflight(lease),
+      (error: unknown) =>
+        error instanceof RouterRunStoreError && error.code === "INVALID_RECORD",
+    );
+    await store.release(lease);
+  }
+
+  {
+    const root = await workspace();
+    const store = new RouterRunStore(join(root, "results"), builtManifest());
+    const lease = await store.acquire("owner-a", "2026-08-15T12:00:00Z");
+    await store.initialize(lease);
+    const item = store.manifest.manifest.plan.items[0]!;
+    const claim = await store.claim(lease, item.item_id, "2026-08-15T12:00:01Z");
+    const outcome = await store.settle(lease, claim, FINISHED);
+    const outcomesDirectory = join(store.runDirectory, "attempt-outcomes");
+    const [outcomeName] = await readdir(outcomesDirectory);
+    assert.ok(outcomeName);
+    await rm(join(outcomesDirectory, outcomeName));
+    await writeFile(
+      join(outcomesDirectory, outcomeName),
+      canonicalFileBytes({
+        ...outcome,
+        ranking: ["foreign-skill"],
+        raw_text: '{"ranking":["foreign-skill"]}',
+      } as unknown as JsonValue),
+    );
+    await assert.rejects(
+      store.preflight(lease),
+      (error: unknown) =>
+        error instanceof RouterRunStoreError && error.code === "INVALID_RECORD",
+    );
+    await store.release(lease);
+  }
+});
+
+test("record directory enumeration fails before reading past plan-derived limits", async () => {
+  class RecordReadObservingFileSystem extends NodeDurableFileSystem {
+    recordReads = 0;
+
+    override async readRegularNoFollow(path: string, maximumBytes: number): Promise<Uint8Array> {
+      if (path.includes(`${sep}attempt-claims${sep}`)) this.recordReads += 1;
+      return super.readRegularNoFollow(path, maximumBytes);
+    }
+  }
+
+  const root = await workspace();
+  const fileSystem = new RecordReadObservingFileSystem(join(root, "results"));
+  const store = new RouterRunStore(join(root, "results"), builtManifest(), fileSystem);
+  const lease = await store.acquire("owner-a", "2026-08-15T12:00:00Z");
+  await store.initialize(lease);
+  const claimsDirectory = join(store.runDirectory, "attempt-claims");
+  for (const digit of ["a", "b", "c"]) {
+    await writeFile(join(claimsDirectory, `${digit.repeat(64)}.json`), "not-canonical");
+  }
+
+  await assert.rejects(
+    store.preflight(lease),
+    (error: unknown) =>
+      error instanceof RouterRunStoreError &&
+      error.code === "UNEXPECTED_STATE_ENTRY" &&
+      error.cause instanceof Error &&
+      "code" in error.cause &&
+      error.cause.code === "DIRECTORY_TOO_LARGE",
+  );
+  assert.equal(fileSystem.recordReads, 0);
+  await store.release(lease);
+});
+
+test("durable record membership does not rescan manifest plan or catalog arrays", async () => {
+  // This is a structural complexity regression, not a throughput benchmark.
+  // The canonical state derivation still walks the plan once; record binding
+  // must use only the constructor-time Map and Set authorities.
+  const promptIds = Array.from({ length: 64 }, (_, index) => `prompt-${index}`);
+  const skillIds = [
+    "skill-a",
+    ...Array.from({ length: 36 }, (_, index) => `skill-${index}`),
+  ];
+  const root = await workspace();
+  const store = new RouterRunStore(
+    join(root, "results"),
+    builtManifest(promptIds, skillIds),
+  );
+  const lease = await store.acquire("owner-a", "2026-08-15T12:00:00Z");
+  await store.initialize(lease);
+  const item = store.manifest.manifest.plan.items[0]!;
+  const claim = await store.claim(lease, item.item_id, "2026-08-15T12:00:01Z");
+  await store.settle(lease, claim, FINISHED);
+
+  const originalSome = Array.prototype.some;
+  const originalIterator = Array.prototype[Symbol.iterator];
+  let planMembershipScans = 0;
+  let catalogRebuilds = 0;
+  Array.prototype.some = function observedSome(
+    this: unknown[],
+    predicate: (value: unknown, index: number, values: unknown[]) => unknown,
+    thisArg?: unknown,
+  ): boolean {
+    if (this.length === promptIds.length) planMembershipScans += 1;
+    return Reflect.apply(originalSome, this, [predicate, thisArg]) as boolean;
+  } as typeof Array.prototype.some;
+  Array.prototype[Symbol.iterator] = function observedIterator(
+    this: unknown[],
+  ): ArrayIterator<unknown> {
+    if (this.length === skillIds.length) catalogRebuilds += 1;
+    return Reflect.apply(originalIterator, this, []) as ArrayIterator<unknown>;
+  } as typeof originalIterator;
+  try {
+    const state = await store.preflight(lease);
+    assert.equal(state.terminal_pending.length, 1);
+  } finally {
+    Array.prototype.some = originalSome;
+    Array.prototype[Symbol.iterator] = originalIterator;
+  }
+
+  assert.equal(planMembershipScans, 0);
+  assert.equal(catalogRebuilds, 0);
+  await store.release(lease);
 });
 
 test("noncanonical, duplicate-key, and truncated claim files fail closed", async () => {

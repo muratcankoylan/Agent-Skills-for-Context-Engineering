@@ -424,16 +424,16 @@
           "size_bytes": 9707
         },
         {
-          "digest": "sha256:2034e2b0894a35c8b635f63ac0a0ebb7aab05ed45e2d00abb25eeca784b38a37",
+          "digest": "sha256:6c112b7d9420edd9bbd4e877679fe8d14ea126339315fc53cbbfcb8af0246638",
           "id": "src:durableFs.test.ts",
           "path": "researcher/benchmarks/sdk-runner/src/durableFs.test.ts",
-          "size_bytes": 10664
+          "size_bytes": 11478
         },
         {
-          "digest": "sha256:7f84fb2de2f7728ca93fe445b0b2629d4e19312103539113f8305137b5e5be35",
+          "digest": "sha256:528e1d90acefb0539b7fe225df8f2b286d6e867a39bada20e59311e0d604de11",
           "id": "src:durableFs.ts",
           "path": "researcher/benchmarks/sdk-runner/src/durableFs.ts",
-          "size_bytes": 16935
+          "size_bytes": 17899
         },
         {
           "digest": "sha256:10fe6fbf6be6fe748a4682de5bffc2976a1dfb87832f90aeb5ff9f33229f7586",
@@ -478,16 +478,16 @@
           "size_bytes": 39876
         },
         {
-          "digest": "sha256:02a8f063e8fd1797a2f4dab0530545543411acc9a0c00f8542700961c5e0c23b",
+          "digest": "sha256:3071af5f3143a75916b800280a483417ea511312d1cb8c71e75694ad61ebb59f",
           "id": "src:routerRunStore.test.ts",
           "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.test.ts",
-          "size_bytes": 24732
+          "size_bytes": 30526
         },
         {
-          "digest": "sha256:6fab3ec976a274bc1c01a7732074216524dd2e866f830ff0ba6d37f77f94732c",
+          "digest": "sha256:d2cdb28dfa5629d4b614cfdd68b46af8ebd631a2e0b93a50e2ed678fa0914664",
           "id": "src:routerRunStore.ts",
           "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.ts",
-          "size_bytes": 44901
+          "size_bytes": 46985
         },
         {
           "digest": "sha256:a0830792a32742d2c5fea11842055765e127139bc7b77b689fd82c5da2861da2",
@@ -3574,12 +3574,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:75793772c6b5b8aae9e6675efb14010558410944968ab436c9a4a1e28988393f",
+    "digest": "sha256:86862cd0d756cea633504f0553603296f441daba2d08c9686a87d4ce334a597d",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:75793772c6b5b8aae9e6675efb14010558410944968ab436c9a4a1e28988393f",
+  "source_tree_digest": "sha256:86862cd0d756cea633504f0553603296f441daba2d08c9686a87d4ce334a597d",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3932,14 +3932,14 @@
       "size_bytes": 9707
     },
     {
-      "digest": "sha256:2034e2b0894a35c8b635f63ac0a0ebb7aab05ed45e2d00abb25eeca784b38a37",
+      "digest": "sha256:6c112b7d9420edd9bbd4e877679fe8d14ea126339315fc53cbbfcb8af0246638",
       "path": "researcher/benchmarks/sdk-runner/src/durableFs.test.ts",
-      "size_bytes": 10664
+      "size_bytes": 11478
     },
     {
-      "digest": "sha256:7f84fb2de2f7728ca93fe445b0b2629d4e19312103539113f8305137b5e5be35",
+      "digest": "sha256:528e1d90acefb0539b7fe225df8f2b286d6e867a39bada20e59311e0d604de11",
       "path": "researcher/benchmarks/sdk-runner/src/durableFs.ts",
-      "size_bytes": 16935
+      "size_bytes": 17899
     },
     {
       "digest": "sha256:10fe6fbf6be6fe748a4682de5bffc2976a1dfb87832f90aeb5ff9f33229f7586",
@@ -3977,14 +3977,14 @@
       "size_bytes": 39876
     },
     {
-      "digest": "sha256:02a8f063e8fd1797a2f4dab0530545543411acc9a0c00f8542700961c5e0c23b",
+      "digest": "sha256:3071af5f3143a75916b800280a483417ea511312d1cb8c71e75694ad61ebb59f",
       "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.test.ts",
-      "size_bytes": 24732
+      "size_bytes": 30526
     },
     {
-      "digest": "sha256:6fab3ec976a274bc1c01a7732074216524dd2e866f830ff0ba6d37f77f94732c",
+      "digest": "sha256:d2cdb28dfa5629d4b614cfdd68b46af8ebd631a2e0b93a50e2ed678fa0914664",
       "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.ts",
-      "size_bytes": 44901
+      "size_bytes": 46985
     },
     {
       "digest": "sha256:a0830792a32742d2c5fea11842055765e127139bc7b77b689fd82c5da2861da2",

@@ -244,6 +244,30 @@ test("directory listing exposes entry kinds without following links", async () =
   ]);
 });
 
+test("directory listing stops at the explicit entry limit", async () => {
+  const root = await workspace();
+  const fileSystem = new NodeDurableFileSystem(root);
+  const directory = join(root, "bounded-state");
+  await mkdir(directory);
+  for (const name of ["a", "b", "c", "d"]) {
+    await writeFile(join(directory, name), name);
+  }
+
+  await assert.rejects(
+    fileSystem.listDirectory(directory, 3),
+    (error: unknown) =>
+      error instanceof DurableFsError && error.code === "DIRECTORY_TOO_LARGE",
+  );
+  assert.deepEqual(
+    (await fileSystem.listDirectory(directory, 4)).map((entry) => entry.name),
+    ["a", "b", "c", "d"],
+  );
+  await assert.rejects(
+    fileSystem.listDirectory(directory, -1),
+    (error: unknown) => error instanceof DurableFsError && error.code === "BOUNDS_INVALID",
+  );
+});
+
 test("directory creation rejects a symlink ancestor inside the confinement root", async () => {
   const root = await workspace();
   const outside = await workspace();

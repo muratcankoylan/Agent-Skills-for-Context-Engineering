@@ -22,7 +22,7 @@ import {
   lstat,
   mkdir,
   open,
-  readdir,
+  opendir,
   unlink,
 } from "node:fs/promises";
 import { dirname, join, relative, resolve, sep } from "node:path";
@@ -30,6 +30,7 @@ import { dirname, join, relative, resolve, sep } from "node:path";
 export type DurableFsErrorCode =
   | "BOUNDS_INVALID"
   | "DIRECTORY_INVALID"
+  | "DIRECTORY_TOO_LARGE"
   | "EXCLUSIVE_TARGET_EXISTS"
   | "FILE_CHANGED"
   | "FILE_INVALID"
@@ -65,7 +66,8 @@ export interface DurableDirectoryEntry {
 
 export interface DurableFileSystem {
   ensurePrivateDirectory(path: string): Promise<void>;
-  listDirectory(path: string): Promise<readonly DurableDirectoryEntry[]>;
+  /** Implementations must stop enumeration once maximumEntries is exceeded. */
+  listDirectory(path: string, maximumEntries: number): Promise<readonly DurableDirectoryEntry[]>;
   statPath(path: string): Promise<DurablePathStat | null>;
   readRegularNoFollow(path: string, maximumBytes: number): Promise<Uint8Array>;
   writeExclusiveDurable(path: string, body: Uint8Array): Promise<void>;
@@ -74,6 +76,7 @@ export interface DurableFileSystem {
 
 const READ_CHUNK_BYTES = 64 * 1024;
 const MAX_LOCK_BYTES = 64 * 1024;
+const DEFAULT_MAX_DIRECTORY_ENTRIES = 1_000_000;
 
 export class NodeDurableFileSystem implements DurableFileSystem {
   readonly confinementRoot: string;
@@ -137,17 +140,35 @@ export class NodeDurableFileSystem implements DurableFileSystem {
     }
   }
 
-  async listDirectory(path: string): Promise<readonly DurableDirectoryEntry[]> {
+  async listDirectory(
+    path: string,
+    maximumEntries = DEFAULT_MAX_DIRECTORY_ENTRIES,
+  ): Promise<readonly DurableDirectoryEntry[]> {
+    assertMaximumEntries(maximumEntries);
     const confined = this.confined(path);
     await this.assertDirectoryAncestors(confined, false);
     const info = await lstatBigInt(confined, "benchmark state directory");
     if (!info.isDirectory() || info.isSymbolicLink()) {
       throw new DurableFsError("DIRECTORY_INVALID", `cannot list non-directory state path: ${path}`);
     }
-    const entries = await readdir(confined, { withFileTypes: true });
-    return entries
-      .map((entry) => ({ name: entry.name, kind: direntKind(entry) }))
-      .sort((left, right) => left.name.localeCompare(right.name));
+    const directory = await opendir(confined);
+    const entries: DurableDirectoryEntry[] = [];
+    try {
+      while (true) {
+        const entry = await directory.read();
+        if (entry === null) break;
+        if (entries.length >= maximumEntries) {
+          throw new DurableFsError(
+            "DIRECTORY_TOO_LARGE",
+            `directory exceeds the ${maximumEntries}-entry limit: ${path}`,
+          );
+        }
+        entries.push({ name: entry.name, kind: direntKind(entry) });
+      }
+    } finally {
+      await directory.close();
+    }
+    return entries.sort((left, right) => left.name.localeCompare(right.name));
   }
 
   async statPath(path: string): Promise<DurablePathStat | null> {
@@ -422,6 +443,15 @@ export class NodeDurableFileSystem implements DurableFileSystem {
 function assertMaximum(maximumBytes: number): void {
   if (!Number.isSafeInteger(maximumBytes) || maximumBytes < 0) {
     throw new DurableFsError("BOUNDS_INVALID", "maximum byte count must be a non-negative safe integer");
+  }
+}
+
+function assertMaximumEntries(maximumEntries: number): void {
+  if (!Number.isSafeInteger(maximumEntries) || maximumEntries < 0) {
+    throw new DurableFsError(
+      "BOUNDS_INVALID",
+      "maximum directory entry count must be a non-negative safe integer",
+    );
   }
 }
 
