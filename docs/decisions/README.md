@@ -18,3 +18,4 @@ The dependency-ordered implementation contracts live in the [specification progr
 - [ADR-0004: Make schemas, identity, and frozen bytes runtime-neutral](0004-runtime-neutral-artifact-contracts.md)
 - [ADR-0005: Publish one machine-checked specification program](0005-canonical-specification-program.md)
 - [ADR-0006: Validate the complete public release boundary](0006-validate-public-release-boundary.md)
+- [ADR-0007: Amend SPEC-003 classification and reference invariants](0007-amend-spec-003-classification-and-reference-invariants.md)
