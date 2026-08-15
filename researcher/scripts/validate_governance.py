@@ -13,51 +13,56 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-try:
-    from governance_policy import Constitution, ConstitutionError
-except ModuleNotFoundError:  # Imported as researcher.scripts.validate_governance.
+if __package__:
     from researcher.scripts.governance_policy import (
         Constitution,
         ConstitutionError,
     )
-
-try:
-    from validate_spec_lifecycle import (
+    from researcher.scripts.validate_authority_contract import (
         AUTHORITY_CONFORMANCE_RECEIPT_PATH,
         AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
         AUTHORITY_CONSTITUTION_POLICY_PATH,
+        AUTHORITY_EVALUATOR_COMPONENT_PATHS,
         AUTHORITY_FIXTURE_MANIFEST_PATH,
         AUTHORITY_IMPLEMENTED_STATUSES,
         AUTHORITY_PREIMPLEMENTATION_STATUSES,
-        AUTHORITY_VALIDATOR_PATH,
-        AUTHORITY_VALIDATOR_VERSION,
         AUTHORITY_VOCABULARY_MIN_REVISION,
         AUTHORITY_VOCABULARY_PATH,
         AuthorityVocabularyBinding,
         authority_policy_case_results,
-        load_candidate,
-        load_candidate_authority_vocabulary,
+        build_authority_evaluator_bundle,
+        canonical_repository_output_path,
         parse_authority_policy_conformance,
         parse_authority_vocabulary,
+        read_canonical_repository_file,
     )
-except ModuleNotFoundError:  # Imported as researcher.scripts.validate_governance.
     from researcher.scripts.validate_spec_lifecycle import (
+        load_candidate,
+        load_candidate_authority_vocabulary,
+    )
+else:  # Direct script execution resolves siblings from this script's directory.
+    from governance_policy import Constitution, ConstitutionError
+    from validate_authority_contract import (
         AUTHORITY_CONFORMANCE_RECEIPT_PATH,
         AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
         AUTHORITY_CONSTITUTION_POLICY_PATH,
+        AUTHORITY_EVALUATOR_COMPONENT_PATHS,
         AUTHORITY_FIXTURE_MANIFEST_PATH,
         AUTHORITY_IMPLEMENTED_STATUSES,
         AUTHORITY_PREIMPLEMENTATION_STATUSES,
-        AUTHORITY_VALIDATOR_PATH,
-        AUTHORITY_VALIDATOR_VERSION,
         AUTHORITY_VOCABULARY_MIN_REVISION,
         AUTHORITY_VOCABULARY_PATH,
         AuthorityVocabularyBinding,
         authority_policy_case_results,
-        load_candidate,
-        load_candidate_authority_vocabulary,
+        build_authority_evaluator_bundle,
+        canonical_repository_output_path,
         parse_authority_policy_conformance,
         parse_authority_vocabulary,
+        read_canonical_repository_file,
+    )
+    from validate_spec_lifecycle import (
+        load_candidate,
+        load_candidate_authority_vocabulary,
     )
 
 
@@ -218,7 +223,7 @@ def atomic_write(path: Path, text: str) -> None:
 
 
 def canonical_json_text(value: Any) -> str:
-    """Serialize governance projections using the lifecycle gate's exact bytes."""
+    """Serialize governance projections using the authority contract's exact bytes."""
 
     return json.dumps(
         value,
@@ -232,11 +237,12 @@ def canonical_json_text(value: Any) -> str:
 def render_authority_conformance(
     registry: AuthorityVocabularyBinding,
     constitution: Constitution,
-    validator_bytes: bytes,
+    evaluator_component_bytes: tuple[tuple[str, bytes], ...],
 ) -> str:
-    """Render a receipt that the independent lifecycle parser can reproduce."""
+    """Render a receipt that the independent authority parser can reproduce."""
 
     results = list(authority_policy_case_results(registry, constitution))
+    validator_bundle = build_authority_evaluator_bundle(evaluator_component_bytes)
     document = {
         "kind": "AuthorityVocabularyConformanceReceipt",
         "schema_version": AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
@@ -249,17 +255,33 @@ def render_authority_conformance(
         },
         "registry_digest": registry.digest,
         "fixture_manifest_digest": registry.fixture_manifest_digest,
-        "validator": {
-            "path": AUTHORITY_VALIDATOR_PATH,
-            "digest": f"sha256:{hashlib.sha256(validator_bytes).hexdigest()}",
-            "version": AUTHORITY_VALIDATOR_VERSION,
-        },
+        "validator_bundle": validator_bundle.to_receipt_value(),
         "case_count": len(results),
         "skipped_case_count": 0,
         "result": "pass",
         "cases": results,
     }
     return canonical_json_text(document)
+
+
+def _load_authority_evaluator_component_bytes(
+    root: Path,
+) -> tuple[tuple[str, bytes], ...]:
+    """Read the exact canonical evaluator sources bound by a receipt."""
+
+    components: list[tuple[str, bytes]] = []
+    for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+        components.append(
+            (
+                relative,
+                read_canonical_repository_file(
+                    root,
+                    relative,
+                    label="authority evaluator bundle component",
+                ),
+            )
+        )
+    return tuple(components)
 
 
 def _load_authority_design(root: Path, authority_spec: Any) -> AuthorityVocabularyBinding:
@@ -281,20 +303,22 @@ def _load_authority_design(root: Path, authority_spec: Any) -> AuthorityVocabula
         r"[1-9][0-9]*", version_value
     ) is None:
         raise ValueError("Authority vocabulary version must be a canonical positive integer")
-    registry_path = root / AUTHORITY_VOCABULARY_PATH
-    fixture_path = root / AUTHORITY_FIXTURE_MANIFEST_PATH
-    for label, path in (
-        ("authority vocabulary", registry_path),
-        ("authority fixture manifest", fixture_path),
-    ):
-        if path.is_symlink() or not path.is_file():
-            raise ValueError(f"{label} must be a regular canonical repository file")
+    registry_bytes = read_canonical_repository_file(
+        root,
+        AUTHORITY_VOCABULARY_PATH,
+        label="authority vocabulary",
+    )
+    fixture_bytes = read_canonical_repository_file(
+        root,
+        AUTHORITY_FIXTURE_MANIFEST_PATH,
+        label="authority fixture manifest",
+    )
     return parse_authority_vocabulary(
-        registry_path.read_bytes(),
+        registry_bytes,
         expected_digest=digest,
         expected_constitution_revision=authority_spec.revision,
         expected_registry_version=int(version_value),
-        fixture_manifest_bytes=fixture_path.read_bytes(),
+        fixture_manifest_bytes=fixture_bytes,
     )
 
 
@@ -324,19 +348,22 @@ def validate_authority_conformance(
         return []
 
     canonical_policy_path = root / AUTHORITY_CONSTITUTION_POLICY_PATH
-    if (
-        canonical_policy_path.is_symlink()
-        or not canonical_policy_path.is_file()
-        or constitution.source.resolve() != canonical_policy_path.resolve()
+    canonical_policy_bytes = read_canonical_repository_file(
+        root,
+        AUTHORITY_CONSTITUTION_POLICY_PATH,
+        label="authority constitution policy",
+    )
+    if constitution.source.resolve() != canonical_policy_path.resolve() or (
+        constitution.digest != hashlib.sha256(canonical_policy_bytes).hexdigest()
     ):
         raise ValueError(
             "authority conformance requires the canonical regular constitution policy"
         )
-    validator_path = root / AUTHORITY_VALIDATOR_PATH
-    if validator_path.is_symlink() or not validator_path.is_file():
-        raise ValueError("authority conformance validator must be a regular canonical file")
-    validator_bytes = validator_path.read_bytes()
-    receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+    receipt_path = canonical_repository_output_path(
+        root,
+        AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+        label="authority conformance receipt",
+    )
     receipt_required = authority_spec.status in AUTHORITY_IMPLEMENTED_STATUSES
 
     if authority_spec.status in AUTHORITY_PREIMPLEMENTATION_STATUSES:
@@ -355,6 +382,7 @@ def validate_authority_conformance(
             "authority-vocabulary conformance --write requires SPEC-000 "
             "to be implemented, verified, or operational"
         )
+    evaluator_component_bytes = _load_authority_evaluator_component_bytes(root)
     if write:
         if receipt_path.is_symlink():
             raise ValueError("authority conformance receipt cannot be a symlink")
@@ -362,13 +390,13 @@ def validate_authority_conformance(
         rendered = render_authority_conformance(
             registry,
             constitution,
-            validator_bytes,
+            evaluator_component_bytes,
         )
         parse_authority_policy_conformance(
             rendered.encode("utf-8"),
             registry=registry,
             constitution=constitution,
-            validator_bytes=validator_bytes,
+            evaluator_component_bytes=evaluator_component_bytes,
         )
         atomic_write(receipt_path, rendered)
 
@@ -384,7 +412,11 @@ def validate_authority_conformance(
         ]
     if registry.policy_conformance is None:
         return ["authority-vocabulary conformance receipt was not validated"]
-    expected = render_authority_conformance(registry, constitution, validator_bytes)
+    expected = render_authority_conformance(
+        registry,
+        constitution,
+        evaluator_component_bytes,
+    )
     if receipt_path.read_text(encoding="utf-8") != expected:
         return [
             "authority-vocabulary conformance receipt is stale: run "

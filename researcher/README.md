@@ -62,6 +62,7 @@ discover -> triage -> evaluate -> extract -> map -> draft -> validate -> prepare
 - `scripts/validate_repo.py` - deterministic repository and harness validator.
 - `scripts/validate_public_repo.py` - tracked-tree guard against workstation paths and credential material; CI also runs Gitleaks over Git history.
 - `scripts/validate_spec_lifecycle.py` - compares proposed specification changes with an exact transition base and requires replacement predecessors to be byte-identical on a separately pinned protected-default tree.
+- `scripts/validate_authority_contract.py` - owns the closed authority-profile, registry, fixture, policy-closure, and conformance-receipt semantics consumed by lifecycle and governance validation.
 - `scripts/validate_run.py` - publish-readiness validator for a single research run.
 - `scripts/research_loop.py` - creates durable run directories and validation reports.
 - `scripts/novelty_check.py` - checks proposal overlap against existing skills and prior runs.

@@ -128,6 +128,7 @@ jobs:
             researcher/scripts/skill_frontmatter.py \
             researcher/scripts/governance_policy.py \
             researcher/scripts/build_inventory.py \
+            researcher/scripts/validate_authority_contract.py \
             researcher/scripts/validate_spec_lifecycle.py \
             researcher/scripts/export_policy.py \
             researcher/scripts/schema_contract.py \
