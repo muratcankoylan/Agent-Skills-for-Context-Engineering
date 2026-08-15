@@ -12,7 +12,9 @@ running a 64-subagent orchestration.
 | `cdc_proof.pdf` | https://cdn.openai.com/pdf/04d1d1e4-bc75-476a-97cf-49055cd98d31/cdc_proof.pdf | 325198 | `b4797f5053d9067329b3dcfcbf913f8bb40d13467453b1300f6d78d08460fc13` |
 
 `cdc_prompt.txt` and `cdc_proof.txt` are text extractions (pypdf) kept for grep-ability and
-diffing. The PDFs are the authoritative artifacts.
+diffing. Non-text control characters introduced by PDF extraction are replaced with the Unicode
+replacement character; form feeds that preserve page boundaries remain. The PDFs are the
+authoritative artifacts.
 
 ## Retrieval
 

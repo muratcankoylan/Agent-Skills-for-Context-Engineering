@@ -394,7 +394,7 @@ All 19 tests pass successfully. Here are the actual test logs from our test run:
 > readwren-agent-system@1.0.0 test
 > vitest run --testTimeout=120000
 
- RUN  v2.1.9 /Users/muratcankoylan/app_readwren
+ RUN  v2.1.9 <project-root>
 
  ✓ tests/skills.test.ts (10 tests) 159317ms
    ✓ LLM Evaluator Skill Tests > Direct Scoring Skill > should use chain-of-thought in scoring 4439ms

@@ -1,9 +1,14 @@
 # SPEC-002: Public and private boundary
 
-- Status: implementing
-- Wave: 0
-- Classification: split
-- Depends on: SPEC-000
+Status: implemented
+Revision: 1
+Revises: none
+Wave: 0
+Classification: split
+Owners: human maintainer; export steward agent
+Depends on: SPEC-000
+Dependency revisions: SPEC-000@1
+Adoption decision: ADR-0005
 
 ## Decision
 

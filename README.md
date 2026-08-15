@@ -284,19 +284,22 @@ Current counts and compatibility status are generated in the [live corpus invent
 - **Skill health gate** (`researcher/scripts/skill_health.py`): deterministic body-quality scoring. Published scores remain dated evidence; local runs produce ignored runtime reports.
 - **Public export boundary** (`governance/export-policy.yaml` + `researcher/scripts/validate_export.py`): allowlisted projections from private or restricted records into reviewable public staging trees without publishing private source locators or digests.
 - **Schema and artifact contract** (`researcher/schemas/` + `researcher/scripts/artifact_store.py`): digest-pinned cross-runtime schemas, typed IDs, private bindings, exact-byte CAS, candidate freeze receipts, and Python/TypeScript conformance.
+- **Autonomous-organization specification program** ([`docs/specs/README.md`](docs/specs/README.md)): machine-checked implementation contracts from the durable control substrate through evidence, evaluation, meta-harness improvement, governance, and deployment.
 
 ### Operator commands
 
 Install the validation dependencies once before running local gates:
 
 ```bash
-python3 -m pip install -r requirements-dev.txt
+python3 -m pip install --require-hashes -r requirements-dev.txt
 ```
 
 ```bash
 # Deterministic gates (also run in CI on every PR)
 python3 -m unittest researcher.scripts.tests.test_skill_frontmatter
 python3 researcher/scripts/validate_platform_compat.py --require-reference-validator
+python3 researcher/scripts/validate_public_repo.py
+python3 researcher/scripts/validate_spec_lifecycle.py --base-ref origin/main
 python3 researcher/scripts/validate_repo.py --strict
 python3 researcher/scripts/skill_health.py --strict --no-history
 python3 researcher/scripts/run_benchmarks.py
@@ -320,10 +323,10 @@ See [researcher/runbooks/continuous-operation.md](researcher/runbooks/continuous
 
 ### Guarantees
 
-- The loop never invokes paid LLMs or makes outbound writes; HTTP retrieval is stdlib-only with a 1.5 MB cap and a 30-second timeout.
+- The current continuous loop never invokes paid LLMs or makes outbound writes; HTTP retrieval is stdlib-only with a 1.5 MB cap and a 30-second timeout.
 - Mechanism promotion requires a recorded human reviewer and a passing run-readiness check.
 - All queue mutations are atomic (temp file + `os.replace`) and serialized via `fcntl` locks.
-- Agents may prepare PRs after gates pass; merge and push remain human-controlled.
+- Governed proposer agents may create candidate commits, push proposal branches, and open PRs after their gates pass. Only a verified human may merge or otherwise advance the accepted default-branch pointer.
 
 ## Star History
 <img width="3664" height="2808" alt="star-history-2026526" src="https://github.com/user-attachments/assets/c9f88769-21b8-4762-9472-d4cf1fe1c802" />

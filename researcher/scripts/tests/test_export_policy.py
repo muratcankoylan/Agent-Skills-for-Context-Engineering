@@ -288,10 +288,10 @@ class ExportBoundaryTests(unittest.TestCase):
 
     def test_high_confidence_secret_structures_are_denied(self) -> None:
         patterns = [
-            "-----BEGIN PRIVATE KEY-----",
+            "-----BEGIN " + "PRIVATE KEY-----",
             "Authorization: Bearer fixture-token",
             "https://example.invalid/?X-Amz-Signature=fixture",
-            "/Users/private-user/Library/fixture",
+            "/" + "Users" + "/private-user/Library/fixture",
         ]
         for index, text in enumerate(patterns):
             with self.subTest(index=index):

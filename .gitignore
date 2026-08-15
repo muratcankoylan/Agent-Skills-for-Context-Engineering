@@ -88,6 +88,26 @@ dashboard/
 # Private folder - never push to public repo
 Private/
 
+# Local user-facing deliverables and drafting outputs
+/outputs/
+
+# Credential-bearing local files
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+service-account.json
+service_account.json
+secrets.json
+secrets.yaml
+secrets.yml
+
 # Cursor IDE
 .cursor/
 

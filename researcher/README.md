@@ -2,6 +2,8 @@
 
 Current corpus counts, source digests, compatibility status, and unresolved-reference status are generated in the [live corpus inventory](generated/corpus-summary.md). Historical reports retain the values measured at their dated snapshot.
 
+The [specification program](../docs/specs/README.md) defines the dependency-ordered contracts for evolving this file-based loop into a durable autonomous organization. Published drafts are not accepted automatically; lifecycle changes require human-merged pull requests.
+
 The public/private boundary is defined by `governance/export-policy.yaml` and `scripts/validate_export.py`. Real private plans and receipts stay under ignored local paths; only validated projection trees are proposed for public review.
 
 Cross-runtime records, typed IDs, private artifact references, and candidate freeze receipts use the SPEC-003 contracts in [`schemas/README.md`](schemas/README.md). Existing claims, mechanisms, run state, and queues remain in place behind validated legacy adapters.
@@ -58,6 +60,8 @@ discover -> triage -> evaluate -> extract -> map -> draft -> validate -> prepare
 - `runbooks/autonomous-research-loop.md` - operating loop for autonomous researchers.
 - `runbooks/pr-readiness.md` - pre-PR checklist.
 - `scripts/validate_repo.py` - deterministic repository and harness validator.
+- `scripts/validate_public_repo.py` - tracked-tree guard against workstation paths and credential material; CI also runs Gitleaks over Git history.
+- `scripts/validate_spec_lifecycle.py` - compares proposed specification status and revision changes with an exact protected Git base.
 - `scripts/validate_run.py` - publish-readiness validator for a single research run.
 - `scripts/research_loop.py` - creates durable run directories and validation reports.
 - `scripts/novelty_check.py` - checks proposal overlap against existing skills and prior runs.
@@ -78,6 +82,7 @@ discover -> triage -> evaluate -> extract -> map -> draft -> validate -> prepare
 
 ```bash
 python researcher/scripts/validate_repo.py
+python researcher/scripts/validate_spec_lifecycle.py --base-ref origin/main
 python researcher/scripts/validate_run.py --run-dir researcher/runs/<run-id>
 python researcher/scripts/research_loop.py init --title "Source title" --url "https://example.com/source"
 python researcher/scripts/novelty_check.py --file researcher/fixtures/skill-proposals/harness-engineering-proposal.md

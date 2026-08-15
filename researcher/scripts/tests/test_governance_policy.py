@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import subprocess
+import sys
 import tempfile
 import unittest
+from copy import deepcopy
 from pathlib import Path
 
 import yaml
@@ -11,14 +16,167 @@ import yaml
 from researcher.scripts.governance_policy import Constitution, ConstitutionError
 from researcher.scripts.validate_governance import (
     DEFAULT_FIXTURES,
+    canonical_json_text,
     render_authority_table,
+    validate_authority_conformance,
     validate_fixtures,
     validate_invariants,
+)
+from researcher.scripts.validate_spec_lifecycle import (
+    AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+    AUTHORITY_FIXTURE_MANIFEST_PATH,
+    AUTHORITY_VALIDATOR_PATH,
+    AUTHORITY_VOCABULARY_PATH,
+    POLICY_ONLY_READ_PROFILES,
+    REQUIRED_AUTHORITY_PROFILES,
+    expected_authority_catalog_boundary_cases,
+    expected_authority_fixture_cases,
+    expected_authority_policy_conditions,
 )
 
 
 ROOT = Path(__file__).resolve().parents[3]
 CONSTITUTION_PATH = ROOT / "governance" / "constitution.yaml"
+
+
+def authority_documents() -> tuple[bytes, bytes]:
+    registry_entries = []
+    fixture_entries = []
+    for (action, resource), profile in sorted(REQUIRED_AUTHORITY_PROFILES.items()):
+        registry_entries.append(
+            {
+                "action": action,
+                "resource": resource,
+                "owner_spec": profile.owner_spec,
+                "actor_classes": list(profile.actor_classes),
+                "max_effect": profile.max_effect,
+                "dependency_floor": list(profile.dependency_floor),
+                "decision_context_fields": list(profile.decision_context_fields),
+                "grant_operation": profile.grant_operation,
+            }
+        )
+        fixture_entries.append(
+            {
+                "action": action,
+                "resource": resource,
+                "cases": list(expected_authority_fixture_cases(profile)),
+            }
+        )
+    fixture = {
+        "kind": "AuthorityVocabularyFixtureManifest",
+        "schema_version": "1.0.0",
+        "constitution_revision": 2,
+        "registry_version": 2,
+        "catalog_boundary_cases": list(expected_authority_catalog_boundary_cases()),
+        "entries": fixture_entries,
+    }
+    fixture_bytes = canonical_json_text(fixture).encode("utf-8")
+    registry = {
+        "kind": "AuthorityVocabularyRegistry",
+        "schema_version": "1.0.0",
+        "owner_spec": "SPEC-000",
+        "constitution_revision": 2,
+        "registry_version": 2,
+        "fixture_manifest": {
+            "path": AUTHORITY_FIXTURE_MANIFEST_PATH,
+            "digest": f"sha256:{hashlib.sha256(fixture_bytes).hexdigest()}",
+            "version": 2,
+        },
+        "entries": registry_entries,
+    }
+    return canonical_json_text(registry).encode("utf-8"), fixture_bytes
+
+
+def conforming_policy_document() -> dict:
+    actors = {"human_maintainer"}
+    actions: set[str] = set()
+    resources: set[str] = set()
+    rules = []
+    profiles = list(sorted(REQUIRED_AUTHORITY_PROFILES.items())) + list(
+        sorted(POLICY_ONLY_READ_PROFILES.items())
+    )
+    for index, ((action, resource), profile) in enumerate(profiles):
+        actors.update(profile.actor_classes)
+        actions.add(action)
+        resources.add(resource)
+        rules.append(
+            {
+                "rule_id": f"authority-profile-{index:03d}",
+                "effect": "allow",
+                "actors": list(profile.actor_classes),
+                "actions": [action],
+                "resources": [resource],
+                "conditions": list(expected_authority_policy_conditions(profile)),
+                "reason_code": "AUTHORITY_PROFILE_ALLOWED",
+            }
+        )
+    return {
+        "schema_version": "1.0.0",
+        "constitution_version": "2.0.0",
+        "lifecycle_state": "effective",
+        "effective_commit": "fixture",
+        "default_effect": "deny",
+        "promotion_event": "human_merged_commit",
+        "actor_classes": {
+            actor: {
+                "automated": actor != "human_maintainer",
+                "conflicts_with": [],
+            }
+            for actor in sorted(actors)
+        },
+        "actions": sorted(actions),
+        "resource_classes": sorted(resources),
+        "protected_surfaces": ["governance/**"],
+        "rules": rules,
+        "emergency_controls": {},
+        "amendment_procedure": {},
+    }
+
+
+def write_revision_two_root(
+    root: Path,
+    *,
+    status: str = "accepted",
+    policy_document: dict | None = None,
+) -> Constitution:
+    registry_bytes, fixture_bytes = authority_documents()
+    registry_digest = f"sha256:{hashlib.sha256(registry_bytes).hexdigest()}"
+    spec = (
+        "# SPEC-000: Fixture\n\n"
+        f"Status: {status}\n"
+        "Revision: 2\n"
+        f"Revises: sha256:{'1' * 64}\n"
+        "Wave: 0\n"
+        "Classification: public\n"
+        "Owners: human maintainer; governance agent\n"
+        "Depends on: none\n"
+        "Dependency revisions: none\n"
+        f"Authority vocabulary: {AUTHORITY_VOCABULARY_PATH}\n"
+        f"Authority vocabulary digest: {registry_digest}\n"
+        "Authority vocabulary version: 2\n\n"
+        "## Decision\n\nFixture.\n"
+    )
+    spec_path = root / "docs/specs/SPEC-000-fixture.md"
+    spec_path.parent.mkdir(parents=True)
+    spec_path.write_text(spec, encoding="utf-8")
+    registry_path = root / AUTHORITY_VOCABULARY_PATH
+    fixture_path = root / AUTHORITY_FIXTURE_MANIFEST_PATH
+    registry_path.parent.mkdir(parents=True, exist_ok=True)
+    fixture_path.parent.mkdir(parents=True, exist_ok=True)
+    registry_path.write_bytes(registry_bytes)
+    fixture_path.write_bytes(fixture_bytes)
+    validator_path = root / AUTHORITY_VALIDATOR_PATH
+    validator_path.parent.mkdir(parents=True, exist_ok=True)
+    validator_path.write_bytes((ROOT / AUTHORITY_VALIDATOR_PATH).read_bytes())
+    constitution_path = root / "governance/constitution.yaml"
+    constitution_path.write_text(
+        yaml.safe_dump(
+            policy_document or conforming_policy_document(),
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    return Constitution.load(constitution_path)
 
 
 class ConstitutionTests(unittest.TestCase):
@@ -191,6 +349,342 @@ class ConstitutionTests(unittest.TestCase):
     def test_path_classification_rejects_escape(self) -> None:
         with self.assertRaises(ConstitutionError):
             self.constitution.classify_path("../outside")
+
+
+class AuthorityConformanceIntegrationTests(unittest.TestCase):
+    def test_current_revision_one_repository_remains_backward_compatible(self) -> None:
+        policy = Constitution.load(CONSTITUTION_PATH)
+        self.assertEqual(
+            validate_authority_conformance(ROOT, policy, write=False),
+            [],
+        )
+        self.assertFalse((ROOT / AUTHORITY_CONFORMANCE_RECEIPT_PATH).exists())
+
+    def test_revision_one_rejects_unowned_canonical_authority_artifacts(self) -> None:
+        spec = (
+            "# SPEC-000: Fixture\n\n"
+            "Status: accepted\n"
+            "Revision: 1\n"
+            "Revises: none\n"
+            "Wave: 0\n"
+            "Classification: public\n"
+            "Owners: human maintainer; governance agent\n"
+            "Depends on: none\n"
+            "Dependency revisions: none\n\n"
+            "## Decision\n\nFixture.\n"
+        )
+        for relative in (
+            AUTHORITY_VOCABULARY_PATH,
+            AUTHORITY_FIXTURE_MANIFEST_PATH,
+            AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+        ):
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                spec_path = root / "docs/specs/SPEC-000-fixture.md"
+                spec_path.parent.mkdir(parents=True)
+                spec_path.write_text(spec, encoding="utf-8")
+                artifact_path = root / relative
+                artifact_path.parent.mkdir(parents=True, exist_ok=True)
+                artifact_path.write_text("{}\n", encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "Authority vocabulary"):
+                    validate_authority_conformance(
+                        root,
+                        Constitution.load(CONSTITUTION_PATH),
+                        write=False,
+                    )
+
+    def test_accepted_validates_design_but_forbids_a_prospective_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(root)
+            receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+            self.assertEqual(
+                validate_authority_conformance(root, policy, write=False),
+                [],
+            )
+            with self.assertRaisesRegex(ValueError, "requires SPEC-000 to be implemented"):
+                validate_authority_conformance(root, policy, write=True)
+            self.assertFalse(receipt_path.exists())
+
+    def test_accepted_candidate_rejects_an_otherwise_valid_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(root, status="implemented")
+            validate_authority_conformance(root, policy, write=True)
+            spec_path = root / "docs/specs/SPEC-000-fixture.md"
+            spec_path.write_text(
+                spec_path.read_text(encoding="utf-8").replace(
+                    "Status: implemented",
+                    "Status: accepted",
+                ),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "pre-implementation"):
+                validate_authority_conformance(root, policy, write=False)
+
+    def test_accepted_can_land_design_before_policy_implementation(self) -> None:
+        revision_one_policy = yaml.safe_load(
+            CONSTITUTION_PATH.read_text(encoding="utf-8")
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(
+                root,
+                policy_document=revision_one_policy,
+            )
+            self.assertEqual(
+                validate_authority_conformance(root, policy, write=False),
+                [],
+            )
+            self.assertFalse((root / AUTHORITY_CONFORMANCE_RECEIPT_PATH).exists())
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(
+                root,
+                status="implemented",
+                policy_document=revision_one_policy,
+            )
+            with self.assertRaisesRegex(
+                ValueError,
+                "does not implement the authority registry",
+            ):
+                validate_authority_conformance(root, policy, write=True)
+            self.assertFalse((root / AUTHORITY_CONFORMANCE_RECEIPT_PATH).exists())
+
+    def test_implemented_round_trip_is_deterministic_atomic_and_public_safe(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(root, status="implemented")
+            receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+            with self.assertRaisesRegex(ValueError, "require.*validated"):
+                validate_authority_conformance(root, policy, write=False)
+            self.assertEqual(
+                validate_authority_conformance(root, policy, write=True),
+                [],
+            )
+            first = receipt_path.read_bytes()
+            self.assertEqual(
+                validate_authority_conformance(root, policy, write=False),
+                [],
+            )
+            self.assertEqual(
+                validate_authority_conformance(root, policy, write=True),
+                [],
+            )
+            self.assertEqual(receipt_path.read_bytes(), first)
+            receipt = json.loads(first)
+            self.assertEqual(receipt["result"], "pass")
+            self.assertEqual(receipt["skipped_case_count"], 0)
+            self.assertEqual(receipt["case_count"], len(receipt["cases"]))
+            self.assertNotIn(str(root), first.decode("utf-8"))
+            self.assertEqual(
+                list(receipt_path.parent.glob(f".{receipt_path.name}.*.tmp")),
+                [],
+            )
+
+    def test_cli_write_then_check_round_trip(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_revision_two_root(root, status="implemented")
+            decisions = root / "governance/fixtures/authority-decisions.jsonl"
+            decisions.write_text("", encoding="utf-8")
+            command = [
+                sys.executable,
+                str(ROOT / "researcher/scripts/validate_governance.py"),
+                "--root",
+                str(root),
+            ]
+            written = subprocess.run(
+                [*command, "--write"],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(written.returncode, 0, written.stdout + written.stderr)
+            checked = subprocess.run(
+                [*command, "--check"],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
+            self.assertTrue((root / AUTHORITY_CONFORMANCE_RECEIPT_PATH).is_file())
+
+    def test_missing_receipt_fails_closed_at_implemented_status(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(root, status="implemented")
+            with self.assertRaisesRegex(ValueError, "require.*validated"):
+                validate_authority_conformance(root, policy, write=False)
+
+    def test_terminal_receipt_is_optional_but_must_validate_when_present(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(root, status="retired")
+            self.assertEqual(
+                validate_authority_conformance(root, policy, write=False),
+                [],
+            )
+
+        for valid in (True, False):
+            with self.subTest(valid=valid), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                policy = write_revision_two_root(root, status="implemented")
+                validate_authority_conformance(root, policy, write=True)
+                spec_path = root / "docs/specs/SPEC-000-fixture.md"
+                spec_path.write_text(
+                    spec_path.read_text(encoding="utf-8").replace(
+                        "Status: implemented",
+                        "Status: retired",
+                    ),
+                    encoding="utf-8",
+                )
+                if valid:
+                    self.assertEqual(
+                        validate_authority_conformance(root, policy, write=False),
+                        [],
+                    )
+                else:
+                    receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+                    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+                    receipt["case_count"] += 1
+                    receipt_path.write_text(
+                        canonical_json_text(receipt),
+                        encoding="utf-8",
+                    )
+                    with self.assertRaises(ValueError):
+                        validate_authority_conformance(root, policy, write=False)
+
+    def test_stale_and_partial_receipts_fail_closed(self) -> None:
+        mutations = {
+            "registry": lambda value: value.__setitem__(
+                "registry_digest", "sha256:" + "0" * 64
+            ),
+            "fixture": lambda value: value.__setitem__(
+                "fixture_manifest_digest", "sha256:" + "0" * 64
+            ),
+            "validator": lambda value: value["validator"].__setitem__(
+                "digest", "sha256:" + "0" * 64
+            ),
+        }
+        for name, mutate in mutations.items():
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                policy = write_revision_two_root(root, status="implemented")
+                self.assertEqual(
+                    validate_authority_conformance(root, policy, write=True),
+                    [],
+                )
+                receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+                mutate(receipt)
+                receipt_path.write_text(canonical_json_text(receipt), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    validate_authority_conformance(root, policy, write=False)
+                self.assertEqual(
+                    validate_authority_conformance(root, policy, write=True),
+                    [],
+                )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(root, status="implemented")
+            validate_authority_conformance(root, policy, write=True)
+            receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+            receipt_path.write_text("{", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                validate_authority_conformance(root, policy, write=False)
+
+    def test_exact_policy_and_validator_source_bytes_are_bound(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(root, status="implemented")
+            validate_authority_conformance(root, policy, write=True)
+
+            policy_document = deepcopy(policy.document)
+            policy_document["effective_commit"] = "changed-policy-bytes"
+            policy_path = root / "governance/constitution.yaml"
+            policy_path.write_text(
+                yaml.safe_dump(policy_document, sort_keys=False),
+                encoding="utf-8",
+            )
+            changed_policy = Constitution.load(policy_path)
+            with self.assertRaises(ValueError):
+                validate_authority_conformance(root, changed_policy, write=False)
+
+        for relative in (
+            AUTHORITY_VOCABULARY_PATH,
+            AUTHORITY_FIXTURE_MANIFEST_PATH,
+        ):
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                policy = write_revision_two_root(root, status="implemented")
+                validate_authority_conformance(root, policy, write=True)
+                source = root / relative
+                source.write_bytes(source.read_bytes() + b"\n")
+                with self.assertRaises(ValueError):
+                    validate_authority_conformance(root, policy, write=False)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = write_revision_two_root(root, status="implemented")
+            validate_authority_conformance(root, policy, write=True)
+            validator_path = root / AUTHORITY_VALIDATOR_PATH
+            validator_path.write_bytes(validator_path.read_bytes() + b"\n")
+            with self.assertRaises(ValueError):
+                validate_authority_conformance(root, policy, write=False)
+
+    def test_structural_backdoor_and_overpermissive_policy_cannot_emit_receipt(
+        self,
+    ) -> None:
+        legacy = conforming_policy_document()
+        legacy["actions"].append("publish_draft")
+        legacy["rules"].append(
+            {
+                "rule_id": "dormant-retained-publish",
+                "effect": "allow",
+                "actors": ["research_proposer"],
+                "actions": ["publish_draft"],
+                "resources": ["public_content_draft"],
+                "conditions": [
+                    {
+                        "key": "automated_identity_disclosed",
+                        "operator": "equals",
+                        "value": False,
+                    }
+                ],
+                "reason_code": "RETAINED_PUBLISH_ALLOW",
+            }
+        )
+
+        overpermissive = conforming_policy_document()
+        query_rule = next(
+            rule
+            for rule in overpermissive["rules"]
+            if rule["actions"] == ["query_status"]
+            and rule["resources"] == ["status_projection"]
+        )
+        query_rule["conditions"] = []
+
+        for name, document, message in (
+            ("structural_backdoor", legacy, "noncatalog pair"),
+            ("overpermissive", overpermissive, "noncanonical predicate"),
+        ):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                policy = write_revision_two_root(
+                    root,
+                    status="implemented",
+                    policy_document=document,
+                )
+                with self.assertRaisesRegex(ValueError, message):
+                    validate_authority_conformance(root, policy, write=True)
+                self.assertFalse(
+                    (root / AUTHORITY_CONFORMANCE_RECEIPT_PATH).exists()
+                )
 
 
 if __name__ == "__main__":

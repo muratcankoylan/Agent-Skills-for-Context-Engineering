@@ -15,7 +15,7 @@
     "effectiveness:run": "node --experimental-strip-types src/runEffectiveness.ts"
   },
   "dependencies": {
-    "@cursor/sdk": "^1.0.13"
+    "@cursor/sdk": "1.0.13"
   },
   "devDependencies": {
     "typescript": "^5.6.0",
