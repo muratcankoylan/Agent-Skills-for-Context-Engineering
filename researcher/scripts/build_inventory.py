@@ -244,6 +244,16 @@ VALIDATOR_OWNERSHIP = (
         "path": "researcher/scripts/run_benchmarks.py",
         "owns": ["deterministic benchmark composition", "adversarial scenario execution"],
     },
+    {
+        "id": "router-report",
+        "path": "researcher/scripts/render_router_report.py",
+        "owns": [
+            "router outcome taxonomy",
+            "accuracy denominators",
+            "deterministic confidence intervals",
+            "published router report rendering",
+        ],
+    },
 )
 
 LIVE_DOCUMENT_LINKS = {
@@ -1203,14 +1213,49 @@ class InventoryBuilder:
     def build_benchmark_runners(self) -> dict[str, Any]:
         runner_dir = self.root / "researcher" / "benchmarks" / "sdk-runner"
         records: list[dict[str, Any]] = []
-        for relative in [
+        contract_paths = [
+            "README.md",
             "package.json",
             "package-lock.json",
             "tsconfig.json",
             "src/common.ts",
+            "src/liveBlock.test.ts",
+            "src/sdkImport.test.ts",
             "src/runRouter.ts",
             "src/runEffectiveness.ts",
-        ]:
+            "test/denyCursorSdkLoader.mjs",
+            "test/registerDenyCursorSdk.mjs",
+        ]
+        expected_contract_paths = set(contract_paths)
+        excluded_roots = {"dist", "node_modules"}
+
+        def contract_files(directory: Path) -> Iterable[Path]:
+            for child in sorted(directory.iterdir(), key=lambda path: path.name):
+                if directory == runner_dir and child.name in excluded_roots:
+                    continue
+                if child.is_dir() and not child.is_symlink():
+                    yield from contract_files(child)
+                else:
+                    yield child
+
+        observed_contract_paths = (
+            {
+                path.relative_to(runner_dir).as_posix()
+                for path in contract_files(runner_dir)
+            }
+            if runner_dir.is_dir()
+            else set()
+        )
+        for relative in sorted(observed_contract_paths - expected_contract_paths):
+            path = runner_dir / relative
+            self.add_source(path)
+            self.add_finding(
+                "UNREGISTERED_BENCHMARK_RUNNER_CONTRACT",
+                path,
+                "benchmark runner file is not registered in the closed contract set",
+                relative,
+            )
+        for relative in contract_paths:
             path = runner_dir / relative
             if not path.exists():
                 self.add_finding("PARSE_ERROR", path, "benchmark runner contract file is missing", relative)
@@ -1224,10 +1269,36 @@ class InventoryBuilder:
                     "size_bytes": size,
                 }
             )
+        documentation_paths = (
+            ("methodology:PLAN.md", runner_dir.parent / "PLAN.md"),
+            ("methodology:router:README.md", runner_dir.parent / "router" / "README.md"),
+            (
+                "methodology:effectiveness:README.md",
+                runner_dir.parent / "effectiveness" / "README.md",
+            ),
+        )
+        for record_id, path in documentation_paths:
+            if not path.exists():
+                self.add_finding(
+                    "PARSE_ERROR",
+                    path,
+                    "benchmark methodology source is missing",
+                    record_id,
+                )
+                continue
+            digest, size = self.add_source(path)
+            records.append(
+                {
+                    "id": record_id,
+                    "path": self.relative(path),
+                    "digest": digest,
+                    "size_bytes": size,
+                }
+            )
         return self._category(
             "researcher/benchmarks/sdk-runner",
             sorted(records, key=lambda item: item["id"]),
-            status={"router": "operational", "effectiveness": "scaffold"},
+            status={"router": "dry_run_only", "effectiveness": "scaffold_dry_run_only"},
         )
 
     def build_manifests(self) -> dict[str, Any]:
@@ -1309,6 +1380,7 @@ class InventoryBuilder:
             ".github/workflows/validate.yml",
             "requirements-dev.in",
             "requirements-dev.txt",
+            "researcher/scripts/tests/test_render_router_report.py",
         ):
             path = self.root / relative
             if not path.is_file():

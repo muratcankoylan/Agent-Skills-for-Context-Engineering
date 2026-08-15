@@ -2,23 +2,25 @@
   "name": "researcher-sdk-runner",
   "version": "0.1.0",
   "private": true,
-  "description": "Cursor SDK-based benchmark runner for the researcher operating system. Runs router and effectiveness benchmarks against the skill corpus.",
+  "description": "Zero-call Cursor SDK benchmark planner and validation package for the researcher operating system.",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
+    "test": "node --experimental-strip-types --test src/*.test.ts && npm run test:dry-run-no-sdk",
+    "test:dry-run-no-sdk": "node --no-warnings --import ./test/registerDenyCursorSdk.mjs --experimental-strip-types src/runRouter.ts --dry-run --models gpt-5.5 --reps 1 --max-runs 112 --max-budget-usd 2 && node --no-warnings --import ./test/registerDenyCursorSdk.mjs --experimental-strip-types src/runEffectiveness.ts --dry-run --models gpt-5.5 --reps 1 --max-runs 12 --max-budget-usd 2",
     "router:dry-run": "node --experimental-strip-types src/runRouter.ts --dry-run",
     "router:run": "node --experimental-strip-types src/runRouter.ts",
     "effectiveness:dry-run": "node --experimental-strip-types src/runEffectiveness.ts --dry-run",
     "effectiveness:run": "node --experimental-strip-types src/runEffectiveness.ts"
   },
   "dependencies": {
-    "@cursor/sdk": "1.0.13"
+    "@cursor/sdk": "1.0.28"
   },
   "devDependencies": {
     "typescript": "^5.6.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^22.13.0"
   }
 }
