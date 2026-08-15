@@ -1510,57 +1510,71 @@
     },
     "orchestration_briefs": {
       "activation_ceiling": "supervised_proposal",
+      "attempt_manifest_instance_classification": "private",
+      "attempt_separation": "builder_and_verifier_distinct",
       "authority": "none",
+      "checkpoint_contract": "SPEC-005 CheckpointEnvelope with SPEC-012 ContextCheckpointPayload",
       "closed_prompt_namespace": true,
-      "count": 6,
-      "owner": "SPEC-005, SPEC-012, and SPEC-013 bootstrap proposal",
+      "count": 7,
+      "enforcement_boundary": "external_harness",
+      "model_visible_launch": "allowlisted_new_identity_projection_only",
+      "owner": "SPEC-005, SPEC-012, SPEC-013, and SPEC-014 bootstrap proposal",
+      "public_projection": "allowlisted_new_identity_projection_only",
       "records": [
         {
-          "digest": "sha256:b2610e2e7965012d69c47431b5affb8a202fd0ef2a7c8cb62506e66740d903d8",
+          "digest": "sha256:9d903133d4523f42aebdaacad1d825b4e364d608102bc68af2245637db632746",
           "id": "docs/reviews/2026-08-15-autonomous-organization-readiness.md",
           "path": "docs/reviews/2026-08-15-autonomous-organization-readiness.md",
           "role": "readiness_review",
-          "size_bytes": 16361,
+          "size_bytes": 20265,
           "status": "bootstrap_proposal"
         },
         {
-          "digest": "sha256:ec68c6730d7169c56525969f726ac1d8593652dd88e2f0e3be95787896d345d5",
+          "digest": "sha256:96f5aac54e9ea3e56fd5af9a977f1467ab6232dcdb5b99b0b029083f29bdfd23",
           "id": "researcher/orchestration/prompts/README.md",
           "path": "researcher/orchestration/prompts/README.md",
           "role": "bundle_contract",
-          "size_bytes": 5014,
+          "size_bytes": 8899,
           "status": "bootstrap_proposal"
         },
         {
-          "digest": "sha256:62e290c2627128aaef2f15ceb2d6661d8f5e30e68a44c6a74d578f40bd6e2977",
+          "digest": "sha256:6e29b41a41f9e89f1e7ba252a701aaaf89a256cb6d40dd3990614daa5c830ca5",
+          "id": "researcher/orchestration/prompts/attempt-manifest.template.md",
+          "path": "researcher/orchestration/prompts/attempt-manifest.template.md",
+          "role": "attempt_manifest_template",
+          "size_bytes": 27477,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:5a780092b1eb76a76f69aed88f855eadbab9503da266005ff76e54fa5e7fc7a4",
           "id": "researcher/orchestration/prompts/fresh-verifier-brief.md",
           "path": "researcher/orchestration/prompts/fresh-verifier-brief.md",
           "role": "verifier_brief",
-          "size_bytes": 6476,
+          "size_bytes": 16429,
           "status": "bootstrap_proposal"
         },
         {
-          "digest": "sha256:25f7225bfde249545dd63e19536baa3c9f333a3c156c393e07b0fa6949de1ce6",
+          "digest": "sha256:2e632078b9eb43f5794075952eb6669f178b2255c8ac82b6304a6d68419a5bad",
           "id": "researcher/orchestration/prompts/organization-root-brief.md",
           "path": "researcher/orchestration/prompts/organization-root-brief.md",
           "role": "root_brief",
-          "size_bytes": 14719,
+          "size_bytes": 24997,
           "status": "bootstrap_proposal"
         },
         {
-          "digest": "sha256:a6ee1a87249f8716ac2a737f0b67ed56aa8260d944a387ce6664d99b97e3737f",
+          "digest": "sha256:ac30b1144163dd96ed9b409f206defab69b92c4ed1590d9348015429b054ee72",
           "id": "researcher/orchestration/prompts/resume-brief.template.md",
           "path": "researcher/orchestration/prompts/resume-brief.template.md",
           "role": "resume_template",
-          "size_bytes": 5130,
+          "size_bytes": 15553,
           "status": "bootstrap_proposal"
         },
         {
-          "digest": "sha256:9a8d36689da1f0be800128fb9bb9a1df8855de18f84158de5bfd4ee54ac8b9d6",
+          "digest": "sha256:4e274b553d0fb8f49b37a53db76da82dd4cde8a0232d128173709c36a87df9ff",
           "id": "researcher/orchestration/prompts/spec-work-brief.template.md",
           "path": "researcher/orchestration/prompts/spec-work-brief.template.md",
           "role": "work_brief_template",
-          "size_bytes": 6126,
+          "size_bytes": 18350,
           "status": "bootstrap_proposal"
         }
       ]
@@ -2884,7 +2898,7 @@
           "path": "researcher/scripts/validate_governance.py"
         },
         {
-          "digest": "sha256:a15f8a09064051f27975bccd5cf5076ebf1a3a871bddf068b4f27fb2dbb785a4",
+          "digest": "sha256:b9e673c8dc9aaf699e36014dc46a528ff9bc4cabaab3c42703da6aecc6ce8eb7",
           "id": "repository-inventory",
           "owns": [
             "identifier uniqueness",
@@ -3394,12 +3408,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:cd2f7cedbfebec8fd40451fab9fe57a25b281e250b0b321e7e1b87edd567ceb2",
+    "digest": "sha256:e3cf67e76169b1e51c08baa6a489364e8fd601f28000e501a98aee2e47e5d0b2",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:cd2f7cedbfebec8fd40451fab9fe57a25b281e250b0b321e7e1b87edd567ceb2",
+  "source_tree_digest": "sha256:e3cf67e76169b1e51c08baa6a489364e8fd601f28000e501a98aee2e47e5d0b2",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3457,9 +3471,9 @@
       "size_bytes": 2050
     },
     {
-      "digest": "sha256:b2610e2e7965012d69c47431b5affb8a202fd0ef2a7c8cb62506e66740d903d8",
+      "digest": "sha256:9d903133d4523f42aebdaacad1d825b4e364d608102bc68af2245637db632746",
       "path": "docs/reviews/2026-08-15-autonomous-organization-readiness.md",
-      "size_bytes": 16361
+      "size_bytes": 20265
     },
     {
       "digest": "sha256:d68a4c87d16bf0beaa9d8dd6e04b664f274db923794b6d56b53ac2f0e6412c05",
@@ -3797,29 +3811,34 @@
       "size_bytes": 14630
     },
     {
-      "digest": "sha256:ec68c6730d7169c56525969f726ac1d8593652dd88e2f0e3be95787896d345d5",
+      "digest": "sha256:96f5aac54e9ea3e56fd5af9a977f1467ab6232dcdb5b99b0b029083f29bdfd23",
       "path": "researcher/orchestration/prompts/README.md",
-      "size_bytes": 5014
+      "size_bytes": 8899
     },
     {
-      "digest": "sha256:62e290c2627128aaef2f15ceb2d6661d8f5e30e68a44c6a74d578f40bd6e2977",
+      "digest": "sha256:6e29b41a41f9e89f1e7ba252a701aaaf89a256cb6d40dd3990614daa5c830ca5",
+      "path": "researcher/orchestration/prompts/attempt-manifest.template.md",
+      "size_bytes": 27477
+    },
+    {
+      "digest": "sha256:5a780092b1eb76a76f69aed88f855eadbab9503da266005ff76e54fa5e7fc7a4",
       "path": "researcher/orchestration/prompts/fresh-verifier-brief.md",
-      "size_bytes": 6476
+      "size_bytes": 16429
     },
     {
-      "digest": "sha256:25f7225bfde249545dd63e19536baa3c9f333a3c156c393e07b0fa6949de1ce6",
+      "digest": "sha256:2e632078b9eb43f5794075952eb6669f178b2255c8ac82b6304a6d68419a5bad",
       "path": "researcher/orchestration/prompts/organization-root-brief.md",
-      "size_bytes": 14719
+      "size_bytes": 24997
     },
     {
-      "digest": "sha256:a6ee1a87249f8716ac2a737f0b67ed56aa8260d944a387ce6664d99b97e3737f",
+      "digest": "sha256:ac30b1144163dd96ed9b409f206defab69b92c4ed1590d9348015429b054ee72",
       "path": "researcher/orchestration/prompts/resume-brief.template.md",
-      "size_bytes": 5130
+      "size_bytes": 15553
     },
     {
-      "digest": "sha256:9a8d36689da1f0be800128fb9bb9a1df8855de18f84158de5bfd4ee54ac8b9d6",
+      "digest": "sha256:4e274b553d0fb8f49b37a53db76da82dd4cde8a0232d128173709c36a87df9ff",
       "path": "researcher/orchestration/prompts/spec-work-brief.template.md",
-      "size_bytes": 6126
+      "size_bytes": 18350
     },
     {
       "digest": "sha256:0ac5456af9a440308082b4f730cb69f5a4bbfc9cb32928db1f8d4c656243e7ba",
@@ -4107,9 +4126,9 @@
       "size_bytes": 54898
     },
     {
-      "digest": "sha256:a15f8a09064051f27975bccd5cf5076ebf1a3a871bddf068b4f27fb2dbb785a4",
+      "digest": "sha256:b9e673c8dc9aaf699e36014dc46a528ff9bc4cabaab3c42703da6aecc6ce8eb7",
       "path": "researcher/scripts/build_inventory.py",
-      "size_bytes": 129349
+      "size_bytes": 129931
     },
     {
       "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
@@ -4290,7 +4309,7 @@
       "path": "researcher/scripts/validate_governance.py"
     },
     {
-      "digest": "sha256:a15f8a09064051f27975bccd5cf5076ebf1a3a871bddf068b4f27fb2dbb785a4",
+      "digest": "sha256:b9e673c8dc9aaf699e36014dc46a528ff9bc4cabaab3c42703da6aecc6ce8eb7",
       "id": "repository-inventory",
       "owns": [
         "identifier uniqueness",

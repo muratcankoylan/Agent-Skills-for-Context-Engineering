@@ -4,19 +4,23 @@ Date: 2026-08-15
 Status: historical audit snapshot
 Authoritative public base: `6dbe1a1d868eab51a3bc9011b0f55e2891513e40`
 
+This document records what the named base and local candidates looked like during the audit. Terms such as `current`, `local`, `next`, and `ready` below are relative to that snapshot, not the repository at read time. This review is neither an authority source nor an executable work order. Recompute live authority, lifecycle, Git, dependency, evaluation, and verification state before acting.
+
 ## Decision
 
-The repository has a reproducible constitutional and data-contract foundation. It does not yet have authority or runtime support for a continuously self-improving production organization.
+At the audited base, the repository had a reproducible constitutional and data-contract foundation but no authority or runtime support for a continuously self-improving production organization.
 
-Use the prompt bundle in `researcher/orchestration/prompts/` as a supervised engineering bootstrap only. The production design is not one persistent model session. It is an event-driven sequence of bounded attempts, each compiled from authoritative state and ending in a durable checkpoint, independently reviewed candidate, or typed blocker.
+The audit recommended using the prompt bundle in `researcher/orchestration/prompts/` only as a supervised engineering bootstrap. The proposed production design was not one persistent model session. It was an event-driven sequence of bounded attempts, each compiled from authoritative state and ending in a reducer-accepted checkpoint, independently reviewed candidate, or typed blocker.
 
-The current activation boundary is:
+The activation boundary recorded at audit time was:
 
 - agents may research, inspect, plan, implement locally, test, and prepare review artifacts within an explicitly authorized work order;
 - agents must not infer authority from chat, a local branch, or a status string outside protected `main`;
 - agents must not merge, enable auto-merge, change repository rules, or describe merged code as deployed;
 - skill, prompt, evaluator, or harness optimization remains proposal-only until the evaluation and promotion specifications are accepted and implemented;
 - the stricter workspace rule still requires explicit human approval before each push or pull-request creation.
+
+Those bullets documented the audit's safe ceiling. They did not grant any action, and later repository or user authority must not be inferred from them.
 
 ## Audit method
 
@@ -105,7 +109,7 @@ These are evidence for append-only supersession, independent verification, failu
 
 Open external PRs are evidence or candidate patches only. The orchestrator must not absorb them without a scoped work order, rebase, independent audit, and current gates.
 
-## Local roadmap review
+## Local roadmap review at audit time
 
 Commit `b2576ba` adds the 27-spec program, lifecycle and dependency graph, ADR-0005 and ADR-0006, stronger public-release validation, exact workflow pins, hash-locked Python tooling, and deterministic spec/ADR parsing. In isolated validation it passed 188 Python tests, 20 TypeScript schema tests, repository and public-boundary gates, platform checks, skill health, activation cases, benchmark dry-runs, and site validation.
 
@@ -120,7 +124,7 @@ The program has six delivery waves:
 5. sustainable operation: open-source governance, private control plane, durable deployment;
 6. optional training and reinforcement-learning research, under separate human authority.
 
-## SPEC-004A candidate review
+## SPEC-004A candidate review at audit time
 
 The local prototype contains event and research-run-transition contracts, Python/TypeScript semantic parity, deterministic import identities, a SQLite event store, optimistic concurrency, exact duplicate handling, hash-chain verification, backup/restore, a deterministic projector, an operator halt, ADR-0007, and a recovery runbook.
 
@@ -138,24 +142,33 @@ The safe sequence is roadmap review and merge, explicit SPEC-004 architecture re
 
 ## Operating architecture
 
-One indefinite prompt is the wrong unit. Work lifetime exceeds session lifetime, and compaction cannot be organizational state. The bootstrap bundle has four components:
+One indefinite prompt is the wrong unit. Work lifetime exceeds session lifetime, and compaction cannot be organizational state. The revised bootstrap bundle has four model-facing prompt components plus one harness-only manifest template:
 
 1. `organization-root-brief.md`: stable outcome, invariants, non-counting outcomes, delegation policy, and return contract;
-2. `spec-work-brief.template.md`: one exact accepted spec or vertical slice compiled for one wake;
+2. `spec-work-brief.template.md`: one exact authoritative spec, lifecycle transition, or vertical slice compiled for one wake, with implementation restricted to accepted revisions;
 3. `fresh-verifier-brief.md`: an independent audit with no builder transcript or prior verdict;
-4. `resume-brief.template.md`: restart from a validated checkpoint rather than conversational memory.
+4. `resume-brief.template.md`: start a new attempt from a validated checkpoint rather than conversational memory; and
+5. `attempt-manifest.template.md`: a private, immutable, harness-owned binding for one builder or verifier attempt plus a model-safe launch projection.
 
-The future harness compiles those components with an authority snapshot, ContextPackage, WorkOrder, capability grant, budget, repository state, and external events. Until SPEC-005, SPEC-012, and SPEC-013 exist, those records are provisional bootstrap inputs and must not be presented as registered durable contracts.
+The future harness compiles those components with an authority snapshot, `ContextPackage`, `WorkOrderSpec`, operation grant, budget, repository state, and external events. Builder and verifier are separate SPEC-005 attempts: each requires its own reservation, descriptor, principal, fence, budget, context profile, manifest, and result. Their independence relationship is a receipt, not shared session history. Until SPEC-005, SPEC-012, SPEC-013, and SPEC-014 are accepted and implemented, these are provisional bootstrap inputs and must not be presented as registered durable contracts.
+
+The filled attempt manifest is private by default and never becomes model input merely because its template is public. The harness renders an allowlisted safe launch projection with a new identity over visible fields only. Any public projection follows the SPEC-002 boundary: it has a new public identity and contains neither a private source identity nor a private input digest. The private manifest may bind a descriptor, result, receipt, or checkpoint internally; its digest is not a public or cross-firewall correlation token.
+
+Authority is staged rather than prompt-derived. A template and a reservation grant no execution authority. The harness must freeze and validate the exact role, context, prompt, criteria, budget, surfaces, and private manifest, compute the effective operation-grant intersection, then atomically activate the matching SPEC-005 descriptor. Mode remains a ceiling, not a capability. Merge and deployment remain human-controlled.
 
 ## Context contract
 
-The context system has eight separate memory authorities: constitutional, evidence, semantic, procedural, episodic, working, preference, and compatibility. Models may propose semantic, procedural, and preference changes; they do not directly rewrite those memories.
+The revised roadmap contract has seven canonical memory classes: constitutional, evidence, knowledge, episodic, working, preference, and compatibility. Each has one declared writer path. Models may emit typed memory-delta proposals where allowed; they do not directly rewrite any plane.
 
-Every wake receives an exact ordered context chain with provenance, freshness, inclusion and exclusion reasons, contradiction completion, and a token allocation. Private bodies stay behind references. Abstractive summaries orient the model but do not prove claims. Prompt versions freeze for an attempt; an improvement becomes a child candidate and never hot-swaps the running attempt.
+Every model call receives an exact ordered allowlisted context chain with permitted provenance and freshness annotations, required contradiction material, and a token allocation. A separate private compilation receipt records the full candidate universe, inclusion and exclusion decisions, denied identities and counts, transforms, and diagnostics. Those private details do not enter model context unless an accepted profile permits a separately derived safe projection. Private bodies stay behind references. Abstractive summaries orient the model but do not prove claims. Prompt versions freeze for an attempt; an improvement becomes a child candidate and never hot-swaps the running attempt.
 
-The checkpoint preserves objective, success predicate, authority, decisions, rejected routes, contradictions, branch and commit identities, changed paths, verification evidence, budgets, exact next action, and stop condition. Agent-to-agent communication that affects decisions becomes a durable artifact or event.
+Checkpoint ownership is not duplicated by the prompt bundle. SPEC-005 owns the canonical `CheckpointEnvelope`, its acceptance lifecycle, and resumability projection. SPEC-012 registers `ContextCheckpointPayload` inside that envelope with objective, success predicate, accepted decisions, rejected routes, contradictions, artifact identities, repository state, verification evidence, budgets, exact next action, and stop condition. A model may propose payload bytes, but only the SPEC-005 reducer can accept the envelope. Resume creates a new attempt pointing to that accepted envelope; it never reopens the source attempt. Agent-to-agent communication that affects decisions becomes a durable artifact or event.
 
-## Activation ladder
+The prompt/harness boundary is explicit. Prompts may state objectives, invariants, evidence requirements, and typed output expectations. Executable code must enforce authority, manifest integrity, information firewalls, role and attempt separation, capability intersection, budgets, locks, external-effect idempotency and reconciliation, checkpoint acceptance, cancellation, and the kill path. A production claim fails when a hard boundary exists only as prose.
+
+## Activation ladder proposed at audit time
+
+This ladder was a non-authoritative planning model for the audited base. A level becomes usable only through current accepted specifications, implemented enforcement, and a live authorization decision; the table itself activates nothing.
 
 | Level | Prerequisite | Permitted behavior |
 | --- | --- | --- |
@@ -168,9 +181,11 @@ The checkpoint preserves objective, success predicate, authority, decisions, rej
 
 SPEC-026 remains optional and independently authorized. No activation level may be inferred from a prompt alone.
 
-## Exact next program actions
+## Program actions proposed at audit time
 
-1. Preserve the current SPEC-004 worktree without mixing in unrelated edits.
+This sequence was the audit's recommended next work, not a standing command or current queue. Each item required a newly validated work order and the authority effective when executed.
+
+1. Preserve the then-current SPEC-004 worktree without mixing in unrelated edits.
 2. With explicit human approval, push and open the roadmap PR from `b2576ba`.
 3. Run GitHub CI and history-level leak scanning, then obtain a human merge.
 4. Resolve lifecycle migration and whether `implementing` is a merged transition or derived PR projection.
@@ -182,17 +197,16 @@ SPEC-026 remains optional and independently authorized. No activation level may 
 10. Implement 004B before calling the event journal operational.
 11. Continue one accepted spec or explicitly named vertical slice per PR.
 
-## Production launch rule
+## Production launch conclusion at audit time
 
-The manual engineering-orchestrator brief may be used now. Continuous autonomous promotion may not.
+The audit permitted the manual engineering-orchestrator brief only under active human supervision. It did not permit continuous autonomous promotion.
 
 Production launch requires executable authority, event persistence, work orders, context compilation, role and capability contracts, independent evaluation, exact-SHA promotion, private credential brokering, deterministic status, recovery, and a tested kill path. If a hard boundary exists only as prompt prose, it is not a production control.
 
-## Prompt-bundle verification snapshot
+## Prompt-bundle verification snapshot at audit time
 
-The settled bootstrap-v1 proposal produced the following local evidence:
+The then-current bootstrap proposal produced the following local evidence. These dated observations do not attest later edits, the current branch, or bootstrap-v2:
 
-- fresh-context adversarial prompt audit: `20/20`, with all ten `long-horizon-prompting` rubric dimensions at `2/2`;
 - Python unit discovery: 191 of 191 tests passing;
 - deterministic inventory: 298 artifact records, 173 canonical sources, zero unresolved references;
 - governance: 26 rules and 2,142 exhaustive decisions;

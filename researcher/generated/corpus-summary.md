@@ -4,14 +4,14 @@
 This is a generated view of canonical repository artifacts, not a second source of truth.
 
 - Schema: `1.0.0`
-- Source tree: `sha256:cd2f7cedbfebec8fd40451fab9fe57a25b281e250b0b321e7e1b87edd567ceb2`
+- Source tree: `sha256:e3cf67e76169b1e51c08baa6a489364e8fd601f28000e501a98aee2e47e5d0b2`
 - Unresolved references: `0`
 
 | Artifact | Count |
 | --- | ---: |
 | Specifications | 27 |
 | Architecture decisions | 6 |
-| Orchestration briefs | 6 |
+| Orchestration briefs | 7 |
 | Published skills | 17 |
 | Mechanism registry records | 22 |
 | Accepted-ledger events | 28 |

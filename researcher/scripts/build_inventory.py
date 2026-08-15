@@ -1483,6 +1483,7 @@ class InventoryBuilder:
         expected = {
             "docs/reviews/2026-08-15-autonomous-organization-readiness.md": "readiness_review",
             "researcher/orchestration/prompts/README.md": "bundle_contract",
+            "researcher/orchestration/prompts/attempt-manifest.template.md": "attempt_manifest_template",
             "researcher/orchestration/prompts/fresh-verifier-brief.md": "verifier_brief",
             "researcher/orchestration/prompts/organization-root-brief.md": "root_brief",
             "researcher/orchestration/prompts/resume-brief.template.md": "resume_template",
@@ -1528,10 +1529,18 @@ class InventoryBuilder:
             )
 
         return self._category(
-            "SPEC-005, SPEC-012, and SPEC-013 bootstrap proposal",
+            "SPEC-005, SPEC-012, SPEC-013, and SPEC-014 bootstrap proposal",
             records,
             authority="none",
             activation_ceiling="supervised_proposal",
+            enforcement_boundary="external_harness",
+            attempt_manifest_instance_classification="private",
+            model_visible_launch="allowlisted_new_identity_projection_only",
+            public_projection="allowlisted_new_identity_projection_only",
+            checkpoint_contract=(
+                "SPEC-005 CheckpointEnvelope with SPEC-012 ContextCheckpointPayload"
+            ),
+            attempt_separation="builder_and_verifier_distinct",
             closed_prompt_namespace=prompt_root.is_dir() and discovered <= set(expected),
         )
 

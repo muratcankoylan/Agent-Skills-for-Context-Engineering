@@ -312,11 +312,43 @@ class RepositoryInventoryTests(unittest.TestCase):
     def test_orchestration_briefs_are_inventory_backed_and_non_authoritative(self) -> None:
         inventory = InventoryBuilder(ROOT).build()
         briefs = inventory["artifacts"]["orchestration_briefs"]
-        self.assertEqual(briefs["count"], 6)
+        self.assertEqual(briefs["count"], 7)
+        self.assertEqual(
+            briefs["owner"],
+            "SPEC-005, SPEC-012, SPEC-013, and SPEC-014 bootstrap proposal",
+        )
         self.assertEqual(briefs["authority"], "none")
         self.assertEqual(briefs["activation_ceiling"], "supervised_proposal")
+        self.assertEqual(briefs["enforcement_boundary"], "external_harness")
+        self.assertEqual(briefs["attempt_manifest_instance_classification"], "private")
+        self.assertEqual(
+            briefs["model_visible_launch"],
+            "allowlisted_new_identity_projection_only",
+        )
+        self.assertEqual(
+            briefs["public_projection"],
+            "allowlisted_new_identity_projection_only",
+        )
+        self.assertEqual(
+            briefs["checkpoint_contract"],
+            "SPEC-005 CheckpointEnvelope with SPEC-012 ContextCheckpointPayload",
+        )
+        self.assertEqual(briefs["attempt_separation"], "builder_and_verifier_distinct")
         self.assertTrue(briefs["closed_prompt_namespace"])
         self.assertTrue(all(record["status"] == "bootstrap_proposal" for record in briefs["records"]))
+        roles = {record["role"] for record in briefs["records"]}
+        self.assertEqual(
+            roles,
+            {
+                "attempt_manifest_template",
+                "bundle_contract",
+                "readiness_review",
+                "resume_template",
+                "root_brief",
+                "verifier_brief",
+                "work_brief_template",
+            },
+        )
         source_paths = {record["path"] for record in inventory["sources"]}
         self.assertTrue({record["path"] for record in briefs["records"]} <= source_paths)
 
