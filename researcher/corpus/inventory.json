@@ -378,38 +378,86 @@
       ]
     },
     "benchmark_runners": {
-      "count": 6,
+      "count": 14,
       "owner": "researcher/benchmarks/sdk-runner",
       "records": [
         {
-          "digest": "sha256:d2768ad2cd5d1b38290085d1d186bea22305e4c93c0546614131f96cba843368",
+          "digest": "sha256:ee021f7ee26add64b43ee7ec5e9fd4e992b98b60a37140dbf68ad4121af36f0c",
+          "id": "README.md",
+          "path": "researcher/benchmarks/sdk-runner/README.md",
+          "size_bytes": 4283
+        },
+        {
+          "digest": "sha256:3e39a01780d7d56dd9cae861cd9af997c499d088caf2e038f0792172d1707cde",
+          "id": "methodology:PLAN.md",
+          "path": "researcher/benchmarks/PLAN.md",
+          "size_bytes": 23453
+        },
+        {
+          "digest": "sha256:c3790bea49d4701acb54ad41d5bccc2fed83dfe93ef425baec3949ee0e9bfe47",
+          "id": "methodology:effectiveness:README.md",
+          "path": "researcher/benchmarks/effectiveness/README.md",
+          "size_bytes": 4829
+        },
+        {
+          "digest": "sha256:665d1b5a4bfac4b27d5581360258104f590030f9061d95a1ac4bc68f6e870730",
+          "id": "methodology:router:README.md",
+          "path": "researcher/benchmarks/router/README.md",
+          "size_bytes": 2896
+        },
+        {
+          "digest": "sha256:09ba1569584f4d7feced9f2fd28de8956bdbfe25262a410c15be24c3c7c3062d",
           "id": "package-lock.json",
           "path": "researcher/benchmarks/sdk-runner/package-lock.json",
-          "size_bytes": 60242
+          "size_bytes": 8435
         },
         {
-          "digest": "sha256:a890243ea6a35f90fec945a8d5a9c7107c44e5db46bf3174a13bcff63ffcb137",
+          "digest": "sha256:81884c7989fb570a578a6aab7e8a1c872185e226f2fae6b5b9ebe55139f35d1f",
           "id": "package.json",
           "path": "researcher/benchmarks/sdk-runner/package.json",
-          "size_bytes": 830
+          "size_bytes": 1283
         },
         {
-          "digest": "sha256:44d472169cf8cc08a4da8c84bff3db907dc5a7f68a79848d931139c8a8750fb9",
+          "digest": "sha256:53a3c706867b139eca036d3242d309c21414d98e9306b8bb4f9310949eafbcb4",
           "id": "src:common.ts",
           "path": "researcher/benchmarks/sdk-runner/src/common.ts",
-          "size_bytes": 10638
+          "size_bytes": 9707
         },
         {
-          "digest": "sha256:d623d5a156a57d07bc1a91cfbe1fc4336f46ef413209395d2894fb3173a9b452",
+          "digest": "sha256:94dedb1e64c41451469f907bb5e7b2afafb79429f1f1b7ddbc2bb1b9489d4691",
+          "id": "src:liveBlock.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/liveBlock.test.ts",
+          "size_bytes": 3928
+        },
+        {
+          "digest": "sha256:a0830792a32742d2c5fea11842055765e127139bc7b77b689fd82c5da2861da2",
           "id": "src:runEffectiveness.ts",
           "path": "researcher/benchmarks/sdk-runner/src/runEffectiveness.ts",
-          "size_bytes": 4368
+          "size_bytes": 7718
         },
         {
-          "digest": "sha256:ee40169ffccd9be901bb592a03d1eb9911ecb6e7e76ca06f13c5ff8d8baccc0e",
+          "digest": "sha256:467ae886890f2dba429948fb00ad8d8949fcfa4c9df0ca74106d47098bea3f86",
           "id": "src:runRouter.ts",
           "path": "researcher/benchmarks/sdk-runner/src/runRouter.ts",
-          "size_bytes": 12576
+          "size_bytes": 6754
+        },
+        {
+          "digest": "sha256:52dc6f351160ec324c16f899ef005affc60bc070a323304fcb6e85fc1f0ba1bc",
+          "id": "src:sdkImport.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/sdkImport.test.ts",
+          "size_bytes": 306
+        },
+        {
+          "digest": "sha256:3f80842b2e9fc1f06ddbf44b8e8f2a9bb1eca10db91db12c1966438a99774ee4",
+          "id": "test:denyCursorSdkLoader.mjs",
+          "path": "researcher/benchmarks/sdk-runner/test/denyCursorSdkLoader.mjs",
+          "size_bytes": 250
+        },
+        {
+          "digest": "sha256:17e1116ab6813d69dd22c986bf238e1c4bcd890cedef24b0f6de883cd593373b",
+          "id": "test:registerDenyCursorSdk.mjs",
+          "path": "researcher/benchmarks/sdk-runner/test/registerDenyCursorSdk.mjs",
+          "size_bytes": 97
         },
         {
           "digest": "sha256:1bf42fa8545bc307e5371c58ffd5a1ac818a07b31da7038cbdb3b95f072a5ab1",
@@ -419,8 +467,8 @@
         }
       ],
       "status": {
-        "effectiveness": "scaffold",
-        "router": "operational"
+        "effectiveness": "scaffold_dry_run_only",
+        "router": "dry_run_only"
       }
     },
     "claims": {
@@ -2914,7 +2962,7 @@
       ]
     },
     "validators": {
-      "count": 11,
+      "count": 12,
       "owner": "declared validator ownership",
       "records": [
         {
@@ -2928,7 +2976,7 @@
           "path": "researcher/scripts/validate_governance.py"
         },
         {
-          "digest": "sha256:b9e673c8dc9aaf699e36014dc46a528ff9bc4cabaab3c42703da6aecc6ce8eb7",
+          "digest": "sha256:940258f35561ab503e4be8d928f1ec65e33699bfac13bb411499e161f62bba05",
           "id": "repository-inventory",
           "owns": [
             "identifier uniqueness",
@@ -3030,13 +3078,24 @@
             "adversarial scenario execution"
           ],
           "path": "researcher/scripts/run_benchmarks.py"
+        },
+        {
+          "digest": "sha256:49bfaa485f5c06d14b57790f3442cb2889e7812e675178be087665d02b1c58ca",
+          "id": "router-report",
+          "owns": [
+            "router outcome taxonomy",
+            "accuracy denominators",
+            "deterministic confidence intervals",
+            "published router report rendering"
+          ],
+          "path": "researcher/scripts/render_router_report.py"
         }
       ],
       "support_files": [
         {
-          "digest": "sha256:121782aac509285b6d7f71d4454e89bdcb7862b8e91c4f7a2398ae74df598ef7",
+          "digest": "sha256:29c4b8f0c72d0d8e396f95c1f338538ce526de500ca33561e8bcc20d38961f87",
           "path": ".github/workflows/validate.yml",
-          "size_bytes": 7273
+          "size_bytes": 7417
         },
         {
           "digest": "sha256:fa38b9156fba7c5204e93923875cf1997dfb85b1ded2ebd3e96014d96e0dd78f",
@@ -3047,15 +3106,20 @@
           "digest": "sha256:d8396edce3a7f1ef78a7580f65b920fc23ffe5298cfd46d021a0be7242af2d12",
           "path": "requirements-dev.txt",
           "size_bytes": 18625
+        },
+        {
+          "digest": "sha256:cc1949045f4ce5de6fab3425c2d351a48221936b104024e1baba5cc75b0cac77",
+          "path": "researcher/scripts/tests/test_render_router_report.py",
+          "size_bytes": 13885
         }
       ]
     }
   },
   "compatibility": {
     "benchmark_runner": {
-      "effectiveness": "scaffold",
+      "effectiveness": "scaffold_dry_run_only",
       "paid_results": "runtime_or_published_only",
-      "router": "operational"
+      "router": "dry_run_only"
     },
     "historical_reports_are_snapshots": true,
     "manifest_skill_sets": {
@@ -3438,12 +3502,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:1f922e2f5367b661a66b3f98c554cb4826799967b05e0aa95d669a4e435bf88c",
+    "digest": "sha256:a68f4881f5727edb60f09818dcdc0944f5367907b102d1445158674ed62baecb",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:1f922e2f5367b661a66b3f98c554cb4826799967b05e0aa95d669a4e435bf88c",
+  "source_tree_digest": "sha256:a68f4881f5727edb60f09818dcdc0944f5367907b102d1445158674ed62baecb",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3451,9 +3515,9 @@
       "size_bytes": 1911
     },
     {
-      "digest": "sha256:121782aac509285b6d7f71d4454e89bdcb7862b8e91c4f7a2398ae74df598ef7",
+      "digest": "sha256:29c4b8f0c72d0d8e396f95c1f338538ce526de500ca33561e8bcc20d38961f87",
       "path": ".github/workflows/validate.yml",
-      "size_bytes": 7273
+      "size_bytes": 7417
     },
     {
       "digest": "sha256:d4827b154512a79ca4635f716d9d0a7d93f3c0b0f29355f67de9e004d968dc9c",
@@ -3716,6 +3780,16 @@
       "size_bytes": 1970
     },
     {
+      "digest": "sha256:3e39a01780d7d56dd9cae861cd9af997c499d088caf2e038f0792172d1707cde",
+      "path": "researcher/benchmarks/PLAN.md",
+      "size_bytes": 23453
+    },
+    {
+      "digest": "sha256:c3790bea49d4701acb54ad41d5bccc2fed83dfe93ef425baec3949ee0e9bfe47",
+      "path": "researcher/benchmarks/effectiveness/README.md",
+      "size_bytes": 4829
+    },
+    {
       "digest": "sha256:4ae1af9564863e50508b70e39965c31ddc034fef59dc887e8655736435f52dd6",
       "path": "researcher/benchmarks/effectiveness/tasks/001-filesystem-context-offload/README.md",
       "size_bytes": 1678
@@ -3751,6 +3825,11 @@
       "size_bytes": 591
     },
     {
+      "digest": "sha256:665d1b5a4bfac4b27d5581360258104f590030f9061d95a1ac4bc68f6e870730",
+      "path": "researcher/benchmarks/router/README.md",
+      "size_bytes": 2896
+    },
+    {
       "digest": "sha256:489d9670c58b3b84c63577e14ad434adf23d8d54da1d72c9d92d1b891da0f7a5",
       "path": "researcher/benchmarks/router/prompts.jsonl",
       "size_bytes": 22506
@@ -3761,29 +3840,54 @@
       "size_bytes": 1898
     },
     {
-      "digest": "sha256:d2768ad2cd5d1b38290085d1d186bea22305e4c93c0546614131f96cba843368",
+      "digest": "sha256:ee021f7ee26add64b43ee7ec5e9fd4e992b98b60a37140dbf68ad4121af36f0c",
+      "path": "researcher/benchmarks/sdk-runner/README.md",
+      "size_bytes": 4283
+    },
+    {
+      "digest": "sha256:09ba1569584f4d7feced9f2fd28de8956bdbfe25262a410c15be24c3c7c3062d",
       "path": "researcher/benchmarks/sdk-runner/package-lock.json",
-      "size_bytes": 60242
+      "size_bytes": 8435
     },
     {
-      "digest": "sha256:a890243ea6a35f90fec945a8d5a9c7107c44e5db46bf3174a13bcff63ffcb137",
+      "digest": "sha256:81884c7989fb570a578a6aab7e8a1c872185e226f2fae6b5b9ebe55139f35d1f",
       "path": "researcher/benchmarks/sdk-runner/package.json",
-      "size_bytes": 830
+      "size_bytes": 1283
     },
     {
-      "digest": "sha256:44d472169cf8cc08a4da8c84bff3db907dc5a7f68a79848d931139c8a8750fb9",
+      "digest": "sha256:53a3c706867b139eca036d3242d309c21414d98e9306b8bb4f9310949eafbcb4",
       "path": "researcher/benchmarks/sdk-runner/src/common.ts",
-      "size_bytes": 10638
+      "size_bytes": 9707
     },
     {
-      "digest": "sha256:d623d5a156a57d07bc1a91cfbe1fc4336f46ef413209395d2894fb3173a9b452",
+      "digest": "sha256:94dedb1e64c41451469f907bb5e7b2afafb79429f1f1b7ddbc2bb1b9489d4691",
+      "path": "researcher/benchmarks/sdk-runner/src/liveBlock.test.ts",
+      "size_bytes": 3928
+    },
+    {
+      "digest": "sha256:a0830792a32742d2c5fea11842055765e127139bc7b77b689fd82c5da2861da2",
       "path": "researcher/benchmarks/sdk-runner/src/runEffectiveness.ts",
-      "size_bytes": 4368
+      "size_bytes": 7718
     },
     {
-      "digest": "sha256:ee40169ffccd9be901bb592a03d1eb9911ecb6e7e76ca06f13c5ff8d8baccc0e",
+      "digest": "sha256:467ae886890f2dba429948fb00ad8d8949fcfa4c9df0ca74106d47098bea3f86",
       "path": "researcher/benchmarks/sdk-runner/src/runRouter.ts",
-      "size_bytes": 12576
+      "size_bytes": 6754
+    },
+    {
+      "digest": "sha256:52dc6f351160ec324c16f899ef005affc60bc070a323304fcb6e85fc1f0ba1bc",
+      "path": "researcher/benchmarks/sdk-runner/src/sdkImport.test.ts",
+      "size_bytes": 306
+    },
+    {
+      "digest": "sha256:3f80842b2e9fc1f06ddbf44b8e8f2a9bb1eca10db91db12c1966438a99774ee4",
+      "path": "researcher/benchmarks/sdk-runner/test/denyCursorSdkLoader.mjs",
+      "size_bytes": 250
+    },
+    {
+      "digest": "sha256:17e1116ab6813d69dd22c986bf238e1c4bcd890cedef24b0f6de883cd593373b",
+      "path": "researcher/benchmarks/sdk-runner/test/registerDenyCursorSdk.mjs",
+      "size_bytes": 97
     },
     {
       "digest": "sha256:1bf42fa8545bc307e5371c58ffd5a1ac818a07b31da7038cbdb3b95f072a5ab1",
@@ -4166,9 +4270,9 @@
       "size_bytes": 54898
     },
     {
-      "digest": "sha256:b9e673c8dc9aaf699e36014dc46a528ff9bc4cabaab3c42703da6aecc6ce8eb7",
+      "digest": "sha256:940258f35561ab503e4be8d928f1ec65e33699bfac13bb411499e161f62bba05",
       "path": "researcher/scripts/build_inventory.py",
-      "size_bytes": 129931
+      "size_bytes": 132676
     },
     {
       "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
@@ -4184,6 +4288,11 @@
       "digest": "sha256:bdd1f338ed58ebd43edfa805190cf16c2eb92c6e62a1efcd7479edfafa50c904",
       "path": "researcher/scripts/migrate_legacy.py",
       "size_bytes": 17446
+    },
+    {
+      "digest": "sha256:49bfaa485f5c06d14b57790f3442cb2889e7812e675178be087665d02b1c58ca",
+      "path": "researcher/scripts/render_router_report.py",
+      "size_bytes": 33217
     },
     {
       "digest": "sha256:ef6cb1f2f03ebd77c6ba56b2adc7dc0f6d0ba3e260272ea7620d744de0f01f3a",
@@ -4204,6 +4313,11 @@
       "digest": "sha256:081a7c4b21db5a77e108c39f1b7b82abd92249bce3bc66a9fb8eea4bef7db3e3",
       "path": "researcher/scripts/tests/test_artifact_store.py",
       "size_bytes": 36042
+    },
+    {
+      "digest": "sha256:cc1949045f4ce5de6fab3425c2d351a48221936b104024e1baba5cc75b0cac77",
+      "path": "researcher/scripts/tests/test_render_router_report.py",
+      "size_bytes": 13885
     },
     {
       "digest": "sha256:7e7bc28b04098d2d07b9f344c2e5923cef99a28ce64570bef7820380c3b2ff69",
@@ -4349,7 +4463,7 @@
       "path": "researcher/scripts/validate_governance.py"
     },
     {
-      "digest": "sha256:b9e673c8dc9aaf699e36014dc46a528ff9bc4cabaab3c42703da6aecc6ce8eb7",
+      "digest": "sha256:940258f35561ab503e4be8d928f1ec65e33699bfac13bb411499e161f62bba05",
       "id": "repository-inventory",
       "owns": [
         "identifier uniqueness",
@@ -4451,6 +4565,17 @@
         "adversarial scenario execution"
       ],
       "path": "researcher/scripts/run_benchmarks.py"
+    },
+    {
+      "digest": "sha256:49bfaa485f5c06d14b57790f3442cb2889e7812e675178be087665d02b1c58ca",
+      "id": "router-report",
+      "owns": [
+        "router outcome taxonomy",
+        "accuracy denominators",
+        "deterministic confidence intervals",
+        "published router report rendering"
+      ],
+      "path": "researcher/scripts/render_router_report.py"
     }
   ]
 }

@@ -4,7 +4,7 @@
 This is a generated view of canonical repository artifacts, not a second source of truth.
 
 - Schema: `1.0.0`
-- Source tree: `sha256:1f922e2f5367b661a66b3f98c554cb4826799967b05e0aa95d669a4e435bf88c`
+- Source tree: `sha256:a68f4881f5727edb60f09818dcdc0944f5367907b102d1445158674ed62baecb`
 - Unresolved references: `0`
 
 | Artifact | Count |
@@ -27,7 +27,7 @@ This is a generated view of canonical repository artifacts, not a second source 
 ## Compatibility
 
 - Plugin version: `2.5.0`
-- Router runner: `operational`
-- Effectiveness runner: `scaffold`
+- Router runner: `dry_run_only`
+- Effectiveness runner: `scaffold_dry_run_only`
 
 Historical reports retain the counts and measurements from their dated snapshot. Current documents should link here instead of copying live totals.

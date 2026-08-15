@@ -63,6 +63,7 @@ jobs:
             researcher/scripts/tests/test_governance_policy.py \
             researcher/scripts/tests/test_schema_contract.py \
             researcher/scripts/tests/test_artifact_store.py \
+            researcher/scripts/tests/test_render_router_report.py \
             researcher/scripts/tests/test_public_repo.py \
             researcher/scripts/validate_governance.py \
             researcher/scripts/validate_export.py \
@@ -76,6 +77,7 @@ jobs:
             researcher/scripts/compare_skill_revisions.py \
             researcher/scripts/check_activation_cases.py \
             researcher/scripts/run_benchmarks.py \
+            researcher/scripts/render_router_report.py \
             researcher/scripts/skill_health.py \
             researcher/scripts/loop_common.py \
             researcher/scripts/loop_discover.py \
@@ -142,6 +144,7 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm run typecheck
+          npm test
           npm run router:dry-run -- --models gpt-5.5 --reps 1 --max-runs 112 --max-budget-usd 2
           npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 12 --max-budget-usd 2
 

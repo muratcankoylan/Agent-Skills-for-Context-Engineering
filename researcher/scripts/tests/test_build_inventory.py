@@ -73,14 +73,24 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/benchmarks/router/prompts.jsonl",
         "researcher/benchmarks/scenarios/adversarial.jsonl",
         "researcher/benchmarks/goldens/adversarial-goldens.json",
+        "researcher/benchmarks/PLAN.md",
+        "researcher/benchmarks/router/README.md",
+        "researcher/benchmarks/effectiveness/README.md",
+        "researcher/benchmarks/sdk-runner/README.md",
         "researcher/benchmarks/sdk-runner/package.json",
         "researcher/benchmarks/sdk-runner/package-lock.json",
         "researcher/benchmarks/sdk-runner/tsconfig.json",
         "researcher/benchmarks/sdk-runner/src/common.ts",
+        "researcher/benchmarks/sdk-runner/src/liveBlock.test.ts",
+        "researcher/benchmarks/sdk-runner/src/sdkImport.test.ts",
         "researcher/benchmarks/sdk-runner/src/runRouter.ts",
         "researcher/benchmarks/sdk-runner/src/runEffectiveness.ts",
+        "researcher/benchmarks/sdk-runner/test/denyCursorSdkLoader.mjs",
+        "researcher/benchmarks/sdk-runner/test/registerDenyCursorSdk.mjs",
         "researcher/scripts/validate_governance.py",
         "researcher/scripts/build_inventory.py",
+        "researcher/scripts/render_router_report.py",
+        "researcher/scripts/tests/test_render_router_report.py",
         "researcher/scripts/validate_spec_lifecycle.py",
         "researcher/scripts/validate_export.py",
         "researcher/scripts/export_policy.py",
@@ -296,6 +306,145 @@ class RepositoryInventoryTests(unittest.TestCase):
         skill.write_text(skill.read_text(encoding="utf-8") + "\n", encoding="utf-8")
         second = InventoryBuilder(root).build()["source_tree_digest"]
         self.assertNotEqual(first, second)
+
+    def test_unregistered_root_benchmark_runner_file_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "researcher/benchmarks/sdk-runner/unregistered.env"
+        path.write_text("UNREGISTERED=true\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        inventory = builder.build()
+        self.assertIn(
+            ("UNREGISTERED_BENCHMARK_RUNNER_CONTRACT", path.relative_to(root).as_posix()),
+            {(finding.code, finding.path) for finding in builder.findings},
+        )
+        self.assertIn(path.relative_to(root).as_posix(), {source["path"] for source in inventory["sources"]})
+
+    def test_unregistered_nested_benchmark_runner_file_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "researcher/benchmarks/sdk-runner/tools/dist/unregistered.js"
+        path.parent.mkdir(parents=True)
+        path.write_text("export const unsafe = true;\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        inventory = builder.build()
+        self.assertIn(
+            ("UNREGISTERED_BENCHMARK_RUNNER_CONTRACT", path.relative_to(root).as_posix()),
+            {(finding.code, finding.path) for finding in builder.findings},
+        )
+        self.assertIn(path.relative_to(root).as_posix(), {source["path"] for source in inventory["sources"]})
+
+    def test_benchmark_runner_vendor_and_generated_roots_are_excluded(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        runner_dir = root / "researcher/benchmarks/sdk-runner"
+        paths = [runner_dir / "node_modules/vendor.js", runner_dir / "dist/generated.js"]
+        for path in paths:
+            path.parent.mkdir(parents=True)
+            path.write_text("generated\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        inventory = builder.build()
+        source_paths = {source["path"] for source in inventory["sources"]}
+        for path in paths:
+            self.assertNotIn(path.relative_to(root).as_posix(), source_paths)
+        self.assertNotIn(
+            "UNREGISTERED_BENCHMARK_RUNNER_CONTRACT",
+            {finding.code for finding in builder.findings},
+        )
+
+    def test_benchmark_methodology_change_updates_source_tree_digest(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()
+        path = root / "researcher/benchmarks/PLAN.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\nMethodology candidate.\n", encoding="utf-8")
+        after = InventoryBuilder(root).build()
+        before_records = {
+            record["id"]: record for record in before["artifacts"]["benchmark_runners"]["records"]
+        }
+        after_records = {
+            record["id"]: record for record in after["artifacts"]["benchmark_runners"]["records"]
+        }
+        self.assertNotEqual(before_records["methodology:PLAN.md"]["digest"], after_records["methodology:PLAN.md"]["digest"])
+        self.assertNotEqual(before["source_tree_digest"], after["source_tree_digest"])
+
+    def test_benchmark_stage_readmes_are_records_and_sources(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        records = {
+            record["id"]: record
+            for record in inventory["artifacts"]["benchmark_runners"]["records"]
+        }
+        expected = {
+            "methodology:router:README.md": "researcher/benchmarks/router/README.md",
+            "methodology:effectiveness:README.md": (
+                "researcher/benchmarks/effectiveness/README.md"
+            ),
+        }
+        source_paths = {source["path"] for source in inventory["sources"]}
+        for record_id, path in expected.items():
+            with self.subTest(record_id=record_id):
+                self.assertEqual(records[record_id]["path"], path)
+                self.assertIn(path, source_paths)
+
+    def test_benchmark_stage_readme_mutations_update_bound_digests(self) -> None:
+        cases = {
+            "methodology:router:README.md": "researcher/benchmarks/router/README.md",
+            "methodology:effectiveness:README.md": (
+                "researcher/benchmarks/effectiveness/README.md"
+            ),
+        }
+        for record_id, relative in cases.items():
+            with self.subTest(record_id=record_id):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                before = InventoryBuilder(root).build()
+                path = root / relative
+                path.write_text(
+                    path.read_text(encoding="utf-8") + "\nReview mutation.\n",
+                    encoding="utf-8",
+                )
+                after = InventoryBuilder(root).build()
+                before_records = {
+                    record["id"]: record
+                    for record in before["artifacts"]["benchmark_runners"]["records"]
+                }
+                after_records = {
+                    record["id"]: record
+                    for record in after["artifacts"]["benchmark_runners"]["records"]
+                }
+                before_sources = {source["path"]: source for source in before["sources"]}
+                after_sources = {source["path"]: source for source in after["sources"]}
+                self.assertNotEqual(
+                    before_records[record_id]["digest"],
+                    after_records[record_id]["digest"],
+                )
+                self.assertNotEqual(
+                    before_sources[relative]["digest"],
+                    after_sources[relative]["digest"],
+                )
+                self.assertNotEqual(before["source_tree_digest"], after["source_tree_digest"])
+
+    def test_benchmark_runner_status_fails_closed_with_live_execution_removed(self) -> None:
+        category = InventoryBuilder(ROOT).build()["artifacts"]["benchmark_runners"]
+        self.assertEqual(
+            category["status"],
+            {"router": "dry_run_only", "effectiveness": "scaffold_dry_run_only"},
+        )
+
+    def test_router_report_accounting_and_evidence_are_source_bound(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        validator_paths = {
+            record["path"] for record in inventory["artifacts"]["validators"]["records"]
+        }
+        support_paths = {
+            record["path"]
+            for record in inventory["artifacts"]["validators"]["support_files"]
+        }
+        self.assertIn("researcher/scripts/render_router_report.py", validator_paths)
+        self.assertIn(
+            "researcher/scripts/tests/test_render_router_report.py",
+            support_paths,
+        )
 
     def test_specification_program_is_inventory_backed(self) -> None:
         inventory = InventoryBuilder(ROOT).build()

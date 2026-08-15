@@ -11,8 +11,8 @@ This document is the plan to close that gap, in four staged releases, with resea
 | 0 | v2.2.0 (shipped) | Harness resistance to gaming, structural validity | $0 | done |
 | 1 | v2.3.0 (shipped) | Per-skill health metrics (deterministic) | $0 | done; corpus 0.814 aggregate, 2 of 15 flagged |
 | 2 | v2.3.0 (shipped) | Skill router accuracy (LLM-as-router) | Cursor credits (~$7 per full sweep) | done; baseline + post-fix delta published |
-| 3 | v2.4.0 | Skill effectiveness on real agent tasks | Cursor credits, larger | scaffolded, one task built |
-| 4 | v2.5.0 | Cross-skill composition | Cursor credits | future |
+| 3 | future activation | Skill effectiveness on real agent tasks | Cursor credits, larger | scaffolded, one task built |
+| 4 | future | Cross-skill composition | Cursor credits | future |
 
 ### Shipped Stage 2 results (v2.3.0)
 
@@ -136,16 +136,16 @@ The activation-scenario descriptions in v2.2.0 frontmatter (replacing v2.1.x key
 
 1. **Fixture**: `researcher/benchmarks/router/prompts.jsonl` with 100 prompts. Each line: `{prompt_id, prompt, expected_primary_skill, acceptable_secondary_skills, rejected_skills, reason}`. Stage 1 ships with 50; expand to 100 over time.
 
-2. **Routing prompt**: A standard template (`researcher/benchmarks/router/routing-prompt.md`) that presents the 15 skill descriptions (shuffled per replication) and the task, asks the model to return a strict-JSON ranked list with confidence.
+2. **Routing prompt**: A standard template (`researcher/benchmarks/router/routing-prompt.md`) that presents the registered skill descriptions (shuffled per replication) and the task, asks the model to return a strict-JSON ranked list with confidence.
 
-3. **Runner**: `researcher/benchmarks/sdk-runner/src/runRouter.ts`. For each prompt x model x replication:
-   - Build the routing prompt with shuffled skill order.
-   - Call `Agent.prompt(routingPrompt, { settingSources: [], model: { id }, local: { cwd: temp } })`.
-   - `settingSources: []` ensures the router agent has no skill loaded; the descriptions in the prompt are the only signal.
-   - Parse JSON. If parse fails, record as `format_failure` (don't reward bad output).
-   - Compare ranked list to ground truth. Record top-1 and top-3 accuracy.
+3. **Runner**: `researcher/benchmarks/sdk-runner/src/runRouter.ts` currently validates fixtures, builds the deterministic prompt x model x replication plan, and enforces worst-case invocation and cost ceilings. Live execution is absent and non-dry invocation fails closed. A separate activation change must:
+   - Freeze the clean source tree, fixture, routing template, skill catalog, package lock, runtime options, model set, replications, seed, plan, and retry policy in a canonical content-addressed manifest before any call.
+   - Call `Agent.prompt` with `tools: []`, `settingSources: []`, `enableAgentRetries: false`, the selected model, and a reviewed local root. These options make the run text-only, exclude ambient configuration, and keep every invocation inside the runner's explicit budget.
+   - Parse output only from a `finished` SDK result. A parse failure becomes `format_failure`; terminal SDK errors and cancellations are operational outcomes, not incorrect routing predictions.
+   - Persist each terminal result with an exclusive write and exact manifest/plan-item digest. Resume must fail closed on malformed, foreign, ambiguous, or in-flight state before a paid call.
+   - Compare valid rankings to ground truth and report accuracy only over usable finished records, alongside availability and failure counts.
 
-4. **Models**: `composer-2`, `claude-opus-4-7`, `gpt-5.5`, `gemini-3.1-pro`. The list comes from `Cursor.models.list()` at run time; if a model is unavailable it is recorded as `model_unavailable` and the run continues.
+4. **Models**: the published sweeps used `composer-2`, `claude-opus-4-7`, `gpt-5.5`, and `gemini-3.1-pro`. Any activated run freezes the exact requested set in its manifest; model availability and resolved model identity are recorded as provider outcomes rather than inferred from ambient state.
 
 5. **Replications**: 3 per (prompt, model). 100 prompts x 4 models x 3 reps = 1200 calls per full run.
 
@@ -166,7 +166,7 @@ The activation-scenario descriptions in v2.2.0 frontmatter (replacing v2.1.x key
 
 Skill descriptions are the only signal a deployed agent uses to decide whether to load a skill. If they don't route correctly, the rest of the harness is academic. This benchmark directly validates the v2.2.0 activation-scenario refactor.
 
-## Stage 3: Skill Effectiveness Benchmark (v2.4.0, ~$50-200 per full run)
+## Stage 3: Skill Effectiveness Benchmark (future activation, ~$50-200 per full run)
 
 The benchmark that proves skills actually help.
 
@@ -190,11 +190,11 @@ Loading a relevant skill into an agent's context improves outcome quality, token
    - `target_plus_one`: target skill plus one related skill.
    - `target_plus_unrelated`: target skill plus one unrelated skill (interaction control).
 
-3. **Runner**: `researcher/benchmarks/sdk-runner/src/runEffectiveness.ts`. For each task x condition x model x replication:
+3. **Future executor contract**: `researcher/benchmarks/sdk-runner/src/runEffectiveness.ts` currently validates the task root and builds only a dry-run plan. A separate activation must, for each task x condition x model x replication:
    - Build the task workspace from `starting/`.
    - Copy only the in-scope skills into `.cursor/skills/` of the task workspace.
-   - Call `Agent.prompt(taskPrompt, { settingSources: ["project"], model: { id }, local: { cwd: taskWorkspace } })` (or local cloud option for parallel runs).
-   - On completion, run `verify.sh`; record exit code, durationMs, transcript token counts (from `run.conversation()`).
+   - Call `Agent.prompt` with the condition's exact settings sources, an explicit tool allowlist derived from the task contract, `enableAgentRetries: false`, the selected model, and the isolated task workspace. The runner, not the SDK, owns retries and cost accounting.
+   - On completion, run `verify.sh`; record its exit code alongside the SDK terminal status, duration, resolved model, and reported usage.
    - Persist transcript JSON, workspace diff, verify output.
 
 4. **Initial task set**: 20 tasks across categories:
@@ -268,78 +268,79 @@ This is the central mechanism we exploit.
 
 For Stage 3, each task workspace is built fresh per condition: copy the `starting/` directory to a temp dir, then conditionally place skills into `.cursor/skills/`.
 
-### Result schema we rely on
+### Result schema required by activation
 
 From the Cursor SDK reference:
 
 ```typescript
 interface RunResult {
   id: string;
+  requestId?: string;
   status: "finished" | "error" | "cancelled";
   result?: string;          // final assistant text
+  error?: RunError;         // terminal SDK error, distinct from format failure
   model?: ModelSelection;   // resolved model
   durationMs?: number;
+  usage?: TokenUsage;       // cumulative reported tokens
   git?: RunGitInfo;
 }
 ```
 
-Plus `run.conversation(): Promise<ConversationTurn[]>` for the per-turn transcript. Token counts come from the conversation events (precise schema depends on SDK version; the runner abstracts this).
+The current zero-call revision smoke-tests that this SDK surface imports, but does not consume it. The activation change must persist a detached per-attempt receipt containing the run/request ids when supplied, terminal status, resolved model, reported usage, and stable error fields. It may parse benchmark output only when terminal status is `finished`; SDK errors and cancellations never consume the format-retry allowance.
 
 ### Runtime choice per stage
 
-- Stage 2 (router): local runtime, no cwd dependence beyond a temp dir. Fast.
-- Stage 3 (effectiveness): local runtime for most tasks; cloud runtime for tasks that need filesystem isolation or parallel execution.
-- Stage 4: cloud runtime by default for full parallelism.
+- Stage 2 (router): dry-run planner only until the manifest/resume/executor activation contract is implemented and human-merged. The eventual executor is a local text-only runtime with no built-in tools or ambient settings.
+- Stage 3 (effectiveness): dry-run scaffold only until its task and isolation contract is implemented.
+- Stage 4: future composition work; runtime choice requires a separate measured isolation and cost decision.
 
 ### Safety
 
 - Privacy Mode enabled on the Cursor account that runs benchmarks, per Cursor's [privacy docs](https://cursor.help/security-and-privacy/privacy.md). Eval data stays out of training.
-- `apiKey` always passed explicitly, never relied on from env, so cross-tenant mistakes are impossible.
-- `await using` syntax for every agent so disposal is automatic.
-- Concrete rate-limit handling: backoff schedule per Cursor's docs, exponential 1s/2s/4s/8s/16s on 429.
+- The current revision performs no SDK call, consumes no credential, and writes no live result state.
+- Activation must pass an explicit credential on every call, set `tools: []`, set `settingSources: []`, and set `enableAgentRetries: false`; ambient authentication, tools, settings, and retries are forbidden.
+- Activation must record terminal SDK errors, request ids when supplied, resolved models, and usage separately from strict-JSON format failures.
 
 ### Cost gates
 
-The runner implements per-run cost caps:
+The planner implements preflight cost ceilings:
 
 - `--max-runs N`: hard cap on total agent invocations.
 - `--max-budget-usd N`: estimated cost cap, fail fast if exceeded.
 - `--dry-run`: print plan, do not call.
 - `--models <list>`: subset to one model for development.
 
-Every runner prints a cost forecast before any agent call.
+Every runner prints a cost forecast. There is no agent-call path in this revision.
 
-## Implementation Order
+## Current And Next Order
 
-1. **Stage 1 (this PR, v2.2.1)**: `researcher/scripts/skill_health.py`, output file, integration with `loop_daily.py`. No API cost.
+1. **Stage 1 (shipped)**: `researcher/scripts/skill_health.py`, output file, and integration with `loop_daily.py`. No API cost.
 
-2. **SDK runner scaffolding (this PR)**: `researcher/benchmarks/sdk-runner/` with package.json, tsconfig, common utilities, dry-run mode. Compiles and exits cleanly without an API key.
+2. **SDK planning package (current)**: exact dependency lock, TypeScript planner utilities, strict fixture/task validation, bounded dry-run forecasts, SDK import smoke, and live-block tests. It compiles and exits cleanly without an API key and contains no live executor.
 
-3. **Router fixtures (this PR)**: 50 prompts in `researcher/benchmarks/router/prompts.jsonl`. Adversarial pairs for the v2.2.0 boundary-confusion cases (evaluation vs advanced-evaluation, etc.) plus single-skill positive controls.
+3. **Router fixtures (shipped and maintained)**: prompts in `researcher/benchmarks/router/prompts.jsonl`, including adversarial boundary-confusion pairs and single-skill positive controls.
 
-4. **First effectiveness task (this PR)**: `researcher/benchmarks/effectiveness/tasks/001-filesystem-context-offload/` fully built. Pattern for the other 19.
+4. **First effectiveness task (scaffolded)**: `researcher/benchmarks/effectiveness/tasks/001-filesystem-context-offload/` is the contract pattern for later tasks.
 
-5. **Verify (this PR)**: compile, run dry, run skill_health for real, all existing gates still pass.
+5. **Validate continuously**: typecheck, run zero-call tests and bounded dry plans, run skill health, and keep every repository gate green.
 
-6. **Execute Stage 1 in CI (next PR after merge)**: add to `loop_daily.py` so skill health updates daily.
+6. **Activate Stage 2 through a separate reviewed change**: implement the canonical manifest, strict resume, exclusive writes, fake-executor tests, dependency containment decision, and concurrency-1 canary before publishing a new router run.
 
-7. **Execute Stage 2 (when env key provided)**: run router benchmark, publish results, iterate descriptions where confusions appear.
+7. **Build the remaining effectiveness tasks incrementally**: prioritize skills that carry the most user-facing claims and validate each task contract deterministically.
 
-8. **Build remaining 19 effectiveness tasks (rolling)**: prioritized by which skills carry the most user-facing claims.
+8. **Activate Stage 3 only after task and isolation review**: run a bounded canary, then a preregistered sweep and publish per-skill effect sizes.
 
-9. **Execute Stage 3 (when ready)**: full effectiveness sweep, publish per-skill effect sizes.
-
-10. **Stage 4 design and execution (v2.5.0)**.
+9. **Design Stage 4 after Stage 3 evidence exists**.
 
 ## Open Decisions
 
-These need user input before Stage 2 execution. They do not block scaffolding.
+These require an explicit disposition before any later Stage 2 activation. They do not block zero-call planning.
 
 1. **Privacy mode**: confirm enabled on the Cursor account that will run benchmarks.
 2. **Higher rate limits**: confirm whether to email `leerob@cursor.com` for benchmark-grade limits per Cursor's docs, or rely on default limits for a smaller initial sweep.
-3. **Models to include in v2.3.0 first run**: ship with composer-2 only, or include claude/gpt/gemini from day one?
-4. **Publication policy**: full raw transcripts committed to the repo, or hosted separately and linked? Transcript size at full scale is multi-MB per sweep.
-5. **Comparison points**: include public benchmark subsets (BrowseComp, SWE-bench) for cross-reference, or keep our task set self-contained for v2.4.0 and add cross-reference in v2.5.0?
+3. **Models for the next run**: use one model for the canary, then decide which exact model set is justified for the preregistered sweep.
+4. **Publication policy**: determine whether public-safe raw transcripts are committed or stored as separately linked artifacts; a full sweep is multi-megabyte.
+5. **Comparison points**: decide whether to include public benchmark subsets or keep the task set self-contained until Stage 3 is validated.
 
 ## What This Plan Does Not Solve
 
