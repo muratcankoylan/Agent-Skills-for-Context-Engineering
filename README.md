@@ -299,7 +299,9 @@ python3 -m pip install --require-hashes -r requirements-dev.txt
 python3 -m unittest researcher.scripts.tests.test_skill_frontmatter
 python3 researcher/scripts/validate_platform_compat.py --require-reference-validator
 python3 researcher/scripts/validate_public_repo.py
-python3 researcher/scripts/validate_spec_lifecycle.py --base-ref origin/main
+python3 researcher/scripts/validate_spec_lifecycle.py \
+  --base-ref origin/main \
+  --promoted-ref origin/main
 python3 researcher/scripts/validate_repo.py --strict
 python3 researcher/scripts/skill_health.py --strict --no-history
 python3 researcher/scripts/run_benchmarks.py

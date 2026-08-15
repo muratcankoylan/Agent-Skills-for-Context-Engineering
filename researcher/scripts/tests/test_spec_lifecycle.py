@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
+
+import yaml
 
 from researcher.scripts.governance_policy import Constitution
 from researcher.scripts.validate_spec_lifecycle import (
@@ -34,6 +38,7 @@ from researcher.scripts.validate_spec_lifecycle import (
     validate_adr_lifecycle,
     validate_lifecycle,
     validate_lifecycle_decision_bindings,
+    validate_promoted_revision_predecessors,
 )
 
 
@@ -99,6 +104,21 @@ def revision(exact_bytes: bytes, *, allow_legacy: bool = False):
 
 def revision_at(path: str, exact_bytes: bytes, *, allow_legacy: bool = False):
     return parse_spec_revision(path, exact_bytes, allow_legacy=allow_legacy)
+
+
+def terminal_adr(body: str = "Decision A."):
+    return parse_adr_revision(
+        "docs/decisions/0007-fixture.md",
+        (
+            "# ADR-0007: Fixture\n\n"
+            "- Status: accepted\n"
+            "- Date: 2026-08-15\n"
+            "- Spec: SPEC-004\n"
+            "- Lifecycle transition: SPEC-004@1 -> amended -> SPEC-004@2\n\n"
+            "## Decision\n\n"
+            f"{body}\n"
+        ).encode("utf-8"),
+    )
 
 
 def canonical_json(value: object) -> bytes:
@@ -310,6 +330,26 @@ def codes(
         finding.code
         for finding in validate_lifecycle(
             base, candidate, authority_vocabulary=authority_vocabulary
+        )
+    }
+
+
+def promoted_codes(
+    base,
+    candidate,
+    promoted_default,
+    *,
+    base_adrs=None,
+    promoted_adrs=None,
+) -> set[str]:
+    return {
+        finding.code
+        for finding in validate_promoted_revision_predecessors(
+            base,
+            candidate,
+            promoted_default,
+            transition_base_adrs=base_adrs or {},
+            promoted_default_adrs=promoted_adrs or {},
         )
     }
 
@@ -1405,6 +1445,300 @@ class SpecificationLifecycleTests(unittest.TestCase):
         digest = f"sha256:{hashlib.sha256(base_bytes).hexdigest()}"
         candidate = revision(spec_bytes(status="draft", revision=2, revises=digest, body="B"))
         self.assertEqual(validate_lifecycle({base.spec_id: base}, {candidate.spec_id: candidate}), [])
+        decision = terminal_adr()
+        self.assertEqual(
+            validate_promoted_revision_predecessors(
+                {base.spec_id: base},
+                {candidate.spec_id: candidate},
+                {base.spec_id: base},
+                transition_base_adrs={decision.adr_id: decision},
+                promoted_default_adrs={decision.adr_id: decision},
+            ),
+            [],
+        )
+
+    def test_new_revision_requires_exact_predecessor_on_promoted_default(self) -> None:
+        base_bytes = spec_bytes(
+            status="amended",
+            body="A",
+            lifecycle_decision="ADR-0007",
+            replacement="SPEC-004@2",
+        )
+        base = revision(base_bytes)
+        digest = f"sha256:{hashlib.sha256(base_bytes).hexdigest()}"
+        candidate = revision(
+            spec_bytes(status="draft", revision=2, revises=digest, body="B")
+        )
+        self.assertEqual(
+            promoted_codes(
+                {base.spec_id: base},
+                {candidate.spec_id: candidate},
+                {},
+            ),
+            {"SPEC_REVISION_PREDECESSOR_NOT_PROMOTED"},
+        )
+
+        for malformed_promoted in (
+            replace(base, path="docs/specs/SPEC-004-relocated.md"),
+            replace(base, revision=99),
+            replace(base, replacement="SPEC-004@999"),
+        ):
+            with self.subTest(promoted=malformed_promoted):
+                self.assertEqual(
+                    promoted_codes(
+                        {base.spec_id: base},
+                        {candidate.spec_id: candidate},
+                        {base.spec_id: malformed_promoted},
+                    ),
+                    {"SPEC_REVISION_PREDECESSOR_NOT_PROMOTED"},
+                )
+
+        active_default = revision(spec_bytes(status="accepted", body="A"))
+        self.assertEqual(
+            promoted_codes(
+                {base.spec_id: base},
+                {candidate.spec_id: candidate},
+                {active_default.spec_id: active_default},
+            ),
+            {"SPEC_REVISION_PREDECESSOR_NOT_PROMOTED"},
+        )
+
+        divergent_default = revision(
+            spec_bytes(
+                status="amended",
+                body="different bytes",
+                lifecycle_decision="ADR-0007",
+                replacement="SPEC-004@2",
+            )
+        )
+        self.assertEqual(
+            promoted_codes(
+                {base.spec_id: base},
+                {candidate.spec_id: candidate},
+                {divergent_default.spec_id: divergent_default},
+            ),
+            {"SPEC_REVISION_PREDECESSOR_NOT_PROMOTED"},
+        )
+
+        decision = terminal_adr()
+        self.assertEqual(
+            promoted_codes(
+                {base.spec_id: base},
+                {candidate.spec_id: candidate},
+                {base.spec_id: base},
+                base_adrs={decision.adr_id: decision},
+                promoted_adrs={},
+            ),
+            {"SPEC_REVISION_PREDECESSOR_NOT_PROMOTED"},
+        )
+        divergent_decision = terminal_adr("Different decision bytes.")
+        self.assertEqual(
+            promoted_codes(
+                {base.spec_id: base},
+                {candidate.spec_id: candidate},
+                {base.spec_id: base},
+                base_adrs={decision.adr_id: decision},
+                promoted_adrs={divergent_decision.adr_id: divergent_decision},
+            ),
+            {"SPEC_REVISION_PREDECESSOR_NOT_PROMOTED"},
+        )
+        relocated_decision = replace(
+            decision,
+            path="docs/decisions/0008-relocated-fixture.md",
+        )
+        self.assertEqual(
+            promoted_codes(
+                {base.spec_id: base},
+                {candidate.spec_id: candidate},
+                {base.spec_id: base},
+                base_adrs={decision.adr_id: decision},
+                promoted_adrs={relocated_decision.adr_id: relocated_decision},
+            ),
+            {"SPEC_REVISION_PREDECESSOR_NOT_PROMOTED"},
+        )
+
+    def test_same_revision_transition_does_not_require_promoted_predecessor(self) -> None:
+        base = revision(spec_bytes(status="architecture_reviewed"))
+        candidate = revision(
+            spec_bytes(
+                status="amended",
+                lifecycle_decision="ADR-0007",
+                replacement="SPEC-004@2",
+            )
+        )
+        self.assertEqual(
+            validate_promoted_revision_predecessors(
+                {base.spec_id: base},
+                {candidate.spec_id: candidate},
+                {},
+                transition_base_adrs={},
+                promoted_default_adrs={},
+            ),
+            [],
+        )
+
+    def test_cli_distinguishes_proposal_base_from_promoted_default(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            spec_path = root / "docs/specs/SPEC-004-fixture.md"
+            adr_path = root / "docs/decisions/0007-fixture.md"
+            spec_path.parent.mkdir(parents=True)
+            adr_path.parent.mkdir(parents=True)
+
+            def git(*arguments: str) -> None:
+                subprocess.run(
+                    ["git", *arguments],
+                    cwd=root,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+
+            def git_output(*arguments: str) -> str:
+                return subprocess.run(
+                    ["git", *arguments],
+                    cwd=root,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                ).stdout.strip()
+
+            git("init", "-b", "main")
+            git("config", "user.name", "Lifecycle Test")
+            git("config", "user.email", "lifecycle@example.invalid")
+            git("config", "commit.gpgsign", "false")
+            git("config", "core.hooksPath", str(root / ".no-hooks"))
+            spec_path.write_bytes(spec_bytes(status="accepted", body="A"))
+            git("add", ".")
+            git("commit", "-m", "active predecessor")
+
+            git("checkout", "-b", "proposal")
+            terminal_bytes = spec_bytes(
+                status="amended",
+                body="A",
+                lifecycle_decision="ADR-0007",
+                replacement="SPEC-004@2",
+            )
+            spec_path.write_bytes(terminal_bytes)
+            adr_path.write_bytes(terminal_adr().exact_bytes)
+            git("add", ".")
+            git("commit", "-m", "terminal predecessor proposal")
+
+            digest = f"sha256:{hashlib.sha256(terminal_bytes).hexdigest()}"
+            spec_path.write_bytes(
+                spec_bytes(status="draft", revision=2, revises=digest, body="B")
+            )
+            main_oid = git_output("rev-parse", "main^{commit}")
+            proposal_oid = git_output("rev-parse", "proposal^{commit}")
+            git("replace", main_oid, proposal_oid)
+            command = [
+                sys.executable,
+                str(ROOT / "researcher/scripts/validate_spec_lifecycle.py"),
+                "--root",
+                str(root),
+                "--base-ref",
+                "proposal",
+                "--promoted-ref",
+                "main",
+            ]
+            missing_promoted_ref = subprocess.run(
+                command[:-2],
+                cwd=root,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(missing_promoted_ref.returncode, 2)
+            self.assertIn("--promoted-ref", missing_promoted_ref.stderr)
+
+            unresolved = subprocess.run(
+                [*command[:-1], "does-not-exist"],
+                cwd=root,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertNotEqual(unresolved.returncode, 0)
+            self.assertIn("SPEC_LIFECYCLE_ERROR", unresolved.stderr)
+
+            rejected = subprocess.run(
+                command,
+                cwd=root,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(rejected.returncode, 1)
+            self.assertIn(
+                "SPEC_REVISION_PREDECESSOR_NOT_PROMOTED",
+                rejected.stderr,
+            )
+
+            git("branch", "-f", "main", "proposal")
+            accepted = subprocess.run(
+                command,
+                cwd=root,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(accepted.returncode, 0, accepted.stderr)
+            self.assertIn("promoted default", accepted.stdout)
+
+    def test_ci_pins_promoted_default_separately_from_proposal_base(self) -> None:
+        workflow = (ROOT / ".github/workflows/validate.yml").read_text(encoding="utf-8")
+        workflow_data = yaml.safe_load(workflow)
+        step_names = [
+            step["name"] for step in workflow_data["jobs"]["validate"]["steps"]
+        ]
+        self.assertEqual(
+            step_names[:5],
+            [
+                "Checkout",
+                "Pin lifecycle Git authorities",
+                "Set up Python",
+                "Install pinned lifecycle parser dependency",
+                "Specification lifecycle against protected base",
+            ],
+        )
+        self.assertIn(
+            "types: [opened, synchronize, reopened, edited, ready_for_review]",
+            workflow,
+        )
+        self.assertIn(
+            "PR_BASE_REF: ${{ github.event.pull_request.base.ref }}",
+            workflow,
+        )
+        self.assertIn("id: lifecycle-authorities", workflow)
+        self.assertIn("git --no-replace-objects", workflow)
+        self.assertIn("GIT_NO_REPLACE_OBJECTS: \"1\"", workflow)
+        self.assertIn("--no-deps", workflow)
+        self.assertIn("--only-binary=:all:", workflow)
+        self.assertIn("--require-hashes", workflow)
+        self.assertIn("pyyaml==6.0.3", workflow)
+        self.assertIn(
+            "sha256:ba1cc08a7ccde2d2ec775841541641e4548226580ab850948cbfda66a1befcdc",
+            workflow,
+        )
+        self.assertIn(
+            "BASE_SHA: ${{ steps.lifecycle-authorities.outputs.base_sha }}",
+            workflow,
+        )
+        self.assertIn('--promoted-ref "$PROMOTED_SHA"', workflow)
+        parser_dependency = workflow.index(
+            "- name: Install pinned lifecycle parser dependency"
+        )
+        lifecycle_gate = workflow.index(
+            "- name: Specification lifecycle against protected base"
+        )
+        self.assertLess(parser_dependency, lifecycle_gate)
+        self.assertLess(lifecycle_gate, workflow.index("- name: Repository secret scan"))
+        self.assertLess(lifecycle_gate, workflow.index("- name: Install validation dependencies"))
 
     def test_active_revision_must_first_enter_terminal_amendment_state(self) -> None:
         base_bytes = spec_bytes(status="accepted", body="A")

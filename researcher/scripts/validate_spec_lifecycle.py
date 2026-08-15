@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Validate specification lifecycle transitions against an exact Git base.
+"""Validate specification lifecycle transitions against exact Git authorities.
 
 The corpus inventory validates the candidate tree in isolation. This gate owns
 the temporal question that an isolated tree cannot answer: whether a proposed
-status or revision is a legal successor to the protected base. GitHub remains
-the authority for whether that candidate was actually human-merged.
+status or revision is a legal successor to its transition base. A separate
+protected-default tree proves that a terminal predecessor was actually promoted
+before its successor revision can be proposed. GitHub remains the authority for
+the actor and merge event that moved those bytes onto the protected default.
 """
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -53,7 +56,7 @@ AUTHORITY_CONFORMANCE_RECEIPT_PATH = (
 AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION = "1.0.0"
 AUTHORITY_CONSTITUTION_POLICY_PATH = "governance/constitution.yaml"
 AUTHORITY_VALIDATOR_PATH = "researcher/scripts/validate_spec_lifecycle.py"
-AUTHORITY_VALIDATOR_VERSION = "1.0.0"
+AUTHORITY_VALIDATOR_VERSION = "1.1.0"
 AUTHORITY_VOCABULARY_READY_STATUSES = {
     "accepted",
     "implemented",
@@ -2702,11 +2705,134 @@ def validate_lifecycle(
     return sorted(findings, key=lambda item: (item.path, item.code, item.message))
 
 
+def validate_promoted_revision_predecessors(
+    transition_base: Mapping[str, SpecRevision],
+    candidate: Mapping[str, SpecRevision],
+    promoted_default: Mapping[str, SpecRevision],
+    *,
+    transition_base_adrs: Mapping[str, AdrRevision],
+    promoted_default_adrs: Mapping[str, AdrRevision],
+) -> list[LifecycleFinding]:
+    """Require each replacement predecessor to be exact on protected default.
+
+    The transition base may be another proposal branch in a stacked pull request.
+    Its terminal metadata is useful for diff validation but carries no lifecycle
+    authority until those exact bytes are reachable from the protected default.
+    """
+
+    findings: list[LifecycleFinding] = []
+
+    def report(record: SpecRevision, message: str) -> None:
+        findings.append(
+            LifecycleFinding(
+                "SPEC_REVISION_PREDECESSOR_NOT_PROMOTED",
+                record.path,
+                record.spec_id,
+                message,
+            )
+        )
+
+    for spec_id, current in sorted(candidate.items()):
+        previous = transition_base.get(spec_id)
+        if previous is None or current.revision <= previous.revision:
+            continue
+
+        promoted = promoted_default.get(spec_id)
+        if promoted is None:
+            report(
+                current,
+                "the protected default does not contain the terminal predecessor",
+            )
+            continue
+        if promoted.path != previous.path:
+            report(
+                current,
+                "the protected-default predecessor has a different canonical path",
+            )
+            continue
+        if promoted.revision != previous.revision:
+            report(
+                current,
+                "the protected-default predecessor has a different revision",
+            )
+            continue
+        if promoted.status not in {"amended", "superseded"}:
+            report(
+                current,
+                "the protected-default predecessor is not terminal as amended or superseded",
+            )
+            continue
+        if promoted.replacement != previous.replacement:
+            report(
+                current,
+                "the protected-default predecessor has a different replacement pointer",
+            )
+            continue
+        if promoted.exact_bytes != previous.exact_bytes:
+            report(
+                current,
+                "the protected-default predecessor bytes differ from the transition base",
+            )
+            continue
+
+        decision_id = previous.lifecycle_decision
+        base_decision = (
+            transition_base_adrs.get(decision_id) if decision_id is not None else None
+        )
+        promoted_decision = (
+            promoted_default_adrs.get(decision_id) if decision_id is not None else None
+        )
+        expected_transition = (
+            f"{previous.spec_id}@{previous.revision} -> "
+            f"{previous.status} -> {previous.replacement}"
+        )
+        if (
+            base_decision is None
+            or base_decision.status != "accepted"
+            or base_decision.lifecycle_transition != expected_transition
+        ):
+            report(
+                current,
+                "the transition base lacks the exact accepted predecessor lifecycle ADR",
+            )
+            continue
+        if (
+            promoted_decision is None
+            or promoted_decision.status != "accepted"
+            or promoted_decision.lifecycle_transition != expected_transition
+        ):
+            report(
+                current,
+                "the protected default lacks the exact accepted predecessor lifecycle ADR",
+            )
+            continue
+        if promoted_decision.path != base_decision.path:
+            report(
+                current,
+                "the protected-default lifecycle ADR has a different canonical path",
+            )
+            continue
+        if promoted_decision.exact_bytes != base_decision.exact_bytes:
+            report(
+                current,
+                "the protected-default lifecycle ADR differs from the transition base",
+            )
+
+    return sorted(findings, key=lambda item: (item.path, item.code, item.message))
+
+
 def _git(root: Path, arguments: list[str]) -> bytes:
+    git_environment = {
+        key: value for key, value in os.environ.items() if not key.startswith("GIT_")
+    }
+    git_environment["GIT_NO_REPLACE_OBJECTS"] = "1"
+    git_environment["GIT_CONFIG_NOSYSTEM"] = "1"
+    git_environment["GIT_CONFIG_GLOBAL"] = os.devnull
     completed = subprocess.run(
-        ["git", *arguments],
+        ["git", "--no-replace-objects", *arguments],
         cwd=root,
         check=False,
+        env=git_environment,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -2786,12 +2912,31 @@ def print_findings(findings: Iterable[LifecycleFinding]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base-ref", required=True, help="exact Git commit or protected base ref")
+    parser.add_argument(
+        "--base-ref",
+        required=True,
+        help="exact Git commit/ref used as the candidate transition base",
+    )
+    parser.add_argument(
+        "--promoted-ref",
+        required=True,
+        help="exact protected-default commit/ref that proves predecessor promotion",
+    )
     parser.add_argument("--root", type=Path, default=ROOT)
     args = parser.parse_args()
     root = args.root.resolve()
     try:
-        base_specs = load_base(root, args.base_ref)
+        base_oid = _git(root, ["rev-parse", "--verify", f"{args.base_ref}^{{commit}}"])
+        base_oid_text = base_oid.decode("ascii").strip()
+        promoted_oid = _git(
+            root,
+            ["rev-parse", "--verify", f"{args.promoted_ref}^{{commit}}"],
+        )
+        promoted_oid_text = promoted_oid.decode("ascii").strip()
+        base_specs = load_base(root, base_oid_text)
+        promoted_specs = load_base(root, promoted_oid_text)
+        base_adrs = load_base_adrs(root, base_oid_text)
+        promoted_adrs = load_base_adrs(root, promoted_oid_text)
         candidate_specs = load_candidate(root)
         candidate_adrs = load_candidate_adrs(root)
         authority_vocabulary = load_candidate_authority_vocabulary(root, candidate_specs)
@@ -2799,6 +2944,15 @@ def main() -> int:
             base_specs,
             candidate_specs,
             authority_vocabulary=authority_vocabulary,
+        )
+        findings.extend(
+            validate_promoted_revision_predecessors(
+                base_specs,
+                candidate_specs,
+                promoted_specs,
+                transition_base_adrs=base_adrs,
+                promoted_default_adrs=promoted_adrs,
+            )
         )
         findings.extend(
             validate_lifecycle_decision_bindings(
@@ -2809,7 +2963,7 @@ def main() -> int:
         )
         findings.extend(
             validate_adr_lifecycle(
-                load_base_adrs(root, args.base_ref),
+                base_adrs,
                 candidate_adrs,
             )
         )
@@ -2820,7 +2974,10 @@ def main() -> int:
     if findings:
         print_findings(findings)
         return 1
-    print(f"Specification lifecycle check passed against {args.base_ref}")
+    print(
+        "Specification lifecycle check passed against "
+        f"transition base {base_oid_text} and promoted default {promoted_oid_text}"
+    )
     return 0
 
 

@@ -29,7 +29,7 @@ No top-level build system. Repo-level gates and per-project tooling below.
 python3 -m unittest researcher.scripts.tests.test_skill_frontmatter # parser and strict-YAML regression tests
 python3 researcher/scripts/validate_governance.py --check # authority model and generated view
 python3 researcher/scripts/build_inventory.py --check    # corpus references and generated inventory
-python3 researcher/scripts/validate_spec_lifecycle.py --base-ref origin/main # base-aware spec transitions and revisions
+python3 researcher/scripts/validate_spec_lifecycle.py --base-ref origin/main --promoted-ref origin/main # transition-base legality plus protected-default predecessor authority
 python3 researcher/scripts/validate_platform_compat.py --require-reference-validator # Agent Skills reference validator + Cursor/Claude/Codex install-layout simulation
 python3 researcher/scripts/validate_repo.py --strict       # corpus structure, manifests, rubric math, mechanism registry, claims, corpus index, activation cases, benchmark scenarios, run artifacts
 python3 researcher/scripts/skill_health.py --strict --no-history  # deterministic skill-body quality gate
