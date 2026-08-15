@@ -1508,6 +1508,63 @@
         }
       ]
     },
+    "orchestration_briefs": {
+      "activation_ceiling": "supervised_proposal",
+      "authority": "none",
+      "closed_prompt_namespace": true,
+      "count": 6,
+      "owner": "SPEC-005, SPEC-012, and SPEC-013 bootstrap proposal",
+      "records": [
+        {
+          "digest": "sha256:b2610e2e7965012d69c47431b5affb8a202fd0ef2a7c8cb62506e66740d903d8",
+          "id": "docs/reviews/2026-08-15-autonomous-organization-readiness.md",
+          "path": "docs/reviews/2026-08-15-autonomous-organization-readiness.md",
+          "role": "readiness_review",
+          "size_bytes": 16361,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:ec68c6730d7169c56525969f726ac1d8593652dd88e2f0e3be95787896d345d5",
+          "id": "researcher/orchestration/prompts/README.md",
+          "path": "researcher/orchestration/prompts/README.md",
+          "role": "bundle_contract",
+          "size_bytes": 5014,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:62e290c2627128aaef2f15ceb2d6661d8f5e30e68a44c6a74d578f40bd6e2977",
+          "id": "researcher/orchestration/prompts/fresh-verifier-brief.md",
+          "path": "researcher/orchestration/prompts/fresh-verifier-brief.md",
+          "role": "verifier_brief",
+          "size_bytes": 6476,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:25f7225bfde249545dd63e19536baa3c9f333a3c156c393e07b0fa6949de1ce6",
+          "id": "researcher/orchestration/prompts/organization-root-brief.md",
+          "path": "researcher/orchestration/prompts/organization-root-brief.md",
+          "role": "root_brief",
+          "size_bytes": 14719,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:a6ee1a87249f8716ac2a737f0b67ed56aa8260d944a387ce6664d99b97e3737f",
+          "id": "researcher/orchestration/prompts/resume-brief.template.md",
+          "path": "researcher/orchestration/prompts/resume-brief.template.md",
+          "role": "resume_template",
+          "size_bytes": 5130,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:9a8d36689da1f0be800128fb9bb9a1df8855de18f84158de5bfd4ee54ac8b9d6",
+          "id": "researcher/orchestration/prompts/spec-work-brief.template.md",
+          "path": "researcher/orchestration/prompts/spec-work-brief.template.md",
+          "role": "work_brief_template",
+          "size_bytes": 6126,
+          "status": "bootstrap_proposal"
+        }
+      ]
+    },
     "router_prompts": {
       "count": 56,
       "owner": "researcher/benchmarks/router/prompts.jsonl",
@@ -2827,7 +2884,7 @@
           "path": "researcher/scripts/validate_governance.py"
         },
         {
-          "digest": "sha256:0b19f6c45132a7a9378a3969842f41d95a22c1cbbb72ee2f7d4c6d78176ab82d",
+          "digest": "sha256:a15f8a09064051f27975bccd5cf5076ebf1a3a871bddf068b4f27fb2dbb785a4",
           "id": "repository-inventory",
           "owns": [
             "identifier uniqueness",
@@ -3337,12 +3394,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:1f84987dc1d48d2a588b6a2597ccbebf6d1c292d33a76d0e52504350a9996ed3",
+    "digest": "sha256:cd2f7cedbfebec8fd40451fab9fe57a25b281e250b0b321e7e1b87edd567ceb2",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:1f84987dc1d48d2a588b6a2597ccbebf6d1c292d33a76d0e52504350a9996ed3",
+  "source_tree_digest": "sha256:cd2f7cedbfebec8fd40451fab9fe57a25b281e250b0b321e7e1b87edd567ceb2",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3398,6 +3455,11 @@
       "digest": "sha256:27812a440a9561fee0679331e7dc7ed7ec6dca6d8cd90b06282f7d56719b3d3a",
       "path": "docs/decisions/README.md",
       "size_bytes": 2050
+    },
+    {
+      "digest": "sha256:b2610e2e7965012d69c47431b5affb8a202fd0ef2a7c8cb62506e66740d903d8",
+      "path": "docs/reviews/2026-08-15-autonomous-organization-readiness.md",
+      "size_bytes": 16361
     },
     {
       "digest": "sha256:d68a4c87d16bf0beaa9d8dd6e04b664f274db923794b6d56b53ac2f0e6412c05",
@@ -3735,6 +3797,31 @@
       "size_bytes": 14630
     },
     {
+      "digest": "sha256:ec68c6730d7169c56525969f726ac1d8593652dd88e2f0e3be95787896d345d5",
+      "path": "researcher/orchestration/prompts/README.md",
+      "size_bytes": 5014
+    },
+    {
+      "digest": "sha256:62e290c2627128aaef2f15ceb2d6661d8f5e30e68a44c6a74d578f40bd6e2977",
+      "path": "researcher/orchestration/prompts/fresh-verifier-brief.md",
+      "size_bytes": 6476
+    },
+    {
+      "digest": "sha256:25f7225bfde249545dd63e19536baa3c9f333a3c156c393e07b0fa6949de1ce6",
+      "path": "researcher/orchestration/prompts/organization-root-brief.md",
+      "size_bytes": 14719
+    },
+    {
+      "digest": "sha256:a6ee1a87249f8716ac2a737f0b67ed56aa8260d944a387ce6664d99b97e3737f",
+      "path": "researcher/orchestration/prompts/resume-brief.template.md",
+      "size_bytes": 5130
+    },
+    {
+      "digest": "sha256:9a8d36689da1f0be800128fb9bb9a1df8855de18f84158de5bfd4ee54ac8b9d6",
+      "path": "researcher/orchestration/prompts/spec-work-brief.template.md",
+      "size_bytes": 6126
+    },
+    {
       "digest": "sha256:0ac5456af9a440308082b4f730cb69f5a4bbfc9cb32928db1f8d4c656243e7ba",
       "path": "researcher/runbooks/schema-migration.md",
       "size_bytes": 2622
@@ -4020,9 +4107,9 @@
       "size_bytes": 54898
     },
     {
-      "digest": "sha256:0b19f6c45132a7a9378a3969842f41d95a22c1cbbb72ee2f7d4c6d78176ab82d",
+      "digest": "sha256:a15f8a09064051f27975bccd5cf5076ebf1a3a871bddf068b4f27fb2dbb785a4",
       "path": "researcher/scripts/build_inventory.py",
-      "size_bytes": 126609
+      "size_bytes": 129349
     },
     {
       "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
@@ -4203,7 +4290,7 @@
       "path": "researcher/scripts/validate_governance.py"
     },
     {
-      "digest": "sha256:0b19f6c45132a7a9378a3969842f41d95a22c1cbbb72ee2f7d4c6d78176ab82d",
+      "digest": "sha256:a15f8a09064051f27975bccd5cf5076ebf1a3a871bddf068b4f27fb2dbb785a4",
       "id": "repository-inventory",
       "owns": [
         "identifier uniqueness",

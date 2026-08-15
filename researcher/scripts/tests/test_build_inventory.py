@@ -125,6 +125,14 @@ def copy_fixture(source: Path, target: Path) -> None:
 
     shutil.copytree(source / "docs" / "specs", target / "docs" / "specs")
     shutil.copytree(source / "docs" / "decisions", target / "docs" / "decisions")
+    shutil.copytree(
+        source / "researcher" / "orchestration" / "prompts",
+        target / "researcher" / "orchestration" / "prompts",
+    )
+    review = source / "docs" / "reviews" / "2026-08-15-autonomous-organization-readiness.md"
+    target_review = target / review.relative_to(source)
+    target_review.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(review, target_review)
 
     source_tasks = source / "researcher" / "benchmarks" / "effectiveness" / "tasks"
     target_tasks = target / "researcher" / "benchmarks" / "effectiveness" / "tasks"
@@ -299,6 +307,40 @@ class RepositoryInventoryTests(unittest.TestCase):
         self.assertEqual(
             {record["id"] for record in decisions["records"]},
             {f"ADR-{number:04d}" for number in range(1, 7)},
+        )
+
+    def test_orchestration_briefs_are_inventory_backed_and_non_authoritative(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        briefs = inventory["artifacts"]["orchestration_briefs"]
+        self.assertEqual(briefs["count"], 6)
+        self.assertEqual(briefs["authority"], "none")
+        self.assertEqual(briefs["activation_ceiling"], "supervised_proposal")
+        self.assertTrue(briefs["closed_prompt_namespace"])
+        self.assertTrue(all(record["status"] == "bootstrap_proposal" for record in briefs["records"]))
+        source_paths = {record["path"] for record in inventory["sources"]}
+        self.assertTrue({record["path"] for record in briefs["records"]} <= source_paths)
+
+    def test_orchestration_brief_change_updates_source_tree_digest(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        path = root / "researcher/orchestration/prompts/organization-root-brief.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+        after = InventoryBuilder(root).build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+
+    def test_unregistered_orchestration_brief_is_reported_and_source_bound(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        extra = root / "researcher/orchestration/prompts/shadow-brief.md"
+        extra.write_text("# Shadow brief\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn(
+            "UNREGISTERED_ORCHESTRATION_BRIEF",
+            {finding.code for finding in builder.findings},
         )
 
     def test_architecture_decision_change_updates_source_tree_digest(self) -> None:
