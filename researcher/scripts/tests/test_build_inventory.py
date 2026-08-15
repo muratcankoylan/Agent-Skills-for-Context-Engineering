@@ -125,6 +125,14 @@ def copy_fixture(source: Path, target: Path) -> None:
 
     shutil.copytree(source / "docs" / "specs", target / "docs" / "specs")
     shutil.copytree(source / "docs" / "decisions", target / "docs" / "decisions")
+    shutil.copytree(
+        source / "researcher" / "orchestration" / "prompts",
+        target / "researcher" / "orchestration" / "prompts",
+    )
+    review = source / "docs" / "reviews" / "2026-08-15-autonomous-organization-readiness.md"
+    target_review = target / review.relative_to(source)
+    target_review.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(review, target_review)
 
     source_tasks = source / "researcher" / "benchmarks" / "effectiveness" / "tasks"
     target_tasks = target / "researcher" / "benchmarks" / "effectiveness" / "tasks"
@@ -299,6 +307,103 @@ class RepositoryInventoryTests(unittest.TestCase):
         self.assertEqual(
             {record["id"] for record in decisions["records"]},
             {f"ADR-{number:04d}" for number in range(1, 7)},
+        )
+
+    def test_orchestration_briefs_are_inventory_backed_and_non_authoritative(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        briefs = inventory["artifacts"]["orchestration_briefs"]
+        self.assertEqual(briefs["count"], 7)
+        self.assertEqual(
+            briefs["owner"],
+            "SPEC-005, SPEC-012, SPEC-013, and SPEC-014 bootstrap proposal",
+        )
+        self.assertEqual(briefs["authority"], "none")
+        self.assertEqual(briefs["activation_ceiling"], "supervised_proposal")
+        self.assertEqual(briefs["enforcement_boundary"], "external_harness")
+        self.assertEqual(briefs["attempt_manifest_instance_classification"], "private")
+        self.assertEqual(
+            briefs["model_visible_launch"],
+            "allowlisted_new_identity_projection_only",
+        )
+        self.assertEqual(
+            briefs["public_projection"],
+            "allowlisted_new_identity_projection_only",
+        )
+        self.assertEqual(
+            briefs["checkpoint_contract"],
+            "SPEC-005 CheckpointEnvelope with SPEC-012 ContextCheckpointPayload",
+        )
+        self.assertEqual(briefs["attempt_separation"], "builder_and_verifier_distinct")
+        self.assertTrue(briefs["closed_prompt_namespace"])
+        self.assertTrue(all(record["status"] == "bootstrap_proposal" for record in briefs["records"]))
+        roles = {record["role"] for record in briefs["records"]}
+        self.assertEqual(
+            roles,
+            {
+                "attempt_manifest_template",
+                "bundle_contract",
+                "readiness_review",
+                "resume_template",
+                "root_brief",
+                "verifier_brief",
+                "work_brief_template",
+            },
+        )
+        source_paths = {record["path"] for record in inventory["sources"]}
+        self.assertTrue({record["path"] for record in briefs["records"]} <= source_paths)
+
+    def test_orchestration_brief_change_updates_source_tree_digest(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        path = root / "researcher/orchestration/prompts/organization-root-brief.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+        after = InventoryBuilder(root).build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+
+    def test_orchestration_briefs_avoid_self_hashes_and_bind_verifier_criteria(self) -> None:
+        resume = (
+            ROOT / "researcher/orchestration/prompts/resume-brief.template.md"
+        ).read_text(encoding="utf-8")
+        verifier = (
+            ROOT / "researcher/orchestration/prompts/fresh-verifier-brief.md"
+        ).read_text(encoding="utf-8")
+        work_brief = (
+            ROOT / "researcher/orchestration/prompts/spec-work-brief.template.md"
+        ).read_text(encoding="utf-8")
+
+        envelope_block = resume.split("### SPEC-005 CheckpointEnvelope", 1)[1].split(
+            "```", 2
+        )[1]
+        self.assertNotIn("checkpoint_envelope_digest:", envelope_block)
+        self.assertIn(
+            "It is never a member of the envelope it hashes.",
+            resume,
+        )
+
+        ready_predicates = verifier.split("`ready` is permitted if and only if", 1)[1]
+        self.assertIn("criteria digest equals the exact criteria contract", ready_predicates)
+        self.assertIn("criteria-derivation receipt", ready_predicates)
+        self.assertIn("evaluator epoch, policy, rubric, thresholds", ready_predicates)
+        self.assertIn("required_passing_conclusion", ready_predicates)
+        self.assertIn("can never yield `ready`", ready_predicates)
+
+        self.assertNotIn("scheduled|decision_available", work_brief)
+        self.assertIn("event_driven_single_delivery_no_progress_polling", work_brief)
+        self.assertIn("never exposes hidden-evaluation scheduling or progress", work_brief)
+
+    def test_unregistered_orchestration_brief_is_reported_and_source_bound(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        extra = root / "researcher/orchestration/prompts/shadow-brief.md"
+        extra.write_text("# Shadow brief\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn(
+            "UNREGISTERED_ORCHESTRATION_BRIEF",
+            {finding.code for finding in builder.findings},
         )
 
     def test_architecture_decision_change_updates_source_tree_digest(self) -> None:

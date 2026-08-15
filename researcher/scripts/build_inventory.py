@@ -575,6 +575,7 @@ class InventoryBuilder:
         schemas = self.build_schemas()
         export_contracts = self.build_export_contracts()
         schema_contracts = self.build_schema_contracts()
+        orchestration_briefs = self.build_orchestration_briefs()
         specifications = self.build_specifications()
         architecture_decisions = self.build_architecture_decisions(
             {record["id"] for record in specifications["records"]}
@@ -674,6 +675,7 @@ class InventoryBuilder:
             "schemas": schemas,
             "export_contracts": export_contracts,
             "schema_contracts": schema_contracts,
+            "orchestration_briefs": orchestration_briefs,
             "specifications": specifications,
             "architecture_decisions": architecture_decisions,
         }
@@ -1473,6 +1475,73 @@ class InventoryBuilder:
             sorted(records, key=lambda item: item["id"]),
             canonicalization_profile=registry.get("canonicalization_profile"),
             id_prefix_count=len(registered_prefixes),
+        )
+
+    def build_orchestration_briefs(self) -> dict[str, Any]:
+        """Bind the non-authoritative long-horizon bootstrap prompt bundle."""
+
+        expected = {
+            "docs/reviews/2026-08-15-autonomous-organization-readiness.md": "readiness_review",
+            "researcher/orchestration/prompts/README.md": "bundle_contract",
+            "researcher/orchestration/prompts/attempt-manifest.template.md": "attempt_manifest_template",
+            "researcher/orchestration/prompts/fresh-verifier-brief.md": "verifier_brief",
+            "researcher/orchestration/prompts/organization-root-brief.md": "root_brief",
+            "researcher/orchestration/prompts/resume-brief.template.md": "resume_template",
+            "researcher/orchestration/prompts/spec-work-brief.template.md": "work_brief_template",
+        }
+        prompt_root = self.root / "researcher" / "orchestration" / "prompts"
+        discovered: set[str] = set()
+        if prompt_root.is_dir():
+            for path in sorted(prompt_root.rglob("*")):
+                if not path.is_file() and not path.is_symlink():
+                    continue
+                relative = self.relative(path)
+                discovered.add(relative)
+                if relative not in expected:
+                    self.add_source(path)
+                    self.add_finding(
+                        "UNREGISTERED_ORCHESTRATION_BRIEF",
+                        path,
+                        "orchestration prompt namespace is closed; register or remove this file",
+                    )
+
+        records: list[dict[str, Any]] = []
+        for relative, role in sorted(expected.items()):
+            path = self.root / relative
+            if not path.is_file():
+                self.add_finding(
+                    "PARSE_ERROR",
+                    path,
+                    "registered orchestration brief is missing",
+                    relative,
+                )
+                continue
+            digest, size = self.add_source(path)
+            records.append(
+                {
+                    "id": relative,
+                    "path": relative,
+                    "role": role,
+                    "digest": digest,
+                    "size_bytes": size,
+                    "status": "bootstrap_proposal",
+                }
+            )
+
+        return self._category(
+            "SPEC-005, SPEC-012, SPEC-013, and SPEC-014 bootstrap proposal",
+            records,
+            authority="none",
+            activation_ceiling="supervised_proposal",
+            enforcement_boundary="external_harness",
+            attempt_manifest_instance_classification="private",
+            model_visible_launch="allowlisted_new_identity_projection_only",
+            public_projection="allowlisted_new_identity_projection_only",
+            checkpoint_contract=(
+                "SPEC-005 CheckpointEnvelope with SPEC-012 ContextCheckpointPayload"
+            ),
+            attempt_separation="builder_and_verifier_distinct",
+            closed_prompt_namespace=prompt_root.is_dir() and discovered <= set(expected),
         )
 
     def build_specifications(self) -> dict[str, Any]:
@@ -2734,10 +2803,10 @@ class InventoryBuilder:
             if filename_match is None:
                 continue
             adr_id = f"ADR-{filename_match.group('number')}"
-            record = decisions_by_id.get(adr_id)
-            if record is None:
+            decision_record = decisions_by_id.get(adr_id)
+            if decision_record is None:
                 continue
-            expected_link = (filename_match.group("number"), record["title"])
+            expected_link = (filename_match.group("number"), decision_record["title"])
             if any(link != expected_link for link in links):
                 self.add_finding(
                     "ADR_INDEX_MISMATCH",
@@ -2779,6 +2848,7 @@ def render_summary(inventory: dict[str, Any]) -> str:
     rows = [
         ("Specifications", artifacts["specifications"]["count"]),
         ("Architecture decisions", artifacts["architecture_decisions"]["count"]),
+        ("Orchestration briefs", artifacts["orchestration_briefs"]["count"]),
         ("Published skills", artifacts["skills"]["count"]),
         ("Mechanism registry records", artifacts["mechanisms"]["count"]),
         ("Accepted-ledger events", artifacts["mechanism_ledgers"]["accepted_event_count"]),
