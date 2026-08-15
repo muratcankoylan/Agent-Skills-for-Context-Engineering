@@ -487,10 +487,10 @@ class RepositoryInventoryTests(unittest.TestCase):
     def test_architecture_decisions_are_inventory_backed(self) -> None:
         inventory = InventoryBuilder(ROOT).build()
         decisions = inventory["artifacts"]["architecture_decisions"]
-        self.assertEqual(decisions["count"], 9)
+        self.assertEqual(decisions["count"], 10)
         self.assertEqual(
             {record["id"] for record in decisions["records"]},
-            {f"ADR-{number:04d}" for number in range(1, 10)},
+            {f"ADR-{number:04d}" for number in range(1, 11)},
         )
 
     def test_orchestration_briefs_are_inventory_backed_and_non_authoritative(self) -> None:
@@ -884,14 +884,25 @@ class RepositoryInventoryTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         path = root / "docs/specs/SPEC-002-public-private-boundary.md"
         original = path.read_text(encoding="utf-8")
-        mutated = original.replace(
-            "Dependency revisions: SPEC-000@1",
-            "Dependency revisions: none",
-            1,
+        mutated = (
+            original.replace("Status: amended\n", "Status: implemented\n", 1)
+            .replace(
+                "Lifecycle decision: ADR-0010\nReplacement: SPEC-002@2\n",
+                "",
+                1,
+            )
+            .replace(
+                "Dependency revisions: SPEC-000@1\n",
+                "Dependency revisions: none\n",
+                1,
+            )
         )
         self.assertNotEqual(original, mutated)
         path.write_text(mutated, encoding="utf-8")
-        self.assertIn("SPEC_DEPENDENCY_REVISION_MISMATCH", finding_codes(root))
+        self.assertEqual(
+            finding_codes(root),
+            {"SPEC_DEPENDENCY_REVISION_MISMATCH"},
+        )
 
     def test_downstream_active_spec_requires_authority_vocabulary_floor(self) -> None:
         temporary, root = self.fixture()
