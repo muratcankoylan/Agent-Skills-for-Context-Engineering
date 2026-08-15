@@ -150,9 +150,15 @@ def write_generic_spec000_revision_two(root: Path, *, status: str = "accepted") 
     original_bytes = path.read_bytes()
     prior_digest = f"sha256:{hashlib.sha256(original_bytes).hexdigest()}"
     text = original_bytes.decode("utf-8")
-    text = text.replace("Status: implemented", f"Status: {status}", 1)
+    if "Status: amended\n" in text:
+        text = text.replace("Status: amended", f"Status: {status}", 1)
+    else:
+        text = text.replace("Status: implemented", f"Status: {status}", 1)
     text = text.replace("Revision: 1", "Revision: 2", 1)
     text = text.replace("Revises: none", f"Revises: {prior_digest}", 1)
+    text = text.replace("Adoption decision: ADR-0005\n", "", 1)
+    text = text.replace("Lifecycle decision: ADR-0008\n", "", 1)
+    text = text.replace("Replacement: SPEC-000@2\n", "", 1)
     path.write_text(text, encoding="utf-8")
 
 
@@ -303,10 +309,10 @@ class RepositoryInventoryTests(unittest.TestCase):
     def test_architecture_decisions_are_inventory_backed(self) -> None:
         inventory = InventoryBuilder(ROOT).build()
         decisions = inventory["artifacts"]["architecture_decisions"]
-        self.assertEqual(decisions["count"], 7)
+        self.assertEqual(decisions["count"], 8)
         self.assertEqual(
             {record["id"] for record in decisions["records"]},
-            {f"ADR-{number:04d}" for number in range(1, 8)},
+            {f"ADR-{number:04d}" for number in range(1, 9)},
         )
 
     def test_orchestration_briefs_are_inventory_backed_and_non_authoritative(self) -> None:

@@ -241,7 +241,7 @@
       ]
     },
     "architecture_decisions": {
-      "count": 7,
+      "count": 8,
       "lifecycle": [
         "accepted",
         "deprecated",
@@ -361,6 +361,19 @@
           ],
           "status": "accepted",
           "title": "Amend SPEC-003 classification and reference invariants"
+        },
+        {
+          "date": "2026-08-15",
+          "digest": "sha256:7cd0c1bb5bcc706f684ff94c2cdf5f9f75bb2cf7780e478d566189d85b161e79",
+          "id": "ADR-0008",
+          "lifecycle_transition": "SPEC-000@1 -> amended -> SPEC-000@2",
+          "path": "docs/decisions/0008-amend-spec-000-for-a-closed-authority-vocabulary.md",
+          "spec_scope": "SPEC-000",
+          "specifications": [
+            "SPEC-000"
+          ],
+          "status": "accepted",
+          "title": "Amend SPEC-000 for a closed authority vocabulary"
         }
       ]
     },
@@ -2285,16 +2298,18 @@
           "classification": "public",
           "dependencies": [],
           "dependency_revisions": "none",
-          "digest": "sha256:be3255f4de01abd3f3326d88916ea9d10e14b364bf7d08ca62eb3093d6e215bf",
+          "digest": "sha256:80fd43dd017a100a23c758e7ae6a22e9b266a19ba3c39573545eddffcb80f784",
           "id": "SPEC-000",
+          "lifecycle_decision": "ADR-0008",
           "owners": [
             "human maintainer",
             "governance agent"
           ],
           "path": "docs/specs/SPEC-000-program-constitution.md",
+          "replacement": "SPEC-000@2",
           "revises": "none",
           "revision": 1,
-          "status": "implemented",
+          "status": "amended",
           "title": "Program constitution and authority model",
           "wave": 0
         },
@@ -3423,12 +3438,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:2cfc43c9223d424b976ff5058aa40b3a0751eb60d3c1e1564c5cd7ba61835b97",
+    "digest": "sha256:1f922e2f5367b661a66b3f98c554cb4826799967b05e0aa95d669a4e435bf88c",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:2cfc43c9223d424b976ff5058aa40b3a0751eb60d3c1e1564c5cd7ba61835b97",
+  "source_tree_digest": "sha256:1f922e2f5367b661a66b3f98c554cb4826799967b05e0aa95d669a4e435bf88c",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3486,9 +3501,14 @@
       "size_bytes": 4166
     },
     {
-      "digest": "sha256:387ae76622f6c99e38e81f5bc588d4bf41b3028fce9b3ec9719459ff28e6c921",
+      "digest": "sha256:7cd0c1bb5bcc706f684ff94c2cdf5f9f75bb2cf7780e478d566189d85b161e79",
+      "path": "docs/decisions/0008-amend-spec-000-for-a-closed-authority-vocabulary.md",
+      "size_bytes": 5065
+    },
+    {
+      "digest": "sha256:7d63cb14b72fce45637a0b6ca48fb887d63320d220ee55f4c13fb6c0fda0e33a",
       "path": "docs/decisions/README.md",
-      "size_bytes": 2183
+      "size_bytes": 2304
     },
     {
       "digest": "sha256:9d903133d4523f42aebdaacad1d825b4e364d608102bc68af2245637db632746",
@@ -3501,9 +3521,9 @@
       "size_bytes": 33175
     },
     {
-      "digest": "sha256:be3255f4de01abd3f3326d88916ea9d10e14b364bf7d08ca62eb3093d6e215bf",
+      "digest": "sha256:80fd43dd017a100a23c758e7ae6a22e9b266a19ba3c39573545eddffcb80f784",
       "path": "docs/specs/SPEC-000-program-constitution.md",
-      "size_bytes": 2803
+      "size_bytes": 2852
     },
     {
       "digest": "sha256:e6109fb747cffc920d3fe48c9bab939bdc9ce7d0dd1130f5ce50367b4d218e28",

@@ -19,3 +19,4 @@ The dependency-ordered implementation contracts live in the [specification progr
 - [ADR-0005: Publish one machine-checked specification program](0005-canonical-specification-program.md)
 - [ADR-0006: Validate the complete public release boundary](0006-validate-public-release-boundary.md)
 - [ADR-0007: Amend SPEC-003 classification and reference invariants](0007-amend-spec-003-classification-and-reference-invariants.md)
+- [ADR-0008: Amend SPEC-000 for a closed authority vocabulary](0008-amend-spec-000-for-a-closed-authority-vocabulary.md)
