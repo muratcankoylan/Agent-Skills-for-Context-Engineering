@@ -81,8 +81,20 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/benchmarks/sdk-runner/package-lock.json",
         "researcher/benchmarks/sdk-runner/tsconfig.json",
         "researcher/benchmarks/sdk-runner/src/common.ts",
+        "researcher/benchmarks/sdk-runner/src/durableFs.test.ts",
+        "researcher/benchmarks/sdk-runner/src/durableFs.ts",
+        "researcher/benchmarks/sdk-runner/src/durableJson.test.ts",
+        "researcher/benchmarks/sdk-runner/src/durableJson.ts",
         "researcher/benchmarks/sdk-runner/src/liveBlock.test.ts",
+        "researcher/benchmarks/sdk-runner/src/routerEngine.test.ts",
+        "researcher/benchmarks/sdk-runner/src/routerEngine.ts",
+        "researcher/benchmarks/sdk-runner/src/routerManifest.test.ts",
+        "researcher/benchmarks/sdk-runner/src/routerManifest.ts",
+        "researcher/benchmarks/sdk-runner/src/routerRunStore.test.ts",
+        "researcher/benchmarks/sdk-runner/src/routerRunStore.ts",
         "researcher/benchmarks/sdk-runner/src/sdkImport.test.ts",
+        "researcher/benchmarks/sdk-runner/src/sourceFreeze.test.ts",
+        "researcher/benchmarks/sdk-runner/src/sourceFreeze.ts",
         "researcher/benchmarks/sdk-runner/src/runRouter.ts",
         "researcher/benchmarks/sdk-runner/src/runEffectiveness.ts",
         "researcher/benchmarks/sdk-runner/test/denyCursorSdkLoader.mjs",
@@ -429,6 +441,23 @@ class RepositoryInventoryTests(unittest.TestCase):
         self.assertEqual(
             category["status"],
             {"router": "dry_run_only", "effectiveness": "scaffold_dry_run_only"},
+        )
+        private_substrate = {
+            "src:durableFs.test.ts",
+            "src:durableFs.ts",
+            "src:durableJson.test.ts",
+            "src:durableJson.ts",
+            "src:routerEngine.test.ts",
+            "src:routerEngine.ts",
+            "src:routerManifest.test.ts",
+            "src:routerManifest.ts",
+            "src:routerRunStore.test.ts",
+            "src:routerRunStore.ts",
+            "src:sourceFreeze.test.ts",
+            "src:sourceFreeze.ts",
+        }
+        self.assertTrue(
+            private_substrate.issubset({record["id"] for record in category["records"]})
         )
 
     def test_router_report_accounting_and_evidence_are_source_bound(self) -> None:

@@ -378,20 +378,20 @@
       ]
     },
     "benchmark_runners": {
-      "count": 14,
+      "count": 26,
       "owner": "researcher/benchmarks/sdk-runner",
       "records": [
         {
-          "digest": "sha256:ee021f7ee26add64b43ee7ec5e9fd4e992b98b60a37140dbf68ad4121af36f0c",
+          "digest": "sha256:362b5b34ac35c3c69020246e760b3ddcae1b66aee71097462d78b8a7ca1ced43",
           "id": "README.md",
           "path": "researcher/benchmarks/sdk-runner/README.md",
-          "size_bytes": 4283
+          "size_bytes": 5395
         },
         {
-          "digest": "sha256:3e39a01780d7d56dd9cae861cd9af997c499d088caf2e038f0792172d1707cde",
+          "digest": "sha256:759bf12d0754177e7a4baec01cee4361864eb44aba2651c306b96fcbf2e0aac7",
           "id": "methodology:PLAN.md",
           "path": "researcher/benchmarks/PLAN.md",
-          "size_bytes": 23453
+          "size_bytes": 24130
         },
         {
           "digest": "sha256:c3790bea49d4701acb54ad41d5bccc2fed83dfe93ef425baec3949ee0e9bfe47",
@@ -400,10 +400,10 @@
           "size_bytes": 4829
         },
         {
-          "digest": "sha256:665d1b5a4bfac4b27d5581360258104f590030f9061d95a1ac4bc68f6e870730",
+          "digest": "sha256:ff46c45fd38c53381221c2f1abf49a4f77f1424eadfe8b5ae8a166894e5d0c95",
           "id": "methodology:router:README.md",
           "path": "researcher/benchmarks/router/README.md",
-          "size_bytes": 2896
+          "size_bytes": 3512
         },
         {
           "digest": "sha256:09ba1569584f4d7feced9f2fd28de8956bdbfe25262a410c15be24c3c7c3062d",
@@ -424,10 +424,70 @@
           "size_bytes": 9707
         },
         {
+          "digest": "sha256:6c112b7d9420edd9bbd4e877679fe8d14ea126339315fc53cbbfcb8af0246638",
+          "id": "src:durableFs.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/durableFs.test.ts",
+          "size_bytes": 11478
+        },
+        {
+          "digest": "sha256:528e1d90acefb0539b7fe225df8f2b286d6e867a39bada20e59311e0d604de11",
+          "id": "src:durableFs.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/durableFs.ts",
+          "size_bytes": 17899
+        },
+        {
+          "digest": "sha256:10fe6fbf6be6fe748a4682de5bffc2976a1dfb87832f90aeb5ff9f33229f7586",
+          "id": "src:durableJson.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/durableJson.test.ts",
+          "size_bytes": 4222
+        },
+        {
+          "digest": "sha256:479e4248f0a4b09cb867a8fd661631300734be04251b0597cc06b3091e61630d",
+          "id": "src:durableJson.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/durableJson.ts",
+          "size_bytes": 15977
+        },
+        {
           "digest": "sha256:94dedb1e64c41451469f907bb5e7b2afafb79429f1f1b7ddbc2bb1b9489d4691",
           "id": "src:liveBlock.test.ts",
           "path": "researcher/benchmarks/sdk-runner/src/liveBlock.test.ts",
           "size_bytes": 3928
+        },
+        {
+          "digest": "sha256:837414afe22ab5e841f6a8b8d966f726976f4ee93de1b8bd8af3860d30630227",
+          "id": "src:routerEngine.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerEngine.test.ts",
+          "size_bytes": 25502
+        },
+        {
+          "digest": "sha256:adfd95350f28845adc12801ff71e25d88a250b1ce5d7c8a120ca591f81962240",
+          "id": "src:routerEngine.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerEngine.ts",
+          "size_bytes": 16140
+        },
+        {
+          "digest": "sha256:892a29bae296c860148866856a533369058aac4165009838d7e1ed1b0884b4b7",
+          "id": "src:routerManifest.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerManifest.test.ts",
+          "size_bytes": 21437
+        },
+        {
+          "digest": "sha256:e7a1dd0e3ea8445d0fc2f763beadde2ad2bfb7271e34e11ed2d1f205ca8aa3f7",
+          "id": "src:routerManifest.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerManifest.ts",
+          "size_bytes": 39876
+        },
+        {
+          "digest": "sha256:3071af5f3143a75916b800280a483417ea511312d1cb8c71e75694ad61ebb59f",
+          "id": "src:routerRunStore.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.test.ts",
+          "size_bytes": 30526
+        },
+        {
+          "digest": "sha256:d2cdb28dfa5629d4b614cfdd68b46af8ebd631a2e0b93a50e2ed678fa0914664",
+          "id": "src:routerRunStore.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.ts",
+          "size_bytes": 46985
         },
         {
           "digest": "sha256:a0830792a32742d2c5fea11842055765e127139bc7b77b689fd82c5da2861da2",
@@ -446,6 +506,18 @@
           "id": "src:sdkImport.test.ts",
           "path": "researcher/benchmarks/sdk-runner/src/sdkImport.test.ts",
           "size_bytes": 306
+        },
+        {
+          "digest": "sha256:f853d70bf00db0f46ca281c8924dafa9b42ff15707794f4712a06570e3d9cd18",
+          "id": "src:sourceFreeze.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/sourceFreeze.test.ts",
+          "size_bytes": 10569
+        },
+        {
+          "digest": "sha256:83e2423b1574447b9a55c699e5b372f8a1244539a736b3b68e4ab59956475bc7",
+          "id": "src:sourceFreeze.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/sourceFreeze.ts",
+          "size_bytes": 20357
         },
         {
           "digest": "sha256:3f80842b2e9fc1f06ddbf44b8e8f2a9bb1eca10db91db12c1966438a99774ee4",
@@ -2726,7 +2798,7 @@
             "SPEC-014",
             "SPEC-016"
           ],
-          "digest": "sha256:c819fecf534ffe474481c346ee9d6d472b8120c9b0f53f3f43930f4527b2cc18",
+          "digest": "sha256:a07e59487db50d1e6846abebc46bbb80d24613a451c5c92357c406fe5d92870c",
           "id": "SPEC-017",
           "owners": [
             "evaluation runner agent",
@@ -2976,7 +3048,7 @@
           "path": "researcher/scripts/validate_governance.py"
         },
         {
-          "digest": "sha256:940258f35561ab503e4be8d928f1ec65e33699bfac13bb411499e161f62bba05",
+          "digest": "sha256:c55e783792fc9225fcb4c61cbfe9933d599b55e143448e79cbbd3d42271bb38d",
           "id": "repository-inventory",
           "owns": [
             "identifier uniqueness",
@@ -3502,12 +3574,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:a68f4881f5727edb60f09818dcdc0944f5367907b102d1445158674ed62baecb",
+    "digest": "sha256:86862cd0d756cea633504f0553603296f441daba2d08c9686a87d4ce334a597d",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:a68f4881f5727edb60f09818dcdc0944f5367907b102d1445158674ed62baecb",
+  "source_tree_digest": "sha256:86862cd0d756cea633504f0553603296f441daba2d08c9686a87d4ce334a597d",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3670,9 +3742,9 @@
       "size_bytes": 16720
     },
     {
-      "digest": "sha256:c819fecf534ffe474481c346ee9d6d472b8120c9b0f53f3f43930f4527b2cc18",
+      "digest": "sha256:a07e59487db50d1e6846abebc46bbb80d24613a451c5c92357c406fe5d92870c",
       "path": "docs/specs/SPEC-017-evaluation-runner.md",
-      "size_bytes": 8762
+      "size_bytes": 9427
     },
     {
       "digest": "sha256:eeed13e853bd89f298d7832604cfcb46339e89596c41fa5606d4be397b20ae34",
@@ -3780,9 +3852,9 @@
       "size_bytes": 1970
     },
     {
-      "digest": "sha256:3e39a01780d7d56dd9cae861cd9af997c499d088caf2e038f0792172d1707cde",
+      "digest": "sha256:759bf12d0754177e7a4baec01cee4361864eb44aba2651c306b96fcbf2e0aac7",
       "path": "researcher/benchmarks/PLAN.md",
-      "size_bytes": 23453
+      "size_bytes": 24130
     },
     {
       "digest": "sha256:c3790bea49d4701acb54ad41d5bccc2fed83dfe93ef425baec3949ee0e9bfe47",
@@ -3825,9 +3897,9 @@
       "size_bytes": 591
     },
     {
-      "digest": "sha256:665d1b5a4bfac4b27d5581360258104f590030f9061d95a1ac4bc68f6e870730",
+      "digest": "sha256:ff46c45fd38c53381221c2f1abf49a4f77f1424eadfe8b5ae8a166894e5d0c95",
       "path": "researcher/benchmarks/router/README.md",
-      "size_bytes": 2896
+      "size_bytes": 3512
     },
     {
       "digest": "sha256:489d9670c58b3b84c63577e14ad434adf23d8d54da1d72c9d92d1b891da0f7a5",
@@ -3840,9 +3912,9 @@
       "size_bytes": 1898
     },
     {
-      "digest": "sha256:ee021f7ee26add64b43ee7ec5e9fd4e992b98b60a37140dbf68ad4121af36f0c",
+      "digest": "sha256:362b5b34ac35c3c69020246e760b3ddcae1b66aee71097462d78b8a7ca1ced43",
       "path": "researcher/benchmarks/sdk-runner/README.md",
-      "size_bytes": 4283
+      "size_bytes": 5395
     },
     {
       "digest": "sha256:09ba1569584f4d7feced9f2fd28de8956bdbfe25262a410c15be24c3c7c3062d",
@@ -3860,9 +3932,59 @@
       "size_bytes": 9707
     },
     {
+      "digest": "sha256:6c112b7d9420edd9bbd4e877679fe8d14ea126339315fc53cbbfcb8af0246638",
+      "path": "researcher/benchmarks/sdk-runner/src/durableFs.test.ts",
+      "size_bytes": 11478
+    },
+    {
+      "digest": "sha256:528e1d90acefb0539b7fe225df8f2b286d6e867a39bada20e59311e0d604de11",
+      "path": "researcher/benchmarks/sdk-runner/src/durableFs.ts",
+      "size_bytes": 17899
+    },
+    {
+      "digest": "sha256:10fe6fbf6be6fe748a4682de5bffc2976a1dfb87832f90aeb5ff9f33229f7586",
+      "path": "researcher/benchmarks/sdk-runner/src/durableJson.test.ts",
+      "size_bytes": 4222
+    },
+    {
+      "digest": "sha256:479e4248f0a4b09cb867a8fd661631300734be04251b0597cc06b3091e61630d",
+      "path": "researcher/benchmarks/sdk-runner/src/durableJson.ts",
+      "size_bytes": 15977
+    },
+    {
       "digest": "sha256:94dedb1e64c41451469f907bb5e7b2afafb79429f1f1b7ddbc2bb1b9489d4691",
       "path": "researcher/benchmarks/sdk-runner/src/liveBlock.test.ts",
       "size_bytes": 3928
+    },
+    {
+      "digest": "sha256:837414afe22ab5e841f6a8b8d966f726976f4ee93de1b8bd8af3860d30630227",
+      "path": "researcher/benchmarks/sdk-runner/src/routerEngine.test.ts",
+      "size_bytes": 25502
+    },
+    {
+      "digest": "sha256:adfd95350f28845adc12801ff71e25d88a250b1ce5d7c8a120ca591f81962240",
+      "path": "researcher/benchmarks/sdk-runner/src/routerEngine.ts",
+      "size_bytes": 16140
+    },
+    {
+      "digest": "sha256:892a29bae296c860148866856a533369058aac4165009838d7e1ed1b0884b4b7",
+      "path": "researcher/benchmarks/sdk-runner/src/routerManifest.test.ts",
+      "size_bytes": 21437
+    },
+    {
+      "digest": "sha256:e7a1dd0e3ea8445d0fc2f763beadde2ad2bfb7271e34e11ed2d1f205ca8aa3f7",
+      "path": "researcher/benchmarks/sdk-runner/src/routerManifest.ts",
+      "size_bytes": 39876
+    },
+    {
+      "digest": "sha256:3071af5f3143a75916b800280a483417ea511312d1cb8c71e75694ad61ebb59f",
+      "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.test.ts",
+      "size_bytes": 30526
+    },
+    {
+      "digest": "sha256:d2cdb28dfa5629d4b614cfdd68b46af8ebd631a2e0b93a50e2ed678fa0914664",
+      "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.ts",
+      "size_bytes": 46985
     },
     {
       "digest": "sha256:a0830792a32742d2c5fea11842055765e127139bc7b77b689fd82c5da2861da2",
@@ -3878,6 +4000,16 @@
       "digest": "sha256:52dc6f351160ec324c16f899ef005affc60bc070a323304fcb6e85fc1f0ba1bc",
       "path": "researcher/benchmarks/sdk-runner/src/sdkImport.test.ts",
       "size_bytes": 306
+    },
+    {
+      "digest": "sha256:f853d70bf00db0f46ca281c8924dafa9b42ff15707794f4712a06570e3d9cd18",
+      "path": "researcher/benchmarks/sdk-runner/src/sourceFreeze.test.ts",
+      "size_bytes": 10569
+    },
+    {
+      "digest": "sha256:83e2423b1574447b9a55c699e5b372f8a1244539a736b3b68e4ab59956475bc7",
+      "path": "researcher/benchmarks/sdk-runner/src/sourceFreeze.ts",
+      "size_bytes": 20357
     },
     {
       "digest": "sha256:3f80842b2e9fc1f06ddbf44b8e8f2a9bb1eca10db91db12c1966438a99774ee4",
@@ -4270,9 +4402,9 @@
       "size_bytes": 54898
     },
     {
-      "digest": "sha256:940258f35561ab503e4be8d928f1ec65e33699bfac13bb411499e161f62bba05",
+      "digest": "sha256:c55e783792fc9225fcb4c61cbfe9933d599b55e143448e79cbbd3d42271bb38d",
       "path": "researcher/scripts/build_inventory.py",
-      "size_bytes": 132676
+      "size_bytes": 133126
     },
     {
       "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
@@ -4463,7 +4595,7 @@
       "path": "researcher/scripts/validate_governance.py"
     },
     {
-      "digest": "sha256:940258f35561ab503e4be8d928f1ec65e33699bfac13bb411499e161f62bba05",
+      "digest": "sha256:c55e783792fc9225fcb4c61cbfe9933d599b55e143448e79cbbd3d42271bb38d",
       "id": "repository-inventory",
       "owns": [
         "identifier uniqueness",

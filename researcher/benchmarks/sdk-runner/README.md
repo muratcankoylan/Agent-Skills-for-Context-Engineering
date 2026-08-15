@@ -1,6 +1,6 @@
 # Researcher SDK Runner
 
-TypeScript planning and validation package for the router (Stage 2) and effectiveness (Stage 3) benchmarks. It pins and smoke-tests the [Cursor SDK](https://cursor.com/docs/sdk/typescript), but this revision contains no live SDK executor.
+TypeScript planning and validation package for the router (Stage 2) and effectiveness (Stage 3) benchmarks. It pins and smoke-tests the [Cursor SDK](https://cursor.com/docs/sdk/typescript), but this revision contains no live SDK executor. A runner-private Router manifest and crash-state prototype is exercised only through deterministic fake-executor tests; it is not a shared organization schema or an activated benchmark path.
 
 See `researcher/benchmarks/PLAN.md` for methodology, hypothesis, statistical design, and reproducibility rules.
 
@@ -21,7 +21,7 @@ The SDK and lockfile are exact review inputs. Run `npm audit --omit=dev` during 
 
 At the 1.0.28 lock review, the upstream transport graph retained unresolved `undici` advisories for which npm reported no compatible fix. CI and routine validation execute typechecking, zero-call import/live-block tests, and bounded `--dry-run` plans; they make no `Agent.prompt` call. Do not describe the dependency tree as vulnerability-free.
 
-Live Stage 2 execution is hard-blocked and the former executor/resume path has been removed. A separate human-merged activation must add a content-addressed run manifest, exclusive crash-safe result writes, strict resume validation, a fresh dependency audit and containment decision, and deterministic fake-executor tests before authorizing one concurrency-1 canary. Do not run multiple benchmark processes against the same SDK state root until that canary is accepted.
+Live Stage 2 execution is hard-blocked and the former executor/resume path has been removed. The private prototype proves canonical integer-only JSON, full-digest plan identities, clean-source and exact-input capture, a concrete manifest-rebuilding pre-effect guard, exclusive append-only claims and outcomes, strict resume validation, cumulative conservative accounting, and crash behavior without importing or calling the SDK. An unmatched claim remains permanently blocking in this revision; there is no unauthenticated reset or reconciliation escape hatch. A separate human-merged activation must replace or adopt those private records under the accepted owner specifications, add the reviewed provider adapter and credential boundary, repeat the dependency audit and containment decision, and authorize one concurrency-1 canary. Do not run multiple benchmark processes against the same SDK state root until that canary is accepted.
 
 ## Commands
 
@@ -48,7 +48,7 @@ Flags shared by both runners:
 
 ## Output
 
-This revision writes no live result, history, or resume state. Its dry runs print the validated plan and worst-case forecast to standard output. Historical artifacts remain under:
+The public commands in this revision write no live result, history, manifest, or resume state. Their dry runs print the validated plan and worst-case forecast to standard output. Unit tests exercise the private state prototype only in disposable temporary directories with an injected fake executor. Historical artifacts remain under:
 
 - `researcher/reports/router-history.jsonl` (Stage 2)
 - `researcher/reports/effectiveness-history.jsonl` (Stage 3)
@@ -66,4 +66,4 @@ Both planners reject a plan above a fixed in-memory cardinality ceiling before a
 
 ## Reproducibility
 
-The current dry-run output is diagnostic, not a durable experimental receipt. The activation change must bind exact clean source-tree, fixture, routing-template, skill-catalog, lockfile, runtime, model, seed, plan, and retry-policy digests in one canonical manifest. Every terminal result must bind that manifest and its exact plan item. Malformed, foreign, in-flight, or ambiguous prior state must block automatic resume before any paid call.
+The current dry-run output is diagnostic, not a durable experimental receipt. The private `router-run-manifest/v1` prototype demonstrates binding an exact clean source tree, fixture, routing template, skill catalog, lockfile, runtime, model set, seed, complete plan, retry policy, and integer micro-USD forecast without self-hashing or path leakage. Its claims, outcomes, and terminal records remain runner-local test contracts. Live activation must first register the accepted provider-neutral contracts, wire and revalidate every semantic input count, and prove that every terminal result binds the authorized manifest and exact plan item. Malformed, foreign, in-flight, or ambiguous prior state must continue to block before any paid call.

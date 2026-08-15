@@ -138,8 +138,8 @@ The activation-scenario descriptions in v2.2.0 frontmatter (replacing v2.1.x key
 
 2. **Routing prompt**: A standard template (`researcher/benchmarks/router/routing-prompt.md`) that presents the registered skill descriptions (shuffled per replication) and the task, asks the model to return a strict-JSON ranked list with confidence.
 
-3. **Runner**: `researcher/benchmarks/sdk-runner/src/runRouter.ts` currently validates fixtures, builds the deterministic prompt x model x replication plan, and enforces worst-case invocation and cost ceilings. Live execution is absent and non-dry invocation fails closed. A separate activation change must:
-   - Freeze the clean source tree, fixture, routing template, skill catalog, package lock, runtime options, model set, replications, seed, plan, and retry policy in a canonical content-addressed manifest before any call.
+3. **Runner**: `researcher/benchmarks/sdk-runner/src/runRouter.ts` currently validates fixtures, builds the deterministic prompt x model x replication plan, and enforces worst-case invocation and cost ceilings. Live execution is absent and non-dry invocation fails closed. Runner-private codecs and an injected fake engine test clean-source capture, concrete manifest-bound pre-effect revalidation, a canonical content-addressed manifest, exclusive claims/outcomes/results, strict resume, and conservative cumulative accounting; they are pre-activation evidence rather than shared schemas or authority. An unmatched prototype claim remains permanently blocking because this revision has no authenticated disposition owner. A separate activation change must:
+   - Adopt accepted provider-neutral contracts that freeze the clean source tree, exact inputs, runtime options, model set, replications, seed, plan, retry policy, and cumulative reservation budget before any call.
    - Call `Agent.prompt` with `tools: []`, `settingSources: []`, `enableAgentRetries: false`, the selected model, and a reviewed local root. These options make the run text-only, exclude ambient configuration, and keep every invocation inside the runner's explicit budget.
    - Parse output only from a `finished` SDK result. A parse failure becomes `format_failure`; terminal SDK errors and cancellations are operational outcomes, not incorrect routing predictions.
    - Persist each terminal result with an exclusive write and exact manifest/plan-item digest. Resume must fail closed on malformed, foreign, ambiguous, or in-flight state before a paid call.
@@ -290,7 +290,7 @@ The current zero-call revision smoke-tests that this SDK surface imports, but do
 
 ### Runtime choice per stage
 
-- Stage 2 (router): dry-run planner only until the manifest/resume/executor activation contract is implemented and human-merged. The eventual executor is a local text-only runtime with no built-in tools or ambient settings.
+- Stage 2 (router): dry-run planner only. The runner-private manifest/resume prototype is fake-tested but not command-reachable and does not activate SPEC-017; live execution still requires accepted owner contracts and a separately reviewed, human-merged provider adapter and authorization. The eventual executor is a local text-only runtime with no built-in tools or ambient settings.
 - Stage 3 (effectiveness): dry-run scaffold only until its task and isolation contract is implemented.
 - Stage 4: future composition work; runtime choice requires a separate measured isolation and cost decision.
 
@@ -324,7 +324,7 @@ Every runner prints a cost forecast. There is no agent-call path in this revisio
 
 5. **Validate continuously**: typecheck, run zero-call tests and bounded dry plans, run skill health, and keep every repository gate green.
 
-6. **Activate Stage 2 through a separate reviewed change**: implement the canonical manifest, strict resume, exclusive writes, fake-executor tests, dependency containment decision, and concurrency-1 canary before publishing a new router run.
+6. **Activate Stage 2 through a separate reviewed change**: adopt the private manifest/resume evidence into accepted provider-neutral contracts, add the isolated provider adapter and authorization boundary, repeat dependency containment review, and pass a concurrency-1 canary before publishing a new router run.
 
 7. **Build the remaining effectiveness tasks incrementally**: prioritize skills that carry the most user-facing claims and validate each task contract deterministically.
 

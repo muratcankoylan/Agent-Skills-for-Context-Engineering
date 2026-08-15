@@ -14,7 +14,7 @@ Evaluation will use a provider-neutral run and result schema with the existing C
 
 ## Context and current repository touchpoints
 
-`researcher/benchmarks/sdk-runner/` already implements bounded concurrency, resume by result scan, progress logging, format retry, privacy settings, and cost forecasts. Router reporting already demonstrates per-skill effect and confusion analysis. This spec generalizes those strengths and adds experiment manifests, result binding, statistical analysis, judge calibration, and negative controls.
+`researcher/benchmarks/sdk-runner/` currently provides strict fixture validation, deterministic zero-call planning, and retry-aware forecasts for the router. The repository separately provides hardened historical-report validation under `researcher/scripts/`. Live execution is fail-closed: the former executor and filename-presence resume path were removed because they did not bind a canonical source/plan manifest or prove crash-safe idempotency. Runner-private manifest, claim, outcome, and terminal-record prototypes may be exercised only with injected fake executors before this specification is accepted. This specification later owns the provider-neutral execution and observation contracts, reservations, statistical analysis, judge calibration, and negative controls.
 
 ## Goals
 
@@ -58,7 +58,7 @@ Atomic runs move `planned -> reservation_pending -> reserved -> running -> compl
 
 ## Implementation sequence
 
-1. Wrap existing router and effectiveness runs in the new plan and result schemas.
+1. Import historical router and effectiveness evidence read-only, then replace the runner-private prototype with the accepted provider-neutral plan and result schemas.
 2. Add digest binding, paired analysis, bootstrap intervals, and failure accounting.
 3. Add blinded pairwise judge protocol and calibration fixtures.
 4. Run deterministic goldens and a bounded no-cost or minimal-cost pilot.
@@ -66,7 +66,7 @@ Atomic runs move `planned -> reservation_pending -> reserved -> running -> compl
 
 ## Migration and rollback
 
-Existing results are imported read-only with provenance and missing-field annotations. The existing commands remain callable until bridge parity passes. Rollback restores the previous runner and leaves new result records intact.
+Existing results are imported read-only with provenance and missing-field annotations. Current commands remain dry-run-only until this specification and all dependencies authorize a separately reviewed activation; no historical live command is a fallback execution path. Rollback disables new dispatch, preserves accepted observations and private prototype evidence, and returns to deterministic planning and report validation.
 
 ## Observability
 
