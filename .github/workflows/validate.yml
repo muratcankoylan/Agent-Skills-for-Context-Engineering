@@ -5,7 +5,8 @@ on:
     branches: [main]
   # Stacked pull requests use proposal branches as their base. Validate every
   # pull request so dependent layers receive the same gates as the base layer.
-  pull_request: {}
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
   workflow_dispatch:
 
 permissions:
@@ -21,17 +22,93 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Pin lifecycle Git authorities
+        id: lifecycle-authorities
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GIT_NO_REPLACE_OBJECTS: "1"
+          GIT_CONFIG_NOSYSTEM: "1"
+          GIT_CONFIG_GLOBAL: /dev/null
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            BASE_SHA="$PR_BASE_SHA"
+            if [ "$PR_BASE_REF" = "$DEFAULT_BRANCH" ]; then
+              PROMOTED_SHA="$PR_BASE_SHA"
+            else
+              git --no-replace-objects -c core.hooksPath=/dev/null fetch --no-tags origin \
+                "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
+              PROMOTED_SHA="$(git --no-replace-objects rev-parse \
+                "refs/remotes/origin/$DEFAULT_BRANCH^{commit}")"
+            fi
+          elif [ "$EVENT_NAME" = "push" ]; then
+            if [ -z "$PUSH_BEFORE_SHA" ] || [ "$PUSH_BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+              echo "Lifecycle validation requires a nonzero push-before SHA" >&2
+              exit 2
+            fi
+            BASE_SHA="$PUSH_BEFORE_SHA"
+            PROMOTED_SHA="$PUSH_BEFORE_SHA"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            git --no-replace-objects -c core.hooksPath=/dev/null fetch --no-tags origin \
+              "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
+            PROMOTED_SHA="$(git --no-replace-objects rev-parse \
+              "refs/remotes/origin/$DEFAULT_BRANCH^{commit}")"
+            BASE_SHA="$(git --no-replace-objects merge-base HEAD "$PROMOTED_SHA")"
+          else
+            echo "Unsupported lifecycle-validation event: $EVENT_NAME" >&2
+            exit 2
+          fi
+          if ! printf '%s\n' "$BASE_SHA" | grep -Eq '^[0-9a-f]{40}$|^[0-9a-f]{64}$'; then
+            echo "Lifecycle validation resolved an invalid transition-base SHA" >&2
+            exit 2
+          fi
+          if ! printf '%s\n' "$PROMOTED_SHA" | grep -Eq '^[0-9a-f]{40}$|^[0-9a-f]{64}$'; then
+            echo "Lifecycle validation resolved an invalid promoted-default SHA" >&2
+            exit 2
+          fi
+          git --no-replace-objects cat-file -e "$BASE_SHA^{commit}"
+          git --no-replace-objects cat-file -e "$PROMOTED_SHA^{commit}"
+          printf 'base_sha=%s\n' "$BASE_SHA" >> "$GITHUB_OUTPUT"
+          printf 'promoted_sha=%s\n' "$PROMOTED_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned lifecycle parser dependency
+        run: |
+          python -m pip install \
+            --disable-pip-version-check \
+            --no-deps \
+            --only-binary=:all: \
+            --require-hashes \
+            -r /dev/stdin <<'REQUIREMENT'
+          pyyaml==6.0.3 \
+            --hash=sha256:ba1cc08a7ccde2d2ec775841541641e4548226580ab850948cbfda66a1befcdc
+          REQUIREMENT
+
+      - name: Specification lifecycle against protected base
+        env:
+          BASE_SHA: ${{ steps.lifecycle-authorities.outputs.base_sha }}
+          PROMOTED_SHA: ${{ steps.lifecycle-authorities.outputs.promoted_sha }}
+          GIT_NO_REPLACE_OBJECTS: "1"
+          GIT_CONFIG_NOSYSTEM: "1"
+          GIT_CONFIG_GLOBAL: /dev/null
+        run: >-
+          python researcher/scripts/validate_spec_lifecycle.py
+          --base-ref "$BASE_SHA"
+          --promoted-ref "$PROMOTED_SHA"
+
       - name: Repository secret scan
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_ENABLE_COMMENTS: "false"
           GITLEAKS_VERSION: "8.30.1"
-
-      - name: Set up Python
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
-        with:
-          python-version: "3.12"
 
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
@@ -98,29 +175,6 @@ jobs:
 
       - name: Generated repository inventory
         run: python researcher/scripts/build_inventory.py --check
-
-      - name: Specification lifecycle against protected base
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PUSH_BEFORE_SHA: ${{ github.event.before }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: |
-          if [ "$EVENT_NAME" = "pull_request" ]; then
-            BASE_SHA="$PR_BASE_SHA"
-          elif [ "$EVENT_NAME" = "push" ]; then
-            if [ -z "$PUSH_BEFORE_SHA" ] || [ "$PUSH_BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
-              echo "Lifecycle validation requires a nonzero push-before SHA" >&2
-              exit 2
-            fi
-            BASE_SHA="$PUSH_BEFORE_SHA"
-          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            BASE_SHA="$(git merge-base HEAD "origin/$DEFAULT_BRANCH")"
-          else
-            echo "Unsupported lifecycle-validation event: $EVENT_NAME" >&2
-            exit 2
-          fi
-          python researcher/scripts/validate_spec_lifecycle.py --base-ref "$BASE_SHA"
 
       - name: Public export boundary
         run: >-

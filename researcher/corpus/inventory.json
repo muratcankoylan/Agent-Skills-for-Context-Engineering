@@ -3091,7 +3091,7 @@
           "path": "researcher/scripts/build_inventory.py"
         },
         {
-          "digest": "sha256:ef2e83da9445bf92d4242042740defae03112536f04cc0f5cafd17f812591035",
+          "digest": "sha256:d334fb7ddcb1743df194e8bcd817e8cf5ced1ca738ce6f83db42149b7e5b3cfe",
           "id": "specification-lifecycle",
           "owns": [
             "base-aware specification status transitions",
@@ -3195,9 +3195,9 @@
       ],
       "support_files": [
         {
-          "digest": "sha256:29c4b8f0c72d0d8e396f95c1f338538ce526de500ca33561e8bcc20d38961f87",
+          "digest": "sha256:058d27d3e0631dc256637ecabb38c92f3fccda97a3b84c4ae06414b430a31ba2",
           "path": ".github/workflows/validate.yml",
-          "size_bytes": 7417
+          "size_bytes": 9991
         },
         {
           "digest": "sha256:fa38b9156fba7c5204e93923875cf1997dfb85b1ded2ebd3e96014d96e0dd78f",
@@ -3604,12 +3604,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:dac808856b5e653ebd9fc9594a4c3e1e215cd7cf58a719ddc7faf2c0f7cf8b61",
+    "digest": "sha256:8aa14172207480651970e3d7e93322ad12b763578f4a9c8bfce0f85fc8e79b55",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:dac808856b5e653ebd9fc9594a4c3e1e215cd7cf58a719ddc7faf2c0f7cf8b61",
+  "source_tree_digest": "sha256:8aa14172207480651970e3d7e93322ad12b763578f4a9c8bfce0f85fc8e79b55",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3617,9 +3617,9 @@
       "size_bytes": 1911
     },
     {
-      "digest": "sha256:29c4b8f0c72d0d8e396f95c1f338538ce526de500ca33561e8bcc20d38961f87",
+      "digest": "sha256:058d27d3e0631dc256637ecabb38c92f3fccda97a3b84c4ae06414b430a31ba2",
       "path": ".github/workflows/validate.yml",
-      "size_bytes": 7417
+      "size_bytes": 9991
     },
     {
       "digest": "sha256:d4827b154512a79ca4635f716d9d0a7d93f3c0b0f29355f67de9e004d968dc9c",
@@ -3692,9 +3692,9 @@
       "size_bytes": 20265
     },
     {
-      "digest": "sha256:d68a4c87d16bf0beaa9d8dd6e04b664f274db923794b6d56b53ac2f0e6412c05",
+      "digest": "sha256:b964cf613586206d2f33049a7b92881bd39d78e89d79e521bcbfe854bb677cbd",
       "path": "docs/specs/README.md",
-      "size_bytes": 33175
+      "size_bytes": 33461
     },
     {
       "digest": "sha256:80fd43dd017a100a23c758e7ae6a22e9b266a19ba3c39573545eddffcb80f784",
@@ -4497,9 +4497,9 @@
       "size_bytes": 24900
     },
     {
-      "digest": "sha256:6939783a55ee7ceb0361e13b08ea4d9cd424a4850c82fd31af2998f44f074a4d",
+      "digest": "sha256:dd2000042ef7708792511c3607883523826cedd6b2b820e2e904b4223cc49a32",
       "path": "researcher/scripts/tests/test_spec_lifecycle.py",
-      "size_bytes": 65020
+      "size_bytes": 77071
     },
     {
       "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
@@ -4532,9 +4532,9 @@
       "size_bytes": 9310
     },
     {
-      "digest": "sha256:ef2e83da9445bf92d4242042740defae03112536f04cc0f5cafd17f812591035",
+      "digest": "sha256:d334fb7ddcb1743df194e8bcd817e8cf5ced1ca738ce6f83db42149b7e5b3cfe",
       "path": "researcher/scripts/validate_spec_lifecycle.py",
-      "size_bytes": 108917
+      "size_bytes": 114743
     },
     {
       "digest": "sha256:8b9e3d9de07a0505ae2b42df2e15dd75bab5f2486e336194481c558e0648ded0",
@@ -4648,7 +4648,7 @@
       "path": "researcher/scripts/build_inventory.py"
     },
     {
-      "digest": "sha256:ef2e83da9445bf92d4242042740defae03112536f04cc0f5cafd17f812591035",
+      "digest": "sha256:d334fb7ddcb1743df194e8bcd817e8cf5ced1ca738ce6f83db42149b7e5b3cfe",
       "id": "specification-lifecycle",
       "owns": [
         "base-aware specification status transitions",
