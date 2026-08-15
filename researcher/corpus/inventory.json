@@ -241,7 +241,7 @@
       ]
     },
     "architecture_decisions": {
-      "count": 6,
+      "count": 7,
       "lifecycle": [
         "accepted",
         "deprecated",
@@ -348,6 +348,19 @@
           ],
           "status": "accepted",
           "title": "Validate the complete public release boundary"
+        },
+        {
+          "date": "2026-08-15",
+          "digest": "sha256:c18b5ec24e8745bd5267bbce48e3510e3223dbeb48d9ac59bf2d0b8644338cc9",
+          "id": "ADR-0007",
+          "lifecycle_transition": "SPEC-003@1 -> amended -> SPEC-003@2",
+          "path": "docs/decisions/0007-amend-spec-003-classification-and-reference-invariants.md",
+          "spec_scope": "SPEC-003",
+          "specifications": [
+            "SPEC-003"
+          ],
+          "status": "accepted",
+          "title": "Amend SPEC-003 classification and reference invariants"
         }
       ]
     },
@@ -2333,16 +2346,18 @@
             "SPEC-002"
           ],
           "dependency_revisions": "SPEC-001@1, SPEC-002@1",
-          "digest": "sha256:95a91c9356d2f6f3c3ba13086e882020511faf2f0403da7fb833c142677a96d0",
+          "digest": "sha256:8850f070fcf92d644da30d606cb2f11eb63ed7e9ae2c22b73aab5a185ba01f7f",
           "id": "SPEC-003",
+          "lifecycle_decision": "ADR-0007",
           "owners": [
             "platform steward agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-003-schema-registry.md",
+          "replacement": "SPEC-003@2",
           "revises": "none",
           "revision": 1,
-          "status": "implemented",
+          "status": "amended",
           "title": "Schema registry and artifact identity",
           "wave": 0
         },
@@ -3408,12 +3423,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:e18fe120351ed7519d1173ca04526db8b5242186ff9b8ae7a70d0e16f9a7671d",
+    "digest": "sha256:2cfc43c9223d424b976ff5058aa40b3a0751eb60d3c1e1564c5cd7ba61835b97",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:e18fe120351ed7519d1173ca04526db8b5242186ff9b8ae7a70d0e16f9a7671d",
+  "source_tree_digest": "sha256:2cfc43c9223d424b976ff5058aa40b3a0751eb60d3c1e1564c5cd7ba61835b97",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3466,9 +3481,14 @@
       "size_bytes": 3850
     },
     {
-      "digest": "sha256:27812a440a9561fee0679331e7dc7ed7ec6dca6d8cd90b06282f7d56719b3d3a",
+      "digest": "sha256:c18b5ec24e8745bd5267bbce48e3510e3223dbeb48d9ac59bf2d0b8644338cc9",
+      "path": "docs/decisions/0007-amend-spec-003-classification-and-reference-invariants.md",
+      "size_bytes": 4166
+    },
+    {
+      "digest": "sha256:387ae76622f6c99e38e81f5bc588d4bf41b3028fce9b3ec9719459ff28e6c921",
       "path": "docs/decisions/README.md",
-      "size_bytes": 2050
+      "size_bytes": 2183
     },
     {
       "digest": "sha256:9d903133d4523f42aebdaacad1d825b4e364d608102bc68af2245637db632746",
@@ -3496,9 +3516,9 @@
       "size_bytes": 3600
     },
     {
-      "digest": "sha256:95a91c9356d2f6f3c3ba13086e882020511faf2f0403da7fb833c142677a96d0",
+      "digest": "sha256:8850f070fcf92d644da30d606cb2f11eb63ed7e9ae2c22b73aab5a185ba01f7f",
       "path": "docs/specs/SPEC-003-schema-registry.md",
-      "size_bytes": 7189
+      "size_bytes": 7238
     },
     {
       "digest": "sha256:d5c4f86026b617ed94d79b702d3f88cf6c0f53da316677156dd5deda6009eac5",

@@ -303,10 +303,10 @@ class RepositoryInventoryTests(unittest.TestCase):
     def test_architecture_decisions_are_inventory_backed(self) -> None:
         inventory = InventoryBuilder(ROOT).build()
         decisions = inventory["artifacts"]["architecture_decisions"]
-        self.assertEqual(decisions["count"], 6)
+        self.assertEqual(decisions["count"], 7)
         self.assertEqual(
             {record["id"] for record in decisions["records"]},
-            {f"ADR-{number:04d}" for number in range(1, 7)},
+            {f"ADR-{number:04d}" for number in range(1, 8)},
         )
 
     def test_orchestration_briefs_are_inventory_backed_and_non_authoritative(self) -> None:
@@ -698,11 +698,11 @@ class RepositoryInventoryTests(unittest.TestCase):
     def test_active_specification_binds_every_direct_dependency_revision(self) -> None:
         temporary, root = self.fixture()
         self.addCleanup(temporary.cleanup)
-        path = root / "docs/specs/SPEC-003-schema-registry.md"
+        path = root / "docs/specs/SPEC-001-repository-reconciliation.md"
         original = path.read_text(encoding="utf-8")
         mutated = original.replace(
-            "Dependency revisions: SPEC-001@1, SPEC-002@1",
-            "Dependency revisions: SPEC-001@1",
+            "Dependency revisions: SPEC-000@1",
+            "Dependency revisions: none",
             1,
         )
         self.assertNotEqual(original, mutated)
