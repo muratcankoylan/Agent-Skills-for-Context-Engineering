@@ -53,7 +53,7 @@ Cancellation is valid only with an authenticated external cancellation event bou
 ## Audit procedure
 
 1. Verify the verifier's own reservation, descriptor, attempt, fence, principal, context, and independence receipt against the distinct builder identities.
-2. Verify that candidate, criteria, context, evaluator decision, required operations, and evidence share exact immutable identities.
+2. Verify that candidate, criteria, context, evaluator contract or opaque evaluator decision, required operations, and evidence share exact immutable identities. Recompute the criteria and failure-mode fingerprints from the authoritative criteria contract; do not accept caller-selected replacement sets.
 3. Verify the staged authority source, lifecycle revision and predecessor binding, implementation floor, dependency stage floors, actor capability intersection, and editable surfaces.
 4. Verify accepted-public and promoted-quality lineage, including complete cumulative reconciliation when those roots differ.
 5. Confirm the diff contains only declared paths and does not overwrite user-owned or unrelated changes.
@@ -117,11 +117,17 @@ criteria_contract:
   expected_criterion_ids: ["{{nonempty, unique canonical IDs}}"]
   expected_failure_mode_ids: ["{{nonempty, unique canonical IDs}}"]
   required_command_ids: ["{{canonical IDs or []}}"]
+  evaluation_gate_requirement: "{{none|public|hidden}}"
+  required_passing_conclusion: "{{exact criteria-derived conclusion or not_applicable only when the gate requirement is none}}"
   criteria_set_fingerprint: "{{recomputed fingerprint}}"
   failure_mode_set_fingerprint: "{{recomputed fingerprint}}"
 evaluation:
-  evaluator_epoch: "{{public identity or not_applicable}}"
-  thresholds_digest: "{{public digest or not_applicable}}"
+  binding_mode: "{{public_visible_contract|opaque_disclosed_decision|not_applicable}}"
+  evaluator_epoch: "{{safe public identity or not_disclosed or not_applicable}}"
+  evaluator_policy_digest: "{{safe public digest or not_disclosed or not_applicable}}"
+  rubric_digest: "{{safe public digest or not_disclosed or not_applicable}}"
+  thresholds_digest: "{{safe public digest or not_disclosed or not_applicable}}"
+  criteria_derivation_receipt: "{{public-safe receipt binding the criteria contract to the epoch/policy/rubric/thresholds, or not_disclosed/not_applicable}}"
   disclosed_decision: "{{opaque allowed decision identity, conclusion, binding, expiry, and issuer or not_applicable}}"
   hidden_material_received: false
 candidate:
@@ -170,7 +176,10 @@ verdict: "ready|not_ready|blocker_valid|blocker_invalid|blocked_independence|blo
 
 - verifier independence and the distinct builder and verifier attempts, principals, descriptors, fences, workspaces, and information profiles are proven by the accepted receipt;
 - the safe launch projection and safe launch-authorization envelope are current and exact, while the private manifest and private receipts remain undisclosed and externally validated;
-- authority, lifecycle, dependency, accepted-public, promoted-quality, candidate, prompt, context, evaluator-decision, and evidence identities are current and exact;
+- authority, lifecycle, dependency, accepted-public, promoted-quality, candidate, prompt, context, evaluator-contract or opaque evaluator-decision, and evidence identities are current and exact;
+- the criteria digest equals the exact criteria contract bound by the verifier descriptor and safe launch projection; its expected criterion IDs, failure-mode IDs, and command IDs are derived from those bytes, and both set fingerprints are independently recomputed;
+- for public evaluation, the evaluator epoch, policy, rubric, thresholds, and criteria-derivation receipt are current, mutually bound, and outside the candidate's editable surfaces; for hidden evaluation, the independently issued opaque decision binds the same candidate, public epoch, criteria contract, and conclusion without disclosing private evaluator material;
+- when the criteria contract requires an evaluation gate, the disclosed decision is current and its conclusion equals the contract's exact `required_passing_conclusion`; reject, deny, fail, expired, unknown, or any other conclusion can never yield `ready`. `not_applicable` is permitted only when the same criteria contract derives `evaluation_gate_requirement: none`;
 - the expected criterion-ID and failure-mode-ID sets are each nonempty and contain unique IDs;
 - actual criterion coverage keys equal the expected criterion set exactly, with no duplicate, missing, or extra key, and every status is `pass`;
 - actual failure-mode coverage keys equal the expected failure-mode set exactly, with no duplicate, missing, or extra key, and every status is `survived`;

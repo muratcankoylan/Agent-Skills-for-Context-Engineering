@@ -1546,11 +1546,11 @@
           "status": "bootstrap_proposal"
         },
         {
-          "digest": "sha256:5a780092b1eb76a76f69aed88f855eadbab9503da266005ff76e54fa5e7fc7a4",
+          "digest": "sha256:e588339b7293a0e7d22f3bd49f045c6dee83be312f8d3ba6b2f2cf31c96414e7",
           "id": "researcher/orchestration/prompts/fresh-verifier-brief.md",
           "path": "researcher/orchestration/prompts/fresh-verifier-brief.md",
           "role": "verifier_brief",
-          "size_bytes": 16429,
+          "size_bytes": 18269,
           "status": "bootstrap_proposal"
         },
         {
@@ -1562,19 +1562,19 @@
           "status": "bootstrap_proposal"
         },
         {
-          "digest": "sha256:ac30b1144163dd96ed9b409f206defab69b92c4ed1590d9348015429b054ee72",
+          "digest": "sha256:8b774f0d34cf4aa0ae36854d6bb9cb97781a3a8430d741dc4f13378c930d05af",
           "id": "researcher/orchestration/prompts/resume-brief.template.md",
           "path": "researcher/orchestration/prompts/resume-brief.template.md",
           "role": "resume_template",
-          "size_bytes": 15553,
+          "size_bytes": 15674,
           "status": "bootstrap_proposal"
         },
         {
-          "digest": "sha256:4e274b553d0fb8f49b37a53db76da82dd4cde8a0232d128173709c36a87df9ff",
+          "digest": "sha256:150e6c0c2260170a3b731fc438adb9bc537b8c2658545e2ee9a528c71fcfd3dc",
           "id": "researcher/orchestration/prompts/spec-work-brief.template.md",
           "path": "researcher/orchestration/prompts/spec-work-brief.template.md",
           "role": "work_brief_template",
-          "size_bytes": 18350,
+          "size_bytes": 18802,
           "status": "bootstrap_proposal"
         }
       ]
@@ -3408,12 +3408,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:e3cf67e76169b1e51c08baa6a489364e8fd601f28000e501a98aee2e47e5d0b2",
+    "digest": "sha256:e18fe120351ed7519d1173ca04526db8b5242186ff9b8ae7a70d0e16f9a7671d",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:e3cf67e76169b1e51c08baa6a489364e8fd601f28000e501a98aee2e47e5d0b2",
+  "source_tree_digest": "sha256:e18fe120351ed7519d1173ca04526db8b5242186ff9b8ae7a70d0e16f9a7671d",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3821,9 +3821,9 @@
       "size_bytes": 27477
     },
     {
-      "digest": "sha256:5a780092b1eb76a76f69aed88f855eadbab9503da266005ff76e54fa5e7fc7a4",
+      "digest": "sha256:e588339b7293a0e7d22f3bd49f045c6dee83be312f8d3ba6b2f2cf31c96414e7",
       "path": "researcher/orchestration/prompts/fresh-verifier-brief.md",
-      "size_bytes": 16429
+      "size_bytes": 18269
     },
     {
       "digest": "sha256:2e632078b9eb43f5794075952eb6669f178b2255c8ac82b6304a6d68419a5bad",
@@ -3831,14 +3831,14 @@
       "size_bytes": 24997
     },
     {
-      "digest": "sha256:ac30b1144163dd96ed9b409f206defab69b92c4ed1590d9348015429b054ee72",
+      "digest": "sha256:8b774f0d34cf4aa0ae36854d6bb9cb97781a3a8430d741dc4f13378c930d05af",
       "path": "researcher/orchestration/prompts/resume-brief.template.md",
-      "size_bytes": 15553
+      "size_bytes": 15674
     },
     {
-      "digest": "sha256:4e274b553d0fb8f49b37a53db76da82dd4cde8a0232d128173709c36a87df9ff",
+      "digest": "sha256:150e6c0c2260170a3b731fc438adb9bc537b8c2658545e2ee9a528c71fcfd3dc",
       "path": "researcher/orchestration/prompts/spec-work-brief.template.md",
-      "size_bytes": 18350
+      "size_bytes": 18802
     },
     {
       "digest": "sha256:0ac5456af9a440308082b4f730cb69f5a4bbfc9cb32928db1f8d4c656243e7ba",

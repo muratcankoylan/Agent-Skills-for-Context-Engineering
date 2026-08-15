@@ -361,6 +361,37 @@ class RepositoryInventoryTests(unittest.TestCase):
         after = InventoryBuilder(root).build()["source_tree_digest"]
         self.assertNotEqual(before, after)
 
+    def test_orchestration_briefs_avoid_self_hashes_and_bind_verifier_criteria(self) -> None:
+        resume = (
+            ROOT / "researcher/orchestration/prompts/resume-brief.template.md"
+        ).read_text(encoding="utf-8")
+        verifier = (
+            ROOT / "researcher/orchestration/prompts/fresh-verifier-brief.md"
+        ).read_text(encoding="utf-8")
+        work_brief = (
+            ROOT / "researcher/orchestration/prompts/spec-work-brief.template.md"
+        ).read_text(encoding="utf-8")
+
+        envelope_block = resume.split("### SPEC-005 CheckpointEnvelope", 1)[1].split(
+            "```", 2
+        )[1]
+        self.assertNotIn("checkpoint_envelope_digest:", envelope_block)
+        self.assertIn(
+            "It is never a member of the envelope it hashes.",
+            resume,
+        )
+
+        ready_predicates = verifier.split("`ready` is permitted if and only if", 1)[1]
+        self.assertIn("criteria digest equals the exact criteria contract", ready_predicates)
+        self.assertIn("criteria-derivation receipt", ready_predicates)
+        self.assertIn("evaluator epoch, policy, rubric, thresholds", ready_predicates)
+        self.assertIn("required_passing_conclusion", ready_predicates)
+        self.assertIn("can never yield `ready`", ready_predicates)
+
+        self.assertNotIn("scheduled|decision_available", work_brief)
+        self.assertIn("event_driven_single_delivery_no_progress_polling", work_brief)
+        self.assertIn("never exposes hidden-evaluation scheduling or progress", work_brief)
+
     def test_unregistered_orchestration_brief_is_reported_and_source_bound(self) -> None:
         temporary, root = self.fixture()
         self.addCleanup(temporary.cleanup)

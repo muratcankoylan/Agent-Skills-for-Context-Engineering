@@ -172,12 +172,13 @@ verification:
   candidate_freeze_contract: "{{required exact-tree and editable-surface contract}}"
   independent_verifier_policy: "{{required safe policy; builder does not preallocate a verifier, and verifier launch proves a distinct attempt and context after candidate freeze}}"
   hidden_evaluation_projection:
-    status: "{{not_applicable|eligible|scheduled|decision_available|closed}}"
-    public_epoch_or_opaque_id: "{{required safe new-identity reference or null}}"
-    eligibility_projection_id: "{{required safe new-identity reference or null}}"
-    permitted_outcome_schema: "{{required allowlisted aggregate or decision schema, or null}}"
+    kind: "{{not_applicable|eligibility_decision|terminal_outcome_decision}}"
+    projection_id: "{{required safe new-identity reference or null}}"
+    conclusion: "{{allowlisted eligibility or terminal conclusion, or null}}"
+    permitted_outcome_schema: "{{required allowlisted decision schema, or null}}"
+    delivery_policy: "event_driven_single_delivery_no_progress_polling"
     private_binding: "dispatcher_and_independent_evaluator_only"
-    prohibited_disclosures: "hidden identity, membership, count, input digest, look budget, raw result, task-level error, timing oracle, private evaluator identity"
+    prohibited_disclosures: "hidden identity, membership, count, input digest, look budget, raw result, task-level error, progress state, schedule state, change timestamp, latency oracle, private evaluator identity"
   migration_obligation: "{{required}}"
   rollback_obligation: "{{required}}"
   observability_obligation: "{{required}}"
@@ -236,7 +237,7 @@ release_and_deployment:
 
 ## Preflight contract
 
-The dispatcher must reject before executor start unless all role-applicable template markers are resolved and all exact versions agree. A conditional `null` above is resolved when its condition requires `null`; it is not an unresolved marker. Preflight checks the private manifest issue receipt and exact role-specific prompt bytes; staged `authority_source`; separate observed, accepted, promoted, and deployed facts; accepted-spec proof for implementation; dependency and surface closure; current attempt reservation and fence; the review-cycle phase; context firewall and hidden-evaluation projection; structured effective-operation intersection; every conditionally required human command; cumulative budget arithmetic; and every prior effect intent and collision state. Builder preflight rejects a preallocated verifier. Verifier preflight requires a frozen candidate and a new-identity receipt proving that the current attempt and context differ from the source builder.
+The dispatcher must reject before executor start unless all role-applicable template markers are resolved and all exact versions agree. A conditional `null` above is resolved when its condition requires `null`; it is not an unresolved marker. Preflight checks the private manifest issue receipt and exact role-specific prompt bytes; staged `authority_source`; separate observed, accepted, promoted, and deployed facts; accepted-spec proof for implementation; dependency and surface closure; current attempt reservation and fence; the review-cycle phase; context firewall and hidden-evaluation projection; structured effective-operation intersection; every conditionally required human command; cumulative budget arithmetic; and every prior effect intent and collision state. Builder preflight rejects a preallocated verifier. Verifier preflight requires a frozen candidate and a new-identity receipt proving that the current attempt and context differ from the source builder. The compiler never exposes hidden-evaluation scheduling or progress and never polls it through model-visible wakes. It may deliver one charged eligibility decision and, after a separately authorized evaluator reaches a terminal state, one charged terminal outcome decision; neither projection includes the hidden event time, run duration, or status history.
 
 Failure emits a durable typed `launch_rejected` receipt and never activates the reserved attempt, calls a model, or performs an effect. A launched model receives only a new-identity safe authorization projection with status `launch_allowed`; it never receives the full private launch receipt or any private digest. If runtime drift later contradicts the projection, stop before the affected action and return `contract_blocked` with visible evidence.
 

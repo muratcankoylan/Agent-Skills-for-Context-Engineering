@@ -16,7 +16,6 @@ The payload, envelope, payload-validation receipt, and checkpoint-acceptance rec
 
 ```yaml
 checkpoint_envelope_id: "{{registered stable identity}}"
-checkpoint_envelope_digest: "{{canonical envelope digest}}"
 work_order_id: "{{required}}"
 work_order_digest: "{{required}}"
 work_order_version: "{{required integer}}"
@@ -34,6 +33,8 @@ policy_context_digest: "{{required}}"
 proposal_operation_key: "{{stable checkpoint-proposal operation key}}"
 proposal_collision_digest: "{{canonical collision digest over all proposal semantics}}"
 ```
+
+The envelope digest is computed over those exact bytes and is carried only by the separate validation and acceptance records below. It is never a member of the envelope it hashes.
 
 `periodic` captures bounded progress. `pre_effect` must name the exact `EffectIntent` and be accepted before the adapter operation begins. `terminal` records the source attempt's proposed final checkpoint; only the owning reducer's accepted terminal transition closes the attempt. A checkpoint proposed by an expired, superseded, cancelled, or wrong-fence executor is historical evidence only and cannot become resumable.
 
