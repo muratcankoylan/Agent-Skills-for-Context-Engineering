@@ -241,7 +241,7 @@
       ]
     },
     "architecture_decisions": {
-      "count": 8,
+      "count": 9,
       "lifecycle": [
         "accepted",
         "deprecated",
@@ -374,6 +374,19 @@
           ],
           "status": "accepted",
           "title": "Amend SPEC-000 for a closed authority vocabulary"
+        },
+        {
+          "date": "2026-08-15",
+          "digest": "sha256:eb7ebbffb816d5ee9a55b6a7a9e122673ea41e832291d12e37a867f4c249f13f",
+          "id": "ADR-0009",
+          "lifecycle_transition": "SPEC-001@1 -> amended -> SPEC-001@2",
+          "path": "docs/decisions/0009-amend-spec-001-for-exact-repository-snapshot-identity.md",
+          "spec_scope": "SPEC-001",
+          "specifications": [
+            "SPEC-001"
+          ],
+          "status": "accepted",
+          "title": "Amend SPEC-001 for exact repository snapshot identity"
         }
       ]
     },
@@ -2440,16 +2453,18 @@
             "SPEC-000"
           ],
           "dependency_revisions": "SPEC-000@1",
-          "digest": "sha256:e6109fb747cffc920d3fe48c9bab939bdc9ce7d0dd1130f5ce50367b4d218e28",
+          "digest": "sha256:cd27da25b87b3e8ee6e03a1febe0be4a3fd9688972fbb8edc02161518090320f",
           "id": "SPEC-001",
+          "lifecycle_decision": "ADR-0009",
           "owners": [
             "corpus steward agent",
             "human maintainer"
           ],
           "path": "docs/specs/SPEC-001-repository-reconciliation.md",
+          "replacement": "SPEC-001@2",
           "revises": "none",
           "revision": 1,
-          "status": "implemented",
+          "status": "amended",
           "title": "Repository reconciliation and generated corpus inventory",
           "wave": 0
         },
@@ -3574,12 +3589,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:86862cd0d756cea633504f0553603296f441daba2d08c9686a87d4ce334a597d",
+    "digest": "sha256:00bcaa9f84dd6ffa4e3e02944b7d76f4cc7465bfac5e15f711c2b6ace9fa793f",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:86862cd0d756cea633504f0553603296f441daba2d08c9686a87d4ce334a597d",
+  "source_tree_digest": "sha256:00bcaa9f84dd6ffa4e3e02944b7d76f4cc7465bfac5e15f711c2b6ace9fa793f",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3642,9 +3657,14 @@
       "size_bytes": 5065
     },
     {
-      "digest": "sha256:7d63cb14b72fce45637a0b6ca48fb887d63320d220ee55f4c13fb6c0fda0e33a",
+      "digest": "sha256:eb7ebbffb816d5ee9a55b6a7a9e122673ea41e832291d12e37a867f4c249f13f",
+      "path": "docs/decisions/0009-amend-spec-001-for-exact-repository-snapshot-identity.md",
+      "size_bytes": 4576
+    },
+    {
+      "digest": "sha256:0a90fc31db983de9dbc1918f80ded7c25a1a7214bcd3ed035f7c35fff54477a3",
       "path": "docs/decisions/README.md",
-      "size_bytes": 2304
+      "size_bytes": 2435
     },
     {
       "digest": "sha256:9d903133d4523f42aebdaacad1d825b4e364d608102bc68af2245637db632746",
@@ -3662,9 +3682,9 @@
       "size_bytes": 2852
     },
     {
-      "digest": "sha256:e6109fb747cffc920d3fe48c9bab939bdc9ce7d0dd1130f5ce50367b4d218e28",
+      "digest": "sha256:cd27da25b87b3e8ee6e03a1febe0be4a3fd9688972fbb8edc02161518090320f",
       "path": "docs/specs/SPEC-001-repository-reconciliation.md",
-      "size_bytes": 3108
+      "size_bytes": 3157
     },
     {
       "digest": "sha256:32fb944b014b961123d9929e64a735add82d1dfb1d105093326564275a163e38",
