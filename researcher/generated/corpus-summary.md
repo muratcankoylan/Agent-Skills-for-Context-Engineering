@@ -4,7 +4,7 @@
 This is a generated view of canonical repository artifacts, not a second source of truth.
 
 - Schema: `1.0.0`
-- Source tree: `sha256:140843a581e778a16c0da439e315370c7b1e8f5c5f42c055ded1494ecb8b8c88`
+- Source tree: `sha256:1f84987dc1d48d2a588b6a2597ccbebf6d1c292d33a76d0e52504350a9996ed3`
 - Unresolved references: `0`
 
 | Artifact | Count |

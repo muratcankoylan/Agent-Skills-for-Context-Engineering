@@ -102,13 +102,21 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PUSH_BEFORE_SHA: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           if [ "$EVENT_NAME" = "pull_request" ]; then
             BASE_SHA="$PR_BASE_SHA"
-          elif [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+          elif [ "$EVENT_NAME" = "push" ]; then
+            if [ -z "$PUSH_BEFORE_SHA" ] || [ "$PUSH_BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+              echo "Lifecycle validation requires a nonzero push-before SHA" >&2
+              exit 2
+            fi
             BASE_SHA="$PUSH_BEFORE_SHA"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            BASE_SHA="$(git merge-base HEAD "origin/$DEFAULT_BRANCH")"
           else
-            BASE_SHA="$(git rev-parse HEAD^)"
+            echo "Unsupported lifecycle-validation event: $EVENT_NAME" >&2
+            exit 2
           fi
           python researcher/scripts/validate_spec_lifecycle.py --base-ref "$BASE_SHA"
 
