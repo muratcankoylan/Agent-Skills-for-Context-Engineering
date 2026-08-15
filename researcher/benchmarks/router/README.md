@@ -2,7 +2,7 @@
 
 Tests whether skill frontmatter descriptions are sufficient to route a user prompt to the intended skill. See `researcher/benchmarks/PLAN.md` for the methodology and the published-results interpretation rules.
 
-This revision is zero-call and dry-run-only. It contains no live SDK executor, result writer, or resume path. A command without `--dry-run` exits before fixture, credential, SDK, or result-state access.
+This revision is zero-call and dry-run-only. It contains no live SDK executor or command-reachable result/resume path. A command without `--dry-run` exits before fixture, credential, SDK, or result-state access. Runner-private manifest and crash-state codecs are exercised only by unit tests with an injected fake executor; they grant no execution authority and are not registered organization schemas.
 
 ## Inputs
 
@@ -28,12 +28,12 @@ The dry run validates the fixture and skill catalog, constructs the deterministi
 
 ## Future activation gate
 
-Live execution requires a separate reviewed and human-merged change. Before one concurrency-1 canary is authorized, that change must provide all of the following:
+Live execution requires a separate reviewed and human-merged change. The current private prototype supplies evidence for the first, second, and fourth properties below, but activation must adopt them under accepted owner specifications and test the real adapter rather than treating prototype presence as authority. Before one concurrency-1 canary is authorized, that change must provide all of the following:
 
-1. A canonical, content-addressed run manifest binding a clean source tree, fixture, routing template, skill catalog, package lock, runtime options, exact model set, replications, seed, complete plan, and retry policy.
+1. An accepted provider-neutral canonical run manifest binding a clean source tree, exact inputs, runtime options, exact model set, replications, seed, complete plan, retry policy, and cumulative reservation budget.
 2. An injected executor boundary with deterministic fake-executor tests proving call counts, retry accounting, terminal-status handling, and the absence of calls during preflight failures.
 3. An explicit credential with confirmed Privacy Mode, plus a text-only SDK request using `tools: []`, `settingSources: []`, and `enableAgentRetries: false`; ambient credentials, tools, settings, and retries remain forbidden.
-4. Exclusive crash-safe terminal-result writes and strict manifest- and plan-item-bound state validation. Malformed, foreign, ambiguous, or in-flight state must block automatic resume before a paid call.
+4. Exclusive crash-safe terminal-result writes and strict manifest- and plan-item-bound state validation. The prototype rebuilds the exact manifest from current source, inputs, and runtime before the fake executor boundary. Malformed, foreign, ambiguous, or in-flight state must block automatic resume before a paid call; unmatched claims have no reset path in this revision.
 5. A fresh dependency audit and an explicit containment decision for every unresolved production advisory.
 
 No parallel or full sweep is authorized until the canary evidence is reviewed and accepted.
