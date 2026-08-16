@@ -1801,6 +1801,25 @@ class TypedPolicyEvaluatorTests(unittest.TestCase):
         unsafe_amendment["amendment_procedure"]["required_transport"] = "direct_push"
         self.assertNotEqual(list(validator.iter_errors(unsafe_amendment)), [])
 
+        for value in (
+            "0000-01-01T00:00:00Z",
+            "1900-02-29T00:00:00Z",
+            "2026-02-29T00:00:00Z",
+            "2026-02-31T00:00:00Z",
+            "2026-04-31T00:00:00Z",
+        ):
+            invalid_calendar = self.schema_two_document()
+            invalid_calendar["rules"][0]["conditions"] = [
+                {
+                    "key": "deadline",
+                    "operator": "equals",
+                    "value_type": "utc_datetime",
+                    "value": value,
+                }
+            ]
+            with self.subTest(invalid_calendar=value):
+                self.assertNotEqual(list(validator.iter_errors(invalid_calendar)), [])
+
         null_operand = self.schema_two_document()
         null_operand["rules"][0]["conditions"][0]["value"] = None
         self.assertNotEqual(list(validator.iter_errors(null_operand)), [])

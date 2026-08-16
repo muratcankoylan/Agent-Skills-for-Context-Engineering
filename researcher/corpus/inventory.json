@@ -409,7 +409,7 @@
       "records": [
         {
           "binding_state": "dormant_unbound",
-          "digest": "sha256:37d7673bded287c74fb35d13e1f11a734f6f7ed4c43d9a1ea04b33d348db83ab",
+          "digest": "sha256:b4143e94a4beee184af8a22bbadcfd366fe8d9b4efd690e9d8e9b94a5fac76d9",
           "id": "authority-vocabulary-schema@2.0.0",
           "kind": "AuthorityVocabularySchema",
           "path": "governance/authority-vocabulary.schema.json",
@@ -3102,7 +3102,7 @@
           "path": "researcher/scripts/governance_policy.py"
         },
         {
-          "digest": "sha256:80037d968acd81cd85b9a5f1f8e977568f3d7839ce121344fb23e96240ced28f",
+          "digest": "sha256:e61a84800e4bfe35ebf155ca3add3c05e25315249dde0a9e5921d037bd8bbf9b",
           "id": "authority-catalog-contract",
           "owns": [
             "standalone authority schema, registry, fixture, and semantic profile validation",
@@ -3637,12 +3637,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:ad902c7f1e83b8cafa635c0d68d43685491a3f047d8b644eedbc92d8ec336baf",
+    "digest": "sha256:59df505ba5bb3c0ae2d77fc789b475e58961d8114f8ec390338d70def4e2c3e1",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:ad902c7f1e83b8cafa635c0d68d43685491a3f047d8b644eedbc92d8ec336baf",
+  "source_tree_digest": "sha256:59df505ba5bb3c0ae2d77fc789b475e58961d8114f8ec390338d70def4e2c3e1",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3900,9 +3900,9 @@
       "size_bytes": 10108
     },
     {
-      "digest": "sha256:37d7673bded287c74fb35d13e1f11a734f6f7ed4c43d9a1ea04b33d348db83ab",
+      "digest": "sha256:b4143e94a4beee184af8a22bbadcfd366fe8d9b4efd690e9d8e9b94a5fac76d9",
       "path": "governance/authority-vocabulary.schema.json",
-      "size_bytes": 15321
+      "size_bytes": 15502
     },
     {
       "digest": "sha256:500c1d138249a135e462e2fcbdbab0874e6ef841c7ca005560106bb727359722",
@@ -4545,7 +4545,7 @@
       "size_bytes": 125915
     },
     {
-      "digest": "sha256:80037d968acd81cd85b9a5f1f8e977568f3d7839ce121344fb23e96240ced28f",
+      "digest": "sha256:e61a84800e4bfe35ebf155ca3add3c05e25315249dde0a9e5921d037bd8bbf9b",
       "path": "researcher/scripts/validate_authority_contract.py",
       "size_bytes": 130350
     },
@@ -4692,7 +4692,7 @@
       "path": "researcher/scripts/governance_policy.py"
     },
     {
-      "digest": "sha256:80037d968acd81cd85b9a5f1f8e977568f3d7839ce121344fb23e96240ced28f",
+      "digest": "sha256:e61a84800e4bfe35ebf155ca3add3c05e25315249dde0a9e5921d037bd8bbf9b",
       "id": "authority-catalog-contract",
       "owns": [
         "standalone authority schema, registry, fixture, and semantic profile validation",

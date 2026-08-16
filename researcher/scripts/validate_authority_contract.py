@@ -99,7 +99,7 @@ AUTHORITY_VOCABULARY_SCHEMA_ID = (
 )
 AUTHORITY_VOCABULARY_PATH = "governance/authority-vocabulary.json"
 AUTHORITY_VOCABULARY_SCHEMA_DIGEST = (
-    "sha256:37d7673bded287c74fb35d13e1f11a734f6f7ed4c43d9a1ea04b33d348db83ab"
+    "sha256:b4143e94a4beee184af8a22bbadcfd366fe8d9b4efd690e9d8e9b94a5fac76d9"
 )
 AUTHORITY_VOCABULARY_SCHEMA_VERSION = "2.0.0"
 AUTHORITY_FIXTURE_MANIFEST_PATH = "governance/fixtures/authority-vocabulary.json"

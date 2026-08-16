@@ -411,16 +411,23 @@ class RepositoryInventoryTests(unittest.TestCase):
         ]
         mutations.append(("invalid_digest", invalid_digest))
 
-        invalid_calendar_date = json.loads(json.dumps(registry))
-        invalid_calendar_date["entries"][0]["actor_bindings"][0]["predicates"] = [
-            {
-                "key": "deadline",
-                "operator": "equals",
-                "value_type": "utc_datetime",
-                "value": "2026-02-31T00:00:00Z",
-            }
-        ]
-        mutations.append(("invalid_calendar_date", invalid_calendar_date))
+        for name, value in [
+            ("invalid_calendar_date", "2026-02-31T00:00:00Z"),
+            ("invalid_non_leap_day", "2026-02-29T00:00:00Z"),
+            ("invalid_century_leap_day", "1900-02-29T00:00:00Z"),
+            ("invalid_thirty_day_month", "2026-04-31T00:00:00Z"),
+            ("invalid_year_zero", "0000-01-01T00:00:00Z"),
+        ]:
+            invalid_calendar_date = json.loads(json.dumps(registry))
+            invalid_calendar_date["entries"][0]["actor_bindings"][0]["predicates"] = [
+                {
+                    "key": "deadline",
+                    "operator": "equals",
+                    "value_type": "utc_datetime",
+                    "value": value,
+                }
+            ]
+            mutations.append((name, invalid_calendar_date))
 
         edge_whitespace = json.loads(json.dumps(fixture))
         edge_whitespace["entries"][0]["cases"][0]["context"] = {
