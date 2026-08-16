@@ -29,11 +29,20 @@ else:  # Direct script execution resolves the sibling from this script's directo
 
 # Explicit compatibility re-exports. The authority-contract implementation lives
 # on its own protected surface; existing lifecycle consumers retain their API.
+AUTHORITY_ACTOR_AUTOMATION = _authority_contract.AUTHORITY_ACTOR_AUTOMATION
+AUTHORITY_ALLOW_REASON_CODE = _authority_contract.AUTHORITY_ALLOW_REASON_CODE
 AUTHORITY_VOCABULARY_SPEC = _authority_contract.AUTHORITY_VOCABULARY_SPEC
 AUTHORITY_VOCABULARY_MIN_REVISION = (
     _authority_contract.AUTHORITY_VOCABULARY_MIN_REVISION
 )
 AUTHORITY_VOCABULARY_PATH = _authority_contract.AUTHORITY_VOCABULARY_PATH
+AUTHORITY_VOCABULARY_SCHEMA_PATH = (
+    _authority_contract.AUTHORITY_VOCABULARY_SCHEMA_PATH
+)
+AUTHORITY_VOCABULARY_SCHEMA_ID = _authority_contract.AUTHORITY_VOCABULARY_SCHEMA_ID
+AUTHORITY_VOCABULARY_SCHEMA_DIGEST = (
+    _authority_contract.AUTHORITY_VOCABULARY_SCHEMA_DIGEST
+)
 AUTHORITY_VOCABULARY_SCHEMA_VERSION = (
     _authority_contract.AUTHORITY_VOCABULARY_SCHEMA_VERSION
 )
@@ -47,8 +56,14 @@ AUTHORITY_CONFORMANCE_RECEIPT_PATH = (
 AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION = (
     _authority_contract.AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION
 )
+AUTHORITY_CONFORMANCE_SCOPE = _authority_contract.AUTHORITY_CONFORMANCE_SCOPE
+AUTHORITY_RUNTIME_AUTHORITY = _authority_contract.AUTHORITY_RUNTIME_AUTHORITY
+AUTHORITY_SPEC_METADATA_KEYS = _authority_contract.AUTHORITY_SPEC_METADATA_KEYS
 AUTHORITY_CONSTITUTION_POLICY_PATH = (
     _authority_contract.AUTHORITY_CONSTITUTION_POLICY_PATH
+)
+AUTHORITY_CONSTITUTION_SCHEMA_VERSION = (
+    _authority_contract.AUTHORITY_CONSTITUTION_SCHEMA_VERSION
 )
 AUTHORITY_VALIDATOR_PATH = _authority_contract.AUTHORITY_VALIDATOR_PATH
 AUTHORITY_VALIDATOR_VERSION = _authority_contract.AUTHORITY_VALIDATOR_VERSION
@@ -60,7 +75,15 @@ AUTHORITY_PREIMPLEMENTATION_STATUSES = (
     _authority_contract.AUTHORITY_PREIMPLEMENTATION_STATUSES
 )
 AUTHORITY_ENTRY_KEYS = _authority_contract.AUTHORITY_ENTRY_KEYS
+AUTHORITY_ACTOR_BINDING_KEYS = _authority_contract.AUTHORITY_ACTOR_BINDING_KEYS
+AUTHORITY_DEPENDENCY_REQUIREMENT_KEYS = (
+    _authority_contract.AUTHORITY_DEPENDENCY_REQUIREMENT_KEYS
+)
 AUTHORITY_MAX_EFFECT_KEYS = _authority_contract.AUTHORITY_MAX_EFFECT_KEYS
+AUTHORITY_MINIMUM_PROTECTED_SURFACES = (
+    _authority_contract.AUTHORITY_MINIMUM_PROTECTED_SURFACES
+)
+AUTHORITY_GRANT_KEYS = _authority_contract.AUTHORITY_GRANT_KEYS
 AUTHORITY_FIXTURE_POINTER_KEYS = _authority_contract.AUTHORITY_FIXTURE_POINTER_KEYS
 AUTHORITY_FIXTURE_ENTRY_KEYS = _authority_contract.AUTHORITY_FIXTURE_ENTRY_KEYS
 AUTHORITY_FIXTURE_CASE_KEYS = _authority_contract.AUTHORITY_FIXTURE_CASE_KEYS
@@ -93,6 +116,8 @@ AUTHORITY_EVALUATOR_COMPONENT_PATHS = (
     _authority_contract.AUTHORITY_EVALUATOR_COMPONENT_PATHS
 )
 AuthoritySemanticProfile = _authority_contract.AuthoritySemanticProfile
+AuthorityActorBinding = _authority_contract.AuthorityActorBinding
+AuthorityDependencyRequirement = _authority_contract.AuthorityDependencyRequirement
 POLICY_ONLY_READ_ACTORS = _authority_contract.POLICY_ONLY_READ_ACTORS
 POLICY_ONLY_READ_PROFILES = _authority_contract.POLICY_ONLY_READ_PROFILES
 REQUIRED_AUTHORITY_PROFILES = _authority_contract.REQUIRED_AUTHORITY_PROFILES
@@ -109,6 +134,9 @@ AuthorityPolicyConformanceBinding = (
     _authority_contract.AuthorityPolicyConformanceBinding
 )
 AuthorityVocabularyBinding = _authority_contract.AuthorityVocabularyBinding
+AuthorityVocabularySchemaBinding = (
+    _authority_contract.AuthorityVocabularySchemaBinding
+)
 expected_authority_dependency_evidence = (
     _authority_contract.expected_authority_dependency_evidence
 )
@@ -118,6 +146,9 @@ expected_authority_catalog_boundary_cases = (
 )
 parse_authority_fixture_manifest = _authority_contract.parse_authority_fixture_manifest
 parse_authority_vocabulary = _authority_contract.parse_authority_vocabulary
+parse_authority_vocabulary_schema = (
+    _authority_contract.parse_authority_vocabulary_schema
+)
 authority_policy_case_results = _authority_contract.authority_policy_case_results
 build_authority_evaluator_bundle = _authority_contract.build_authority_evaluator_bundle
 expected_authority_policy_conditions = (
@@ -130,6 +161,9 @@ parse_authority_policy_conformance = (
     _authority_contract.parse_authority_policy_conformance
 )
 load_authority_vocabulary = _authority_contract.load_authority_vocabulary
+load_authority_vocabulary_schema = (
+    _authority_contract.load_authority_vocabulary_schema
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -268,30 +302,55 @@ def load_candidate_authority_vocabulary(
     root: Path,
     candidate_specs: Mapping[str, SpecRevision],
 ) -> AuthorityVocabularyBinding | None:
-    """Load the sole canonical registry or reject detached registry artifacts."""
+    """Load schema-v2 artifacts while allowing the standalone schema under rev1."""
 
     authority_spec = candidate_specs.get(AUTHORITY_VOCABULARY_SPEC)
-    metadata_keys = {
-        "Authority vocabulary",
-        "Authority vocabulary digest",
-        "Authority vocabulary version",
-    }
-    has_metadata = authority_spec is not None and bool(
-        metadata_keys.intersection(authority_spec.metadata)
+    present_metadata = (
+        set()
+        if authority_spec is None
+        else AUTHORITY_SPEC_METADATA_KEYS.intersection(authority_spec.metadata)
     )
+    schema_path = root / AUTHORITY_VOCABULARY_SCHEMA_PATH
+    schema_present = schema_path.exists() or schema_path.is_symlink()
     registry_path = root / AUTHORITY_VOCABULARY_PATH
     fixture_path = root / AUTHORITY_FIXTURE_MANIFEST_PATH
     registry_present = registry_path.exists() or registry_path.is_symlink()
     fixture_present = fixture_path.exists() or fixture_path.is_symlink()
     receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
     receipt_present = receipt_path.exists() or receipt_path.is_symlink()
-    if not (has_metadata or registry_present or fixture_present or receipt_present):
+    if not (
+        present_metadata
+        or schema_present
+        or registry_present
+        or fixture_present
+        or receipt_present
+    ):
         return None
     if authority_spec is None:
+        if schema_present and not (registry_present or fixture_present or receipt_present):
+            load_authority_vocabulary_schema(root)
+            return None
         raise ValueError("authority vocabulary artifacts require canonical SPEC-000")
+    if authority_spec.revision < AUTHORITY_VOCABULARY_MIN_REVISION:
+        if present_metadata:
+            raise ValueError(
+                "pre-registry SPEC-000 forbids authority vocabulary metadata"
+            )
+        if registry_present or fixture_present or receipt_present:
+            raise ValueError(
+                "pre-registry SPEC-000 forbids registry, fixture, and receipt artifacts"
+            )
+        if schema_present:
+            load_authority_vocabulary_schema(root)
+        return None
+    if present_metadata != AUTHORITY_SPEC_METADATA_KEYS:
+        missing = sorted(AUTHORITY_SPEC_METADATA_KEYS - present_metadata)
+        raise ValueError(
+            "SPEC-000 revision 2 authority metadata must be the atomic six-key set; "
+            f"missing={missing}"
+        )
     if (
-        authority_spec.revision >= AUTHORITY_VOCABULARY_MIN_REVISION
-        and authority_spec.status in AUTHORITY_PREIMPLEMENTATION_STATUSES
+        authority_spec.status in AUTHORITY_PREIMPLEMENTATION_STATUSES
         and receipt_present
     ):
         raise ValueError(
@@ -556,7 +615,14 @@ def validate_lifecycle(
         if record is None or authority_vocabulary is None:
             return False
         return (
-            authority_vocabulary.path == record.metadata.get("Authority vocabulary")
+            authority_vocabulary.schema_path
+            == record.metadata.get("Authority vocabulary schema")
+            and authority_vocabulary.schema_digest
+            == record.metadata.get("Authority vocabulary schema digest")
+            and authority_vocabulary.schema_version
+            == record.metadata.get("Authority vocabulary schema version")
+            and authority_vocabulary.path
+            == record.metadata.get("Authority vocabulary")
             and authority_vocabulary.digest
             == record.metadata.get("Authority vocabulary digest")
             and str(authority_vocabulary.registry_version)
@@ -583,6 +649,8 @@ def validate_lifecycle(
             receipt is not None
             and receipt.path == AUTHORITY_CONFORMANCE_RECEIPT_PATH
             and receipt.schema_version == AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION
+            and receipt.scope == AUTHORITY_CONFORMANCE_SCOPE
+            and receipt.runtime_authority == AUTHORITY_RUNTIME_AUTHORITY
             and receipt.registry_digest == authority_vocabulary.digest
             and receipt.fixture_manifest_digest
             == authority_vocabulary.fixture_manifest_digest

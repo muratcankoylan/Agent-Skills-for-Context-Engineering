@@ -12,6 +12,7 @@ from pathlib import Path
 from unittest import mock
 
 import yaml
+from jsonschema import Draft202012Validator, FormatChecker
 
 from researcher.scripts.build_inventory import (
     InventoryBuilder,
@@ -29,11 +30,16 @@ from researcher.scripts.tests.test_spec_lifecycle import (
 from researcher.scripts.validate_authority_contract import (
     AUTHORITY_CONFORMANCE_RECEIPT_PATH,
     AUTHORITY_CONSTITUTION_POLICY_PATH,
+    AUTHORITY_EVALUATOR_BUNDLE_VERSION,
     AUTHORITY_EVALUATOR_COMPONENT_PATHS,
     AUTHORITY_FIXTURE_MANIFEST_PATH,
     AUTHORITY_VOCABULARY_PATH,
+    AUTHORITY_VOCABULARY_SCHEMA_ID,
+    AUTHORITY_VOCABULARY_SCHEMA_PATH,
+    AUTHORITY_VOCABULARY_SCHEMA_VERSION,
     AuthorityVocabularyBinding,
     build_authority_evaluator_bundle,
+    load_authority_vocabulary_schema,
     parse_authority_vocabulary,
 )
 
@@ -63,6 +69,7 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/corpus/index.json",
         "researcher/corpus/inventory.schema.json",
         "governance/constitution.yaml",
+        "governance/authority-vocabulary.schema.json",
         "governance/export-policy.yaml",
         "governance/export-policy.schema.json",
         "researcher/exports/schemas/export-records.schema.json",
@@ -194,8 +201,10 @@ def write_authority_revision(
     include_conformance: bool = False,
 ) -> AuthorityVocabularyBinding:
     _registry, _fixture, registry_bytes, fixture_bytes = authority_documents()
+    schema_binding = load_authority_vocabulary_schema(root)
     binding = parse_authority_vocabulary(
         registry_bytes,
+        schema_binding=schema_binding,
         expected_digest=f"sha256:{hashlib.sha256(registry_bytes).hexdigest()}",
         expected_constitution_revision=2,
         expected_registry_version=2,
@@ -212,6 +221,9 @@ def write_authority_revision(
     spec_path = root / "docs/specs/SPEC-000-program-constitution.md"
     spec_text = spec_path.read_text(encoding="utf-8")
     authority_metadata = (
+        f"Authority vocabulary schema: {schema_binding.path}\n"
+        f"Authority vocabulary schema digest: {schema_binding.digest}\n"
+        f"Authority vocabulary schema version: {schema_binding.schema_version}\n"
         f"Authority vocabulary: {binding.path}\n"
         f"Authority vocabulary digest: {binding.digest}\n"
         f"Authority vocabulary version: {binding.registry_version}\n"
@@ -260,6 +272,17 @@ def replace_spec000_metadata(root: Path, key: str, value: str) -> None:
     path.write_text("".join(lines), encoding="utf-8")
 
 
+def remove_spec000_metadata(root: Path, key: str) -> None:
+    path = root / "docs/specs/SPEC-000-program-constitution.md"
+    lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+    prefix = f"{key}: "
+    matches = [index for index, line in enumerate(lines) if line.startswith(prefix)]
+    if len(matches) != 1:
+        raise AssertionError(f"expected one {key!r} metadata line, found {len(matches)}")
+    del lines[matches[0]]
+    path.write_text("".join(lines), encoding="utf-8")
+
+
 def replace_spec004_status(root: Path, status: str) -> None:
     path = root / "docs/specs/SPEC-004-event-journal.md"
     text = path.read_text(encoding="utf-8")
@@ -285,6 +308,169 @@ class RepositoryInventoryTests(unittest.TestCase):
         inventory = builder.build()
         self.assertEqual(builder.findings, [])
         self.assertEqual(inventory["unresolved_references"], [])
+
+    def test_authority_schema_is_canonical_meta_valid_and_matches_instances(self) -> None:
+        schema_path = ROOT / AUTHORITY_VOCABULARY_SCHEMA_PATH
+        exact_bytes = schema_path.read_bytes()
+        schema = json.loads(exact_bytes)
+        self.assertEqual(exact_bytes, canonical_json(schema))
+        Draft202012Validator.check_schema(schema)
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
+        registry, fixture, _registry_bytes, _fixture_bytes = authority_documents()
+        validator.validate(registry)
+        validator.validate(fixture)
+
+        binding = load_authority_vocabulary_schema(ROOT)
+        self.assertEqual(binding.path, AUTHORITY_VOCABULARY_SCHEMA_PATH)
+        self.assertEqual(binding.schema_id, AUTHORITY_VOCABULARY_SCHEMA_ID)
+        self.assertEqual(binding.schema_version, AUTHORITY_VOCABULARY_SCHEMA_VERSION)
+        self.assertEqual(
+            binding.digest,
+            f"sha256:{hashlib.sha256(exact_bytes).hexdigest()}",
+        )
+
+    def test_authority_schema_rejects_closed_shape_and_scalar_mutations(self) -> None:
+        schema = json.loads(
+            (ROOT / AUTHORITY_VOCABULARY_SCHEMA_PATH).read_text(encoding="utf-8")
+        )
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
+        registry, fixture, _registry_bytes, _fixture_bytes = authority_documents()
+
+        empty_dependency_fixture = json.loads(json.dumps(fixture))
+        empty_dependency_fixture["entries"][0]["cases"][0]["dependencies"] = []
+        validator.validate(empty_dependency_fixture)
+        empty_guard_fixture = json.loads(json.dumps(fixture))
+        empty_guard_fixture["entries"][0]["cases"][0]["context"] = {
+            "bounded_text": ""
+        }
+        validator.validate(empty_guard_fixture)
+
+        mutations: list[tuple[str, dict[str, object]]] = []
+        extra_root = json.loads(json.dumps(registry))
+        extra_root["unreviewed"] = True
+        mutations.append(("extra_root", extra_root))
+
+        legacy_entry = json.loads(json.dumps(registry))
+        first_entry = legacy_entry["entries"][0]
+        first_entry["actor_classes"] = ["human"]
+        first_entry.pop("actor_bindings")
+        mutations.append(("legacy_entry", legacy_entry))
+
+        empty_predicates = json.loads(json.dumps(registry))
+        empty_predicates["entries"][0]["actor_bindings"][0]["predicates"] = []
+        mutations.append(("empty_predicates", empty_predicates))
+
+        boolean_effect = json.loads(json.dumps(registry))
+        boolean_effect["entries"][0]["max_effect"]["max_targets"] = True
+        mutations.append(("boolean_effect", boolean_effect))
+
+        unbounded_token = json.loads(json.dumps(registry))
+        unbounded_token["entries"][0]["action"] = "a" * 129
+        mutations.append(("unbounded_token", unbounded_token))
+
+        present_boolean = json.loads(json.dumps(registry))
+        present_boolean["entries"][0]["actor_bindings"][0]["predicates"] = [
+            {
+                "key": "required_flag",
+                "operator": "present",
+                "value_type": "boolean",
+            }
+        ]
+        mutations.append(("present_boolean", present_boolean))
+
+        present_with_value = json.loads(json.dumps(registry))
+        present_with_value["entries"][0]["actor_bindings"][0]["predicates"] = [
+            {
+                "key": "required_text",
+                "operator": "present",
+                "value_type": "string",
+                "value": "forbidden",
+            }
+        ]
+        mutations.append(("present_with_value", present_with_value))
+
+        wrong_equals_type = json.loads(json.dumps(registry))
+        wrong_equals_type["entries"][0]["actor_bindings"][0]["predicates"] = [
+            {
+                "key": "portable_count",
+                "operator": "equals",
+                "value_type": "integer",
+                "value": "1",
+            }
+        ]
+        mutations.append(("wrong_equals_type", wrong_equals_type))
+
+        invalid_digest = json.loads(json.dumps(registry))
+        invalid_digest["entries"][0]["actor_bindings"][0]["predicates"] = [
+            {
+                "key": "bound_digest",
+                "operator": "equals",
+                "value_type": "sha256_digest",
+                "value": "sha256:ABC",
+            }
+        ]
+        mutations.append(("invalid_digest", invalid_digest))
+
+        for name, value in [
+            ("invalid_calendar_date", "2026-02-31T00:00:00Z"),
+            ("invalid_non_leap_day", "2026-02-29T00:00:00Z"),
+            ("invalid_century_leap_day", "1900-02-29T00:00:00Z"),
+            ("invalid_thirty_day_month", "2026-04-31T00:00:00Z"),
+            ("invalid_year_zero", "0000-01-01T00:00:00Z"),
+        ]:
+            invalid_calendar_date = json.loads(json.dumps(registry))
+            invalid_calendar_date["entries"][0]["actor_bindings"][0]["predicates"] = [
+                {
+                    "key": "deadline",
+                    "operator": "equals",
+                    "value_type": "utc_datetime",
+                    "value": value,
+                }
+            ]
+            mutations.append((name, invalid_calendar_date))
+
+        edge_whitespace = json.loads(json.dumps(fixture))
+        edge_whitespace["entries"][0]["cases"][0]["context"] = {
+            "bounded_text": " leading"
+        }
+        mutations.append(("edge_whitespace", edge_whitespace))
+
+        control_character = json.loads(json.dumps(fixture))
+        control_character["entries"][0]["cases"][0]["context"] = {
+            "bounded_text": "invalid\u0085text"
+        }
+        mutations.append(("control_character", control_character))
+
+        for name, mutation in mutations:
+            with self.subTest(name=name):
+                self.assertFalse(validator.is_valid(mutation))
+
+    def test_authority_schema_has_dormant_inventory_identity(self) -> None:
+        builder = InventoryBuilder(ROOT)
+        inventory = builder.build()
+        self.assertEqual(builder.findings, [])
+        exact_bytes = (ROOT / AUTHORITY_VOCABULARY_SCHEMA_PATH).read_bytes()
+        digest = f"sha256:{hashlib.sha256(exact_bytes).hexdigest()}"
+        self.assertEqual(
+            inventory["artifacts"]["authority_contracts"],
+            {
+                "owner": "SPEC-000",
+                "count": 1,
+                "records": [
+                    {
+                        "id": "authority-vocabulary-schema@2.0.0",
+                        "kind": "AuthorityVocabularySchema",
+                        "path": AUTHORITY_VOCABULARY_SCHEMA_PATH,
+                        "schema_id": AUTHORITY_VOCABULARY_SCHEMA_ID,
+                        "version": AUTHORITY_VOCABULARY_SCHEMA_VERSION,
+                        "digest": digest,
+                        "binding_state": "dormant_unbound",
+                    }
+                ],
+            },
+        )
+        sources = {record["path"]: record for record in inventory["sources"]}
+        self.assertEqual(sources[AUTHORITY_VOCABULARY_SCHEMA_PATH]["digest"], digest)
 
     def test_two_builds_are_byte_identical(self) -> None:
         first = InventoryBuilder(ROOT).build()
@@ -505,7 +691,7 @@ class RepositoryInventoryTests(unittest.TestCase):
                 "id": "authority-catalog-contract",
                 "path": "researcher/scripts/validate_authority_contract.py",
                 "owns": [
-                    "authority registry, fixture, and semantic profile validation",
+                    "standalone authority schema, registry, fixture, and semantic profile validation",
                     "structural authority-policy closure",
                     "authority evaluator-bundle identity",
                     "authority conformance receipt validation",
@@ -531,7 +717,12 @@ class RepositoryInventoryTests(unittest.TestCase):
                 )
 
     def test_authority_evaluator_mutations_update_inventory_source_identity(self) -> None:
-        for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+        executable_components = (
+            relative
+            for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS
+            if relative != AUTHORITY_VOCABULARY_SCHEMA_PATH
+        )
+        for relative in executable_components:
             with self.subTest(relative=relative):
                 temporary, root = self.fixture()
                 self.addCleanup(temporary.cleanup)
@@ -555,6 +746,81 @@ class RepositoryInventoryTests(unittest.TestCase):
                     before["source_tree_digest"],
                     after["source_tree_digest"],
                 )
+
+    def test_dormant_authority_schema_mutation_fails_the_code_pin(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before_builder = InventoryBuilder(root)
+        before = before_builder.build()
+        self.assertEqual(before_builder.findings, [])
+
+        path = root / AUTHORITY_VOCABULARY_SCHEMA_PATH
+        schema = json.loads(path.read_text(encoding="utf-8"))
+        schema["$defs"]["token"]["description"] = "inventory mutation"
+        path.write_bytes(canonical_json(schema))
+
+        after_builder = InventoryBuilder(root)
+        after = after_builder.build()
+        self.assertIn(
+            "AUTHORITY_VOCABULARY_SCHEMA_INVALID",
+            {finding.code for finding in after_builder.findings},
+        )
+        self.assertEqual(after["artifacts"]["authority_contracts"]["count"], 0)
+        self.assertNotEqual(before["source_tree_digest"], after["source_tree_digest"])
+
+    def test_authority_schema_invalid_missing_and_symlink_fail_closed(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / AUTHORITY_VOCABULARY_SCHEMA_PATH
+        schema = json.loads(path.read_text(encoding="utf-8"))
+        schema["x-authority-schema-version"] = "2.0.1"
+        path.write_bytes(canonical_json(schema))
+        builder = InventoryBuilder(root)
+        inventory = builder.build()
+        self.assertIn(
+            "AUTHORITY_VOCABULARY_SCHEMA_INVALID",
+            {finding.code for finding in builder.findings},
+        )
+        self.assertEqual(inventory["artifacts"]["authority_contracts"]["count"], 0)
+
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        (root / AUTHORITY_VOCABULARY_SCHEMA_PATH).unlink()
+        codes = finding_codes(root)
+        self.assertIn("AUTHORITY_VOCABULARY_SCHEMA_INVALID", codes)
+        self.assertIn("PATH_ESCAPE", codes)
+
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / AUTHORITY_VOCABULARY_SCHEMA_PATH
+        detached = path.with_name("authority-vocabulary.detached.schema.json")
+        path.rename(detached)
+        path.symlink_to(detached.name)
+        codes = finding_codes(root)
+        self.assertIn("AUTHORITY_VOCABULARY_SCHEMA_INVALID", codes)
+        self.assertIn("PATH_ESCAPE", codes)
+
+    def test_authority_schema_loader_and_source_digest_must_match(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        binding = load_authority_vocabulary_schema(root)
+        mismatched = mock.Mock(
+            path=binding.path,
+            digest="sha256:" + "0" * 64,
+            schema_id=binding.schema_id,
+            schema_version=binding.schema_version,
+        )
+        with mock.patch(
+            "researcher.scripts.build_inventory.load_authority_vocabulary_schema",
+            return_value=mismatched,
+        ):
+            builder = InventoryBuilder(root)
+            inventory = builder.build()
+        self.assertIn(
+            "AUTHORITY_VOCABULARY_SCHEMA_INVALID",
+            {finding.code for finding in builder.findings},
+        )
+        self.assertEqual(inventory["artifacts"]["authority_contracts"]["count"], 0)
 
     def test_specification_program_is_inventory_backed(self) -> None:
         inventory = InventoryBuilder(ROOT).build()
@@ -1040,6 +1306,10 @@ class RepositoryInventoryTests(unittest.TestCase):
 
     def test_authority_metadata_path_digest_and_version_are_exact(self) -> None:
         mutations = (
+            ("Authority vocabulary schema", "governance/detached-authority.schema.json"),
+            ("Authority vocabulary schema digest", "sha256:" + "0" * 64),
+            ("Authority vocabulary schema version", "2.0.1"),
+            ("Authority vocabulary schema version", "02.0.0"),
             ("Authority vocabulary", "governance/detached-authority.json"),
             ("Authority vocabulary digest", "sha256:" + "0" * 64),
             ("Authority vocabulary version", "3"),
@@ -1052,6 +1322,34 @@ class RepositoryInventoryTests(unittest.TestCase):
                 write_authority_revision(root)
                 replace_spec000_metadata(root, key, value)
                 self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
+    def test_authority_schema_and_registry_metadata_are_atomic(self) -> None:
+        metadata_keys = (
+            "Authority vocabulary schema",
+            "Authority vocabulary schema digest",
+            "Authority vocabulary schema version",
+            "Authority vocabulary",
+            "Authority vocabulary digest",
+            "Authority vocabulary version",
+        )
+        for key in metadata_keys:
+            with self.subTest(missing=key):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                write_authority_revision(root)
+                remove_spec000_metadata(root, key)
+                builder = InventoryBuilder(root)
+                inventory = builder.build()
+                self.assertIn(
+                    "SPEC_AUTHORITY_VOCABULARY_INVALID",
+                    {finding.code for finding in builder.findings},
+                )
+                self.assertEqual(
+                    inventory["artifacts"]["authority_contracts"]["records"][0][
+                        "binding_state"
+                    ],
+                    "dormant_unbound",
+                )
 
     def test_authority_registry_symlink_is_rejected(self) -> None:
         temporary, root = self.fixture()
@@ -1190,21 +1488,48 @@ class RepositoryInventoryTests(unittest.TestCase):
             if record["id"] == "SPEC-000"
         )
         authority_record = spec000["authority_vocabulary"]
+        self.assertEqual(
+            authority_record["schema"],
+            {
+                "path": binding.schema_path,
+                "digest": binding.schema_digest,
+                "version": binding.schema_version,
+            },
+        )
         self.assertEqual(authority_record["digest"], binding.digest)
         self.assertEqual(
             authority_record["fixture_manifest"]["digest"],
             binding.fixture_manifest_digest,
         )
         self.assertIn("policy_conformance", authority_record)
+        self.assertEqual(
+            authority_record["policy_conformance"]["scope"],
+            "offline_class_policy_conformance",
+        )
+        self.assertEqual(
+            authority_record["policy_conformance"]["runtime_authority"],
+            "none",
+        )
         expected_bundle = build_authority_evaluator_bundle(
             tuple(
                 (relative, (root / relative).read_bytes())
                 for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS
             )
         )
+        self.assertEqual(expected_bundle.version, AUTHORITY_EVALUATOR_BUNDLE_VERSION)
+        self.assertEqual(
+            tuple(component.path for component in expected_bundle.components),
+            AUTHORITY_EVALUATOR_COMPONENT_PATHS,
+        )
         self.assertEqual(
             authority_record["policy_conformance"]["validator_bundle"],
             expected_bundle.to_receipt_value(),
+        )
+        self.assertEqual(
+            inventory["artifacts"]["authority_contracts"]["records"][0][
+                "binding_state"
+            ],
+            "bound",
         )
 
         before = inventory["source_tree_digest"]
