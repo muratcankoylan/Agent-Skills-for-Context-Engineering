@@ -21,19 +21,25 @@ if __package__:
     from researcher.scripts.validate_authority_contract import (
         AUTHORITY_CONFORMANCE_RECEIPT_PATH,
         AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
+        AUTHORITY_CONFORMANCE_SCOPE,
         AUTHORITY_CONSTITUTION_POLICY_PATH,
         AUTHORITY_EVALUATOR_COMPONENT_PATHS,
         AUTHORITY_FIXTURE_MANIFEST_PATH,
         AUTHORITY_IMPLEMENTED_STATUSES,
         AUTHORITY_PREIMPLEMENTATION_STATUSES,
+        AUTHORITY_RUNTIME_AUTHORITY,
+        AUTHORITY_SPEC_METADATA_KEYS,
         AUTHORITY_VOCABULARY_MIN_REVISION,
         AUTHORITY_VOCABULARY_PATH,
+        AUTHORITY_VOCABULARY_SCHEMA_PATH,
+        AUTHORITY_VOCABULARY_SCHEMA_VERSION,
         AuthorityVocabularyBinding,
         authority_policy_case_results,
         build_authority_evaluator_bundle,
         canonical_repository_output_path,
         parse_authority_policy_conformance,
         parse_authority_vocabulary,
+        load_authority_vocabulary_schema,
         read_canonical_repository_file,
     )
     from researcher.scripts.validate_spec_lifecycle import (
@@ -45,19 +51,25 @@ else:  # Direct script execution resolves siblings from this script's directory.
     from validate_authority_contract import (
         AUTHORITY_CONFORMANCE_RECEIPT_PATH,
         AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
+        AUTHORITY_CONFORMANCE_SCOPE,
         AUTHORITY_CONSTITUTION_POLICY_PATH,
         AUTHORITY_EVALUATOR_COMPONENT_PATHS,
         AUTHORITY_FIXTURE_MANIFEST_PATH,
         AUTHORITY_IMPLEMENTED_STATUSES,
         AUTHORITY_PREIMPLEMENTATION_STATUSES,
+        AUTHORITY_RUNTIME_AUTHORITY,
+        AUTHORITY_SPEC_METADATA_KEYS,
         AUTHORITY_VOCABULARY_MIN_REVISION,
         AUTHORITY_VOCABULARY_PATH,
+        AUTHORITY_VOCABULARY_SCHEMA_PATH,
+        AUTHORITY_VOCABULARY_SCHEMA_VERSION,
         AuthorityVocabularyBinding,
         authority_policy_case_results,
         build_authority_evaluator_bundle,
         canonical_repository_output_path,
         parse_authority_policy_conformance,
         parse_authority_vocabulary,
+        load_authority_vocabulary_schema,
         read_canonical_repository_file,
     )
     from validate_spec_lifecycle import (
@@ -246,6 +258,8 @@ def render_authority_conformance(
     document = {
         "kind": "AuthorityVocabularyConformanceReceipt",
         "schema_version": AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
+        "scope": AUTHORITY_CONFORMANCE_SCOPE,
+        "runtime_authority": AUTHORITY_RUNTIME_AUTHORITY,
         "constitution_revision": registry.constitution_revision,
         "registry_version": registry.registry_version,
         "constitution_policy": {
@@ -288,6 +302,35 @@ def _load_authority_design(root: Path, authority_spec: Any) -> AuthorityVocabula
     """Load registry and fixtures while deliberately ignoring a stale derived receipt."""
 
     metadata = authority_spec.metadata
+    present_metadata = AUTHORITY_SPEC_METADATA_KEYS.intersection(metadata)
+    if present_metadata != AUTHORITY_SPEC_METADATA_KEYS:
+        raise ValueError(
+            "authority design requires the atomic six-key SPEC-000 metadata set"
+        )
+    schema_path_value = metadata.get("Authority vocabulary schema")
+    schema_digest = metadata.get("Authority vocabulary schema digest")
+    schema_version = metadata.get("Authority vocabulary schema version")
+    if schema_path_value != AUTHORITY_VOCABULARY_SCHEMA_PATH:
+        raise ValueError(
+            "Authority vocabulary schema must be the canonical path "
+            f"{AUTHORITY_VOCABULARY_SCHEMA_PATH}"
+        )
+    if not isinstance(schema_digest, str) or re.fullmatch(
+        r"sha256:[0-9a-f]{64}", schema_digest
+    ) is None:
+        raise ValueError(
+            "Authority vocabulary schema digest must be sha256:<64 lowercase hex>"
+        )
+    if schema_version != AUTHORITY_VOCABULARY_SCHEMA_VERSION:
+        raise ValueError(
+            "Authority vocabulary schema version must be "
+            f"{AUTHORITY_VOCABULARY_SCHEMA_VERSION}"
+        )
+    schema_binding = load_authority_vocabulary_schema(
+        root,
+        expected_digest=schema_digest,
+        expected_version=schema_version,
+    )
     path_value = metadata.get("Authority vocabulary")
     digest = metadata.get("Authority vocabulary digest")
     version_value = metadata.get("Authority vocabulary version")
@@ -315,6 +358,7 @@ def _load_authority_design(root: Path, authority_spec: Any) -> AuthorityVocabula
     )
     return parse_authority_vocabulary(
         registry_bytes,
+        schema_binding=schema_binding,
         expected_digest=digest,
         expected_constitution_revision=authority_spec.revision,
         expected_registry_version=int(version_value),

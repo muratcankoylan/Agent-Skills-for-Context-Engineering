@@ -403,6 +403,21 @@
         }
       ]
     },
+    "authority_contracts": {
+      "count": 1,
+      "owner": "SPEC-000",
+      "records": [
+        {
+          "binding_state": "dormant_unbound",
+          "digest": "sha256:37d7673bded287c74fb35d13e1f11a734f6f7ed4c43d9a1ea04b33d348db83ab",
+          "id": "authority-vocabulary-schema@2.0.0",
+          "kind": "AuthorityVocabularySchema",
+          "path": "governance/authority-vocabulary.schema.json",
+          "schema_id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/governance/authority-vocabulary.schema.json",
+          "version": "2.0.0"
+        }
+      ]
+    },
     "benchmark_runners": {
       "count": 26,
       "owner": "researcher/benchmarks/sdk-runner",
@@ -3068,7 +3083,7 @@
       "owner": "declared validator ownership",
       "records": [
         {
-          "digest": "sha256:6c41a3de45c5f26a0d2605980683acaefbec8d8d41f009496bf7641aafc62b12",
+          "digest": "sha256:b59e33e0f5772cb38ece82824082ab98d268c0a1677d0ae1ec8ee79bb38c51d8",
           "id": "governance-policy",
           "owns": [
             "constitutional invariants",
@@ -3078,7 +3093,7 @@
           "path": "researcher/scripts/validate_governance.py"
         },
         {
-          "digest": "sha256:734d71e6fbf5a1b58280826ee88bbe3fc1f31f26f131079155273d7bacce3149",
+          "digest": "sha256:b406c35c4304bc3789bf0eb1f93a94269b7f583ba7b5bfd1a45d83db33975245",
           "id": "authority-policy-evaluator",
           "owns": [
             "Constitution decision evaluation",
@@ -3087,10 +3102,10 @@
           "path": "researcher/scripts/governance_policy.py"
         },
         {
-          "digest": "sha256:142d7d96cd1853939b79fbff77c9011650379231f6539bcf8996aa4a47fb82d8",
+          "digest": "sha256:80037d968acd81cd85b9a5f1f8e977568f3d7839ce121344fb23e96240ced28f",
           "id": "authority-catalog-contract",
           "owns": [
-            "authority registry, fixture, and semantic profile validation",
+            "standalone authority schema, registry, fixture, and semantic profile validation",
             "structural authority-policy closure",
             "authority evaluator-bundle identity",
             "authority conformance receipt validation"
@@ -3098,7 +3113,7 @@
           "path": "researcher/scripts/validate_authority_contract.py"
         },
         {
-          "digest": "sha256:f67e1f30c8243ef6bb5e9d0681a858bd4c5c0fc0fe766c69d6872ea4c1eb5523",
+          "digest": "sha256:e85e62d1ab1e7730ffbc9c909e1fffb96f41dd99442958d27fc95a7c2386ff18",
           "id": "repository-inventory",
           "owns": [
             "identifier uniqueness",
@@ -3111,7 +3126,7 @@
           "path": "researcher/scripts/build_inventory.py"
         },
         {
-          "digest": "sha256:832443a5dc8991b579210548f3330a000a37c2b2c01ed82bdaa81f6290cba487",
+          "digest": "sha256:78ad969d91af2fd56716d5b1a21d6665b490c3ac42ebc90e1e86a92033087c30",
           "id": "specification-lifecycle",
           "owns": [
             "base-aware specification status transitions",
@@ -3622,12 +3637,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:2ace858d7155dbbdadaf4fe744c165fa35279d30fade25b513ed2eeb515853bb",
+    "digest": "sha256:ad902c7f1e83b8cafa635c0d68d43685491a3f047d8b644eedbc92d8ec336baf",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:2ace858d7155dbbdadaf4fe744c165fa35279d30fade25b513ed2eeb515853bb",
+  "source_tree_digest": "sha256:ad902c7f1e83b8cafa635c0d68d43685491a3f047d8b644eedbc92d8ec336baf",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -3710,9 +3725,9 @@
       "size_bytes": 20265
     },
     {
-      "digest": "sha256:335e10028cbc475dc4c1c44708fa2990f5d8a57af9287feefd9b895cf35132be",
+      "digest": "sha256:9ad3e068d65f91bd7bd9811f069d67837723d43fb210529183b5d88c5a2c3f1d",
       "path": "docs/specs/README.md",
-      "size_bytes": 34238
+      "size_bytes": 38943
     },
     {
       "digest": "sha256:80fd43dd017a100a23c758e7ae6a22e9b266a19ba3c39573545eddffcb80f784",
@@ -3883,6 +3898,11 @@
       "digest": "sha256:a819cf042650a3b5e458bf97b2697d4263bb08d7bd9a26fa0ba6c2381423cdf7",
       "path": "examples/x-to-book-system/README.md",
       "size_bytes": 10108
+    },
+    {
+      "digest": "sha256:37d7673bded287c74fb35d13e1f11a734f6f7ed4c43d9a1ea04b33d348db83ab",
+      "path": "governance/authority-vocabulary.schema.json",
+      "size_bytes": 15321
     },
     {
       "digest": "sha256:500c1d138249a135e462e2fcbdbab0874e6ef841c7ca005560106bb727359722",
@@ -4460,9 +4480,9 @@
       "size_bytes": 54898
     },
     {
-      "digest": "sha256:f67e1f30c8243ef6bb5e9d0681a858bd4c5c0fc0fe766c69d6872ea4c1eb5523",
+      "digest": "sha256:e85e62d1ab1e7730ffbc9c909e1fffb96f41dd99442958d27fc95a7c2386ff18",
       "path": "researcher/scripts/build_inventory.py",
-      "size_bytes": 134222
+      "size_bytes": 137683
     },
     {
       "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
@@ -4475,9 +4495,9 @@
       "size_bytes": 40910
     },
     {
-      "digest": "sha256:734d71e6fbf5a1b58280826ee88bbe3fc1f31f26f131079155273d7bacce3149",
+      "digest": "sha256:b406c35c4304bc3789bf0eb1f93a94269b7f583ba7b5bfd1a45d83db33975245",
       "path": "researcher/scripts/governance_policy.py",
-      "size_bytes": 13670
+      "size_bytes": 40048
     },
     {
       "digest": "sha256:bdd1f338ed58ebd43edfa805190cf16c2eb92c6e62a1efcd7479edfafa50c904",
@@ -4520,14 +4540,14 @@
       "size_bytes": 24900
     },
     {
-      "digest": "sha256:89dec4ac89b68383c40c2e6283bd2e1c60c8b8f153a6957d8330ae5d6a16165d",
+      "digest": "sha256:6235476ffd8d0ed3ca03740cc400bbac3cc1020795fed77a08743d6ff403d7c8",
       "path": "researcher/scripts/tests/test_spec_lifecycle.py",
-      "size_bytes": 85784
+      "size_bytes": 125915
     },
     {
-      "digest": "sha256:142d7d96cd1853939b79fbff77c9011650379231f6539bcf8996aa4a47fb82d8",
+      "digest": "sha256:80037d968acd81cd85b9a5f1f8e977568f3d7839ce121344fb23e96240ced28f",
       "path": "researcher/scripts/validate_authority_contract.py",
-      "size_bytes": 85600
+      "size_bytes": 130350
     },
     {
       "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
@@ -4535,9 +4555,9 @@
       "size_bytes": 5382
     },
     {
-      "digest": "sha256:6c41a3de45c5f26a0d2605980683acaefbec8d8d41f009496bf7641aafc62b12",
+      "digest": "sha256:b59e33e0f5772cb38ece82824082ab98d268c0a1677d0ae1ec8ee79bb38c51d8",
       "path": "researcher/scripts/validate_governance.py",
-      "size_bytes": 19997
+      "size_bytes": 21905
     },
     {
       "digest": "sha256:facebf497d771a018adff8c0bbbbcbb1b28cf38a797c82d48e47fcc9c46fd81f",
@@ -4560,9 +4580,9 @@
       "size_bytes": 9310
     },
     {
-      "digest": "sha256:832443a5dc8991b579210548f3330a000a37c2b2c01ed82bdaa81f6290cba487",
+      "digest": "sha256:78ad969d91af2fd56716d5b1a21d6665b490c3ac42ebc90e1e86a92033087c30",
       "path": "researcher/scripts/validate_spec_lifecycle.py",
-      "size_bytes": 48401
+      "size_bytes": 51475
     },
     {
       "digest": "sha256:8b9e3d9de07a0505ae2b42df2e15dd75bab5f2486e336194481c558e0648ded0",
@@ -4653,7 +4673,7 @@
   "unresolved_references": [],
   "validator_ownership": [
     {
-      "digest": "sha256:6c41a3de45c5f26a0d2605980683acaefbec8d8d41f009496bf7641aafc62b12",
+      "digest": "sha256:b59e33e0f5772cb38ece82824082ab98d268c0a1677d0ae1ec8ee79bb38c51d8",
       "id": "governance-policy",
       "owns": [
         "constitutional invariants",
@@ -4663,7 +4683,7 @@
       "path": "researcher/scripts/validate_governance.py"
     },
     {
-      "digest": "sha256:734d71e6fbf5a1b58280826ee88bbe3fc1f31f26f131079155273d7bacce3149",
+      "digest": "sha256:b406c35c4304bc3789bf0eb1f93a94269b7f583ba7b5bfd1a45d83db33975245",
       "id": "authority-policy-evaluator",
       "owns": [
         "Constitution decision evaluation",
@@ -4672,10 +4692,10 @@
       "path": "researcher/scripts/governance_policy.py"
     },
     {
-      "digest": "sha256:142d7d96cd1853939b79fbff77c9011650379231f6539bcf8996aa4a47fb82d8",
+      "digest": "sha256:80037d968acd81cd85b9a5f1f8e977568f3d7839ce121344fb23e96240ced28f",
       "id": "authority-catalog-contract",
       "owns": [
-        "authority registry, fixture, and semantic profile validation",
+        "standalone authority schema, registry, fixture, and semantic profile validation",
         "structural authority-policy closure",
         "authority evaluator-bundle identity",
         "authority conformance receipt validation"
@@ -4683,7 +4703,7 @@
       "path": "researcher/scripts/validate_authority_contract.py"
     },
     {
-      "digest": "sha256:f67e1f30c8243ef6bb5e9d0681a858bd4c5c0fc0fe766c69d6872ea4c1eb5523",
+      "digest": "sha256:e85e62d1ab1e7730ffbc9c909e1fffb96f41dd99442958d27fc95a7c2386ff18",
       "id": "repository-inventory",
       "owns": [
         "identifier uniqueness",
@@ -4696,7 +4716,7 @@
       "path": "researcher/scripts/build_inventory.py"
     },
     {
-      "digest": "sha256:832443a5dc8991b579210548f3330a000a37c2b2c01ed82bdaa81f6290cba487",
+      "digest": "sha256:78ad969d91af2fd56716d5b1a21d6665b490c3ac42ebc90e1e86a92033087c30",
       "id": "specification-lifecycle",
       "owns": [
         "base-aware specification status transitions",

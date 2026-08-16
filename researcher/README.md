@@ -8,6 +8,10 @@ The public/private boundary is defined by `governance/export-policy.yaml` and `s
 
 Cross-runtime records, typed IDs, private artifact references, and candidate freeze receipts use the SPEC-003 contracts in [`schemas/README.md`](schemas/README.md). Existing claims, mechanisms, run state, and queues remain in place behind validated legacy adapters.
 
+The standalone `governance/authority-vocabulary.schema.json` describes the future SPEC-000 revision-2 authority registry and its synthetic offline fixture manifest. It is deliberately outside the SPEC-003 durable-record registry: SPEC-000 must bind the schema and registry independently by exact path, version, and digest before either can become constitutional input. The dependency-light loader accepts only the code-pinned canonical schema bytes, while CI independently meta-validates those bytes as Draft 2020-12. While revision 1 remains current, inventory reports the schema as unbound machinery and no registry, fixture manifest, or conformance receipt exists.
+
+The version-2 registry uses actor-specific typed predicate sets, exact `{spec_id, revision, minimum_runtime_stage}` requirements, an operation-specific grant, and a componentwise maximum-effect ceiling. Effect codes are incomparable unless equal; target and state-transition counts must each narrow independently. The schema admits `implemented`, `verified`, or `operational` minima, and every current profile requires `operational`; fixtures also supply preimplementation, terminal, missing, and mismatched synthetic evidence to prove denial. All fixture evidence is explicitly `synthetic_offline`, and identity fixtures use only canonical `synthetic:<token>` labels: these class-policy test inputs are not claims about a current promoted runtime record or authenticated provider identity.
+
 This directory defines the repo-native workflow for turning external research into skill changes. It is intentionally file-based so agents can inspect, resume, and audit work without requiring a hosted scheduler.
 
 ## Mission
@@ -48,6 +52,7 @@ discover -> triage -> evaluate -> extract -> map -> draft -> validate -> prepare
 - `corpus/index.json` - machine-readable map of skills, mechanisms, claims, and activation scenarios.
 - `benchmarks/` - adversarial scenarios and goldens for the researcher harness.
 - `schemas/` - digest-pinned durable-record schemas and cross-language conformance evidence.
+- `../governance/authority-vocabulary.schema.json` - dormant SPEC-000 authority-catalog and synthetic-fixture contract; not a runtime evidence schema.
 - `artifacts/` - private CAS contract and ignored runtime root.
 - `rubrics/content-curation.md` - gates for accepting external content.
 - `rubrics/skill-change.md` - gates for changing skills.
@@ -62,7 +67,7 @@ discover -> triage -> evaluate -> extract -> map -> draft -> validate -> prepare
 - `scripts/validate_repo.py` - deterministic repository and harness validator.
 - `scripts/validate_public_repo.py` - tracked-tree guard against workstation paths and credential material; CI also runs Gitleaks over Git history.
 - `scripts/validate_spec_lifecycle.py` - compares proposed specification changes with an exact transition base and requires replacement predecessors to be byte-identical on a separately pinned protected-default tree.
-- `scripts/validate_authority_contract.py` - owns the closed authority-profile, registry, fixture, policy-closure, and conformance-receipt semantics consumed by lifecycle and governance validation.
+- `scripts/validate_authority_contract.py` - owns the closed authority registry, typed predicates, effect-ceiling and exact-dependency algebra, synthetic fixtures, policy closure, evaluator bundle, and offline conformance-receipt semantics consumed by lifecycle and governance validation.
 - `scripts/validate_run.py` - publish-readiness validator for a single research run.
 - `scripts/research_loop.py` - creates durable run directories and validation reports.
 - `scripts/novelty_check.py` - checks proposal overlap against existing skills and prior runs.
@@ -78,6 +83,8 @@ discover -> triage -> evaluate -> extract -> map -> draft -> validate -> prepare
 4. Prefer updating existing skills over adding new ones unless the activation scenario, mechanism, and operating procedure are distinct.
 5. Require human review when evidence is anecdotal, source claims are volatile, or a skill change affects repo-wide guidance.
 6. Keep all generated skill changes aligned with `template/SKILL.md`, the 500-line cap, and manifest sync rules.
+
+Authority conformance is not runtime authorization. Its receipt is scoped to offline class-policy conformance and declares that it grants no runtime authority; individual decisions carry the same explicit offline/no-runtime boundary. Conformance also closes the policy lifecycle marker, actor descriptors, protected surfaces, emergency controls, amendment procedure, allow reason semantics, and the exact default-deny form rather than attesting only finite cases. Explicit deny rules are forbidden in this oracle because a selectively targeted denial could preserve every sampled decision while disabling a reviewed action. Runtime actor class, dependency state, assignment and fence, and capability grant must eventually come from trusted authenticated resolvers; caller-supplied fixture fields, synthetic identities, or evidence tuples never satisfy that boundary.
 
 ## Local Commands
 

@@ -21,12 +21,16 @@ from researcher.scripts import validate_spec_lifecycle as spec_lifecycle
 from researcher.scripts.governance_policy import Constitution
 from researcher.scripts.validate_spec_lifecycle import (
     AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
+    AUTHORITY_CONFORMANCE_SCOPE,
     AUTHORITY_CONSTITUTION_POLICY_PATH,
     AUTHORITY_EVALUATOR_BUNDLE_VERSION,
     AUTHORITY_EVALUATOR_COMPONENT_PATHS,
     AUTHORITY_FIXTURE_MANIFEST_PATH,
+    AUTHORITY_RUNTIME_AUTHORITY,
     AUTHORITY_VALIDATOR_BUNDLE_ALGORITHM,
     AUTHORITY_VOCABULARY_PATH,
+    AUTHORITY_VOCABULARY_SCHEMA_PATH,
+    AUTHORITY_VOCABULARY_SCHEMA_VERSION,
     POLICY_ONLY_READ_PROFILES,
     REQUIRED_AUTHORITY_PROFILES,
     AuthorityEvaluatorBundleBinding,
@@ -38,6 +42,7 @@ from researcher.scripts.validate_spec_lifecycle import (
     expected_authority_policy_conditions,
     load_candidate_authority_vocabulary,
     load_authority_vocabulary,
+    load_authority_vocabulary_schema,
     parse_authority_vocabulary,
     parse_authority_policy_conformance,
     parse_adr_revision,
@@ -67,6 +72,9 @@ def spec_bytes(
     authority_path: str | None = None,
     authority_digest: str | None = None,
     authority_version: int | str | None = None,
+    authority_schema_path: str | None = None,
+    authority_schema_digest: str | None = None,
+    authority_schema_version: str | None = None,
 ) -> bytes:
     decision = (
         f"Lifecycle decision: {lifecycle_decision}\n"
@@ -83,6 +91,16 @@ def spec_bytes(
         else ""
     )
     authority_lines = ""
+    if authority_schema_path is not None:
+        authority_lines += f"Authority vocabulary schema: {authority_schema_path}\n"
+    if authority_schema_digest is not None:
+        authority_lines += (
+            f"Authority vocabulary schema digest: {authority_schema_digest}\n"
+        )
+    if authority_schema_version is not None:
+        authority_lines += (
+            f"Authority vocabulary schema version: {authority_schema_version}\n"
+        )
     if authority_path is not None:
         authority_lines += f"Authority vocabulary: {authority_path}\n"
     if authority_digest is not None:
@@ -149,10 +167,14 @@ def authority_documents(
                 "action": action,
                 "resource": resource,
                 "owner_spec": profile.owner_spec,
-                "actor_classes": list(profile.actor_classes),
+                "actor_bindings": [
+                    binding.to_payload() for binding in profile.actor_bindings
+                ],
                 "max_effect": profile.max_effect,
-                "dependency_floor": list(profile.dependency_floor),
-                "decision_context_fields": list(profile.decision_context_fields),
+                "dependency_requirements": [
+                    requirement.to_payload()
+                    for requirement in profile.dependency_requirements
+                ],
                 "grant_operation": profile.grant_operation,
             }
         )
@@ -165,7 +187,7 @@ def authority_documents(
         )
     fixture = {
         "kind": "AuthorityVocabularyFixtureManifest",
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
         "constitution_revision": constitution_revision,
         "registry_version": registry_version,
         "catalog_boundary_cases": list(expected_authority_catalog_boundary_cases()),
@@ -174,7 +196,7 @@ def authority_documents(
     fixture_bytes = canonical_json(fixture)
     registry = {
         "kind": "AuthorityVocabularyRegistry",
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
         "owner_spec": "SPEC-000",
         "constitution_revision": constitution_revision,
         "registry_version": registry_version,
@@ -193,6 +215,7 @@ def parse_valid_authority() -> AuthorityVocabularyBinding:
     _registry, _fixture, registry_bytes, fixture_bytes = authority_documents()
     return parse_authority_vocabulary(
         registry_bytes,
+        schema_binding=load_authority_vocabulary_schema(ROOT),
         expected_digest=f"sha256:{hashlib.sha256(registry_bytes).hexdigest()}",
         expected_constitution_revision=2,
         expected_registry_version=2,
@@ -201,61 +224,123 @@ def parse_valid_authority() -> AuthorityVocabularyBinding:
 
 
 def conforming_constitution() -> Constitution:
-    actors = {"human_maintainer"}
+    actors = {
+        "change_author",
+        "community_contributor",
+        "content_proposer",
+        "human_maintainer",
+        "independent_canary_attestor",
+        "independent_epoch_sealer",
+        "independent_verifier",
+        "release_attestor",
+        "research_proposer",
+    }
     actions = set()
     resources = set()
     rules = []
-    for index, ((action, resource), profile) in enumerate(
-        sorted(REQUIRED_AUTHORITY_PROFILES.items())
-    ):
+    profiles = (
+        *(sorted(REQUIRED_AUTHORITY_PROFILES.items())),
+        *(sorted(POLICY_ONLY_READ_PROFILES.items())),
+    )
+    rule_index = 0
+    for (action, resource), profile in profiles:
         actors.update(profile.actor_classes)
         actions.add(action)
         resources.add(resource)
-        rules.append(
-            {
-                "rule_id": f"authority-profile-{index:03d}",
-                "effect": "allow",
-                "actors": list(profile.actor_classes),
-                "actions": [action],
-                "resources": [resource],
-                "conditions": list(expected_authority_policy_conditions(profile)),
-                "reason_code": "AUTHORITY_PROFILE_ALLOWED",
-            }
-        )
-    for index, ((action, resource), profile) in enumerate(
-        sorted(POLICY_ONLY_READ_PROFILES.items())
-    ):
-        actors.update(profile.actor_classes)
-        actions.add(action)
-        resources.add(resource)
-        rules.append(
-            {
-                "rule_id": f"policy-only-read-{index:03d}",
-                "effect": "allow",
-                "actors": list(profile.actor_classes),
-                "actions": [action],
-                "resources": [resource],
-                "conditions": list(expected_authority_policy_conditions(profile)),
-                "reason_code": "POLICY_ONLY_READ_ALLOWED",
-            }
-        )
+        for actor in profile.actor_classes:
+            rules.append(
+                {
+                    "rule_id": f"authority-profile-{rule_index:03d}",
+                    "effect": "allow",
+                    "actors": [actor],
+                    "actions": [action],
+                    "resources": [resource],
+                    "conditions": list(
+                        expected_authority_policy_conditions(profile, actor)
+                    ),
+                    "reason_code": "OFFLINE_CLASS_POLICY_ALLOWED",
+                }
+            )
+            rule_index += 1
     document = {
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
         "constitution_version": "2.0.0",
         "lifecycle_state": "effective",
-        "effective_commit": "fixture",
+        "effective_commit": "$SELF",
         "default_effect": "deny",
         "promotion_event": "human_merged_commit",
         "actor_classes": {
-            actor: {"automated": actor != "human_maintainer", "conflicts_with": []}
+            actor: {
+                "automated": actor
+                not in {"community_contributor", "human_maintainer"}
+            }
             for actor in sorted(actors)
         },
+        "identity_bindings": {actor: [] for actor in sorted(actors)},
         "actions": sorted(actions),
         "resource_classes": sorted(resources),
-        "protected_surfaces": ["governance/**"],
+        "protected_surfaces": [
+            ".github/CODEOWNERS",
+            ".github/workflows/**",
+            "governance/**",
+            "researcher/benchmarks/**/hidden/**",
+            "researcher/rubrics/**",
+            "researcher/scripts/build_inventory.py",
+            "researcher/scripts/governance_policy.py",
+            "researcher/scripts/run_benchmarks.py",
+            "researcher/scripts/validate_*.py",
+        ],
+        "separation_of_duty": [
+            {
+                "rule_id": "protected-change-lineage-separation",
+                "scope": "protected_change_lineage",
+                "constraint": "distinct_authenticated_principal_across_groups",
+                "groups": [
+                    {
+                        "duty": "attestor",
+                        "actor_classes": [
+                            "independent_canary_attestor",
+                            "release_attestor",
+                        ],
+                    },
+                    {
+                        "duty": "author",
+                        "actor_classes": [
+                            "change_author",
+                            "community_contributor",
+                            "content_proposer",
+                            "human_maintainer",
+                            "research_proposer",
+                        ],
+                    },
+                    {
+                        "duty": "sealer",
+                        "actor_classes": ["independent_epoch_sealer"],
+                    },
+                    {
+                        "duty": "verifier",
+                        "actor_classes": ["independent_verifier"],
+                    },
+                ],
+            }
+        ],
         "rules": rules,
-        "emergency_controls": {},
-        "amendment_procedure": {},
+        "emergency_controls": {
+            "disable_changes_authority": False,
+            "disable_mutates_history": False,
+            "disable_stops_new_work": True,
+        },
+        "amendment_procedure": {
+            "prior_versions_retained": True,
+            "required_actor": "human_maintainer",
+            "required_state_sequence": [
+                "draft",
+                "reviewed",
+                "merged",
+                "effective",
+            ],
+            "required_transport": "pull_request",
+        },
     }
     return Constitution(document, "a" * 64, Path(AUTHORITY_CONSTITUTION_POLICY_PATH))
 
@@ -298,6 +383,8 @@ def authority_conformance_document(
     receipt = {
         "kind": "AuthorityVocabularyConformanceReceipt",
         "schema_version": AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
+        "scope": AUTHORITY_CONFORMANCE_SCOPE,
+        "runtime_authority": AUTHORITY_RUNTIME_AUTHORITY,
         "constitution_revision": registry.constitution_revision,
         "registry_version": registry.registry_version,
         "constitution_policy": {
@@ -329,6 +416,9 @@ def authority_spec_bytes(
         revision=revision,
         revises=revises,
         dependency_revisions="none",
+        authority_schema_path=binding.schema_path,
+        authority_schema_digest=binding.schema_digest,
+        authority_schema_version=binding.schema_version,
         authority_path=binding.path,
         authority_digest=binding.digest,
         authority_version=binding.registry_version,
@@ -445,6 +535,7 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
         registry_bytes = canonical_json(registry)
         return parse_authority_vocabulary(
             registry_bytes,
+            schema_binding=load_authority_vocabulary_schema(ROOT),
             expected_digest=f"sha256:{hashlib.sha256(registry_bytes).hexdigest()}",
             expected_constitution_revision=2,
             expected_registry_version=2,
@@ -594,15 +685,26 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
         names = {str(case["case"]) for case in cases}
         for actor in emergency.actor_classes:
             self.assertIn(f"allow__{actor}", names)
-        for field in emergency.decision_context_fields:
-            self.assertIn(f"missing_guard__{field}", names)
+            for predicate in emergency.actor_binding(actor).predicates:
+                self.assertIn(
+                    f"missing_guard__{actor}__{predicate['key']}", names
+                )
         self.assertTrue(
             {
-                "below_dependency_floor",
-                "owner_inactive",
+                "dependency_lower_revision",
+                "dependency_higher_revision",
+                "dependency_accepted_stage",
+                "dependency_terminal_stage",
+                "dependency_missing",
+                "dependency_extra",
                 "wrong_actor",
-                "widened_effect",
-                "wrong_grant",
+                "widened_effect_targets",
+                "widened_effect_transitions",
+                "mixed_effect_widening",
+                "wrong_grant_operation",
+                "grant_too_narrow",
+                "grant_effect_code_mismatch",
+                "extra_context_field",
             }
             <= names
         )
@@ -701,6 +803,7 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
             parse_authority_vocabulary(
                 duplicate,
+                schema_binding=load_authority_vocabulary_schema(ROOT),
                 expected_digest=f"sha256:{hashlib.sha256(duplicate).hexdigest()}",
                 expected_constitution_revision=2,
                 expected_registry_version=2,
@@ -713,6 +816,7 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "floating point is forbidden"):
             parse_authority_vocabulary(
                 floating,
+                schema_binding=load_authority_vocabulary_schema(ROOT),
                 expected_digest=f"sha256:{hashlib.sha256(floating).hexdigest()}",
                 expected_constitution_revision=2,
                 expected_registry_version=2,
@@ -725,6 +829,7 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
         ):
             parse_authority_vocabulary(
                 noncanonical,
+                schema_binding=load_authority_vocabulary_schema(ROOT),
                 expected_digest=f"sha256:{hashlib.sha256(noncanonical).hexdigest()}",
                 expected_constitution_revision=2,
                 expected_registry_version=2,
@@ -746,20 +851,19 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
         registry, fixture, _registry_bytes, _fixture_bytes = authority_documents()
         mutations = {
             "owner": lambda entry: entry.__setitem__("owner_spec", "SPEC-999"),
-            "actor": lambda entry: entry.__setitem__(
-                "actor_classes",
-                ["human_maintainer"]
-                if entry["actor_classes"] != ["human_maintainer"]
-                else ["research_agent"],
+            "actor": lambda entry: entry["actor_bindings"][0].__setitem__(
+                "actor_class", "unauthorized_actor"
             ),
             "effect": lambda entry: entry["max_effect"].__setitem__("max_targets", 2),
-            "guard": lambda entry: entry.__setitem__(
-                "decision_context_fields", entry["decision_context_fields"][1:]
+            "guard": lambda entry: entry["actor_bindings"][0].__setitem__(
+                "predicates", entry["actor_bindings"][0]["predicates"][1:]
             ),
             "grant": lambda entry: entry.__setitem__(
                 "grant_operation", "unauthorized_operation"
             ),
-            "dependency": lambda entry: entry.__setitem__("dependency_floor", []),
+            "dependency": lambda entry: entry.__setitem__(
+                "dependency_requirements", []
+            ),
             "arbitrary_pair": lambda entry: entry.__setitem__(
                 "action", "invent_authority"
             ),
@@ -793,22 +897,32 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
             "missing_guard": lambda document: case(
                 document, "missing_guard"
             ).__setitem__(
-                "decision_context_fields", list(profile.decision_context_fields)
+                "context",
+                deepcopy(
+                    next(
+                        item
+                        for item in self.first_fixture(document)["cases"]
+                        if item["case"]
+                        == f"allow__{case(document, 'missing_guard')['actor_class']}"
+                    )["context"]
+                ),
             ),
             "widened_effect": lambda document: case(
-                document, "widened_effect"
+                document, "widened_effect_targets"
             ).__setitem__("effect", profile.max_effect),
-            "wrong_grant": lambda document: case(document, "wrong_grant").__setitem__(
-                "grant_operation", profile.grant_operation
+            "wrong_grant": lambda document: case(
+                document, "wrong_grant_operation"
+            )["grant"].__setitem__(
+                "operation", profile.grant_operation
             ),
             "below_dependency_floor": lambda document: case(
-                document, "below_dependency_floor"
-            )["dependency_evidence"][0].__setitem__(
-                "revision", int(profile.dependency_floor[0].split("@")[1])
+                document, "dependency_lower_revision"
+            )["dependencies"][0].__setitem__(
+                "revision", profile.dependency_requirements[0].revision
             ),
-            "owner_inactive": lambda document: case(document, "owner_inactive")[
-                "dependency_evidence"
-            ][0].__setitem__("status", "operational"),
+            "owner_inactive": lambda document: case(
+                document, "dependency_terminal_stage"
+            )["dependencies"][0].__setitem__("runtime_stage", "operational"),
         }
         for name, mutate in mutations.items():
             mutated = deepcopy(fixture)
@@ -862,7 +976,12 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
     ) -> None:
         _registry, _fixture, registry_bytes, fixture_bytes = authority_documents()
         digest = f"sha256:{hashlib.sha256(registry_bytes).hexdigest()}"
+        schema_bytes = (ROOT / AUTHORITY_VOCABULARY_SCHEMA_PATH).read_bytes()
+        schema_digest = f"sha256:{hashlib.sha256(schema_bytes).hexdigest()}"
         good_metadata = {
+            "Authority vocabulary schema": AUTHORITY_VOCABULARY_SCHEMA_PATH,
+            "Authority vocabulary schema digest": schema_digest,
+            "Authority vocabulary schema version": AUTHORITY_VOCABULARY_SCHEMA_VERSION,
             "Authority vocabulary": AUTHORITY_VOCABULARY_PATH,
             "Authority vocabulary digest": digest,
             "Authority vocabulary version": "2",
@@ -870,6 +989,7 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "governance" / "fixtures").mkdir(parents=True)
+            (root / AUTHORITY_VOCABULARY_SCHEMA_PATH).write_bytes(schema_bytes)
             (root / AUTHORITY_VOCABULARY_PATH).write_bytes(registry_bytes)
             (root / AUTHORITY_FIXTURE_MANIFEST_PATH).write_bytes(fixture_bytes)
             self.assertEqual(
@@ -883,6 +1003,15 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
                 "digest": ("Authority vocabulary digest", "sha256:" + "0" * 64),
                 "version": ("Authority vocabulary version", "3"),
                 "noncanonical_version": ("Authority vocabulary version", "02"),
+                "schema_path": (
+                    "Authority vocabulary schema",
+                    "governance/arbitrary.schema.json",
+                ),
+                "schema_digest": (
+                    "Authority vocabulary schema digest",
+                    "sha256:" + "0" * 64,
+                ),
+                "schema_version": ("Authority vocabulary schema version", "2.0.1"),
             }
             for name, (field, value) in mutations.items():
                 metadata = dict(good_metadata)
@@ -915,7 +1044,7 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
                 path = root / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.symlink_to(root / "missing-authority-artifact.json")
-                with self.assertRaisesRegex(ValueError, "Authority vocabulary"):
+                with self.assertRaisesRegex(ValueError, "pre-registry SPEC-000"):
                     load_candidate_authority_vocabulary(
                         root,
                         {authority_spec.spec_id: authority_spec},
@@ -954,7 +1083,7 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
             }
             <= registry_reasons
         )
-        self.assertIn("AUTHORITY_PROFILE_ALLOWED", policy_reasons)
+        self.assertIn("OFFLINE_CLASS_POLICY_ALLOWED", policy_reasons)
 
     def test_unconditional_allow_policy_cannot_be_masked_by_registry_denials(
         self,
@@ -971,7 +1100,7 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
                 "actions": ["query_status"],
                 "resources": ["status_projection"],
                 "conditions": [],
-                "reason_code": "UNCONDITIONAL_STATUS_QUERY",
+                "reason_code": "OFFLINE_CLASS_POLICY_ALLOWED",
             }
         ]
         policy = Constitution(
@@ -1009,10 +1138,11 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
                     {
                         "key": "automated_identity_disclosed",
                         "operator": "equals",
+                        "value_type": "boolean",
                         "value": False,
                     }
                 ],
-                "reason_code": "RETAINED_LEGACY_ALLOW",
+                "reason_code": "OFFLINE_CLASS_POLICY_ALLOWED",
             },
             actions=("publish_draft",),
             resources=("public_content_draft",),
@@ -1028,7 +1158,12 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
         )
         target_condition.clear()
         target_condition.update(
-            {"key": "target_id", "operator": "equals", "value": False}
+            {
+                "key": "target_id",
+                "operator": "equals",
+                "value_type": "boolean",
+                "value": False,
+            }
         )
         alternate_guard = constitution_with_added_allow_rule(
             {
@@ -1038,12 +1173,12 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
                 "actions": [pair[0]],
                 "resources": [pair[1]],
                 "conditions": alternate_conditions,
-                "reason_code": "ALTERNATE_GUARD_ALLOW",
+                "reason_code": "OFFLINE_CLASS_POLICY_ALLOWED",
             }
         )
 
         for name, policy, message in (
-            ("retained_legacy", retained_legacy, "noncatalog pair"),
+            ("retained_legacy", retained_legacy, "noncatalog path"),
             ("alternate_guard", alternate_guard, "noncanonical predicate"),
         ):
             results = authority_policy_case_results(registry, policy)
@@ -1067,6 +1202,61 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
                     constitution=policy,
                     evaluator_component_bytes=component_bytes,
                 )
+
+    def test_selective_deny_cannot_hide_outside_finite_fixtures(self) -> None:
+        registry = parse_valid_authority()
+        document = deepcopy(conforming_constitution().document)
+        document["rules"].append(
+            {
+                "rule_id": "aaa-selective-emergency-deny",
+                "effect": "deny",
+                "actors": ["human_maintainer"],
+                "actions": ["emergency_disable"],
+                "resources": ["emergency_control"],
+                "conditions": [
+                    {
+                        "key": "operation_id",
+                        "operator": "equals",
+                        "value": "future_emergency_operation",
+                        "value_type": "string",
+                    }
+                ],
+                "reason_code": "SELECTIVE_EMERGENCY_DENY",
+            }
+        )
+        document["rules"].sort(key=lambda rule: rule["rule_id"])
+        policy = Constitution(
+            document,
+            "9" * 64,
+            Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+        )
+        results = authority_policy_case_results(registry, policy)
+        self.assertTrue(
+            all(
+                result["actual_decision"] == result["expected_decision"]
+                and result["policy_decision"] == result["expected_policy_decision"]
+                and result["registry_decision"]
+                == result["expected_registry_decision"]
+                for result in results
+            ),
+            "the selective deny must remain dormant in finite fixtures",
+        )
+        with self.assertRaisesRegex(ValueError, "must not contain explicit deny rules"):
+            authority_contract.validate_authority_policy_closure(policy)
+
+        component_bytes = evaluator_component_bytes()
+        _receipt, receipt_bytes = authority_conformance_document(
+            registry,
+            policy,
+            component_bytes,
+        )
+        with self.assertRaisesRegex(ValueError, "must not contain explicit deny rules"):
+            parse_authority_policy_conformance(
+                receipt_bytes,
+                registry=registry,
+                constitution=policy,
+                evaluator_component_bytes=component_bytes,
+            )
 
     def test_valid_policy_conformance_receipt_is_recomputed_and_bound(self) -> None:
         registry = parse_valid_authority()
@@ -1162,8 +1352,9 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
                 build_authority_evaluator_bundle(invalid)
 
         mutated_component_bytes = (
-            (component_bytes[0][0], component_bytes[0][1] + b" mutated"),
-            component_bytes[1],
+            component_bytes[0],
+            (component_bytes[1][0], component_bytes[1][1] + b" mutated"),
+            component_bytes[2],
         )
         mutated_bundle = build_authority_evaluator_bundle(mutated_component_bytes)
         self.assertNotEqual(mutated_bundle.digest, bundle.digest)
@@ -1189,6 +1380,10 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
             registry, constitution, component_bytes
         )
         mutations = {
+            "scope": lambda value: value.__setitem__("scope", "runtime_authorization"),
+            "runtime_authority": lambda value: value.__setitem__(
+                "runtime_authority", "grant"
+            ),
             "policy_digest": lambda value: value["constitution_policy"].__setitem__(
                 "digest", "sha256:" + "0" * 64
             ),
@@ -1270,7 +1465,6 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
                 authority_vocabulary=registry,
             ),
         )
-
         constitution = conforming_constitution()
         component_bytes = evaluator_component_bytes()
         _receipt, receipt_bytes = authority_conformance_document(
@@ -1337,6 +1531,749 @@ class AuthorityVocabularyLifecycleTests(unittest.TestCase):
                 authority_vocabulary=forged_registry,
             ),
         )
+
+    def test_rev1_accepts_only_the_standalone_validated_schema(self) -> None:
+        authority_spec = revision_at(
+            "docs/specs/SPEC-000-fixture.md",
+            spec_bytes(
+                spec_id="SPEC-000",
+                status="accepted",
+                revision=1,
+                revises="none",
+                dependency_revisions="none",
+            ),
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            schema_path = root / AUTHORITY_VOCABULARY_SCHEMA_PATH
+            schema_path.parent.mkdir(parents=True)
+            schema_path.write_bytes(
+                (ROOT / AUTHORITY_VOCABULARY_SCHEMA_PATH).read_bytes()
+            )
+            self.assertIsNone(
+                load_candidate_authority_vocabulary(
+                    root, {authority_spec.spec_id: authority_spec}
+                )
+            )
+
+            schema = json.loads(schema_path.read_text(encoding="utf-8"))
+            semantically_invalid = deepcopy(schema)
+            semantically_invalid["$defs"]["registry"]["type"] = 123
+            semantically_invalid_bytes = canonical_json(semantically_invalid)
+            with self.assertRaisesRegex(ValueError, "code-pinned schema 2.0.0"):
+                authority_contract.parse_authority_vocabulary_schema(
+                    semantically_invalid_bytes,
+                    expected_digest=(
+                        "sha256:"
+                        + hashlib.sha256(semantically_invalid_bytes).hexdigest()
+                    ),
+                )
+
+            schema["$id"] = "https://example.invalid/authority.schema.json"
+            schema_path.write_bytes(canonical_json(schema))
+            with self.assertRaisesRegex(ValueError, r"schema \$id"):
+                load_candidate_authority_vocabulary(
+                    root, {authority_spec.spec_id: authority_spec}
+                )
+
+    def test_schema_two_rejects_old_registry_shape_and_partial_metadata(self) -> None:
+        registry, fixture, registry_bytes, fixture_bytes = authority_documents()
+        legacy = deepcopy(registry)
+        entry = legacy["entries"][0]
+        entry["actor_classes"] = [
+            binding["actor_class"] for binding in entry.pop("actor_bindings")
+        ]
+        with self.assertRaisesRegex(ValueError, "closed schema"):
+            self.parse_documents(legacy, fixture)
+
+        partial_metadata = {
+            "Authority vocabulary": AUTHORITY_VOCABULARY_PATH,
+            "Authority vocabulary digest": "sha256:" + "0" * 64,
+            "Authority vocabulary version": "2",
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(ValueError, "atomic six-key"):
+                load_authority_vocabulary(
+                    Path(directory),
+                    partial_metadata,
+                    expected_constitution_revision=2,
+                )
+
+        schema_binding = load_authority_vocabulary_schema(ROOT)
+        forged_binding = replace(
+            schema_binding,
+            digest="sha256:" + "0" * 64,
+        )
+        with self.assertRaisesRegex(ValueError, "validated schema 2.0.0 binding"):
+            parse_authority_vocabulary(
+                registry_bytes,
+                schema_binding=forged_binding,
+                expected_digest=(
+                    f"sha256:{hashlib.sha256(registry_bytes).hexdigest()}"
+                ),
+                expected_constitution_revision=2,
+                expected_registry_version=2,
+                fixture_manifest_bytes=fixture_bytes,
+            )
+
+    def test_authority_semantic_globals_are_immutable(self) -> None:
+        component_bytes = evaluator_component_bytes()
+        before_digest = build_authority_evaluator_bundle(component_bytes).digest
+        pair = ("merge", "pull_request")
+        profile = REQUIRED_AUTHORITY_PROFILES[pair]
+        with self.assertRaises(TypeError):
+            REQUIRED_AUTHORITY_PROFILES[pair] = replace(  # type: ignore[index]
+                profile,
+                actor_classes=profile.actor_classes + ("forged_actor",),
+            )
+        with self.assertRaises(TypeError):
+            authority_contract.REQUIRED_AUTHORITY_VOCABULARY_OWNERS[pair] = (  # type: ignore[index]
+                "SPEC-999"
+            )
+        with self.assertRaises(TypeError):
+            authority_contract.AUTHORITY_ACTOR_AUTOMATION[  # type: ignore[index]
+                "human_maintainer"
+            ] = True
+        override_key = (pair[0], pair[1], "human_maintainer")
+        with self.assertRaises(TypeError):
+            authority_contract._REV1_ACTOR_GUARD_OVERRIDES[override_key] = (  # type: ignore[index]
+                frozenset()
+            )
+        with self.assertRaises(TypeError):
+            authority_contract._AUTHORITY_EMERGENCY_CONTROLS[  # type: ignore[index]
+                "disable_stops_new_work"
+            ] = False
+        with self.assertRaises(TypeError):
+            authority_contract._AUTHORITY_AMENDMENT_PROCEDURE[  # type: ignore[index]
+                "required_actor"
+            ] = "forged_actor"
+        semantic_sets = (
+            authority_contract.AUTHORITY_VOCABULARY_READY_STATUSES,
+            authority_contract.AUTHORITY_IMPLEMENTED_STATUSES,
+            authority_contract.AUTHORITY_PREIMPLEMENTATION_STATUSES,
+            authority_contract.AUTHORITY_ENTRY_KEYS,
+            authority_contract.AUTHORITY_FIXTURE_CASE_KEYS,
+            authority_contract.AUTHORITY_MINIMUM_PROTECTED_SURFACES,
+            authority_contract.AUTHORITY_SPEC_METADATA_KEYS,
+            authority_contract._AUTHORITY_DEPENDENCY_EVIDENCE_STAGES,
+            authority_contract._REV1_ACTOR_GUARD_FIELDS,
+        )
+        for semantic_set in semantic_sets:
+            with self.subTest(semantic_set=semantic_set), self.assertRaises(
+                AttributeError
+            ):
+                semantic_set.add("forged")
+        self.assertEqual(REQUIRED_AUTHORITY_PROFILES[pair], profile)
+        self.assertEqual(
+            build_authority_evaluator_bundle(component_bytes).digest,
+            before_digest,
+        )
+
+    def test_rev1_actor_guards_are_actor_specific_and_not_laundered(self) -> None:
+        common = {"expected_target_version", "operation_id", "target_id"}
+
+        def keys(pair: tuple[str, str], actor: str) -> set[str]:
+            return {
+                str(predicate["key"])
+                for predicate in REQUIRED_AUTHORITY_PROFILES[pair]
+                .actor_binding(actor)
+                .predicates
+            }
+
+        candidate = ("propose_change", "candidate_artifact")
+        self.assertEqual(
+            keys(candidate, "change_author"),
+            common | {"automated_identity_disclosed"},
+        )
+        self.assertEqual(
+            keys(candidate, "research_proposer"),
+            common | {"automated_identity_disclosed"},
+        )
+        self.assertEqual(
+            keys(candidate, "community_contributor"),
+            common | {"human_review_path"},
+        )
+        self.assertEqual(
+            keys(candidate, "human_maintainer"), common | {"authenticated"}
+        )
+
+        proposal = ("push_proposal", "proposal_branch")
+        self.assertEqual(
+            keys(proposal, "change_author"),
+            common | {"automated_identity_disclosed", "human_review_path"},
+        )
+        self.assertEqual(
+            keys(proposal, "human_maintainer"), common | {"authenticated"}
+        )
+        self.assertEqual(
+            keys(("emergency_disable", "emergency_control"), "human_maintainer"),
+            common | {"safety_ledger_version"},
+        )
+        for profile in REQUIRED_AUTHORITY_PROFILES.values():
+            for binding in profile.actor_bindings:
+                predicate_keys = {str(item["key"]) for item in binding.predicates}
+                self.assertTrue(common <= predicate_keys)
+                for predicate in binding.predicates:
+                    if predicate["value_type"] == "boolean":
+                        self.assertEqual(predicate["operator"], "equals")
+                        self.assertIs(predicate["value"], True)
+
+    def test_registry_precedence_and_dependency_effect_grant_matrix(self) -> None:
+        binding = parse_valid_authority()
+        pair = ("query_status", "status_projection")
+        pair_cases = {
+            case.case: case
+            for case in binding.fixture_cases
+            if (case.action, case.resource) == pair
+        }
+        expected_reasons = {
+            "dependency_lower_revision": "REGISTRY_DEPENDENCY_DENY",
+            "dependency_higher_revision": "REGISTRY_DEPENDENCY_DENY",
+            "dependency_accepted_stage": "REGISTRY_DEPENDENCY_DENY",
+            "dependency_terminal_stage": "REGISTRY_DEPENDENCY_DENY",
+            "dependency_missing": "REGISTRY_DEPENDENCY_DENY",
+            "dependency_extra": "REGISTRY_DEPENDENCY_DENY",
+            "widened_effect_targets": "REGISTRY_EFFECT_DENY",
+            "widened_effect_transitions": "REGISTRY_EFFECT_DENY",
+            "mixed_effect_widening": "REGISTRY_EFFECT_DENY",
+            "wrong_effect_code": "REGISTRY_EFFECT_DENY",
+            "wrong_grant_operation": "REGISTRY_GRANT_DENY",
+            "grant_too_narrow": "REGISTRY_GRANT_DENY",
+            "grant_effect_code_mismatch": "REGISTRY_GRANT_DENY",
+        }
+        for case_name, reason in expected_reasons.items():
+            with self.subTest(case=case_name):
+                self.assertEqual(
+                    authority_contract._authority_registry_boundary_decision(
+                        pair_cases[case_name]
+                    ),
+                    ("deny", reason),
+                )
+        self.assertEqual(
+            authority_contract._authority_registry_boundary_decision(
+                pair_cases["narrowed_effect"]
+            ),
+            ("allow", "REGISTRY_ALLOW"),
+        )
+
+        base = next(
+            case
+            for name, case in pair_cases.items()
+            if name.startswith("allow__")
+        )
+        precedence_cases = {
+            "REGISTRY_PAIR_DENY": replace(
+                base,
+                action="unknown_action",
+                actor_class="unauthorized_actor",
+                context={},
+                max_targets=base.max_targets + 1,
+                grant_operation="unauthorized_operation",
+                dependencies=(),
+            ),
+            "REGISTRY_ACTOR_DENY": replace(
+                base,
+                actor_class="unauthorized_actor",
+                context={},
+                max_targets=base.max_targets + 1,
+                grant_operation="unauthorized_operation",
+                dependencies=(),
+            ),
+            "REGISTRY_GUARD_DENY": replace(
+                base,
+                context={},
+                max_targets=base.max_targets + 1,
+                grant_operation="unauthorized_operation",
+                dependencies=(),
+            ),
+            "REGISTRY_EFFECT_DENY": replace(
+                base,
+                max_targets=base.max_targets + 1,
+                grant_operation="unauthorized_operation",
+                dependencies=(),
+            ),
+            "REGISTRY_GRANT_DENY": replace(
+                base, grant_operation="unauthorized_operation", dependencies=()
+            ),
+            "REGISTRY_DEPENDENCY_DENY": replace(base, dependencies=()),
+        }
+        for expected_reason, case in precedence_cases.items():
+            with self.subTest(expected_reason=expected_reason):
+                self.assertEqual(
+                    authority_contract._authority_registry_boundary_decision(case)[1],
+                    expected_reason,
+                )
+
+    def test_fixture_scalars_reject_composites_and_binding_context_is_immutable(
+        self,
+    ) -> None:
+        binding = parse_valid_authority()
+        case = binding.fixture_cases[0]
+        with self.assertRaises(TypeError):
+            case.context[next(iter(case.context))] = "mutated"  # type: ignore[index]
+
+        registry, fixture, _registry_bytes, _fixture_bytes = authority_documents()
+        first_case = self.first_fixture(fixture)["cases"][0]
+        context_key = next(iter(first_case["context"]))
+        for value in (None, [], {}, 1.5):
+            mutated = deepcopy(fixture)
+            self.first_fixture(mutated)["cases"][0]["context"][context_key] = value
+            with self.subTest(context=value), self.assertRaises(ValueError):
+                self.parse_documents(registry, mutated)
+        for value in (None, [], {}, True, -1):
+            mutated = deepcopy(fixture)
+            self.first_fixture(mutated)["cases"][0]["effect"]["max_targets"] = value
+            with self.subTest(effect=value), self.assertRaises(ValueError):
+                self.parse_documents(registry, mutated)
+
+        surrogate_fixture = deepcopy(fixture)
+        surrogate_fixture["entries"][0]["cases"][0]["context"][context_key] = (
+            "\ud800"
+        )
+        surrogate_bytes = (
+            json.dumps(surrogate_fixture, ensure_ascii=True, sort_keys=True, indent=2)
+            + "\n"
+        ).encode("ascii")
+        rebound_registry = deepcopy(registry)
+        rebound_registry["fixture_manifest"]["digest"] = (
+            f"sha256:{hashlib.sha256(surrogate_bytes).hexdigest()}"
+        )
+        registry_bytes = canonical_json(rebound_registry)
+        with self.assertRaisesRegex(ValueError, "valid UTF-8 scalar text"):
+            parse_authority_vocabulary(
+                registry_bytes,
+                schema_binding=load_authority_vocabulary_schema(ROOT),
+                expected_digest=(
+                    f"sha256:{hashlib.sha256(registry_bytes).hexdigest()}"
+                ),
+                expected_constitution_revision=2,
+                expected_registry_version=2,
+                fixture_manifest_bytes=surrogate_bytes,
+            )
+
+    def test_fixture_bool_integer_alias_is_rejected_before_acceptance_and_receipt(
+        self,
+    ) -> None:
+        registry, fixture, _registry_bytes, _fixture_bytes = authority_documents()
+        fixture_case = next(
+            case
+            for entry in fixture["entries"]
+            for case in entry["cases"]
+            if case["case"] == "dependency_lower_revision"
+            and any(type(value) is bool for value in case["context"].values())
+        )
+        context_key = next(
+            key for key, value in fixture_case["context"].items() if type(value) is bool
+        )
+        fixture_case["context"][context_key] = int(fixture_case["context"][context_key])
+        with self.assertRaisesRegex(ValueError, "exact negative semantic profile"):
+            self.parse_documents(registry, fixture)
+
+        fixture_bytes = canonical_json(fixture)
+        registry["fixture_manifest"]["digest"] = (
+            f"sha256:{hashlib.sha256(fixture_bytes).hexdigest()}"
+        )
+        registry_bytes = canonical_json(registry)
+        schema_bytes = (ROOT / AUTHORITY_VOCABULARY_SCHEMA_PATH).read_bytes()
+        schema_digest = f"sha256:{hashlib.sha256(schema_bytes).hexdigest()}"
+        registry_digest = f"sha256:{hashlib.sha256(registry_bytes).hexdigest()}"
+        authority_spec = revision_at(
+            "docs/specs/SPEC-000-fixture.md",
+            spec_bytes(
+                spec_id="SPEC-000",
+                status="accepted",
+                revision=2,
+                revises="sha256:" + "1" * 64,
+                dependency_revisions="none",
+                authority_schema_path=AUTHORITY_VOCABULARY_SCHEMA_PATH,
+                authority_schema_digest=schema_digest,
+                authority_schema_version=AUTHORITY_VOCABULARY_SCHEMA_VERSION,
+                authority_path=AUTHORITY_VOCABULARY_PATH,
+                authority_digest=registry_digest,
+                authority_version=2,
+            ),
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "governance" / "fixtures").mkdir(parents=True)
+            (root / AUTHORITY_VOCABULARY_SCHEMA_PATH).write_bytes(schema_bytes)
+            (root / AUTHORITY_VOCABULARY_PATH).write_bytes(registry_bytes)
+            (root / AUTHORITY_FIXTURE_MANIFEST_PATH).write_bytes(fixture_bytes)
+            with self.assertRaisesRegex(ValueError, "exact negative semantic profile"):
+                load_candidate_authority_vocabulary(
+                    root,
+                    {authority_spec.spec_id: authority_spec},
+                )
+
+        binding = parse_valid_authority()
+        case_index, parsed_case = next(
+            (index, case)
+            for index, case in enumerate(binding.fixture_cases)
+            if case.case == "dependency_lower_revision"
+            and any(type(value) is bool for value in case.context.values())
+        )
+        mutated_context = dict(parsed_case.context)
+        parsed_context_key = next(
+            key for key, value in mutated_context.items() if type(value) is bool
+        )
+        mutated_context[parsed_context_key] = int(mutated_context[parsed_context_key])
+        mutated_cases = list(binding.fixture_cases)
+        mutated_cases[case_index] = replace(parsed_case, context=mutated_context)
+        forged_binding = replace(binding, fixture_cases=tuple(mutated_cases))
+        constitution = conforming_constitution()
+        component_bytes = evaluator_component_bytes()
+        _receipt, receipt_bytes = authority_conformance_document(
+            forged_binding,
+            constitution,
+            component_bytes,
+        )
+        with self.assertRaisesRegex(
+            ValueError, "registry_reason=REGISTRY_DEPENDENCY_DENY"
+        ):
+            parse_authority_policy_conformance(
+                receipt_bytes,
+                registry=forged_binding,
+                constitution=constitution,
+                evaluator_component_bytes=component_bytes,
+            )
+
+    def test_protected_lineage_identity_bindings_allow_same_duty_only(self) -> None:
+        same_duty = deepcopy(conforming_constitution().document)
+        same_duty["identity_bindings"]["human_maintainer"] = [
+            "synthetic:dual_author"
+        ]
+        same_duty["identity_bindings"]["change_author"] = [
+            "synthetic:dual_author"
+        ]
+        same_duty_policy = Constitution(
+            same_duty,
+            "d" * 64,
+            Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+        )
+        authority_contract.validate_authority_policy_closure(same_duty_policy)
+
+        cross_duty = deepcopy(conforming_constitution().document)
+        cross_duty["identity_bindings"]["human_maintainer"] = [
+            "synthetic:dual_role"
+        ]
+        cross_duty["identity_bindings"]["independent_verifier"] = [
+            "synthetic:dual_role"
+        ]
+        with self.assertRaisesRegex(ValueError, "principals assigned across"):
+            Constitution(
+                cross_duty,
+                "e" * 64,
+                Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+            )
+
+        alias_pairs = (
+            ("github:Alice", "github:alice"),
+            ("synthetic:Alice", "synthetic:alice"),
+            ("synthetic:álîce", "synthetic:alice"),
+        )
+        for author_principal, verifier_principal in alias_pairs:
+            aliased = deepcopy(conforming_constitution().document)
+            aliased["identity_bindings"]["human_maintainer"] = [author_principal]
+            aliased["identity_bindings"]["independent_verifier"] = [
+                verifier_principal
+            ]
+            with self.subTest(
+                author=author_principal, verifier=verifier_principal
+            ), self.assertRaisesRegex(
+                ValueError, "canonical synthetic offline principal"
+            ):
+                Constitution(
+                    aliased,
+                    "f" * 64,
+                    Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+                )
+
+    def test_receipt_is_explicitly_offline_and_never_runtime_authority(self) -> None:
+        registry = parse_valid_authority()
+        constitution = conforming_constitution()
+        component_bytes = evaluator_component_bytes()
+        _receipt, receipt_bytes = authority_conformance_document(
+            registry, constitution, component_bytes
+        )
+        conformance = parse_authority_policy_conformance(
+            receipt_bytes,
+            registry=registry,
+            constitution=constitution,
+            evaluator_component_bytes=component_bytes,
+        )
+        self.assertEqual(conformance.scope, "offline_class_policy_conformance")
+        self.assertEqual(conformance.runtime_authority, "none")
+        self.assertFalse(hasattr(authority_contract, "authorize_runtime_effect"))
+
+    def test_receipt_requires_an_effective_self_bound_constitution(self) -> None:
+        registry = parse_valid_authority()
+        component_bytes = evaluator_component_bytes()
+        mutations = (
+            ("draft", "$SELF"),
+            ("reviewed", "$SELF"),
+            ("merged", "$SELF"),
+            ("superseded", "$SELF"),
+            ("effective", "fixture-commit"),
+        )
+        for lifecycle_state, effective_commit in mutations:
+            document = deepcopy(conforming_constitution().document)
+            document["lifecycle_state"] = lifecycle_state
+            document["effective_commit"] = effective_commit
+            constitution = Constitution(
+                document,
+                "a" * 64,
+                Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+            )
+            _receipt, receipt_bytes = authority_conformance_document(
+                registry, constitution, component_bytes
+            )
+            with self.subTest(
+                lifecycle_state=lifecycle_state,
+                effective_commit=effective_commit,
+            ), self.assertRaisesRegex(
+                ValueError, "lifecycle_state effective.*effective_commit \\$SELF"
+            ):
+                parse_authority_policy_conformance(
+                    receipt_bytes,
+                    registry=registry,
+                    constitution=constitution,
+                    evaluator_component_bytes=component_bytes,
+                )
+
+    def test_receipt_requires_exact_schema_and_offline_allow_reason(self) -> None:
+        registry = parse_valid_authority()
+        component_bytes = evaluator_component_bytes()
+        mutations = {
+            "schema_version": lambda document: document.__setitem__(
+                "schema_version", "2.999.999"
+            ),
+            "allow_reason": lambda document: document["rules"][0].__setitem__(
+                "reason_code", "RUNTIME_AUTHORITY_GRANTED"
+            ),
+        }
+        expected_errors = {
+            "schema_version": "exact Constitution schema version 2.0.0",
+            "allow_reason": "offline-only reason code OFFLINE_CLASS_POLICY_ALLOWED",
+        }
+        for name, mutate in mutations.items():
+            document = deepcopy(conforming_constitution().document)
+            mutate(document)
+            constitution = Constitution(
+                document,
+                "1" * 64,
+                Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+            )
+            _receipt, receipt_bytes = authority_conformance_document(
+                registry,
+                constitution,
+                component_bytes,
+            )
+            with self.subTest(name=name), self.assertRaisesRegex(
+                ValueError, expected_errors[name]
+            ):
+                parse_authority_policy_conformance(
+                    receipt_bytes,
+                    registry=registry,
+                    constitution=constitution,
+                    evaluator_component_bytes=component_bytes,
+                )
+
+    def test_authority_actor_descriptors_and_actor_set_are_exact(self) -> None:
+        for actor, automated in (
+            ("human_maintainer", True),
+            ("community_contributor", True),
+            ("content_proposer", False),
+        ):
+            document = deepcopy(conforming_constitution().document)
+            document["actor_classes"][actor]["automated"] = automated
+            policy = Constitution(
+                document,
+                "b" * 64,
+                Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+            )
+            with self.subTest(actor=actor), self.assertRaisesRegex(
+                ValueError, "exact reviewed actor-class automation descriptors"
+            ):
+                authority_contract.validate_authority_policy_closure(policy)
+
+        document = deepcopy(conforming_constitution().document)
+        document["actor_classes"]["unreviewed_actor"] = {"automated": True}
+        document["identity_bindings"]["unreviewed_actor"] = []
+        policy = Constitution(
+            document,
+            "c" * 64,
+            Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+        )
+        with self.assertRaisesRegex(
+            ValueError, "exact reviewed actor-class automation descriptors"
+        ):
+            authority_contract.validate_authority_policy_closure(policy)
+
+    def test_authority_protected_surfaces_preserve_the_reviewed_baseline(self) -> None:
+        for removed in sorted(authority_contract.AUTHORITY_MINIMUM_PROTECTED_SURFACES):
+            document = deepcopy(conforming_constitution().document)
+            document["protected_surfaces"].remove(removed)
+            policy = Constitution(
+                document,
+                "d" * 64,
+                Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+            )
+            with self.subTest(removed=removed), self.assertRaisesRegex(
+                ValueError, "omits reviewed protected surfaces"
+            ):
+                authority_contract.validate_authority_policy_closure(policy)
+
+        conservative = deepcopy(conforming_constitution().document)
+        conservative["protected_surfaces"].append("secrets/**")
+        conservative["protected_surfaces"].sort()
+        policy = Constitution(
+            conservative,
+            "e" * 64,
+            Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+        )
+        authority_contract.validate_authority_policy_closure(policy)
+        for path in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+            self.assertEqual(policy.classify_path(path), "protected_surface")
+
+    def test_authority_closure_rechecks_emergency_and_amendment_invariants(self) -> None:
+        constructor_aliases = (
+            (
+                "emergency_controls",
+                "disable_stops_new_work",
+                1,
+                "schema-2 emergency_controls",
+            ),
+            (
+                "amendment_procedure",
+                "prior_versions_retained",
+                1,
+                "schema-2 amendment_procedure",
+            ),
+        )
+        for section, field, alias, error in constructor_aliases:
+            document = deepcopy(conforming_constitution().document)
+            document[section][field] = alias
+            with self.subTest(constructor=section), self.assertRaisesRegex(
+                ValueError, error
+            ):
+                Constitution(
+                    document,
+                    "8" * 64,
+                    Path(AUTHORITY_CONSTITUTION_POLICY_PATH),
+                )
+
+        emergency_mutations = {
+            "changed": lambda value: value.__setitem__(
+                "disable_changes_authority", True
+            ),
+            "false_as_zero_changes": lambda value: value.__setitem__(
+                "disable_changes_authority", 0
+            ),
+            "false_as_zero_history": lambda value: value.__setitem__(
+                "disable_mutates_history", 0
+            ),
+            "true_as_one_stop": lambda value: value.__setitem__(
+                "disable_stops_new_work", 1
+            ),
+            "missing": lambda value: value.pop("disable_mutates_history"),
+            "extra": lambda value: value.__setitem__("alternate_stop", True),
+        }
+        for name, mutate in emergency_mutations.items():
+            policy = conforming_constitution()
+            mutate(policy._document["emergency_controls"])  # type: ignore[attr-defined]
+            with self.subTest(emergency=name), self.assertRaisesRegex(
+                ValueError, "exact reviewed emergency controls"
+            ):
+                authority_contract.validate_authority_policy_closure(policy)
+
+        amendment_mutations = {
+            "actor": lambda value: value.__setitem__(
+                "required_actor", "runtime_operator"
+            ),
+            "transport": lambda value: value.__setitem__(
+                "required_transport", "direct_push"
+            ),
+            "states": lambda value: value.__setitem__(
+                "required_state_sequence", ["draft", "effective"]
+            ),
+            "retention": lambda value: value.__setitem__(
+                "prior_versions_retained", False
+            ),
+            "retention_true_as_one": lambda value: value.__setitem__(
+                "prior_versions_retained", 1
+            ),
+            "extra": lambda value: value.__setitem__("alternate_path", True),
+        }
+        for name, mutate in amendment_mutations.items():
+            policy = conforming_constitution()
+            mutate(policy._document["amendment_procedure"])  # type: ignore[attr-defined]
+            with self.subTest(amendment=name), self.assertRaisesRegex(
+                ValueError, "exact reviewed amendment procedure"
+            ):
+                authority_contract.validate_authority_policy_closure(policy)
+
+        registry = parse_valid_authority()
+        component_bytes = evaluator_component_bytes()
+        receipt_mutations = (
+            (
+                "emergency_controls",
+                lambda policy: policy._document["emergency_controls"].__setitem__(  # type: ignore[attr-defined]
+                    "disable_stops_new_work", 1
+                ),
+                "exact reviewed emergency controls",
+            ),
+            (
+                "amendment_procedure",
+                lambda policy: policy._document["amendment_procedure"].__setitem__(  # type: ignore[attr-defined]
+                    "prior_versions_retained", 1
+                ),
+                "exact reviewed amendment procedure",
+            ),
+        )
+        for name, mutate, error in receipt_mutations:
+            policy = conforming_constitution()
+            mutate(policy)
+            _receipt, receipt_bytes = authority_conformance_document(
+                registry, policy, component_bytes
+            )
+            with self.subTest(receipt=name), self.assertRaisesRegex(ValueError, error):
+                parse_authority_policy_conformance(
+                    receipt_bytes,
+                    registry=registry,
+                    constitution=policy,
+                    evaluator_component_bytes=component_bytes,
+                )
+
+    def test_receipt_reparses_schema_component_even_with_forged_binding(self) -> None:
+        registry = parse_valid_authority()
+        constitution = conforming_constitution()
+        components = dict(evaluator_component_bytes())
+        schema = json.loads(
+            components[AUTHORITY_VOCABULARY_SCHEMA_PATH].decode("utf-8")
+        )
+        schema["$defs"]["registry"]["type"] = 123
+        malicious_schema_bytes = canonical_json(schema)
+        malicious_schema_digest = (
+            f"sha256:{hashlib.sha256(malicious_schema_bytes).hexdigest()}"
+        )
+        components[AUTHORITY_VOCABULARY_SCHEMA_PATH] = malicious_schema_bytes
+        forged_registry = replace(
+            registry,
+            schema_digest=malicious_schema_digest,
+        )
+        component_bytes = tuple(components.items())
+        _receipt, receipt_bytes = authority_conformance_document(
+            forged_registry,
+            constitution,
+            component_bytes,
+        )
+        with self.assertRaisesRegex(ValueError, "invalid schema component"):
+            parse_authority_policy_conformance(
+                receipt_bytes,
+                registry=forged_registry,
+                constitution=constitution,
+                evaluator_component_bytes=component_bytes,
+            )
 
 
 class SpecificationLifecycleTests(unittest.TestCase):

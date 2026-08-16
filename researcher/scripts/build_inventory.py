@@ -30,11 +30,16 @@ if __package__:
         AUTHORITY_EVALUATOR_COMPONENT_PATHS,
         AUTHORITY_FIXTURE_MANIFEST_PATH,
         AUTHORITY_IMPLEMENTED_STATUSES,
+        AUTHORITY_SPEC_METADATA_KEYS,
         AUTHORITY_VOCABULARY_MIN_REVISION,
         AUTHORITY_VOCABULARY_PATH,
         AUTHORITY_VOCABULARY_READY_STATUSES,
+        AUTHORITY_VOCABULARY_SCHEMA_ID,
+        AUTHORITY_VOCABULARY_SCHEMA_PATH,
+        AUTHORITY_VOCABULARY_SCHEMA_VERSION,
         AUTHORITY_VOCABULARY_SPEC,
         AuthorityVocabularyBinding,
+        load_authority_vocabulary_schema,
     )
     from researcher.scripts.validate_spec_lifecycle import (
         SpecRevision,
@@ -49,11 +54,16 @@ else:  # Direct script execution resolves siblings from this script's directory.
         AUTHORITY_EVALUATOR_COMPONENT_PATHS,
         AUTHORITY_FIXTURE_MANIFEST_PATH,
         AUTHORITY_IMPLEMENTED_STATUSES,
+        AUTHORITY_SPEC_METADATA_KEYS,
         AUTHORITY_VOCABULARY_MIN_REVISION,
         AUTHORITY_VOCABULARY_PATH,
         AUTHORITY_VOCABULARY_READY_STATUSES,
+        AUTHORITY_VOCABULARY_SCHEMA_ID,
+        AUTHORITY_VOCABULARY_SCHEMA_PATH,
+        AUTHORITY_VOCABULARY_SCHEMA_VERSION,
         AUTHORITY_VOCABULARY_SPEC,
         AuthorityVocabularyBinding,
+        load_authority_vocabulary_schema,
     )
     from validate_spec_lifecycle import (  # type: ignore[import-not-found]
         SpecRevision,
@@ -102,6 +112,9 @@ SPEC_REQUIRED_METADATA = (
 SPEC_OPTIONAL_METADATA = {
     "Activation",
     "Adoption decision",
+    "Authority vocabulary schema",
+    "Authority vocabulary schema digest",
+    "Authority vocabulary schema version",
     "Authority vocabulary",
     "Authority vocabulary digest",
     "Authority vocabulary version",
@@ -119,6 +132,9 @@ SPEC_METADATA_ORDER = (
     "Owners",
     "Depends on",
     "Dependency revisions",
+    "Authority vocabulary schema",
+    "Authority vocabulary schema digest",
+    "Authority vocabulary schema version",
     "Authority vocabulary",
     "Authority vocabulary digest",
     "Authority vocabulary version",
@@ -131,13 +147,7 @@ SPEC_LIFECYCLE_DECISION_RE = re.compile(r"^ADR-[0-9]{4}$")
 SPEC_REPLACEMENT_RE = re.compile(r"^SPEC-[0-9]{3}@[1-9][0-9]*$")
 SPEC_DEPENDENCY_REVISION_RE = re.compile(r"^(SPEC-[0-9]{3})@([1-9][0-9]*)$")
 SPEC_TERMINAL_STATUSES = {"amended", "superseded", "retired"}
-AUTHORITY_VOCABULARY_METADATA_KEYS = frozenset(
-    {
-        "Authority vocabulary",
-        "Authority vocabulary digest",
-        "Authority vocabulary version",
-    }
-)
+AUTHORITY_VOCABULARY_METADATA_KEYS = frozenset(AUTHORITY_SPEC_METADATA_KEYS)
 ADR_FILENAME_RE = re.compile(r"^(?P<number>[0-9]{4})-(?P<slug>[a-z0-9-]+)\.md$")
 ADR_HEADING_RE = re.compile(r"^# ADR-(?P<number>[0-9]{4}): (?P<title>.+)$")
 ADR_INDEX_ROW_RE = re.compile(
@@ -188,7 +198,7 @@ VALIDATOR_OWNERSHIP = (
         "id": "authority-catalog-contract",
         "path": "researcher/scripts/validate_authority_contract.py",
         "owns": [
-            "authority registry, fixture, and semantic profile validation",
+            "standalone authority schema, registry, fixture, and semantic profile validation",
             "structural authority-policy closure",
             "authority evaluator-bundle identity",
             "authority conformance receipt validation",
@@ -500,6 +510,7 @@ class InventoryBuilder:
         self.skill_names: set[str] = set()
         self.mechanisms: dict[str, dict[str, Any]] = {}
         self.claims: dict[str, dict[str, Any]] = {}
+        self._authority_binding: AuthorityVocabularyBinding | None = None
 
     def add_finding(
         self,
@@ -604,6 +615,7 @@ class InventoryBuilder:
         schema_contracts = self.build_schema_contracts()
         orchestration_briefs = self.build_orchestration_briefs()
         specifications = self.build_specifications()
+        authority_contracts = self.build_authority_contracts()
         architecture_decisions = self.build_architecture_decisions(
             {record["id"] for record in specifications["records"]}
         )
@@ -702,6 +714,7 @@ class InventoryBuilder:
             "schemas": schemas,
             "export_contracts": export_contracts,
             "schema_contracts": schema_contracts,
+            "authority_contracts": authority_contracts,
             "orchestration_briefs": orchestration_briefs,
             "specifications": specifications,
             "architecture_decisions": architecture_decisions,
@@ -1578,6 +1591,57 @@ class InventoryBuilder:
             id_prefix_count=len(registered_prefixes),
         )
 
+    def build_authority_contracts(self) -> dict[str, Any]:
+        """Inventory the standalone schema without treating it as authority."""
+
+        path = self.root / AUTHORITY_VOCABULARY_SCHEMA_PATH
+        source_digest, _size_bytes = self.add_source(path)
+        records: list[dict[str, Any]] = []
+        try:
+            schema = load_authority_vocabulary_schema(self.root)
+        except (OSError, UnicodeError, ValueError) as exc:
+            self.add_finding(
+                "AUTHORITY_VOCABULARY_SCHEMA_INVALID",
+                path,
+                str(exc),
+                "authority-vocabulary-schema@2.0.0",
+            )
+            return self._category(AUTHORITY_VOCABULARY_SPEC, records)
+        if (
+            schema.path != AUTHORITY_VOCABULARY_SCHEMA_PATH
+            or schema.schema_id != AUTHORITY_VOCABULARY_SCHEMA_ID
+            or schema.schema_version != AUTHORITY_VOCABULARY_SCHEMA_VERSION
+            or schema.digest != source_digest
+        ):
+            self.add_finding(
+                "AUTHORITY_VOCABULARY_SCHEMA_INVALID",
+                path,
+                "authority schema loader and inventory source identity differ",
+                "authority-vocabulary-schema@2.0.0",
+            )
+            return self._category(AUTHORITY_VOCABULARY_SPEC, records)
+        authority_binding = self._authority_binding
+        binding_state = (
+            "bound"
+            if authority_binding is not None
+            and authority_binding.schema_path == schema.path
+            and authority_binding.schema_digest == schema.digest
+            and authority_binding.schema_version == schema.schema_version
+            else "dormant_unbound"
+        )
+        records.append(
+            {
+                "id": "authority-vocabulary-schema@2.0.0",
+                "kind": "AuthorityVocabularySchema",
+                "path": schema.path,
+                "schema_id": schema.schema_id,
+                "version": schema.schema_version,
+                "digest": schema.digest,
+                "binding_state": binding_state,
+            }
+        )
+        return self._category(AUTHORITY_VOCABULARY_SPEC, records)
+
     def build_orchestration_briefs(self) -> dict[str, Any]:
         """Bind the non-authoritative long-horizon bootstrap prompt bundle."""
 
@@ -1648,6 +1712,7 @@ class InventoryBuilder:
     def build_specifications(self) -> dict[str, Any]:
         """Build and validate the canonical specification dependency graph."""
 
+        self._authority_binding = None
         specs_dir = self.root / "docs" / "specs"
         index_path = specs_dir / "README.md"
         template_path = specs_dir / "SPEC-TEMPLATE.md"
@@ -2142,10 +2207,16 @@ class InventoryBuilder:
                 AUTHORITY_VOCABULARY_SPEC,
             )
         if authority_binding is not None and authority_spec_record is not None:
+            self._authority_binding = authority_binding
             authority_record: dict[str, Any] = {
+                "schema": {
+                    "path": authority_binding.schema_path,
+                    "digest": authority_binding.schema_digest,
+                    "version": authority_binding.schema_version,
+                },
                 "path": authority_binding.path,
                 "digest": authority_binding.digest,
-                "schema_version": authority_binding.schema_version,
+                "schema_version": authority_binding.registry_schema_version,
                 "constitution_revision": authority_binding.constitution_revision,
                 "registry_version": authority_binding.registry_version,
                 "fixture_manifest": {
@@ -2160,6 +2231,8 @@ class InventoryBuilder:
                     "path": conformance.path,
                     "digest": conformance.digest,
                     "schema_version": conformance.schema_version,
+                    "scope": conformance.scope,
+                    "runtime_authority": conformance.runtime_authority,
                     "constitution_policy_digest": conformance.constitution_policy_digest,
                     "registry_digest": conformance.registry_digest,
                     "fixture_manifest_digest": conformance.fixture_manifest_digest,
@@ -2958,6 +3031,7 @@ def render_summary(inventory: dict[str, Any]) -> str:
     artifacts = inventory["artifacts"]
     rows = [
         ("Specifications", artifacts["specifications"]["count"]),
+        ("Authority contracts", artifacts["authority_contracts"]["count"]),
         ("Architecture decisions", artifacts["architecture_decisions"]["count"]),
         ("Orchestration briefs", artifacts["orchestration_briefs"]["count"]),
         ("Published skills", artifacts["skills"]["count"]),

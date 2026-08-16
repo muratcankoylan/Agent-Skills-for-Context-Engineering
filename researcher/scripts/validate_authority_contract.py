@@ -13,20 +13,27 @@ import json
 import re
 from dataclasses import dataclass, replace
 from pathlib import Path, PurePosixPath
+from types import MappingProxyType
 from typing import Any, Iterable, Mapping
 
 
 __all__ = (
+    "AUTHORITY_ACTOR_BINDING_KEYS",
+    "AUTHORITY_ACTOR_AUTOMATION",
+    "AUTHORITY_ALLOW_REASON_CODE",
     "AUTHORITY_CATALOG_FIXTURE_CASE_KEYS",
     "AUTHORITY_CONFORMANCE_CASE_KEYS",
     "AUTHORITY_CONFORMANCE_POLICY_KEYS",
     "AUTHORITY_CONFORMANCE_RECEIPT_PATH",
     "AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION",
+    "AUTHORITY_CONFORMANCE_SCOPE",
     "AUTHORITY_CONFORMANCE_VALIDATOR_BUNDLE_KEYS",
     "AUTHORITY_CONFORMANCE_VALIDATOR_COMPONENT_KEYS",
     "AUTHORITY_CONFORMANCE_VALIDATOR_KEYS",
     "AUTHORITY_CONSTITUTION_POLICY_PATH",
+    "AUTHORITY_CONSTITUTION_SCHEMA_VERSION",
     "AUTHORITY_DEPENDENCY_EVIDENCE_KEYS",
+    "AUTHORITY_DEPENDENCY_REQUIREMENT_KEYS",
     "AUTHORITY_ENTRY_KEYS",
     "AUTHORITY_FIXTURE_CASE_KEYS",
     "AUTHORITY_FIXTURE_ENTRY_KEYS",
@@ -35,7 +42,10 @@ __all__ = (
     "AUTHORITY_FIXTURE_POINTER_KEYS",
     "AUTHORITY_IMPLEMENTED_STATUSES",
     "AUTHORITY_MAX_EFFECT_KEYS",
+    "AUTHORITY_MINIMUM_PROTECTED_SURFACES",
+    "AUTHORITY_GRANT_KEYS",
     "AUTHORITY_PREIMPLEMENTATION_STATUSES",
+    "AUTHORITY_RUNTIME_AUTHORITY",
     "AUTHORITY_EVALUATOR_BUNDLE_VERSION",
     "AUTHORITY_EVALUATOR_COMPONENT_PATHS",
     "AUTHORITY_VALIDATOR_BUNDLE_ALGORITHM",
@@ -44,14 +54,21 @@ __all__ = (
     "AUTHORITY_VOCABULARY_MIN_REVISION",
     "AUTHORITY_VOCABULARY_PATH",
     "AUTHORITY_VOCABULARY_READY_STATUSES",
+    "AUTHORITY_VOCABULARY_SCHEMA_DIGEST",
     "AUTHORITY_VOCABULARY_SCHEMA_VERSION",
+    "AUTHORITY_VOCABULARY_SCHEMA_ID",
+    "AUTHORITY_VOCABULARY_SCHEMA_PATH",
+    "AUTHORITY_SPEC_METADATA_KEYS",
     "AUTHORITY_VOCABULARY_SPEC",
+    "AuthorityActorBinding",
+    "AuthorityDependencyRequirement",
     "AuthorityFixtureCase",
     "AuthorityFixtureManifestBinding",
     "AuthorityEvaluatorBundleBinding",
     "AuthorityEvaluatorComponentBinding",
     "AuthorityPolicyConformanceBinding",
     "AuthoritySemanticProfile",
+    "AuthorityVocabularySchemaBinding",
     "AuthorityVocabularyBinding",
     "POLICY_ONLY_READ_ACTORS",
     "POLICY_ONLY_READ_PROFILES",
@@ -64,113 +81,306 @@ __all__ = (
     "expected_authority_fixture_cases",
     "expected_authority_policy_conditions",
     "load_authority_vocabulary",
+    "load_authority_vocabulary_schema",
     "parse_authority_fixture_manifest",
     "parse_authority_policy_conformance",
     "parse_authority_vocabulary",
+    "parse_authority_vocabulary_schema",
     "validate_authority_policy_closure",
 )
 
 
 AUTHORITY_VOCABULARY_SPEC = "SPEC-000"
 AUTHORITY_VOCABULARY_MIN_REVISION = 2
+AUTHORITY_VOCABULARY_SCHEMA_PATH = "governance/authority-vocabulary.schema.json"
+AUTHORITY_VOCABULARY_SCHEMA_ID = (
+    "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/"
+    "governance/authority-vocabulary.schema.json"
+)
 AUTHORITY_VOCABULARY_PATH = "governance/authority-vocabulary.json"
-AUTHORITY_VOCABULARY_SCHEMA_VERSION = "1.0.0"
+AUTHORITY_VOCABULARY_SCHEMA_DIGEST = (
+    "sha256:37d7673bded287c74fb35d13e1f11a734f6f7ed4c43d9a1ea04b33d348db83ab"
+)
+AUTHORITY_VOCABULARY_SCHEMA_VERSION = "2.0.0"
 AUTHORITY_FIXTURE_MANIFEST_PATH = "governance/fixtures/authority-vocabulary.json"
-AUTHORITY_FIXTURE_MANIFEST_SCHEMA_VERSION = "1.0.0"
+AUTHORITY_FIXTURE_MANIFEST_SCHEMA_VERSION = "2.0.0"
 AUTHORITY_CONFORMANCE_RECEIPT_PATH = (
     "governance/generated/authority-vocabulary-conformance.json"
 )
-AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION = "2.0.0"
+AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION = "3.0.0"
+AUTHORITY_CONFORMANCE_SCOPE = "offline_class_policy_conformance"
+AUTHORITY_RUNTIME_AUTHORITY = "none"
 AUTHORITY_CONSTITUTION_POLICY_PATH = "governance/constitution.yaml"
+AUTHORITY_CONSTITUTION_SCHEMA_VERSION = "2.0.0"
+AUTHORITY_ALLOW_REASON_CODE = "OFFLINE_CLASS_POLICY_ALLOWED"
+AUTHORITY_ACTOR_AUTOMATION = MappingProxyType(
+    {
+        "attested_supervisor_clock_sampler": True,
+        "authenticated_reader": True,
+        "authenticated_runtime_operator": True,
+        "change_author": True,
+        "community_contributor": False,
+        "content_exporter": True,
+        "content_proposer": True,
+        "credential_reconciler": True,
+        "human_maintainer": False,
+        "independent_canary_attestor": True,
+        "independent_epoch_sealer": True,
+        "independent_verifier": True,
+        "release_attestor": True,
+        "repository_acceptance_reconciler": True,
+        "research_proposer": True,
+        "runtime_operator": True,
+        "trusted_clock_reducer": True,
+    }
+)
+AUTHORITY_MINIMUM_PROTECTED_SURFACES = frozenset(
+    {
+        ".github/CODEOWNERS",
+        ".github/workflows/**",
+        "governance/**",
+        "researcher/benchmarks/**/hidden/**",
+        "researcher/rubrics/**",
+        "researcher/scripts/build_inventory.py",
+        "researcher/scripts/governance_policy.py",
+        "researcher/scripts/run_benchmarks.py",
+        "researcher/scripts/validate_*.py",
+    }
+)
+_AUTHORITY_EMERGENCY_CONTROLS = MappingProxyType(
+    {
+        "disable_changes_authority": False,
+        "disable_mutates_history": False,
+        "disable_stops_new_work": True,
+    }
+)
+_AUTHORITY_AMENDMENT_PROCEDURE = MappingProxyType(
+    {
+        "prior_versions_retained": True,
+        "required_actor": "human_maintainer",
+        "required_state_sequence": ("draft", "reviewed", "merged", "effective"),
+        "required_transport": "pull_request",
+    }
+)
 # Compatibility constants retained while non-receipt callers migrate to the
-# evaluator bundle. Receipt schema 2.0.0 does not consume either value.
+# evaluator bundle. Receipt schema 3.0.0 does not consume either value.
 AUTHORITY_VALIDATOR_PATH = "researcher/scripts/validate_spec_lifecycle.py"
 AUTHORITY_VALIDATOR_VERSION = "1.1.0"
 AUTHORITY_VALIDATOR_BUNDLE_ALGORITHM = "sha256-canonical-component-manifest-v1"
-AUTHORITY_EVALUATOR_BUNDLE_VERSION = "0.1.0"
+AUTHORITY_EVALUATOR_BUNDLE_VERSION = "1.0.0"
 AUTHORITY_EVALUATOR_COMPONENT_PATHS = (
+    AUTHORITY_VOCABULARY_SCHEMA_PATH,
     "researcher/scripts/governance_policy.py",
     "researcher/scripts/validate_authority_contract.py",
 )
-AUTHORITY_VOCABULARY_READY_STATUSES = {
-    "accepted",
-    "implemented",
-    "verified",
-    "operational",
-}
-_AUTHORITY_DEPENDENCY_EVIDENCE_STATUSES = {
-    "draft",
-    "architecture_reviewed",
-    "accepted",
-    "implemented",
-    "verified",
-    "operational",
-}
-AUTHORITY_IMPLEMENTED_STATUSES = {"implemented", "verified", "operational"}
-AUTHORITY_PREIMPLEMENTATION_STATUSES = {
-    "draft",
-    "architecture_reviewed",
-    "accepted",
-}
-AUTHORITY_ENTRY_KEYS = {
-    "action",
-    "resource",
-    "owner_spec",
-    "actor_classes",
-    "max_effect",
-    "dependency_floor",
-    "decision_context_fields",
-    "grant_operation",
-}
-AUTHORITY_MAX_EFFECT_KEYS = {
-    "code",
-    "max_targets",
-    "max_state_transitions",
-}
-AUTHORITY_FIXTURE_POINTER_KEYS = {"path", "digest", "version"}
-AUTHORITY_FIXTURE_ENTRY_KEYS = {"action", "resource", "cases"}
-AUTHORITY_FIXTURE_CASE_KEYS = {
-    "case",
-    "actor_class",
-    "decision_context_fields",
-    "effect",
-    "expected_decision",
-    "expected_policy_decision",
-    "expected_registry_decision",
-    "grant_operation",
-    "omitted_context_field",
-    "dependency_evidence",
-}
-AUTHORITY_CATALOG_FIXTURE_CASE_KEYS = AUTHORITY_FIXTURE_CASE_KEYS | {
-    "action",
-    "resource",
-}
-AUTHORITY_DEPENDENCY_EVIDENCE_KEYS = {"spec", "revision", "status"}
-AUTHORITY_CONFORMANCE_POLICY_KEYS = {"path", "digest", "version"}
-AUTHORITY_CONFORMANCE_VALIDATOR_BUNDLE_KEYS = {
-    "algorithm",
-    "components",
-    "digest",
-    "version",
-}
-AUTHORITY_CONFORMANCE_VALIDATOR_COMPONENT_KEYS = {"path", "digest"}
+_AUTHORITY_EVALUATOR_EXECUTABLE_COMPONENT_PATHS = (
+    "researcher/scripts/governance_policy.py",
+    "researcher/scripts/validate_authority_contract.py",
+)
+AUTHORITY_VOCABULARY_READY_STATUSES = frozenset(
+    {
+        "accepted",
+        "implemented",
+        "verified",
+        "operational",
+    }
+)
+_AUTHORITY_DEPENDENCY_EVIDENCE_STAGES = frozenset(
+    {
+        "draft",
+        "architecture_reviewed",
+        "accepted",
+        "implemented",
+        "verified",
+        "operational",
+        "amended",
+        "superseded",
+        "retired",
+    }
+)
+AUTHORITY_IMPLEMENTED_STATUSES = frozenset(
+    {"implemented", "verified", "operational"}
+)
+AUTHORITY_PREIMPLEMENTATION_STATUSES = frozenset(
+    {
+        "draft",
+        "architecture_reviewed",
+        "accepted",
+    }
+)
+AUTHORITY_ENTRY_KEYS = frozenset(
+    {
+        "action",
+        "resource",
+        "owner_spec",
+        "actor_bindings",
+        "max_effect",
+        "dependency_requirements",
+        "grant_operation",
+    }
+)
+AUTHORITY_ACTOR_BINDING_KEYS = frozenset({"actor_class", "predicates"})
+AUTHORITY_DEPENDENCY_REQUIREMENT_KEYS = frozenset(
+    {
+        "spec_id",
+        "revision",
+        "minimum_runtime_stage",
+    }
+)
+AUTHORITY_MAX_EFFECT_KEYS = frozenset(
+    {
+        "code",
+        "max_targets",
+        "max_state_transitions",
+    }
+)
+AUTHORITY_FIXTURE_POINTER_KEYS = frozenset({"path", "digest", "version"})
+AUTHORITY_FIXTURE_ENTRY_KEYS = frozenset({"action", "resource", "cases"})
+AUTHORITY_FIXTURE_CASE_KEYS = frozenset(
+    {
+        "case",
+        "evidence_kind",
+        "actor_class",
+        "context",
+        "effect",
+        "grant",
+        "dependencies",
+        "expected_decision",
+        "expected_policy_decision",
+        "expected_registry_decision",
+    }
+)
+AUTHORITY_CATALOG_FIXTURE_CASE_KEYS = AUTHORITY_FIXTURE_CASE_KEYS | frozenset(
+    {"action", "resource"}
+)
+AUTHORITY_DEPENDENCY_EVIDENCE_KEYS = frozenset(
+    {"spec_id", "revision", "runtime_stage"}
+)
+AUTHORITY_GRANT_KEYS = frozenset({"operation", "effect"})
+AUTHORITY_SPEC_METADATA_KEYS = frozenset(
+    {
+        "Authority vocabulary schema",
+        "Authority vocabulary schema digest",
+        "Authority vocabulary schema version",
+        "Authority vocabulary",
+        "Authority vocabulary digest",
+        "Authority vocabulary version",
+    }
+)
+AUTHORITY_CONFORMANCE_POLICY_KEYS = frozenset({"path", "digest", "version"})
+AUTHORITY_CONFORMANCE_VALIDATOR_BUNDLE_KEYS = frozenset(
+    {
+        "algorithm",
+        "components",
+        "digest",
+        "version",
+    }
+)
+AUTHORITY_CONFORMANCE_VALIDATOR_COMPONENT_KEYS = frozenset({"path", "digest"})
 # Compatibility import name; schema 2.0.0 binds the complete bundle shape.
 AUTHORITY_CONFORMANCE_VALIDATOR_KEYS = AUTHORITY_CONFORMANCE_VALIDATOR_BUNDLE_KEYS
-AUTHORITY_CONFORMANCE_CASE_KEYS = {
-    "action",
-    "resource",
-    "case",
-    "expected_decision",
-    "expected_policy_decision",
-    "expected_registry_decision",
-    "registry_decision",
-    "registry_reason_code",
-    "policy_decision",
-    "actual_decision",
-    "context_digest",
-    "matched_rule",
-    "reason_code",
-}
+AUTHORITY_CONFORMANCE_CASE_KEYS = frozenset(
+    {
+        "action",
+        "resource",
+        "case",
+        "expected_decision",
+        "expected_policy_decision",
+        "expected_registry_decision",
+        "expected_registry_reason_code",
+        "registry_decision",
+        "registry_reason_code",
+        "policy_decision",
+        "actual_decision",
+        "context_digest",
+        "matched_rule",
+        "reason_code",
+    }
+)
+
+
+@dataclass(frozen=True)
+class AuthorityDependencyRequirement:
+    """One exact, operational dependency identity required by a catalog entry."""
+
+    spec_id: str
+    revision: int
+    minimum_runtime_stage: str = "operational"
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "minimum_runtime_stage": self.minimum_runtime_stage,
+            "revision": self.revision,
+            "spec_id": self.spec_id,
+        }
+
+
+@dataclass(frozen=True)
+class AuthorityActorBinding:
+    """One actor class and its non-transferable typed policy predicates."""
+
+    actor_class: str
+    predicates: tuple[dict[str, object], ...]
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "actor_class": self.actor_class,
+            "predicates": [dict(predicate) for predicate in self.predicates],
+        }
+
+
+_BOOLEAN_TRUE_CONTEXT_FIELDS = frozenset(
+    {
+        "accepted_pointer_absent",
+        "authenticated",
+        "automated_identity_disclosed",
+        "candidate_digest_verified",
+        "capability_grant_valid",
+        "independent_of_author",
+        "latest_commit_reviewed",
+        "required_checks_passed",
+    }
+)
+_INTEGER_CONTEXT_FIELDS = frozenset(
+    {
+        "activation_epoch",
+        "budget_ceiling",
+        "canary_epoch",
+        "expected_accepted_pointer_version",
+        "expected_deployment_version",
+        "expected_target_version",
+        "organization_epoch",
+        "safety_ledger_version",
+        "split_and_look_ceiling",
+    }
+)
+_UTC_DATETIME_CONTEXT_FIELDS = frozenset({"break_glass_expiry", "deadline"})
+
+
+def _authority_predicate(key: str) -> dict[str, object]:
+    if key in _BOOLEAN_TRUE_CONTEXT_FIELDS:
+        return {
+            "key": key,
+            "operator": "equals",
+            "value": True,
+            "value_type": "boolean",
+        }
+    if key == "human_review_path":
+        return {
+            "key": key,
+            "operator": "equals",
+            "value": "pull_request",
+            "value_type": "string",
+        }
+    if key.endswith("_digest"):
+        value_type = "sha256_digest"
+    elif key in _INTEGER_CONTEXT_FIELDS:
+        value_type = "integer"
+    elif key in _UTC_DATETIME_CONTEXT_FIELDS:
+        value_type = "utc_datetime"
+    else:
+        value_type = "string"
+    return {"key": key, "operator": "present", "value_type": value_type}
 
 
 @dataclass(frozen=True)
@@ -185,6 +395,8 @@ class AuthoritySemanticProfile:
     dependency_floor: tuple[str, ...]
     decision_context_fields: tuple[str, ...]
     grant_operation: str
+    action: str = ""
+    resource: str = ""
 
     @property
     def max_effect(self) -> dict[str, object]:
@@ -193,6 +405,53 @@ class AuthoritySemanticProfile:
             "max_state_transitions": self.max_state_transitions,
             "max_targets": self.max_targets,
         }
+
+    @property
+    def dependency_requirements(self) -> tuple[AuthorityDependencyRequirement, ...]:
+        required: dict[str, int] = {AUTHORITY_VOCABULARY_SPEC: 2}
+        for binding in self.dependency_floor:
+            spec_id, revision_text = binding.split("@", maxsplit=1)
+            required[spec_id] = int(revision_text)
+        required.setdefault(self.owner_spec, 1)
+        if self.owner_spec == AUTHORITY_VOCABULARY_SPEC:
+            required[self.owner_spec] = AUTHORITY_VOCABULARY_MIN_REVISION
+        return tuple(
+            AuthorityDependencyRequirement(spec_id=spec_id, revision=revision)
+            for spec_id, revision in sorted(required.items())
+        )
+
+    @property
+    def actor_bindings(self) -> tuple[AuthorityActorBinding, ...]:
+        bindings: list[AuthorityActorBinding] = []
+        for actor_class in self.actor_classes:
+            fields = set(self.decision_context_fields)
+            guard_override = _REV1_ACTOR_GUARD_OVERRIDES.get(
+                (self.action, self.resource, actor_class)
+            )
+            if guard_override is not None:
+                fields.difference_update(_REV1_ACTOR_GUARD_FIELDS)
+                fields.update(guard_override)
+            else:
+                if actor_class == "human_maintainer":
+                    fields.add("authenticated")
+                if actor_class.startswith("authenticated_"):
+                    fields.add("authenticated")
+            predicates = tuple(
+                _authority_predicate(field) for field in sorted(fields)
+            )
+            bindings.append(
+                AuthorityActorBinding(
+                    actor_class=actor_class,
+                    predicates=predicates,
+                )
+            )
+        return tuple(sorted(bindings, key=lambda binding: binding.actor_class))
+
+    def actor_binding(self, actor_class: str) -> AuthorityActorBinding:
+        for binding in self.actor_bindings:
+            if binding.actor_class == actor_class:
+                return binding
+        raise KeyError(actor_class)
 
 
 def _authority_context(*additional: str) -> tuple[str, ...]:
@@ -829,9 +1088,181 @@ REQUIRED_AUTHORITY_PROFILES: Mapping[tuple[str, str], AuthoritySemanticProfile] 
     ),
 }
 
-REQUIRED_AUTHORITY_VOCABULARY_OWNERS = {
-    pair: profile.owner_spec for pair, profile in REQUIRED_AUTHORITY_PROFILES.items()
-}
+
+_REV1_ACTOR_GUARD_FIELDS = frozenset(
+    {
+        "authenticated",
+        "automated_identity_disclosed",
+        "candidate_digest_verified",
+        "capability_grant_valid",
+        "human_review_path",
+        "independent_of_author",
+        "latest_commit_reviewed",
+        "required_checks_passed",
+    }
+)
+_REV1_ACTOR_GUARD_OVERRIDES: dict[tuple[str, str, str], frozenset[str]] = {}
+
+
+def _bind_rev1_guards(
+    pairs: Iterable[tuple[str, str]],
+    actors: Iterable[str],
+    *guards: str,
+) -> None:
+    for action, resource in pairs:
+        for actor in actors:
+            _REV1_ACTOR_GUARD_OVERRIDES[(action, resource, actor)] = frozenset(guards)
+
+
+_bind_rev1_guards(
+    {
+        ("read", "candidate_artifact"),
+        ("read", "public_content_draft"),
+        ("read", "public_repository"),
+        ("read", "pull_request"),
+        ("read", "research_artifact"),
+    },
+    POLICY_ONLY_READ_ACTORS,
+)
+_bind_rev1_guards(
+    {
+        ("research", "candidate_artifact"),
+        ("research", "research_artifact"),
+        ("propose_change", "research_artifact"),
+    },
+    {"research_proposer"},
+    "automated_identity_disclosed",
+)
+_bind_rev1_guards(
+    {
+        ("research", "candidate_artifact"),
+        ("research", "research_artifact"),
+        ("propose_change", "research_artifact"),
+    },
+    {"human_maintainer"},
+    "authenticated",
+)
+_bind_rev1_guards(
+    {("propose_change", "candidate_artifact")},
+    {"change_author", "research_proposer"},
+    "automated_identity_disclosed",
+)
+_bind_rev1_guards(
+    {("propose_change", "candidate_artifact")},
+    {"community_contributor"},
+    "human_review_path",
+)
+_bind_rev1_guards(
+    {("propose_change", "candidate_artifact")},
+    {"human_maintainer"},
+    "authenticated",
+)
+_bind_rev1_guards(
+    {
+        ("open_pull_request", "pull_request"),
+        ("push_proposal", "proposal_branch"),
+        ("respond_to_review", "pull_request"),
+    },
+    {"change_author", "research_proposer"},
+    "automated_identity_disclosed",
+    "human_review_path",
+)
+_bind_rev1_guards(
+    {
+        ("open_pull_request", "pull_request"),
+        ("respond_to_review", "pull_request"),
+    },
+    {"community_contributor"},
+    "human_review_path",
+)
+_bind_rev1_guards(
+    {
+        ("open_pull_request", "pull_request"),
+        ("push_proposal", "proposal_branch"),
+        ("respond_to_review", "pull_request"),
+    },
+    {"human_maintainer"},
+    "authenticated",
+)
+_bind_rev1_guards(
+    {("evaluate", "candidate_artifact"), ("evaluate", "research_artifact")},
+    {"independent_verifier"},
+    "independent_of_author",
+)
+_bind_rev1_guards(
+    {("attest_release", "candidate_artifact"), ("attest_release", "pull_request")},
+    {"release_attestor"},
+    "candidate_digest_verified",
+    "independent_of_author",
+)
+_bind_rev1_guards(
+    {("execute_work", "candidate_artifact"), ("execute_work", "research_artifact")},
+    {"runtime_operator"},
+    "capability_grant_valid",
+)
+_bind_rev1_guards(
+    {("emergency_disable", "emergency_control")},
+    {"human_maintainer", "runtime_operator"},
+)
+_bind_rev1_guards(
+    {("merge", "default_branch"), ("merge", "pull_request")},
+    {"human_maintainer"},
+    "authenticated",
+    "latest_commit_reviewed",
+    "required_checks_passed",
+)
+_bind_rev1_guards(
+    {("activate_production", "production_deployment")},
+    {"human_maintainer"},
+    "authenticated",
+    "latest_commit_reviewed",
+    "required_checks_passed",
+)
+_bind_rev1_guards(
+    {
+        ("amend_constitution", "constitution"),
+        ("change_protected_surface", "evaluator_policy"),
+        ("change_protected_surface", "hidden_evaluation"),
+        ("change_protected_surface", "protected_surface"),
+        ("change_protected_surface", "public_private_boundary"),
+    },
+    {"human_maintainer"},
+    "authenticated",
+    "human_review_path",
+)
+_bind_rev1_guards(
+    {
+        ("approve_weight_training", "weight_training"),
+        ("authorize_credential_destination", "credential_destination"),
+        ("expose_private_record", "private_record"),
+    },
+    {"human_maintainer"},
+    "authenticated",
+)
+
+_REV1_ACTOR_GUARD_OVERRIDES = MappingProxyType(
+    dict(_REV1_ACTOR_GUARD_OVERRIDES)
+)
+
+POLICY_ONLY_READ_PROFILES = MappingProxyType(
+    {
+        pair: replace(profile, action=pair[0], resource=pair[1])
+        for pair, profile in POLICY_ONLY_READ_PROFILES.items()
+    }
+)
+REQUIRED_AUTHORITY_PROFILES = MappingProxyType(
+    {
+        pair: replace(profile, action=pair[0], resource=pair[1])
+        for pair, profile in REQUIRED_AUTHORITY_PROFILES.items()
+    }
+)
+
+REQUIRED_AUTHORITY_VOCABULARY_OWNERS = MappingProxyType(
+    {
+        pair: profile.owner_spec
+        for pair, profile in REQUIRED_AUTHORITY_PROFILES.items()
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -839,17 +1270,52 @@ class AuthorityFixtureCase:
     action: str
     resource: str
     case: str
+    evidence_kind: str
     actor_class: str
-    decision_context_fields: tuple[str, ...]
+    context: Mapping[str, object]
     effect_code: str
     max_targets: int
     max_state_transitions: int
+    grant_effect_code: str
+    grant_max_targets: int
+    grant_max_state_transitions: int
     expected_decision: str
     expected_policy_decision: str
     expected_registry_decision: str
+    expected_registry_reason_code: str
     grant_operation: str
-    omitted_context_field: str
-    dependency_evidence: tuple[tuple[str, int, str], ...]
+    dependencies: tuple[tuple[str, int, str], ...]
+
+    @property
+    def effect(self) -> dict[str, object]:
+        return {
+            "code": self.effect_code,
+            "max_state_transitions": self.max_state_transitions,
+            "max_targets": self.max_targets,
+        }
+
+    @property
+    def grant(self) -> dict[str, object]:
+        return {
+            "effect": {
+                "code": self.grant_effect_code,
+                "max_state_transitions": self.grant_max_state_transitions,
+                "max_targets": self.grant_max_targets,
+            },
+            "operation": self.grant_operation,
+        }
+
+    @property
+    def decision_context_fields(self) -> tuple[str, ...]:
+        """Compatibility view; decisions use the actual scalar context."""
+
+        return tuple(sorted(self.context))
+
+    @property
+    def dependency_evidence(self) -> tuple[tuple[str, int, str], ...]:
+        """Compatibility view for callers migrating to `dependencies`."""
+
+        return self.dependencies
 
 
 @dataclass(frozen=True)
@@ -899,6 +1365,8 @@ class AuthorityPolicyConformanceBinding:
     path: str
     digest: str
     schema_version: str
+    scope: str
+    runtime_authority: str
     constitution_policy_digest: str
     registry_digest: str
     fixture_manifest_digest: str
@@ -910,10 +1378,21 @@ class AuthorityPolicyConformanceBinding:
 
 
 @dataclass(frozen=True)
-class AuthorityVocabularyBinding:
+class AuthorityVocabularySchemaBinding:
     path: str
     digest: str
+    schema_id: str
     schema_version: str
+
+
+@dataclass(frozen=True)
+class AuthorityVocabularyBinding:
+    schema_path: str
+    schema_digest: str
+    schema_version: str
+    path: str
+    digest: str
+    registry_schema_version: str
     constitution_revision: int
     registry_version: int
     entries: tuple[tuple[str, str, str], ...]
@@ -928,6 +1407,18 @@ class AuthorityVocabularyBinding:
         if self.policy_conformance is None:
             return None
         return self.policy_conformance.digest
+
+    @property
+    def policy_conformance_scope(self) -> str | None:
+        if self.policy_conformance is None:
+            return None
+        return self.policy_conformance.scope
+
+    @property
+    def policy_conformance_runtime_authority(self) -> str | None:
+        if self.policy_conformance is None:
+            return None
+        return self.policy_conformance.runtime_authority
 
 
 def _strict_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -969,6 +1460,129 @@ def _canonical_json_bytes(value: Any) -> bytes:
     return (
         json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
     ).encode("utf-8")
+
+
+def _exact_authority_value_equal(actual: object, expected: object) -> bool:
+    """Compare validated JSON-like values without Python's bool/int aliasing."""
+
+    if type(actual) is not type(expected):
+        return False
+    if isinstance(actual, dict) and isinstance(expected, dict):
+        return set(actual) == set(expected) and all(
+            _exact_authority_value_equal(actual[key], expected[key])
+            for key in expected
+        )
+    if isinstance(actual, (list, tuple)) and isinstance(expected, (list, tuple)):
+        return len(actual) == len(expected) and all(
+            _exact_authority_value_equal(actual_item, expected_item)
+            for actual_item, expected_item in zip(actual, expected, strict=True)
+        )
+    try:
+        result = actual == expected
+    except Exception:
+        return False
+    return type(result) is bool and result
+
+
+def parse_authority_vocabulary_schema(
+    exact_bytes: bytes,
+    *,
+    expected_digest: str,
+    expected_version: str = AUTHORITY_VOCABULARY_SCHEMA_VERSION,
+) -> AuthorityVocabularySchemaBinding:
+    """Bind the exact canonical schema before any registry bytes are trusted."""
+
+    if re.fullmatch(r"sha256:[0-9a-f]{64}", expected_digest) is None:
+        raise ValueError(
+            "authority vocabulary schema digest must be sha256:<64 lowercase hex>"
+        )
+    if expected_version != AUTHORITY_VOCABULARY_SCHEMA_VERSION:
+        raise ValueError(
+            "authority vocabulary schema version must be "
+            f"{AUTHORITY_VOCABULARY_SCHEMA_VERSION}"
+        )
+    actual_digest = f"sha256:{hashlib.sha256(exact_bytes).hexdigest()}"
+    if actual_digest != expected_digest:
+        raise ValueError(
+            "authority vocabulary schema digest mismatch: expected "
+            f"{expected_digest}, got {actual_digest}"
+        )
+    data = _strict_json_loads(exact_bytes, label="authority vocabulary schema")
+    if not isinstance(data, dict):
+        raise ValueError("authority vocabulary schema root must be an object")
+    root_keys = {
+        "$defs",
+        "$id",
+        "$schema",
+        "oneOf",
+        "title",
+        "x-authority-schema-version",
+    }
+    if set(data) != root_keys:
+        raise ValueError(
+            "authority vocabulary schema root fields do not match the closed identity"
+        )
+    if data["$schema"] != "https://json-schema.org/draft/2020-12/schema":
+        raise ValueError("authority vocabulary schema dialect is invalid")
+    if data["$id"] != AUTHORITY_VOCABULARY_SCHEMA_ID:
+        raise ValueError("authority vocabulary schema $id is invalid")
+    if data["x-authority-schema-version"] != AUTHORITY_VOCABULARY_SCHEMA_VERSION:
+        raise ValueError("authority vocabulary schema marker is invalid")
+    if (
+        data["title"]
+        != "Authority vocabulary registry and synthetic offline fixtures 2.0.0"
+    ):
+        raise ValueError("authority vocabulary schema title is invalid")
+    if not _exact_authority_value_equal(
+        data["oneOf"],
+        [
+            {"$ref": "#/$defs/fixtureManifest"},
+            {"$ref": "#/$defs/registry"},
+        ],
+    ):
+        raise ValueError("authority vocabulary schema root alternatives are invalid")
+    definitions = data["$defs"]
+    if not isinstance(definitions, dict) or not {
+        "fixtureManifest",
+        "registry",
+    }.issubset(definitions):
+        raise ValueError("authority vocabulary schema definitions are incomplete")
+    if actual_digest != AUTHORITY_VOCABULARY_SCHEMA_DIGEST:
+        raise ValueError(
+            "authority vocabulary schema bytes do not match the code-pinned "
+            f"schema 2.0.0 digest {AUTHORITY_VOCABULARY_SCHEMA_DIGEST}"
+        )
+    if exact_bytes != _canonical_json_bytes(data):
+        raise ValueError(
+            "authority vocabulary schema must use canonical sorted pretty serialization"
+        )
+    return AuthorityVocabularySchemaBinding(
+        path=AUTHORITY_VOCABULARY_SCHEMA_PATH,
+        digest=actual_digest,
+        schema_id=AUTHORITY_VOCABULARY_SCHEMA_ID,
+        schema_version=AUTHORITY_VOCABULARY_SCHEMA_VERSION,
+    )
+
+
+def load_authority_vocabulary_schema(
+    root: Path,
+    *,
+    expected_digest: str | None = None,
+    expected_version: str = AUTHORITY_VOCABULARY_SCHEMA_VERSION,
+) -> AuthorityVocabularySchemaBinding:
+    """Load and directly validate the canonical authority schema."""
+
+    exact_bytes = read_canonical_repository_file(
+        root,
+        AUTHORITY_VOCABULARY_SCHEMA_PATH,
+        label="authority vocabulary schema",
+    )
+    digest = expected_digest or f"sha256:{hashlib.sha256(exact_bytes).hexdigest()}"
+    return parse_authority_vocabulary_schema(
+        exact_bytes,
+        expected_digest=digest,
+        expected_version=expected_version,
+    )
 
 
 def read_canonical_repository_file(
@@ -1066,7 +1680,7 @@ def _governance_policy_module() -> Any:
 
 
 def authority_evaluator_runtime_component_bytes() -> tuple[tuple[str, bytes], ...]:
-    """Return the exact canonical source bytes backing the executing evaluator."""
+    """Return executable component bytes; the target root supplies schema bytes."""
 
     root = Path(__file__).resolve().parents[2]
     governance_policy = _governance_policy_module()
@@ -1074,11 +1688,11 @@ def authority_evaluator_runtime_component_bytes() -> tuple[tuple[str, bytes], ..
     if type(governance_source) is not str:
         raise ValueError("executing governance policy has no canonical source file")
     module_paths = {
-        AUTHORITY_EVALUATOR_COMPONENT_PATHS[0]: Path(governance_source),
-        AUTHORITY_EVALUATOR_COMPONENT_PATHS[1]: Path(__file__),
+        "researcher/scripts/governance_policy.py": Path(governance_source),
+        "researcher/scripts/validate_authority_contract.py": Path(__file__),
     }
     components: list[tuple[str, bytes]] = []
-    for relative_path in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+    for relative_path in _AUTHORITY_EVALUATOR_EXECUTABLE_COMPONENT_PATHS:
         expected_path = (root / relative_path).resolve(strict=True)
         if module_paths[relative_path].resolve(strict=True) != expected_path:
             raise ValueError(
@@ -1146,17 +1760,40 @@ def build_authority_evaluator_bundle(
 def expected_authority_dependency_evidence(
     profile: AuthoritySemanticProfile,
 ) -> list[dict[str, object]]:
-    evidence: list[dict[str, object]] = []
-    for binding in profile.dependency_floor:
-        spec_id, revision = binding.split("@", maxsplit=1)
-        evidence.append(
-            {
-                "spec": spec_id,
-                "revision": int(revision),
-                "status": "operational",
-            }
-        )
-    return evidence
+    return [
+        {
+            "spec_id": requirement.spec_id,
+            "revision": requirement.revision,
+            "runtime_stage": "operational",
+        }
+        for requirement in profile.dependency_requirements
+    ]
+
+
+def _sample_context(binding: AuthorityActorBinding) -> dict[str, object]:
+    context: dict[str, object] = {}
+    for predicate in binding.predicates:
+        key = str(predicate["key"])
+        if predicate["operator"] == "equals":
+            context[key] = predicate["value"]
+        elif predicate["value_type"] == "sha256_digest":
+            context[key] = f"sha256:{hashlib.sha256(key.encode()).hexdigest()}"
+        elif predicate["value_type"] == "integer":
+            context[key] = 1
+        elif predicate["value_type"] == "utc_datetime":
+            context[key] = "2030-01-01T00:00:00Z"
+        elif predicate["value_type"] == "string":
+            context[key] = f"synthetic_{key}"
+        else:  # Defensive: profiles must use only policy schema-v2 value types.
+            raise RuntimeError(f"unsupported authority predicate value type for {key}")
+    return context
+
+
+def _wrong_scalar_for_predicate(predicate: Mapping[str, object]) -> object:
+    value_type = predicate["value_type"]
+    if value_type in {"string", "sha256_digest", "utc_datetime"}:
+        return 7
+    return "wrong_type"
 
 
 def expected_authority_fixture_cases(
@@ -1164,83 +1801,231 @@ def expected_authority_fixture_cases(
 ) -> tuple[dict[str, object], ...]:
     """Return the exhaustive actor, guard, dependency, effect, and grant cases."""
 
-    allowed_actor = profile.actor_classes[0]
-    fields = list(profile.decision_context_fields)
+    allowed_binding = profile.actor_bindings[0]
     exact_effect = profile.max_effect
     dependency_evidence = expected_authority_dependency_evidence(profile)
     common: dict[str, object] = {
-        "actor_class": allowed_actor,
-        "decision_context_fields": fields,
+        "evidence_kind": "synthetic_offline",
+        "actor_class": allowed_binding.actor_class,
+        "context": _sample_context(allowed_binding),
         "effect": exact_effect,
+        "grant": {"operation": profile.grant_operation, "effect": exact_effect},
+        "dependencies": dependency_evidence,
         "expected_decision": "deny",
         "expected_policy_decision": "deny",
         "expected_registry_decision": "deny",
-        "grant_operation": profile.grant_operation,
-        "omitted_context_field": "none",
-        "dependency_evidence": dependency_evidence,
     }
 
     cases: list[dict[str, object]] = []
-    for actor_class in profile.actor_classes:
+    for binding in profile.actor_bindings:
+        valid_context = _sample_context(binding)
         cases.append(
             dict(
                 common,
-                case=f"allow__{actor_class}",
-                actor_class=actor_class,
+                case=f"allow__{binding.actor_class}",
+                actor_class=binding.actor_class,
+                context=valid_context,
                 expected_decision="allow",
                 expected_policy_decision="allow",
                 expected_registry_decision="allow",
             )
         )
-    for omitted_field in profile.decision_context_fields:
+        for predicate in binding.predicates:
+            key = str(predicate["key"])
+            missing_context = dict(valid_context)
+            del missing_context[key]
+            cases.append(
+                dict(
+                    common,
+                    case=f"missing_guard__{binding.actor_class}__{key}",
+                    actor_class=binding.actor_class,
+                    context=missing_context,
+                )
+            )
+        representative = binding.predicates[0]
+        representative_key = str(representative["key"])
+        wrong_type_context = dict(valid_context)
+        wrong_type_context[representative_key] = _wrong_scalar_for_predicate(
+            representative
+        )
         cases.append(
             dict(
                 common,
-                case=f"missing_guard__{omitted_field}",
-                decision_context_fields=[
-                    field for field in fields if field != omitted_field
-                ],
-                omitted_context_field=omitted_field,
+                case=f"wrong_type_guard__{binding.actor_class}",
+                actor_class=binding.actor_class,
+                context=wrong_type_context,
             )
         )
-    below_floor = [dict(item) for item in dependency_evidence]
-    below_floor[0]["revision"] = int(below_floor[0]["revision"]) - 1
+        boolean_predicate = next(
+            (
+                predicate
+                for predicate in binding.predicates
+                if predicate["value_type"] == "boolean"
+            ),
+            None,
+        )
+        if boolean_predicate is not None:
+            false_context = dict(valid_context)
+            false_context[str(boolean_predicate["key"])] = False
+            cases.append(
+                dict(
+                    common,
+                    case=f"false_guard__{binding.actor_class}",
+                    actor_class=binding.actor_class,
+                    context=false_context,
+                )
+            )
+        string_predicate = next(
+            (
+                predicate
+                for predicate in binding.predicates
+                if predicate["value_type"] in {"string", "utc_datetime"}
+            ),
+            None,
+        )
+        if string_predicate is not None:
+            empty_context = dict(valid_context)
+            empty_context[str(string_predicate["key"])] = ""
+            cases.append(
+                dict(
+                    common,
+                    case=f"empty_guard__{binding.actor_class}",
+                    actor_class=binding.actor_class,
+                    context=empty_context,
+                )
+            )
+        digest_predicate = next(
+            (
+                predicate
+                for predicate in binding.predicates
+                if predicate["value_type"] == "sha256_digest"
+            ),
+            None,
+        )
+        if digest_predicate is not None:
+            malformed_context = dict(valid_context)
+            malformed_context[str(digest_predicate["key"])] = "sha256:not-a-digest"
+            cases.append(
+                dict(
+                    common,
+                    case=f"malformed_digest_guard__{binding.actor_class}",
+                    actor_class=binding.actor_class,
+                    context=malformed_context,
+                )
+            )
+
+    extra_context = _sample_context(allowed_binding)
+    extra_context["unreviewed_context"] = "synthetic_unreviewed_context"
     cases.append(
         dict(
             common,
-            case="below_dependency_floor",
-            dependency_evidence=below_floor,
+            case="extra_context_field",
+            context=dict(sorted(extra_context.items())),
+            expected_policy_decision="allow",
         )
     )
-    owner_inactive = [dict(item) for item in dependency_evidence]
-    owner_record = next(
-        item for item in owner_inactive if item["spec"] == profile.owner_spec
+
+    dependency_mutations: dict[str, list[dict[str, object]]] = {}
+    lower = [dict(item) for item in dependency_evidence]
+    lower[0]["revision"] = int(lower[0]["revision"]) - 1
+    dependency_mutations["dependency_lower_revision"] = lower
+    higher = [dict(item) for item in dependency_evidence]
+    higher[0]["revision"] = int(higher[0]["revision"]) + 1
+    dependency_mutations["dependency_higher_revision"] = higher
+    accepted = [dict(item) for item in dependency_evidence]
+    accepted[0]["runtime_stage"] = "accepted"
+    dependency_mutations["dependency_accepted_stage"] = accepted
+    terminal = [dict(item) for item in dependency_evidence]
+    terminal[0]["runtime_stage"] = "superseded"
+    dependency_mutations["dependency_terminal_stage"] = terminal
+    dependency_mutations["dependency_missing"] = [
+        dict(item) for item in dependency_evidence[1:]
+    ]
+    extra = [dict(item) for item in dependency_evidence]
+    extra.append(
+        {"spec_id": "SPEC-999", "revision": 1, "runtime_stage": "operational"}
     )
-    owner_record["status"] = "draft"
+    dependency_mutations["dependency_extra"] = extra
+    for case_name, dependencies in dependency_mutations.items():
+        cases.append(dict(common, case=case_name, dependencies=dependencies))
+
+    narrow_effect = {
+        "code": profile.max_effect_code,
+        "max_state_transitions": 0,
+        "max_targets": 0,
+    }
     cases.append(
         dict(
             common,
-            case="owner_inactive",
-            dependency_evidence=owner_inactive,
+            case="narrowed_effect",
+            effect=narrow_effect,
+            expected_decision="allow",
+            expected_policy_decision="allow",
+            expected_registry_decision="allow",
         )
     )
+    widened_targets = dict(exact_effect)
+    widened_targets["max_targets"] = profile.max_targets + 1
+    cases.append(dict(common, case="widened_effect_targets", effect=widened_targets))
+    widened_transitions = dict(exact_effect)
+    widened_transitions["max_state_transitions"] = (
+        profile.max_state_transitions + 1
+    )
+    cases.append(
+        dict(common, case="widened_effect_transitions", effect=widened_transitions)
+    )
+    mixed_effect = dict(narrow_effect)
+    mixed_effect["max_state_transitions"] = profile.max_state_transitions + 1
+    cases.append(dict(common, case="mixed_effect_widening", effect=mixed_effect))
     cases.append(
         dict(
             common,
-            case="widened_effect",
+            case="wrong_effect_code",
             effect={
                 "code": "unbounded_effect",
-                "max_state_transitions": profile.max_state_transitions + 1,
-                "max_targets": profile.max_targets + 1,
+                "max_state_transitions": profile.max_state_transitions,
+                "max_targets": profile.max_targets,
             },
         )
     )
-    cases.append(dict(common, case="wrong_actor", actor_class="unauthorized_actor"))
     cases.append(
         dict(
             common,
-            case="wrong_grant",
-            grant_operation="unauthorized_operation",
+            case="wrong_actor",
+            actor_class="unauthorized_actor",
+        )
+    )
+    wrong_operation_grant = {
+        "operation": "unauthorized_operation",
+        "effect": exact_effect,
+    }
+    cases.append(
+        dict(common, case="wrong_grant_operation", grant=wrong_operation_grant)
+    )
+    narrow_grant_effect = dict(exact_effect)
+    narrow_grant_effect["max_targets"] = max(0, profile.max_targets - 1)
+    cases.append(
+        dict(
+            common,
+            case="grant_too_narrow",
+            grant={
+                "operation": profile.grant_operation,
+                "effect": narrow_grant_effect,
+            },
+        )
+    )
+    cases.append(
+        dict(
+            common,
+            case="grant_effect_code_mismatch",
+            grant={
+                "operation": profile.grant_operation,
+                "effect": {
+                    "code": "unbounded_effect",
+                    "max_state_transitions": profile.max_state_transitions,
+                    "max_targets": profile.max_targets,
+                },
+            },
         )
     )
     return tuple(sorted(cases, key=lambda case: str(case["case"])))
@@ -1295,8 +2080,12 @@ def expected_authority_catalog_boundary_cases() -> tuple[dict[str, object], ...]
         expected_decision="deny",
         expected_policy_decision="deny",
         expected_registry_decision="deny",
-        dependency_evidence=[
-            {"spec": "SPEC-000", "revision": 2, "status": "operational"}
+        dependencies=[
+            {
+                "spec_id": "SPEC-000",
+                "revision": 2,
+                "runtime_stage": "operational",
+            }
         ],
     )
     read_cases: list[dict[str, object]] = []
@@ -1305,7 +2094,7 @@ def expected_authority_catalog_boundary_cases() -> tuple[dict[str, object], ...]
     ):
         profile_cases = expected_authority_fixture_cases(read_profile)
         for profile_case in profile_cases:
-            is_allow = str(profile_case["case"]).startswith("allow__")
+            is_allow = profile_case["expected_registry_decision"] == "allow"
             read_cases.append(
                 dict(
                     profile_case,
@@ -1329,7 +2118,14 @@ def expected_authority_catalog_boundary_cases() -> tuple[dict[str, object], ...]
                     "max_state_transitions": 1,
                     "max_targets": 1,
                 },
-                grant_operation="append_organization_event",
+                grant={
+                    "operation": "append_organization_event",
+                    "effect": {
+                        "code": "append_one_organization_event",
+                        "max_state_transitions": 1,
+                        "max_targets": 1,
+                    },
+                },
                 expected_decision="deny",
                 expected_policy_decision="deny",
                 expected_registry_decision="deny",
@@ -1358,12 +2154,23 @@ def expected_authority_catalog_boundary_cases() -> tuple[dict[str, object], ...]
             "max_state_transitions": 1,
             "max_targets": 1,
         },
-        grant_operation="append_organization_event",
+        grant={
+            "operation": "append_organization_event",
+            "effect": {
+                "code": "append_one_organization_event",
+                "max_state_transitions": 1,
+                "max_targets": 1,
+            },
+        },
         expected_decision="deny",
         expected_policy_decision="deny",
         expected_registry_decision="deny",
-        dependency_evidence=[
-            {"spec": "SPEC-000", "revision": 2, "status": "operational"}
+        dependencies=[
+            {
+                "spec_id": "SPEC-000",
+                "revision": 2,
+                "runtime_stage": "operational",
+            }
         ],
     )
     return tuple(
@@ -1382,12 +2189,74 @@ def expected_authority_catalog_boundary_cases() -> tuple[dict[str, object], ...]
     )
 
 
+def _expected_registry_reason_code(
+    case_name: str,
+    expected_registry_decision: str,
+) -> str:
+    """Bind each canonical fixture name to its reviewed registry branch."""
+
+    if expected_registry_decision == "allow":
+        return "REGISTRY_ALLOW"
+    if expected_registry_decision == "non_event":
+        return "REGISTRY_POLICY_ONLY_READ"
+    segments = case_name.split("__")
+    if any(segment == "wrong_actor" for segment in segments):
+        return "REGISTRY_ACTOR_DENY"
+    if any(
+        segment == "extra_context_field"
+        or segment.startswith(
+            (
+                "empty_guard",
+                "false_guard",
+                "malformed_digest_guard",
+                "missing_guard",
+                "wrong_type_guard",
+            )
+        )
+        for segment in segments
+    ):
+        return "REGISTRY_GUARD_DENY"
+    if any(
+        segment
+        in {
+            "event_append_denied",
+            "mixed_effect_widening",
+            "widened_effect_targets",
+            "widened_effect_transitions",
+            "wrong_effect_code",
+        }
+        for segment in segments
+    ):
+        return "REGISTRY_EFFECT_DENY"
+    if any(
+        segment
+        in {
+            "grant_effect_code_mismatch",
+            "grant_too_narrow",
+            "wrong_grant_operation",
+        }
+        for segment in segments
+    ):
+        return "REGISTRY_GRANT_DENY"
+    if any(segment.startswith("dependency_") for segment in segments):
+        return "REGISTRY_DEPENDENCY_DENY"
+    if case_name in {
+        "legacy_publish_draft_denied",
+        "noncatalog_event_append_denied",
+        "read_unknown_resource_denied",
+        "unknown_action",
+        "unknown_pair",
+        "unknown_resource",
+    }:
+        return "REGISTRY_PAIR_DENY"
+    raise ValueError(f"authority fixture case has no reviewed registry reason: {case_name}")
+
+
 def _validate_max_effect_shape(value: Any, *, label: str) -> None:
     if not isinstance(value, dict) or set(value) != AUTHORITY_MAX_EFFECT_KEYS:
         raise ValueError(f"{label} max_effect does not match the closed schema")
     if (
-        not isinstance(value["code"], str)
-        or re.fullmatch(r"[a-z][a-z0-9_]*", value["code"]) is None
+        not _is_authority_token(value["code"])
     ):
         raise ValueError(f"{label} max_effect code is invalid")
     for key in ("max_targets", "max_state_transitions"):
@@ -1395,9 +2264,40 @@ def _validate_max_effect_shape(value: Any, *, label: str) -> None:
             raise ValueError(f"{label} {key} must be a non-negative integer")
 
 
+def _is_authority_token(value: Any) -> bool:
+    return (
+        type(value) is str
+        and len(value) <= 128
+        and re.fullmatch(r"[a-z][a-z0-9_]*", value) is not None
+    )
+
+
+def _validate_context_scalar(value: Any, *, label: str) -> None:
+    if type(value) is bool:
+        return
+    if type(value) is int:
+        if value < 0 or value > 9_007_199_254_740_991:
+            raise ValueError(f"{label} integer is outside the portable non-negative range")
+        return
+    if type(value) is not str:
+        raise ValueError(f"{label} must be a string, boolean, or non-negative integer")
+    if len(value) > 4096:
+        raise ValueError(f"{label} string exceeds 4096 characters")
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError as exc:
+        raise ValueError(f"{label} string must be valid UTF-8 scalar text") from exc
+    if value and value != value.strip():
+        raise ValueError(f"{label} string must not have edge whitespace")
+    if value and not value.strip():
+        raise ValueError(f"{label} string must not be whitespace-only")
+    if any(ord(character) < 32 or 127 <= ord(character) <= 159 for character in value):
+        raise ValueError(f"{label} string must not contain C0 or C1 controls")
+
+
 def _validate_dependency_evidence(value: Any, *, label: str) -> None:
-    if not isinstance(value, list) or not value:
-        raise ValueError(f"{label} dependency_evidence must be a non-empty array")
+    if not isinstance(value, list):
+        raise ValueError(f"{label} dependencies must be an array")
     identities: list[str] = []
     for index, item in enumerate(value):
         if (
@@ -1408,23 +2308,96 @@ def _validate_dependency_evidence(value: Any, *, label: str) -> None:
                 f"{label} dependency evidence {index} has an invalid schema"
             )
         if (
-            not isinstance(item["spec"], str)
-            or re.fullmatch(r"SPEC-[0-9]{3}", item["spec"]) is None
+            not isinstance(item["spec_id"], str)
+            or re.fullmatch(r"SPEC-[0-9]{3}", item["spec_id"]) is None
         ):
             raise ValueError(f"{label} dependency evidence {index} has an invalid spec")
-        if type(item["revision"]) is not int or item["revision"] < 0:
+        if type(item["revision"]) is not int or item["revision"] < 1:
             raise ValueError(
                 f"{label} dependency evidence {index} has an invalid revision"
             )
-        if item["status"] not in _AUTHORITY_DEPENDENCY_EVIDENCE_STATUSES:
+        if item["runtime_stage"] not in _AUTHORITY_DEPENDENCY_EVIDENCE_STAGES:
             raise ValueError(
-                f"{label} dependency evidence {index} has an invalid status"
+                f"{label} dependency evidence {index} has an invalid runtime_stage"
             )
-        identities.append(item["spec"])
+        identities.append(item["spec_id"])
     if identities != sorted(set(identities)):
         raise ValueError(
             f"{label} dependency evidence must be sorted and duplicate-free"
         )
+
+
+def _parse_authority_fixture_case(
+    action: str,
+    resource: str,
+    case: Mapping[str, Any],
+    *,
+    label: str,
+) -> AuthorityFixtureCase:
+    if not _is_authority_token(action) or not _is_authority_token(resource):
+        raise ValueError(f"{label} action/resource identity is invalid")
+    case_keys = set(case)
+    if (
+        case_keys != AUTHORITY_FIXTURE_CASE_KEYS
+        and case_keys != AUTHORITY_CATALOG_FIXTURE_CASE_KEYS
+    ):
+        raise ValueError(f"{label} does not match the closed schema")
+    if not _is_authority_token(case["case"]):
+        raise ValueError(f"{label} has an invalid case name")
+    if case["evidence_kind"] != "synthetic_offline":
+        raise ValueError(f"{label} evidence_kind must be synthetic_offline")
+    if not _is_authority_token(case["actor_class"]):
+        raise ValueError(f"{label} has an invalid actor class")
+    context = case["context"]
+    if not isinstance(context, dict):
+        raise ValueError(f"{label} context must be an object")
+    if list(context) != sorted(context) or any(
+        not _is_authority_token(key) for key in context
+    ):
+        raise ValueError(f"{label} context keys must be sorted unique authority tokens")
+    for key, value in context.items():
+        _validate_context_scalar(value, label=f"{label} context.{key}")
+    _validate_max_effect_shape(case["effect"], label=label)
+    grant = case["grant"]
+    if not isinstance(grant, dict) or set(grant) != AUTHORITY_GRANT_KEYS:
+        raise ValueError(f"{label} grant does not match the closed schema")
+    if not _is_authority_token(grant["operation"]):
+        raise ValueError(f"{label} grant operation is invalid")
+    _validate_max_effect_shape(grant["effect"], label=f"{label} grant")
+    _validate_dependency_evidence(case["dependencies"], label=label)
+    if case["expected_decision"] not in {"allow", "deny"}:
+        raise ValueError(f"{label} expected_decision is invalid")
+    if case["expected_policy_decision"] not in {"allow", "deny"}:
+        raise ValueError(f"{label} expected_policy_decision is invalid")
+    if case["expected_registry_decision"] not in {"allow", "deny", "non_event"}:
+        raise ValueError(f"{label} expected_registry_decision is invalid")
+    effect = case["effect"]
+    grant_effect = grant["effect"]
+    return AuthorityFixtureCase(
+        action=action,
+        resource=resource,
+        case=case["case"],
+        evidence_kind=case["evidence_kind"],
+        actor_class=case["actor_class"],
+        context=MappingProxyType(dict(context)),
+        effect_code=effect["code"],
+        max_targets=effect["max_targets"],
+        max_state_transitions=effect["max_state_transitions"],
+        grant_effect_code=grant_effect["code"],
+        grant_max_targets=grant_effect["max_targets"],
+        grant_max_state_transitions=grant_effect["max_state_transitions"],
+        expected_decision=case["expected_decision"],
+        expected_policy_decision=case["expected_policy_decision"],
+        expected_registry_decision=case["expected_registry_decision"],
+        expected_registry_reason_code=_expected_registry_reason_code(
+            case["case"], case["expected_registry_decision"]
+        ),
+        grant_operation=grant["operation"],
+        dependencies=tuple(
+            (item["spec_id"], item["revision"], item["runtime_stage"])
+            for item in case["dependencies"]
+        ),
+    )
 
 
 def parse_authority_fixture_manifest(
@@ -1491,7 +2464,7 @@ def parse_authority_fixture_manifest(
             )
         action = entry["action"]
         resource = entry["resource"]
-        if not isinstance(action, str) or not isinstance(resource, str):
+        if not _is_authority_token(action) or not _is_authority_token(resource):
             raise ValueError(f"authority fixture entry {index} has an invalid identity")
         pair = (action, resource)
         if pair in seen_pairs:
@@ -1501,8 +2474,10 @@ def parse_authority_fixture_manifest(
         if profile is None:
             raise ValueError(f"detached authority fixture entry: {action}/{resource}")
         cases = entry["cases"]
-        if not isinstance(cases, list):
-            raise ValueError(f"authority fixture entry {index} cases must be an array")
+        if not isinstance(cases, list) or not cases:
+            raise ValueError(
+                f"authority fixture entry {index} cases must be a non-empty array"
+            )
         names: list[str] = []
         for case_index, case in enumerate(cases):
             if not isinstance(case, dict) or set(case) != AUTHORITY_FIXTURE_CASE_KEYS:
@@ -1510,82 +2485,22 @@ def parse_authority_fixture_manifest(
                     f"authority fixture entry {index} case {case_index} does not match "
                     "the closed schema"
                 )
-            if (
-                not isinstance(case["case"], str)
-                or re.fullmatch(r"[a-z][a-z0-9_]*", case["case"]) is None
-            ):
-                raise ValueError(
-                    f"authority fixture entry {index} has an invalid case name"
-                )
             names.append(case["case"])
-            if not isinstance(case["actor_class"], str):
-                raise ValueError(
-                    f"authority fixture entry {index} has an invalid actor"
+            parsed_cases.append(
+                _parse_authority_fixture_case(
+                    action,
+                    resource,
+                    case,
+                    label=f"authority fixture entry {index} case {case_index}",
                 )
-            if (
-                not isinstance(case["decision_context_fields"], list)
-                or any(
-                    not isinstance(field, str)
-                    for field in case["decision_context_fields"]
-                )
-                or case["decision_context_fields"]
-                != sorted(set(case["decision_context_fields"]))
-            ):
-                raise ValueError(
-                    f"authority fixture entry {index} has invalid decision context fields"
-                )
-            _validate_max_effect_shape(
-                case["effect"],
-                label=f"authority fixture entry {index} case {case_index}",
             )
-            _validate_dependency_evidence(
-                case["dependency_evidence"],
-                label=f"authority fixture entry {index} case {case_index}",
-            )
-            if case["expected_decision"] not in {"allow", "deny"}:
-                raise ValueError(
-                    f"authority fixture entry {index} has an invalid expected decision"
-                )
-            if case["expected_policy_decision"] not in {"allow", "deny"} or case[
-                "expected_registry_decision"
-            ] not in {"allow", "deny", "non_event"}:
-                raise ValueError(
-                    f"authority fixture entry {index} has invalid boundary expectations"
-                )
-            if not isinstance(case["grant_operation"], str) or not isinstance(
-                case["omitted_context_field"], str
-            ):
-                raise ValueError(
-                    f"authority fixture entry {index} has invalid case metadata"
-                )
         expected_cases = list(expected_authority_fixture_cases(profile))
-        if names != sorted(set(names)) or cases != expected_cases:
+        if names != sorted(set(names)) or not _exact_authority_value_equal(
+            cases, expected_cases
+        ):
             raise ValueError(
                 f"authority fixture entry {index} must prove every actor and guard plus "
                 "the exact negative semantic profile"
-            )
-        for case in cases:
-            effect = case["effect"]
-            parsed_cases.append(
-                AuthorityFixtureCase(
-                    action=action,
-                    resource=resource,
-                    case=case["case"],
-                    actor_class=case["actor_class"],
-                    decision_context_fields=tuple(case["decision_context_fields"]),
-                    effect_code=effect["code"],
-                    max_targets=effect["max_targets"],
-                    max_state_transitions=effect["max_state_transitions"],
-                    expected_decision=case["expected_decision"],
-                    expected_policy_decision=case["expected_policy_decision"],
-                    expected_registry_decision=case["expected_registry_decision"],
-                    grant_operation=case["grant_operation"],
-                    omitted_context_field=case["omitted_context_field"],
-                    dependency_evidence=tuple(
-                        (item["spec"], item["revision"], item["status"])
-                        for item in case["dependency_evidence"]
-                    ),
-                )
             )
         parsed_pairs.append(pair)
 
@@ -1598,7 +2513,9 @@ def parse_authority_fixture_manifest(
     expected_boundary_cases = list(expected_authority_catalog_boundary_cases())
     if (
         not isinstance(catalog_boundary_cases, list)
-        or catalog_boundary_cases != expected_boundary_cases
+        or not _exact_authority_value_equal(
+            catalog_boundary_cases, expected_boundary_cases
+        )
     ):
         raise ValueError(
             "authority fixture manifest must contain the exact catalog-boundary cases"
@@ -1611,34 +2528,26 @@ def parse_authority_fixture_manifest(
             raise ValueError(
                 f"authority catalog-boundary fixture {index} has an invalid schema"
             )
-        _validate_max_effect_shape(
-            case["effect"], label=f"authority catalog-boundary fixture {index}"
-        )
-        _validate_dependency_evidence(
-            case["dependency_evidence"],
-            label=f"authority catalog-boundary fixture {index}",
-        )
         parsed_cases.append(
-            AuthorityFixtureCase(
-                action=case["action"],
-                resource=case["resource"],
-                case=case["case"],
-                actor_class=case["actor_class"],
-                decision_context_fields=tuple(case["decision_context_fields"]),
-                effect_code=case["effect"]["code"],
-                max_targets=case["effect"]["max_targets"],
-                max_state_transitions=case["effect"]["max_state_transitions"],
-                expected_decision=case["expected_decision"],
-                expected_policy_decision=case["expected_policy_decision"],
-                expected_registry_decision=case["expected_registry_decision"],
-                grant_operation=case["grant_operation"],
-                omitted_context_field=case["omitted_context_field"],
-                dependency_evidence=tuple(
-                    (item["spec"], item["revision"], item["status"])
-                    for item in case["dependency_evidence"]
-                ),
+            _parse_authority_fixture_case(
+                case["action"],
+                case["resource"],
+                case,
+                label=f"authority catalog-boundary fixture {index}",
             )
         )
+    for case in parsed_cases:
+        actual_decision, actual_reason = _authority_registry_boundary_decision(case)
+        if (
+            actual_decision != case.expected_registry_decision
+            or actual_reason != case.expected_registry_reason_code
+        ):
+            raise ValueError(
+                "authority fixture case does not preserve its reviewed registry "
+                f"branch: {case.action}/{case.resource}/{case.case} expected "
+                f"{case.expected_registry_decision}/{case.expected_registry_reason_code}, "
+                f"got {actual_decision}/{actual_reason}"
+            )
     if exact_bytes != _canonical_json_bytes(data):
         raise ValueError(
             "authority fixture manifest JSON must use canonical sorted pretty serialization"
@@ -1657,6 +2566,7 @@ def parse_authority_fixture_manifest(
 def parse_authority_vocabulary(
     exact_bytes: bytes,
     *,
+    schema_binding: AuthorityVocabularySchemaBinding,
     expected_digest: str,
     expected_constitution_revision: int,
     expected_registry_version: int,
@@ -1664,6 +2574,14 @@ def parse_authority_vocabulary(
 ) -> AuthorityVocabularyBinding:
     """Strictly parse the machine authority vocabulary bound by SPEC-000."""
 
+    if (
+        type(schema_binding) is not AuthorityVocabularySchemaBinding
+        or schema_binding.path != AUTHORITY_VOCABULARY_SCHEMA_PATH
+        or schema_binding.schema_id != AUTHORITY_VOCABULARY_SCHEMA_ID
+        or schema_binding.schema_version != AUTHORITY_VOCABULARY_SCHEMA_VERSION
+        or schema_binding.digest != AUTHORITY_VOCABULARY_SCHEMA_DIGEST
+    ):
+        raise ValueError("authority vocabulary requires a validated schema 2.0.0 binding")
     actual_digest = f"sha256:{hashlib.sha256(exact_bytes).hexdigest()}"
     if actual_digest != expected_digest:
         raise ValueError(
@@ -1735,7 +2653,6 @@ def parse_authority_vocabulary(
 
     parsed_entries: list[tuple[str, str, str]] = []
     seen_pairs: set[tuple[str, str]] = set()
-    token = re.compile(r"^[a-z][a-z0-9_]*$")
     for index, entry in enumerate(entries):
         if not isinstance(entry, dict) or set(entry) != AUTHORITY_ENTRY_KEYS:
             raise ValueError(
@@ -1744,9 +2661,9 @@ def parse_authority_vocabulary(
         action = entry["action"]
         resource = entry["resource"]
         owner_spec = entry["owner_spec"]
-        if not isinstance(action, str) or token.fullmatch(action) is None:
+        if not _is_authority_token(action):
             raise ValueError(f"authority entry {index} has invalid action")
-        if not isinstance(resource, str) or token.fullmatch(resource) is None:
+        if not _is_authority_token(resource):
             raise ValueError(f"authority entry {index} has invalid resource")
         if (
             not isinstance(owner_spec, str)
@@ -1768,23 +2685,96 @@ def parse_authority_vocabulary(
                 f"required authority pair {action}/{resource} must be owned by "
                 f"{profile.owner_spec}"
             )
-        if entry["actor_classes"] != list(profile.actor_classes):
+        actor_bindings = entry["actor_bindings"]
+        if not isinstance(actor_bindings, list) or not actor_bindings:
+            raise ValueError(f"authority entry {index} actor_bindings must be non-empty")
+        actor_names: list[str] = []
+        for binding_index, binding in enumerate(actor_bindings):
+            if (
+                not isinstance(binding, dict)
+                or set(binding) != AUTHORITY_ACTOR_BINDING_KEYS
+                or not _is_authority_token(binding.get("actor_class"))
+                or not isinstance(binding.get("predicates"), list)
+                or not binding["predicates"]
+            ):
+                raise ValueError(
+                    f"authority entry {index} actor binding {binding_index} is invalid"
+                )
+            actor_names.append(binding["actor_class"])
+            predicate_keys: list[str] = []
+            for predicate_index, predicate_payload in enumerate(binding["predicates"]):
+                predicate = _governance_policy_module().parse_policy_predicate(
+                    predicate_payload,
+                    location=(
+                        f"authority entry {index} actor binding {binding_index} "
+                        f"predicate {predicate_index}"
+                    ),
+                )
+                if predicate.to_payload() != predicate_payload:
+                    raise ValueError(
+                        f"authority entry {index} actor binding {binding_index} "
+                        "predicate is not canonical"
+                    )
+                predicate_keys.append(predicate.key)
+            if predicate_keys != sorted(set(predicate_keys)):
+                raise ValueError(
+                    f"authority entry {index} actor binding {binding_index} "
+                    "predicates must be sorted and key-unique"
+                )
+        if actor_names != sorted(set(actor_names)):
             raise ValueError(
-                f"authority entry {index} actor_classes do not match the profile"
+                f"authority entry {index} actor bindings must be sorted and unique"
             )
-        if entry["max_effect"] != profile.max_effect:
+        if not _exact_authority_value_equal(
+            actor_bindings,
+            [binding.to_payload() for binding in profile.actor_bindings],
+        ):
+            raise ValueError(
+                f"authority entry {index} actor_bindings do not match the profile"
+            )
+        if not _exact_authority_value_equal(entry["max_effect"], profile.max_effect):
             raise ValueError(
                 f"authority entry {index} max_effect does not match the profile"
             )
-        if entry["dependency_floor"] != list(profile.dependency_floor):
+        dependency_requirements = entry["dependency_requirements"]
+        if not isinstance(dependency_requirements, list) or not dependency_requirements:
             raise ValueError(
-                f"authority entry {index} dependency_floor does not match the profile"
+                f"authority entry {index} dependency_requirements must be non-empty"
             )
-        if entry["decision_context_fields"] != list(profile.decision_context_fields):
+        dependency_ids: list[str] = []
+        for requirement_index, requirement in enumerate(dependency_requirements):
+            if (
+                not isinstance(requirement, dict)
+                or set(requirement) != AUTHORITY_DEPENDENCY_REQUIREMENT_KEYS
+                or not isinstance(requirement["spec_id"], str)
+                or re.fullmatch(r"SPEC-[0-9]{3}", requirement["spec_id"]) is None
+                or type(requirement["revision"]) is not int
+                or requirement["revision"] < 1
+                or requirement["minimum_runtime_stage"] != "operational"
+            ):
+                raise ValueError(
+                    f"authority entry {index} dependency requirement "
+                    f"{requirement_index} is invalid"
+                )
+            dependency_ids.append(requirement["spec_id"])
+        if dependency_ids != sorted(set(dependency_ids)):
             raise ValueError(
-                f"authority entry {index} decision_context_fields do not match the profile"
+                f"authority entry {index} dependency requirements must be sorted and unique"
             )
-        if entry["grant_operation"] != profile.grant_operation:
+        if not _exact_authority_value_equal(
+            dependency_requirements,
+            [
+                requirement.to_payload()
+                for requirement in profile.dependency_requirements
+            ],
+        ):
+            raise ValueError(
+                f"authority entry {index} dependency_requirements do not match the profile"
+            )
+        if (
+            not _is_authority_token(entry["grant_operation"])
+            or entry["grant_operation"] != profile.grant_operation
+        ):
             raise ValueError(
                 f"authority entry {index} grant_operation does not match the profile"
             )
@@ -1815,9 +2805,12 @@ def parse_authority_vocabulary(
         expected_profiles=REQUIRED_AUTHORITY_PROFILES,
     )
     return AuthorityVocabularyBinding(
+        schema_path=schema_binding.path,
+        schema_digest=schema_binding.digest,
+        schema_version=schema_binding.schema_version,
         path=AUTHORITY_VOCABULARY_PATH,
         digest=actual_digest,
-        schema_version=data["schema_version"],
+        registry_schema_version=data["schema_version"],
         constitution_revision=data["constitution_revision"],
         registry_version=data["registry_version"],
         entries=tuple(parsed_entries),
@@ -1831,43 +2824,51 @@ def parse_authority_vocabulary(
 def _authority_registry_boundary_decision(
     case: AuthorityFixtureCase,
 ) -> tuple[str, str]:
-    if case.action == "read":
-        profile = POLICY_ONLY_READ_PROFILES.get((case.action, case.resource))
-        if profile is None:
-            return ("deny", "REGISTRY_NON_EVENT_APPEND_DENY")
-        if case.actor_class not in profile.actor_classes:
-            return ("deny", "REGISTRY_ACTOR_DENY")
-        if case.decision_context_fields != profile.decision_context_fields:
-            return ("deny", "REGISTRY_GUARD_DENY")
-        if (
-            case.effect_code != profile.max_effect_code
-            or case.max_targets != profile.max_targets
-            or case.max_state_transitions != profile.max_state_transitions
-        ):
-            return ("deny", "REGISTRY_NON_EVENT_APPEND_DENY")
-        if case.grant_operation != profile.grant_operation:
-            return ("deny", "REGISTRY_GRANT_DENY")
-        if not _authority_dependency_floor_satisfied(case, profile):
-            return ("deny", "REGISTRY_DEPENDENCY_DENY")
-        return ("non_event", "REGISTRY_POLICY_ONLY_READ")
-    profile = REQUIRED_AUTHORITY_PROFILES.get((case.action, case.resource))
+    pair = (case.action, case.resource)
+    profile = REQUIRED_AUTHORITY_PROFILES.get(pair) or POLICY_ONLY_READ_PROFILES.get(
+        pair
+    )
     if profile is None:
         return ("deny", "REGISTRY_PAIR_DENY")
     if case.actor_class not in profile.actor_classes:
         return ("deny", "REGISTRY_ACTOR_DENY")
-    if case.decision_context_fields != profile.decision_context_fields:
+    actor_binding = profile.actor_binding(case.actor_class)
+    predicates = tuple(
+        _governance_policy_module().parse_policy_predicate(
+            payload,
+            location=f"authority profile {case.action}/{case.resource}/{case.actor_class}",
+        )
+        for payload in actor_binding.predicates
+    )
+    if set(case.context) != {predicate.key for predicate in predicates} or not all(
+        _governance_policy_module().policy_predicate_matches(predicate, case.context)
+        for predicate in predicates
+    ):
         return ("deny", "REGISTRY_GUARD_DENY")
     if (
         case.effect_code != profile.max_effect_code
-        or case.max_targets != profile.max_targets
-        or case.max_state_transitions != profile.max_state_transitions
+        or case.max_targets > profile.max_targets
+        or case.max_state_transitions > profile.max_state_transitions
     ):
         return ("deny", "REGISTRY_EFFECT_DENY")
-    if case.grant_operation != profile.grant_operation:
+    if (
+        case.grant_operation != profile.grant_operation
+        or not _authority_grant_effect_satisfied(case)
+    ):
         return ("deny", "REGISTRY_GRANT_DENY")
     if not _authority_dependency_floor_satisfied(case, profile):
         return ("deny", "REGISTRY_DEPENDENCY_DENY")
+    if pair in POLICY_ONLY_READ_PROFILES:
+        return ("non_event", "REGISTRY_POLICY_ONLY_READ")
     return ("allow", "REGISTRY_ALLOW")
+
+
+def _authority_grant_effect_satisfied(case: AuthorityFixtureCase) -> bool:
+    return (
+        case.grant_effect_code == case.effect_code
+        and case.max_targets <= case.grant_max_targets
+        and case.max_state_transitions <= case.grant_max_state_transitions
+    )
 
 
 def _authority_dependency_floor_satisfied(
@@ -1876,21 +2877,24 @@ def _authority_dependency_floor_satisfied(
 ) -> bool:
     """Evaluate only the exact revision/status floor, independent of other denials."""
 
-    if profile is None:
-        required = {"SPEC-000": 2}
-    else:
-        required = {
-            binding.split("@", maxsplit=1)[0]: int(binding.split("@", maxsplit=1)[1])
-            for binding in profile.dependency_floor
-        }
+    requirements = (
+        profile.dependency_requirements
+        if profile is not None
+        else (AuthorityDependencyRequirement("SPEC-000", 2),)
+    )
+    required = {
+        requirement.spec_id: (
+            requirement.revision,
+            requirement.minimum_runtime_stage,
+        )
+        for requirement in requirements
+    }
     evidence = {
-        spec_id: (revision, status)
-        for spec_id, revision, status in case.dependency_evidence
+        spec_id: (revision, runtime_stage)
+        for spec_id, revision, runtime_stage in case.dependencies
     }
     return set(evidence) == set(required) and all(
-        evidence[spec_id][0] >= revision
-        and evidence[spec_id][1] in AUTHORITY_VOCABULARY_READY_STATUSES
-        for spec_id, revision in required.items()
+        evidence[spec_id] == requirement for spec_id, requirement in required.items()
     )
 
 
@@ -1906,12 +2910,14 @@ def authority_policy_case_results(
             (case.action, case.resource)
         ) or POLICY_ONLY_READ_PROFILES.get((case.action, case.resource))
         registry_decision, registry_reason = _authority_registry_boundary_decision(case)
-        canonical_context = {
-            field: True for field in sorted(case.decision_context_fields)
-        }
+        canonical_context = dict(case.context)
         dependency_value = [
-            {"spec": spec_id, "revision": revision, "status": status}
-            for spec_id, revision, status in case.dependency_evidence
+            {
+                "spec_id": spec_id,
+                "revision": revision,
+                "runtime_stage": runtime_stage,
+            }
+            for spec_id, revision, runtime_stage in case.dependencies
         ]
         canonical_context.update(
             {
@@ -1920,6 +2926,7 @@ def authority_policy_case_results(
                     case, profile
                 ),
                 "grant_operation": case.grant_operation,
+                "grant_effect_satisfied": _authority_grant_effect_satisfied(case),
                 "requested_effect_code": case.effect_code,
                 "requested_max_state_transitions": case.max_state_transitions,
                 "requested_max_targets": case.max_targets,
@@ -1949,6 +2956,7 @@ def authority_policy_case_results(
                 "expected_decision": case.expected_decision,
                 "expected_policy_decision": case.expected_policy_decision,
                 "expected_registry_decision": case.expected_registry_decision,
+                "expected_registry_reason_code": case.expected_registry_reason_code,
                 "registry_decision": registry_decision,
                 "registry_reason_code": registry_reason,
                 "policy_decision": policy_decision,
@@ -1963,90 +2971,280 @@ def authority_policy_case_results(
 
 def expected_authority_policy_conditions(
     profile: AuthoritySemanticProfile,
+    actor_class: str | None = None,
 ) -> tuple[dict[str, object], ...]:
-    """Return the sole accepted allow-rule predicate shape for one profile."""
+    """Return the canonical typed conditions for one atomic actor allow path."""
 
-    conditions: dict[str, dict[str, object]] = {
-        field: {"key": field, "operator": "present"}
-        for field in profile.decision_context_fields
+    if actor_class is None:
+        if len(profile.actor_classes) != 1:
+            raise ValueError("actor_class is required for a multi-actor authority profile")
+        actor_class = profile.actor_classes[0]
+    try:
+        binding = profile.actor_binding(actor_class)
+    except KeyError as exc:
+        raise ValueError(f"actor class {actor_class} is not bound by the profile") from exc
+    conditions = {
+        str(predicate["key"]): dict(predicate) for predicate in binding.predicates
     }
     conditions.update(
         {
             "dependency_evidence_digest": {
                 "key": "dependency_evidence_digest",
                 "operator": "present",
+                "value_type": "sha256_digest",
             },
             "dependency_floor_satisfied": {
                 "key": "dependency_floor_satisfied",
                 "operator": "equals",
                 "value": True,
+                "value_type": "boolean",
+            },
+            "grant_effect_satisfied": {
+                "key": "grant_effect_satisfied",
+                "operator": "equals",
+                "value": True,
+                "value_type": "boolean",
             },
             "grant_operation": {
                 "key": "grant_operation",
                 "operator": "equals",
                 "value": profile.grant_operation,
+                "value_type": "string",
             },
             "requested_effect_code": {
                 "key": "requested_effect_code",
                 "operator": "equals",
                 "value": profile.max_effect_code,
+                "value_type": "string",
             },
             "requested_max_state_transitions": {
                 "key": "requested_max_state_transitions",
-                "operator": "equals",
+                "operator": "less_than_or_equal",
                 "value": profile.max_state_transitions,
+                "value_type": "integer",
             },
             "requested_max_targets": {
                 "key": "requested_max_targets",
-                "operator": "equals",
+                "operator": "less_than_or_equal",
                 "value": profile.max_targets,
+                "value_type": "integer",
             },
         }
     )
     return tuple(conditions[key] for key in sorted(conditions))
 
 
+_AUTHORITY_PROTECTED_SOD_GROUPS = (
+    ("attestor", ("independent_canary_attestor", "release_attestor")),
+    (
+        "author",
+        (
+            "change_author",
+            "community_contributor",
+            "content_proposer",
+            "human_maintainer",
+            "research_proposer",
+        ),
+    ),
+    ("sealer", ("independent_epoch_sealer",)),
+    ("verifier", ("independent_verifier",)),
+)
+
+
+def _is_synthetic_offline_principal(value: object) -> bool:
+    """Recognize fixture identities without claiming provider authentication."""
+
+    if type(value) is not str or not value.startswith("synthetic:"):
+        return False
+    return _is_authority_token(value.removeprefix("synthetic:"))
+
+
 def validate_authority_policy_closure(constitution: Any) -> None:
     """Reject noncatalog, overbroad, duplicate, or weaker allow-rule paths."""
 
+    if getattr(constitution, "schema_major", None) != 2:
+        raise ValueError("authority conformance requires Constitution schema major 2")
+    document = constitution.document
+    if document.get("schema_version") != AUTHORITY_CONSTITUTION_SCHEMA_VERSION:
+        raise ValueError(
+            "authority conformance requires exact Constitution schema version "
+            f"{AUTHORITY_CONSTITUTION_SCHEMA_VERSION}"
+        )
+    if (
+        document.get("lifecycle_state") != "effective"
+        or document.get("effective_commit") != "$SELF"
+    ):
+        raise ValueError(
+            "authority conformance requires lifecycle_state effective bound to "
+            "effective_commit $SELF"
+        )
+    actor_descriptors = document.get("actor_classes", {})
+    actual_actor_automation = {
+        actor: descriptor.get("automated")
+        for actor, descriptor in actor_descriptors.items()
+        if isinstance(descriptor, dict)
+    }
+    if not _exact_authority_value_equal(
+        actual_actor_automation, dict(AUTHORITY_ACTOR_AUTOMATION)
+    ):
+        raise ValueError(
+            "authority conformance requires the exact reviewed actor-class "
+            "automation descriptors"
+        )
+    protected_surfaces = set(document.get("protected_surfaces", ()))
+    missing_protected_surfaces = sorted(
+        AUTHORITY_MINIMUM_PROTECTED_SURFACES - protected_surfaces
+    )
+    if missing_protected_surfaces:
+        raise ValueError(
+            "authority conformance omits reviewed protected surfaces: "
+            f"{missing_protected_surfaces}"
+        )
+    unprotected_components = [
+        path
+        for path in AUTHORITY_EVALUATOR_COMPONENT_PATHS
+        if constitution.classify_path(path) != "protected_surface"
+    ]
+    if unprotected_components:
+        raise ValueError(
+            "authority conformance classifies evaluator components as public: "
+            f"{unprotected_components}"
+        )
+    if not _exact_authority_value_equal(
+        document.get("emergency_controls"), dict(_AUTHORITY_EMERGENCY_CONTROLS)
+    ):
+        raise ValueError(
+            "authority conformance requires the exact reviewed emergency controls"
+        )
+    expected_amendment = dict(_AUTHORITY_AMENDMENT_PROCEDURE)
+    expected_amendment["required_state_sequence"] = list(
+        _AUTHORITY_AMENDMENT_PROCEDURE["required_state_sequence"]
+    )
+    if not _exact_authority_value_equal(
+        document.get("amendment_procedure"), expected_amendment
+    ):
+        raise ValueError(
+            "authority conformance requires the exact reviewed amendment procedure"
+        )
     try:
         rules = constitution.rules
     except (AttributeError, KeyError, TypeError) as exc:
         raise ValueError("constitution does not expose validated policy rules") from exc
+    deny_rule_ids = sorted(
+        rule["rule_id"] for rule in rules if rule.get("effect") == "deny"
+    )
+    if deny_rule_ids:
+        raise ValueError(
+            "authority default-deny class-policy oracle must not contain explicit "
+            f"deny rules: {deny_rule_ids}"
+        )
     seen_paths: set[tuple[str, str, str]] = set()
     for rule in rules:
         if rule.get("effect") != "allow":
             continue
-        for action in rule["actions"]:
-            for resource in rule["resources"]:
-                pair = (action, resource)
-                profile = REQUIRED_AUTHORITY_PROFILES.get(
-                    pair
-                ) or POLICY_ONLY_READ_PROFILES.get(pair)
-                if profile is None:
-                    raise ValueError(
-                        f"allow rule {rule['rule_id']} contains noncatalog pair "
-                        f"{action}/{resource}"
-                    )
-                if not set(rule["actors"]).issubset(profile.actor_classes):
-                    raise ValueError(
-                        f"allow rule {rule['rule_id']} widens actors for "
-                        f"{action}/{resource}"
-                    )
-                if rule.get("conditions", []) != list(
-                    expected_authority_policy_conditions(profile)
-                ):
-                    raise ValueError(
-                        f"allow rule {rule['rule_id']} has a noncanonical predicate "
-                        f"for {action}/{resource}"
-                    )
-                for actor in rule["actors"]:
-                    path = (actor, action, resource)
-                    if path in seen_paths:
-                        raise ValueError(
-                            f"duplicate allow path for {actor}/{action}/{resource}"
-                        )
-                    seen_paths.add(path)
+        if not all(len(rule[field]) == 1 for field in ("actors", "actions", "resources")):
+            raise ValueError(
+                f"allow rule {rule['rule_id']} must bind one atomic actor/action/resource path"
+            )
+        actor = rule["actors"][0]
+        action = rule["actions"][0]
+        resource = rule["resources"][0]
+        pair = (action, resource)
+        profile = REQUIRED_AUTHORITY_PROFILES.get(
+            pair
+        ) or POLICY_ONLY_READ_PROFILES.get(pair)
+        if profile is None or actor not in profile.actor_classes:
+            raise ValueError(
+                f"allow rule {rule['rule_id']} contains noncatalog path "
+                f"{actor}/{action}/{resource}"
+            )
+        if rule.get("reason_code") != AUTHORITY_ALLOW_REASON_CODE:
+            raise ValueError(
+                f"allow rule {rule['rule_id']} must use offline-only reason code "
+                f"{AUTHORITY_ALLOW_REASON_CODE}"
+            )
+        predicates = constitution.predicates_for_rule(rule["rule_id"])
+        if not _exact_authority_value_equal(
+            [predicate.to_payload() for predicate in predicates],
+            list(expected_authority_policy_conditions(profile, actor)),
+        ):
+            raise ValueError(
+                f"allow rule {rule['rule_id']} has a noncanonical predicate "
+                f"for {actor}/{action}/{resource}"
+            )
+        path = (actor, action, resource)
+        if path in seen_paths:
+            raise ValueError(f"duplicate allow path for {actor}/{action}/{resource}")
+        seen_paths.add(path)
+
+    expected_paths = {
+        (actor, action, resource)
+        for (action, resource), profile in {
+            **REQUIRED_AUTHORITY_PROFILES,
+            **POLICY_ONLY_READ_PROFILES,
+        }.items()
+        for actor in profile.actor_classes
+    }
+    if seen_paths != expected_paths:
+        missing = sorted(expected_paths - seen_paths)
+        extra = sorted(seen_paths - expected_paths)
+        raise ValueError(
+            f"authority allow-path closure mismatch: missing={missing}, extra={extra}"
+        )
+
+    sod_rules = constitution.separation_of_duty_rules
+    if len(sod_rules) != 1:
+        raise ValueError("authority conformance requires one protected-lineage SoD rule")
+    sod_rule = sod_rules[0]
+    actual_groups = tuple(
+        (group.duty, tuple(group.actor_classes)) for group in sod_rule.groups
+    )
+    if (
+        sod_rule.scope != "protected_change_lineage"
+        or sod_rule.constraint
+        != "distinct_authenticated_principal_across_groups"
+        or actual_groups != _AUTHORITY_PROTECTED_SOD_GROUPS
+    ):
+        raise ValueError("authority protected-lineage SoD rule is not exact")
+
+    # Before SPEC-024 defines authenticated runtime resolution, these optional
+    # bindings are only synthetic offline fixtures. Provider handles would make
+    # case, Unicode, and account-linking aliases look falsely authoritative.
+    invalid_principals = sorted(
+        (actor, principal)
+        for actor, principals in constitution.identity_bindings.items()
+        for principal in principals
+        if not _is_synthetic_offline_principal(principal)
+    )
+    if invalid_principals:
+        raise ValueError(
+            "authority offline identity bindings require synthetic:<lowercase_token> "
+            "fixture principals; runtime/provider identity requires future SPEC-024 "
+            f"resolver evidence: {invalid_principals}"
+        )
+
+    actor_duties = {
+        actor: duty
+        for duty, actors in _AUTHORITY_PROTECTED_SOD_GROUPS
+        for actor in actors
+    }
+    principal_duties: dict[str, set[str]] = {}
+    for actor, principals in constitution.identity_bindings.items():
+        duty = actor_duties.get(actor)
+        if duty is None:
+            continue
+        for principal in principals:
+            principal_duties.setdefault(principal, set()).add(duty)
+    conflicts = {
+        principal: sorted(duties)
+        for principal, duties in principal_duties.items()
+        if len(duties) > 1
+    }
+    if conflicts:
+        raise ValueError(
+            "offline identity bindings span protected-lineage duties: "
+            f"{conflicts}"
+        )
 
 
 def parse_authority_policy_conformance(
@@ -2069,6 +3267,8 @@ def parse_authority_policy_conformance(
     root_keys = {
         "kind",
         "schema_version",
+        "scope",
+        "runtime_authority",
         "constitution_revision",
         "registry_version",
         "constitution_policy",
@@ -2090,6 +3290,12 @@ def parse_authority_policy_conformance(
         raise ValueError(
             "authority policy conformance receipt schema_version must be "
             f"{AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION}"
+        )
+    if data["scope"] != AUTHORITY_CONFORMANCE_SCOPE:
+        raise ValueError("authority policy conformance receipt scope is invalid")
+    if data["runtime_authority"] != AUTHORITY_RUNTIME_AUTHORITY:
+        raise ValueError(
+            "authority policy conformance receipt must declare runtime_authority none"
         )
     if (
         type(data["constitution_revision"]) is not int
@@ -2123,15 +3329,33 @@ def parse_authority_policy_conformance(
         )
 
     validator_bundle = data["validator_bundle"]
-    expected_bundle = build_authority_evaluator_bundle(evaluator_component_bytes)
-    runtime_bundle = build_authority_evaluator_bundle(
-        authority_evaluator_runtime_component_bytes()
+    component_entries = (
+        tuple(evaluator_component_bytes.items())
+        if isinstance(evaluator_component_bytes, Mapping)
+        else tuple(evaluator_component_bytes)
     )
-    if expected_bundle != runtime_bundle:
+    expected_bundle = build_authority_evaluator_bundle(component_entries)
+    provided_components = dict(component_entries)
+    runtime_components = dict(authority_evaluator_runtime_component_bytes())
+    if any(
+        provided_components.get(path) != runtime_components[path]
+        for path in _AUTHORITY_EVALUATOR_EXECUTABLE_COMPONENT_PATHS
+    ):
         raise ValueError(
             "authority policy conformance receipt component bytes do not match "
             "the executing evaluator"
         )
+    try:
+        parse_authority_vocabulary_schema(
+            provided_components[AUTHORITY_VOCABULARY_SCHEMA_PATH],
+            expected_digest=registry.schema_digest,
+            expected_version=registry.schema_version,
+        )
+    except ValueError as exc:
+        raise ValueError(
+            "authority policy conformance receipt evaluator bundle contains an "
+            f"invalid schema component: {exc}"
+        ) from exc
     if (
         not isinstance(validator_bundle, dict)
         or set(validator_bundle) != AUTHORITY_CONFORMANCE_VALIDATOR_BUNDLE_KEYS
@@ -2141,7 +3365,9 @@ def parse_authority_policy_conformance(
             or set(component) != AUTHORITY_CONFORMANCE_VALIDATOR_COMPONENT_KEYS
             for component in validator_bundle.get("components", [])
         )
-        or validator_bundle != expected_bundle.to_receipt_value()
+        or not _exact_authority_value_equal(
+            validator_bundle, expected_bundle.to_receipt_value()
+        )
     ):
         raise ValueError(
             "authority policy conformance receipt binds the wrong evaluator bundle"
@@ -2159,6 +3385,8 @@ def parse_authority_policy_conformance(
         for result in expected_results
         if result["policy_decision"] != result["expected_policy_decision"]
         or result["registry_decision"] != result["expected_registry_decision"]
+        or result["registry_reason_code"]
+        != result["expected_registry_reason_code"]
         or result["actual_decision"] != result["expected_decision"]
     ]
     if nonconforming:
@@ -2168,9 +3396,11 @@ def parse_authority_policy_conformance(
             f"{first['action']}/{first['resource']}/{first['case']} expected "
             f"policy={first['expected_policy_decision']}, "
             f"registry={first['expected_registry_decision']}, "
+            f"registry_reason={first['expected_registry_reason_code']}, "
             f"combined={first['expected_decision']}; got "
             f"policy={first['policy_decision']}, "
             f"registry={first['registry_decision']}, "
+            f"registry_reason={first['registry_reason_code']}, "
             f"combined={first['actual_decision']}"
         )
     if (
@@ -2191,7 +3421,7 @@ def parse_authority_policy_conformance(
             raise ValueError(
                 f"authority policy conformance case {index} does not match the closed schema"
             )
-    if cases != expected_results:
+    if not _exact_authority_value_equal(cases, expected_results):
         raise ValueError(
             "authority policy conformance receipt does not cover every manifest case exactly"
         )
@@ -2203,6 +3433,8 @@ def parse_authority_policy_conformance(
         path=AUTHORITY_CONFORMANCE_RECEIPT_PATH,
         digest=f"sha256:{hashlib.sha256(exact_bytes).hexdigest()}",
         schema_version=data["schema_version"],
+        scope=data["scope"],
+        runtime_authority=data["runtime_authority"],
         constitution_policy_digest=policy["digest"],
         registry_digest=data["registry_digest"],
         fixture_manifest_digest=data["fixture_manifest_digest"],
@@ -2224,6 +3456,39 @@ def load_authority_vocabulary(
     *,
     expected_constitution_revision: int,
 ) -> AuthorityVocabularyBinding:
+    present_metadata = AUTHORITY_SPEC_METADATA_KEYS.intersection(metadata)
+    if present_metadata != AUTHORITY_SPEC_METADATA_KEYS:
+        missing = sorted(AUTHORITY_SPEC_METADATA_KEYS - present_metadata)
+        extra_state = "partial" if present_metadata else "absent"
+        raise ValueError(
+            "authority vocabulary metadata must provide the atomic six-key set; "
+            f"state={extra_state}, missing={missing}"
+        )
+    schema_path_value = metadata.get("Authority vocabulary schema")
+    schema_digest = metadata.get("Authority vocabulary schema digest")
+    schema_version_value = metadata.get("Authority vocabulary schema version")
+    if schema_path_value != AUTHORITY_VOCABULARY_SCHEMA_PATH:
+        raise ValueError(
+            "Authority vocabulary schema must be the canonical path "
+            f"{AUTHORITY_VOCABULARY_SCHEMA_PATH}"
+        )
+    if schema_digest is None or re.fullmatch(
+        r"sha256:[0-9a-f]{64}", schema_digest
+    ) is None:
+        raise ValueError(
+            "Authority vocabulary schema digest must be sha256:<64 lowercase hex>"
+        )
+    if schema_version_value != AUTHORITY_VOCABULARY_SCHEMA_VERSION:
+        raise ValueError(
+            "Authority vocabulary schema version must be "
+            f"{AUTHORITY_VOCABULARY_SCHEMA_VERSION}"
+        )
+    schema_binding = load_authority_vocabulary_schema(
+        root,
+        expected_digest=schema_digest,
+        expected_version=schema_version_value,
+    )
+
     path_value = metadata.get("Authority vocabulary")
     digest = metadata.get("Authority vocabulary digest")
     version_value = metadata.get("Authority vocabulary version")
@@ -2252,6 +3517,7 @@ def load_authority_vocabulary(
     )
     binding = parse_authority_vocabulary(
         registry_bytes,
+        schema_binding=schema_binding,
         expected_digest=digest,
         expected_constitution_revision=expected_constitution_revision,
         expected_registry_version=registry_version,
@@ -2298,3 +3564,5 @@ def load_authority_vocabulary(
         evaluator_component_bytes=evaluator_component_bytes,
     )
     return replace(binding, policy_conformance=conformance)
+    "AuthorityActorBinding",
+    "AuthorityDependencyRequirement",
