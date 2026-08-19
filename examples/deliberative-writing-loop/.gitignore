@@ -1,0 +1,8 @@
+runs/
+eval/results/
+personas/*/persona.json
+__pycache__/
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
