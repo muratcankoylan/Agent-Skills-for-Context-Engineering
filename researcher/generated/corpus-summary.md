@@ -4,7 +4,7 @@
 This is a generated view of canonical repository artifacts, not a second source of truth.
 
 - Schema: `1.0.0`
-- Source tree: `sha256:cdd6e53336fa690cfaf9ee97ba4da08225611477c0addf2e2d4c392b5ed5c49d`
+- Source tree: `sha256:9c30d9a443a23bfcbb75c7234516bcf6064e57a670beb36a976b5d416e86e9b3`
 - Unresolved references: `0`
 
 | Artifact | Count |
@@ -19,7 +19,7 @@ This is a generated view of canonical repository artifacts, not a second source 
 | Adversarial scenarios | 7 |
 | Adversarial goldens | 7 |
 | Effectiveness tasks | 1 |
-| Example projects | 6 |
+| Example projects | 7 |
 
 ## Compatibility
 
