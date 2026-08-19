@@ -57,13 +57,37 @@ Every stage writes artifacts to `runs/<run-id>/`; a run is resumable and auditab
 If a paragraph still fails after the repair budget, the harness keeps the best version
 by deterministic flag count and records the residual flags rather than hiding them.
 
+## Configuration
+
+Copy the template and fill in your keys:
+
+```bash
+cp .env.example .env
+$EDITOR .env
+dwl check-env        # masked presence report, makes no API calls
+```
+
+`.env` is gitignored. The CLI loads it automatically from this directory or any parent;
+pass `--env-file path/to/other.env` to point elsewhere. Values already present in the
+real environment always win over the file, so exported shell variables and
+platform-injected secrets are never silently overridden by a stale local file.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `ANTHROPIC_API_KEY` | for live runs | Claude generation and judging |
+| `OPENAI_API_KEY` | for live runs | OpenAI generation and judging |
+| `PANGRAM_API_KEY` | optional | detector diagnostic column; omit to skip it |
+| `DWL_ANTHROPIC_MODEL` / `DWL_OPENAI_MODEL` | optional | pin dated model snapshots for reproducible benchmarks |
+| `DWL_*_URL` | optional | endpoint overrides for proxies or gateways |
+
+The test suite, `--dry-run` forecasts, and `--provider none` persona compilation all work
+with no keys at all.
+
 ## Quick start
 
 ```bash
 pip install -e ".[dev]"
-pytest                      # 37 tests, no network required
-
-export ANTHROPIC_API_KEY=... OPENAI_API_KEY=...   # PANGRAM_API_KEY optional
+pytest                      # 47 tests, no network required
 
 # 1. Compile a persona (see personas/README.md for corpus guidance)
 dwl compile-persona --name sample-essayist \

@@ -15,17 +15,40 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
 from .adapters import Budget, make_adapter
 from .adapters.pangram import PangramClient
 from .benchmark import BenchItem, judge_symmetric, run_item
+from .env import find_env_file, key_status, load_env
 from .harness import RunConfig, WritingRun
 from .persona import Persona, compile_persona
 
 # Worst-case calls per condition for a ~900-word piece (8 paragraphs).
 _CALL_FORECAST = {"oneshot": 1, "selfrefine": 3, "dwl": 1 + 8 * (1 + 3 + 3 + 1)}
+
+
+def _cmd_check_env(args: argparse.Namespace) -> int:
+    """Report which keys are visible, masked. Makes no API calls."""
+    env_path = Path(args.env_file) if args.env_file else find_env_file()
+    print(f".env file: {env_path if env_path else 'not found (using real environment only)'}")
+    status = key_status()
+    for name, masked in status.items():
+        required = "optional" if name == "PANGRAM_API_KEY" else "required for live runs"
+        state = "set" if masked != "<unset>" else "MISSING"
+        print(f"  {name}: {state} {masked} ({required})")
+    for name in ("DWL_ANTHROPIC_MODEL", "DWL_OPENAI_MODEL"):
+        pinned = os.environ.get(name)
+        print(f"  {name}: {pinned if pinned else 'unpinned (adapter default)'}")
+    missing = [n for n in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY") if status[n] == "<unset>"]
+    if missing:
+        print(
+            "\nAdd the missing keys to .env (copy .env.example) or export them. "
+            "Deterministic tests and --dry-run work without any keys."
+        )
+    return 0
 
 
 def _cmd_compile_persona(args: argparse.Namespace) -> int:
@@ -178,7 +201,11 @@ def _cmd_judge(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="dwl", description=__doc__)
+    parser.add_argument("--env-file", help="path to a .env file (default: nearest .env in this directory or a parent)")
     sub = parser.add_subparsers(dest="command", required=True)
+
+    p = sub.add_parser("check-env", help="report which API keys are visible (masked, no API calls)")
+    p.set_defaults(func=_cmd_check_env)
 
     p = sub.add_parser("compile-persona", help="compile a writer corpus into a persona artifact")
     p.add_argument("--name", required=True)
@@ -223,6 +250,7 @@ def main(argv: list[str] | None = None) -> int:
     p.set_defaults(func=_cmd_judge)
 
     args = parser.parse_args(argv)
+    load_env(Path(args.env_file) if args.env_file else None)
     return args.func(args)
 
 

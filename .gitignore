@@ -26,6 +26,11 @@ ENV/
 env/
 .venv
 
+# Local secrets: only .env.example templates are committed
+.env
+.env.*
+!.env.example
+
 # IDE
 .vscode/
 .idea/
