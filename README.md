@@ -200,6 +200,7 @@ The [examples](examples/) folder contains complete system designs that demonstra
 | [book-sft-pipeline](examples/book-sft-pipeline/) | Train models to write in any author's style. Includes Gertrude Stein case study with 70% human score on Pangram, $2 total cost | project-development, context-compression, multi-agent-patterns, evaluation |
 | [interleaved-thinking](examples/interleaved-thinking/) | Reasoning trace optimizer that captures, analyzes, and converts agent failure patterns into generated skills | evaluation, advanced-evaluation, context-degradation, harness-engineering |
 | [long-horizon-prompt-lab](examples/long-horizon-prompt-lab/) | Production-ready educational website: method guide, copyable task-brief template, four complete prompt rewrites, structural audits, and a caveated research/vendor reference catalog | long-horizon-prompting, harness-engineering, multi-agent-patterns, advanced-evaluation |
+| [deliberative-writing-loop](examples/deliberative-writing-loop/) | Inference-time writing harness: persona compilation (deterministic stylometry + tacit-knowledge extraction), paragraph contracts, sentence-level critique with deterministic slop gates, trace compaction, and a three-condition benchmark. No fine-tuning; the no-training counterpart to book-sft-pipeline | context-compression, memory-systems, evaluation, advanced-evaluation, harness-engineering, long-horizon-prompting |
 
 Each example includes:
 - Complete PRD with architecture decisions

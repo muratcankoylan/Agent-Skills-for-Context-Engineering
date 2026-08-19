@@ -840,13 +840,18 @@
       ]
     },
     "examples": {
-      "count": 6,
+      "count": 7,
       "owner": "examples/*/README.md",
       "records": [
         {
           "digest": "sha256:e80dc5fe7391c3a5745c574814a1502d24ba9acea91fcbb5dc7ec7d38eb43545",
           "id": "book-sft-pipeline",
           "path": "examples/book-sft-pipeline"
+        },
+        {
+          "digest": "sha256:4b8ceb390b738a3ba93dff0c98a1e7b41bf7b977a3f6b49f00ee0b5a9c711d48",
+          "id": "deliberative-writing-loop",
+          "path": "examples/deliberative-writing-loop"
         },
         {
           "digest": "sha256:4ac5d0f82bfa76166bad86e703f4e84c3f50d5d9592d356d46db5a6aa2f19855",
@@ -2552,12 +2557,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:cdd6e53336fa690cfaf9ee97ba4da08225611477c0addf2e2d4c392b5ed5c49d",
+    "digest": "sha256:9c30d9a443a23bfcbb75c7234516bcf6064e57a670beb36a976b5d416e86e9b3",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:cdd6e53336fa690cfaf9ee97ba4da08225611477c0addf2e2d4c392b5ed5c49d",
+  "source_tree_digest": "sha256:9c30d9a443a23bfcbb75c7234516bcf6064e57a670beb36a976b5d416e86e9b3",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
@@ -2578,6 +2583,11 @@
       "digest": "sha256:e80dc5fe7391c3a5745c574814a1502d24ba9acea91fcbb5dc7ec7d38eb43545",
       "path": "examples/book-sft-pipeline/README.md",
       "size_bytes": 2795
+    },
+    {
+      "digest": "sha256:4b8ceb390b738a3ba93dff0c98a1e7b41bf7b977a3f6b49f00ee0b5a9c711d48",
+      "path": "examples/deliberative-writing-loop/README.md",
+      "size_bytes": 6801
     },
     {
       "digest": "sha256:4ac5d0f82bfa76166bad86e703f4e84c3f50d5d9592d356d46db5a6aa2f19855",
