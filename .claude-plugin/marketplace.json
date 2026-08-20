@@ -26,6 +26,7 @@
         "./skills/filesystem-context",
         "./skills/hosted-agents",
         "./skills/evaluation",
+        "./skills/rendered-ui-finish-gate",
         "./skills/advanced-evaluation",
         "./skills/harness-engineering",
         "./skills/project-development",
