@@ -62,6 +62,9 @@ Orchestrator-worker systems can compound tokens when supervisors accumulate long
 **Evaluation Frameworks**
 Production agent evaluation requires deterministic checks and multi-dimensional rubrics covering factual accuracy, completeness, tool efficiency, and process quality. Use model judges only after structure, evidence, and rubric math are valid; route judge design, pairwise comparison, and bias mitigation to Advanced Evaluation.
 
+**Rendered UI Finish Gates**
+Interface work needs its own evidence boundary. Preserve product context in a design contract and state matrix, inspect representative renders across required states and viewports, then run deterministic interaction and accessibility checks before treating a UI as complete. The `rendered-ui-finish-gate` skill owns this interface-specific review; `evaluation` owns the broader agent or pipeline rubric.
+
 **Harness Engineering**
 Reliable autonomous agents need explicit operating loops around the model: locked metrics, editable surfaces, durable logs, novelty checks, rollback rules, and human approval boundaries. Harnesses prevent agents from weakening the evaluator, losing state across compaction, or turning ambiguous goals into unreviewable changes.
 
@@ -107,6 +110,7 @@ Internal skills in this collection:
 - [context-optimization](skills/context-optimization/SKILL.md)
 - [latent-briefing](skills/latent-briefing/SKILL.md)
 - [evaluation](skills/evaluation/SKILL.md)
+- [rendered-ui-finish-gate](skills/rendered-ui-finish-gate/SKILL.md)
 - [advanced-evaluation](skills/advanced-evaluation/SKILL.md)
 - [harness-engineering](skills/harness-engineering/SKILL.md)
 - [self-improvement-loops](skills/self-improvement-loops/SKILL.md)

@@ -52,6 +52,7 @@ These skills address the ongoing operation and optimization of agent systems.
 | [context-optimization](skills/context-optimization/) | Apply compaction, masking, and caching strategies |
 | [latent-briefing](skills/latent-briefing/) | Share task-relevant orchestrator state with workers via task-guided KV cache compaction when the worker runtime is controllable |
 | [evaluation](skills/evaluation/) | Build evaluation frameworks for agent systems |
+| [rendered-ui-finish-gate](skills/rendered-ui-finish-gate/) | Evaluate web and mobile interfaces through product context, state coverage, rendered evidence, and deterministic finish checks |
 | [advanced-evaluation](skills/advanced-evaluation/) | Master LLM-as-a-Judge techniques: direct scoring, pairwise comparison, rubric generation, and bias mitigation |
 | [harness-engineering](skills/harness-engineering/) | Design autonomous agent harnesses with locked metrics, durable logs, novelty gates, rollback, and human approval boundaries |
 | [self-improvement-loops](skills/self-improvement-loops/) | **NEW** Build loops where the harness itself is the optimization target: RSI, meta-harness search, failure-driven self-edits, evolutionary scaffold search, and acceptance gates for self-modifying systems |
@@ -134,6 +135,7 @@ This installs all published skills in a single plugin. Skills are activated auto
 | `filesystem-context` | Moving large or durable context into files, creating scratchpads, supporting just-in-time discovery, or coordinating agents through shared artifacts |
 | `hosted-agents` | Running coding agents in remote sandboxes, background environments, warm pools, or multiplayer agent infrastructure |
 | `evaluation` | Creating deterministic checks, rubrics, regression suites, production monitoring, or quality gates for agent behavior |
+| `rendered-ui-finish-gate` | Reviewing web or mobile interfaces through product context, required states, rendered evidence, accessibility checks, and finish gates |
 | `advanced-evaluation` | Using LLM judges, pairwise comparison, calibration, bias mitigation, or human-aligned quality assessment |
 | `harness-engineering` | Designing autonomous loops with locked evaluators, editable surfaces, durable logs, novelty gates, rollback, and approval boundaries |
 | `self-improvement-loops` | Building loops that modify themselves: failure-driven harness self-edits, meta-harness search, evolutionary scaffold search, context mechanism evolution, and acceptance gates for self-modification |
@@ -182,7 +184,7 @@ cp -R skills/context-fundamentals .agents/skills/
 
 Do not flatten `SKILL.md` into a single file at `.claude/skills/context-fundamentals.md`. That breaks relative `references/` paths and violates the Agent Skills directory spec used by Cursor, Claude Code, and Codex.
 
-Available skills: `context-fundamentals`, `context-degradation`, `context-compression`, `context-optimization`, `latent-briefing`, `multi-agent-patterns`, `long-horizon-prompting`, `memory-systems`, `tool-design`, `filesystem-context`, `hosted-agents`, `evaluation`, `advanced-evaluation`, `harness-engineering`, `self-improvement-loops`, `project-development`, `bdi-mental-states`
+Available skills: `context-fundamentals`, `context-degradation`, `context-compression`, `context-optimization`, `latent-briefing`, `multi-agent-patterns`, `long-horizon-prompting`, `memory-systems`, `tool-design`, `filesystem-context`, `hosted-agents`, `evaluation`, `rendered-ui-finish-gate`, `advanced-evaluation`, `harness-engineering`, `self-improvement-loops`, `project-development`, `bdi-mental-states`
 
 ### For Custom Implementations
 

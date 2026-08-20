@@ -54,6 +54,13 @@
       "claim_ids": ["claim-evaluation-browsecomp-variance"]
     },
     {
+      "name": "rendered-ui-finish-gate",
+      "path": "skills/rendered-ui-finish-gate/SKILL.md",
+      "activation_scenarios": ["rendered web interface review", "mobile interface state coverage", "UI finish gates", "product-context preservation in UI work", "responsive and accessibility evidence"],
+      "mechanism_ids": ["rendered-artifact-finish-gate"],
+      "claim_ids": []
+    },
+    {
       "name": "filesystem-context",
       "path": "skills/filesystem-context/SKILL.md",
       "activation_scenarios": ["tool-output offloading", "durable scratchpads", "just-in-time file discovery", "cross-agent handoff files"],
