@@ -1,0 +1,8 @@
+# These frozen unified-diff artifacts contain literal single-space empty context
+# records. Preserve their manifest-bound bytes; only blank-at-EOL checking is
+# disabled for these exact historical files, not source code or future patches.
+docs/product/pr-updates-2026-09-29/pr-134-transport.patch whitespace=-blank-at-eol
+docs/product/pr-updates-2026-09-29/pr-83-installer-replacement.patch whitespace=-blank-at-eol
+docs/product/pr-updates-2026-09-29/pr-80-frontmatter-replacement.patch whitespace=-blank-at-eol
+docs/product/pr-updates-2026-09-29/pr-92-calculator-replacement.patch whitespace=-blank-at-eol
+docs/product/pr-updates-2026-09-29/pr-113-locking-replacement.patch whitespace=-blank-at-eol

@@ -291,4 +291,3 @@ Not executed: full isolated PR checkout tests, external action installers, API c
 6. Treat #40, #95, #38, and #24 as separate scope/curation decisions; prefer a focused example or external resource when appropriate. Treat #17 as superseded.
 
 Before any subsequent merge recommendation, re-fetch the head SHA, resolve conflicts against the intended release base, regenerate derived inventory, run the current trusted deterministic gates and relevant unit/security tests in a credential-free isolated checkout, and review the resulting diff. Paid effectiveness evaluation requires its own explicit authority, immutable experiment identity, cumulative reservation, and retained evidence. A clean merge bit or an author-reported score is not that evidence.
-
