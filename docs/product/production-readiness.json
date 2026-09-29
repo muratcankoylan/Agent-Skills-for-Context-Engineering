@@ -1,0 +1,1755 @@
+{
+  "authority": {
+    "active_environment_id": null,
+    "authoritative": false,
+    "baseline_commit": "c6cd52017b247804373339e1c3c103d42554b0a1",
+    "candidate_commit": null,
+    "candidate_state": "uncommitted_worktree",
+    "certification_mode": "blocked_assessment_only",
+    "notice": "This file assesses an uncommitted local worktree against the named baseline. It is non-authoritative and cannot authorize draft-spec implementation, external effects, runtime activation, promotion, merge, or deployment.",
+    "production_ready": false,
+    "production_scope": []
+  },
+  "blockers": [
+    "The proposed stack baseline is not authoritative until human-merged into protected main in dependency order, and the local product candidate is still an uncommitted worktree.",
+    "SPEC-000 through SPEC-003 revision 1 are terminal amended revisions; lawful replacement revisions are required before dependent runtime work can advance.",
+    "SPEC-004 through SPEC-026 remain draft and cannot authorize implementation or activation.",
+    "The private event journal, work kernel, command bus, GitHub reconciler, status projections, identity broker, and deployment controller are not operational.",
+    "The operator web UI has a real read-only loopback observation adapter plus separate fixture controls, but no authenticated authoritative projection or command API.",
+    "Stage-3 effectiveness evaluation has insufficient coverage and Stage-4 composition evaluation is not implemented.",
+    "No accepted and attested isolation provider exists for candidate, community, or hidden-evaluation execution.",
+    "No hosted deployment has measured availability, latency, recovery, security, or cost against the proposed budgets.",
+    "Production branch rules, required checks, merge strategy, and proposer non-bypass must be verified and enforced by the human maintainer."
+  ],
+  "capabilities": [
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The candidate has not been promoted by human merge and release.",
+        "Effectiveness and composition evidence is incomplete."
+      ],
+      "category": "public_product",
+      "description": "Versioned public collection of context-engineering and harness-engineering skills.",
+      "evidence": [
+        "SKILL.md",
+        ".claude-plugin/marketplace.json",
+        ".plugin/plugin.json"
+      ],
+      "id": "skills.catalog",
+      "product_id": "skills-distribution",
+      "required_specs": [
+        "SPEC-001",
+        "SPEC-003"
+      ],
+      "status": "available"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The assessed candidate is not a human-promoted release."
+      ],
+      "category": "public_product",
+      "description": "Claude and Open Plugins packaging plus supported project-local installation layouts.",
+      "evidence": [
+        ".claude-plugin/marketplace.json",
+        ".plugin/plugin.json",
+        "researcher/scripts/validate_platform_compat.py"
+      ],
+      "id": "skills.packaging",
+      "product_id": "skills-distribution",
+      "required_specs": [
+        "SPEC-001",
+        "SPEC-002",
+        "SPEC-003"
+      ],
+      "status": "available"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "Required-check enforcement and proposer non-bypass must be verified on protected main."
+      ],
+      "category": "public_product",
+      "description": "Deterministic repository, schema, public-boundary, governance, compatibility, and activation validation.",
+      "evidence": [
+        ".github/workflows/validate.yml",
+        "researcher/scripts/validate_repo.py",
+        "researcher/scripts/validate_public_repo.py"
+      ],
+      "id": "skills.release-validation",
+      "product_id": "skills-distribution",
+      "required_specs": [
+        "SPEC-000",
+        "SPEC-001",
+        "SPEC-002",
+        "SPEC-003"
+      ],
+      "status": "implemented"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "One published model remains below the proposed per-model beta target.",
+        "A future production release policy requires accepted SPEC-016, SPEC-017, and SPEC-019 owner contracts."
+      ],
+      "category": "public_product",
+      "description": "Per-model and per-skill routing evaluation with confusion analysis.",
+      "evidence": [
+        "researcher/benchmarks/router/results-published/2026-05-19.md",
+        "researcher/benchmarks/router/prompts.jsonl"
+      ],
+      "id": "skills.router-evaluation",
+      "product_id": "skills-distribution",
+      "required_specs": [
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-019"
+      ],
+      "status": "partial"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "Only one effectiveness task is available.",
+        "Representative held-out and adversarial coverage does not exist."
+      ],
+      "category": "public_product",
+      "description": "Paired measurement of whether loading a skill improves task outcomes.",
+      "evidence": [
+        "researcher/benchmarks/effectiveness",
+        "researcher/benchmarks/PLAN.md"
+      ],
+      "id": "skills.effectiveness-evaluation",
+      "product_id": "skills-distribution",
+      "required_specs": [
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-019"
+      ],
+      "status": "partial"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "Stage-4 composition evaluation is not implemented."
+      ],
+      "category": "public_product",
+      "description": "Regression evaluation for realistic multi-skill combinations and conflicts.",
+      "evidence": [
+        "researcher/benchmarks/PLAN.md"
+      ],
+      "id": "skills.composition-evaluation",
+      "product_id": "skills-distribution",
+      "required_specs": [
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-019"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The existing educational site is not a complete versioned product documentation and correction surface."
+      ],
+      "category": "public_product",
+      "description": "Public catalog, documentation, evidence, release notes, and correction experience.",
+      "evidence": [
+        "README.md",
+        "docs",
+        "examples/long-horizon-prompt-lab"
+      ],
+      "id": "skills.public-documentation",
+      "product_id": "skills-distribution",
+      "required_specs": [
+        "SPEC-002",
+        "SPEC-015",
+        "SPEC-023"
+      ],
+      "status": "partial"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The assessed candidate has not completed the protected-main human release path."
+      ],
+      "category": "public_product",
+      "description": "Human-reviewed merge and public release of exact validated bytes.",
+      "evidence": [
+        "docs/specs/README.md",
+        "researcher/runbooks/pr-readiness.md"
+      ],
+      "id": "skills.human-release",
+      "product_id": "skills-distribution",
+      "required_specs": [],
+      "status": "available"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-000 revision 1 is terminal amended and its replacement is not present."
+      ],
+      "category": "control_plane",
+      "description": "Closed, deny-by-default authority vocabulary and human-only powers.",
+      "evidence": [
+        "docs/specs/SPEC-000-program-constitution.md",
+        "governance/constitution.yaml"
+      ],
+      "id": "control.authority",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-000"
+      ],
+      "status": "blocked"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-001 revision 1 is terminal amended and its replacement is not present."
+      ],
+      "category": "shared_foundation",
+      "description": "Exact source-byte-bound repository inventory and reconciliation.",
+      "evidence": [
+        "docs/specs/SPEC-001-repository-reconciliation.md",
+        "researcher/scripts/build_inventory.py"
+      ],
+      "id": "control.repository-inventory",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-001"
+      ],
+      "status": "blocked"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-002 revision 1 is terminal amended and its replacement is not present."
+      ],
+      "category": "shared_foundation",
+      "description": "Allowlisted public projections with separate public identity.",
+      "evidence": [
+        "docs/specs/SPEC-002-public-private-boundary.md",
+        "governance/export-policy.yaml"
+      ],
+      "id": "control.public-private-boundary",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-002"
+      ],
+      "status": "blocked"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-003 revision 1 is terminal amended and its replacement is not present."
+      ],
+      "category": "shared_foundation",
+      "description": "Runtime-neutral schemas, canonical JSON, artifact references, storage bindings, and candidate freezing.",
+      "evidence": [
+        "docs/specs/SPEC-003-schema-registry.md",
+        "researcher/schemas/registry.json",
+        "researcher/scripts/artifact_store.py"
+      ],
+      "id": "control.artifact-identity",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-003"
+      ],
+      "status": "blocked"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The legacy loop does not implement accepted journal, work-order, command, identity, or deployment owner contracts.",
+        "The assessed baseline still exposes an opt-in launchd installer and an --allow-fetch HTTP path; keep it uninstalled and do not treat mode=dry-run as an effect boundary."
+      ],
+      "category": "legacy_precursor",
+      "description": "Supervised file-based research bookkeeping and validation loop.",
+      "evidence": [
+        "researcher/scripts/research_loop.py",
+        "researcher/scripts/loop_step.py",
+        "researcher/runbooks/continuous-operation.md"
+      ],
+      "id": "control.legacy-research-loop",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-009",
+        "SPEC-010"
+      ],
+      "status": "blocked"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-004 is draft and no authoritative event journal is deployed."
+      ],
+      "category": "control_plane",
+      "description": "Append-only organization event journal, deterministic projections, backup, and shadow migration.",
+      "evidence": [
+        "docs/specs/SPEC-004-event-journal.md"
+      ],
+      "id": "control.event-journal",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-000",
+        "SPEC-001",
+        "SPEC-002",
+        "SPEC-003",
+        "SPEC-004"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-005 is draft and no fenced work-order kernel exists."
+      ],
+      "category": "control_plane",
+      "description": "Typed work orders, scheduler, leases, attempts, budgets, checkpoints, recovery, and reducer.",
+      "evidence": [
+        "docs/specs/SPEC-005-work-orders.md"
+      ],
+      "id": "control.work-orders",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-000",
+        "SPEC-003",
+        "SPEC-004",
+        "SPEC-005"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-006 is draft and no authenticated command bus exists."
+      ],
+      "category": "control_plane",
+      "description": "Authenticated deterministic command grammar and immutable scoped feedback ledger.",
+      "evidence": [
+        "docs/specs/SPEC-006-command-feedback.md"
+      ],
+      "id": "control.command-feedback",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-000",
+        "SPEC-002",
+        "SPEC-003",
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-007 is draft and no production GitHub App identities or reconciler are installed."
+      ],
+      "category": "integration",
+      "description": "Least-privilege GitHub observation, proposal effects, check reporting, and reconciliation.",
+      "evidence": [
+        "docs/specs/SPEC-007-github-pr-lifecycle.md"
+      ],
+      "id": "control.github-lifecycle",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-000",
+        "SPEC-002",
+        "SPEC-003",
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-007"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-008 is draft and current status is not an authoritative event-derived product API."
+      ],
+      "category": "control_plane",
+      "description": "Fresh status projections, traces, health, critical path, cost accounting, and stable blockers.",
+      "evidence": [
+        "docs/specs/SPEC-008-status-observability.md",
+        "researcher/scripts/loop_status.py"
+      ],
+      "id": "control.status-observability",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-000",
+        "SPEC-002",
+        "SPEC-003",
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-007",
+        "SPEC-008"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-009 is draft and the current manual seed file is not a production source registry."
+      ],
+      "category": "research_pipeline",
+      "description": "Versioned source registry, feed eligibility, classification, licensing, and connector policy.",
+      "evidence": [
+        "docs/specs/SPEC-009-source-registry.md",
+        "researcher/discovery/manual-seed.jsonl"
+      ],
+      "id": "control.source-registry",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-003",
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-009"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-010 is draft and production networking remains disabled."
+      ],
+      "category": "research_pipeline",
+      "description": "SSRF-safe bounded retrieval, immutable evidence capture, extraction, and receipts.",
+      "evidence": [
+        "docs/specs/SPEC-010-retrieval-evidence.md"
+      ],
+      "id": "control.retrieval-evidence",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-003",
+        "SPEC-005",
+        "SPEC-009",
+        "SPEC-010"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-011 is draft and existing claims/mechanism files do not implement the owner graph contract."
+      ],
+      "category": "research_pipeline",
+      "description": "Evidence-to-claim, mechanism, contradiction, decision, and merged-outcome graph.",
+      "evidence": [
+        "docs/specs/SPEC-011-evidence-graph.md",
+        "researcher/claims/index.jsonl",
+        "researcher/mechanisms/registry.jsonl"
+      ],
+      "id": "control.evidence-graph",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-002",
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-007",
+        "SPEC-010",
+        "SPEC-011"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-012 is draft and no production context compiler or memory firewall exists."
+      ],
+      "category": "agent_harness",
+      "description": "Deterministic context packages, token budgets, provenance, memory planes, and information firewalls.",
+      "evidence": [
+        "docs/specs/SPEC-012-context-compiler.md"
+      ],
+      "id": "control.context-compiler",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-003",
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-010",
+        "SPEC-011",
+        "SPEC-012"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-013 is draft and documentation owner labels are not authenticated role contracts."
+      ],
+      "category": "agent_harness",
+      "description": "Versioned roles, prompts, skills, tools, capability ceilings, and separation requirements.",
+      "evidence": [
+        "docs/specs/SPEC-013-agent-role-contracts.md",
+        "researcher/orchestration/prompts"
+      ],
+      "id": "control.agent-roles",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-000",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-012",
+        "SPEC-013"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-014 is draft and no executor/environment provider has accepted conformance evidence.",
+        "Untrusted execution must remain disabled."
+      ],
+      "category": "agent_harness",
+      "description": "Provider-neutral executor protocol, Hermes adapter boundary, environment attestation, and isolation.",
+      "evidence": [
+        "docs/specs/SPEC-014-runtime-hermes.md"
+      ],
+      "id": "control.executor-runtime",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-003",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-012",
+        "SPEC-013",
+        "SPEC-014"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-015 is draft and no durable approved notification outbox exists."
+      ],
+      "category": "interaction",
+      "description": "Redacted review packets, content drafts, destination approvals, and notification reconciliation.",
+      "evidence": [
+        "docs/specs/SPEC-015-notifications-content.md"
+      ],
+      "id": "control.notifications",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-002",
+        "SPEC-003",
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-007",
+        "SPEC-008",
+        "SPEC-011",
+        "SPEC-013",
+        "SPEC-014",
+        "SPEC-015"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-016 is draft and legacy benchmark fixtures are not sealed production evaluation epochs."
+      ],
+      "category": "evaluation",
+      "description": "Evaluation registry, fixture/split provenance, rubric epochs, and hidden-test firewall.",
+      "evidence": [
+        "docs/specs/SPEC-016-evaluation-registry.md",
+        "researcher/benchmarks"
+      ],
+      "id": "control.evaluation-registry",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-011",
+        "SPEC-012",
+        "SPEC-013",
+        "SPEC-016"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-017 is draft and the current benchmark runner intentionally blocks live provider calls."
+      ],
+      "category": "evaluation",
+      "description": "Independent multi-model evaluation with statistical, missing-data, cost, and provenance gates.",
+      "evidence": [
+        "docs/specs/SPEC-017-evaluation-runner.md",
+        "researcher/benchmarks/sdk-runner"
+      ],
+      "id": "control.evaluation-runner",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-003",
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-013",
+        "SPEC-014",
+        "SPEC-016",
+        "SPEC-017"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-018 is draft and no immutable candidate/failure archive exists."
+      ],
+      "category": "evaluation",
+      "description": "Immutable candidate lineage, rejected-path memory, and retention-aware archive.",
+      "evidence": [
+        "docs/specs/SPEC-018-candidate-archive.md"
+      ],
+      "id": "control.candidate-archive",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-003",
+        "SPEC-012",
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-018"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-019 is draft and no exact-head production attestation/promotion reducer exists."
+      ],
+      "category": "release",
+      "description": "Exact-PR-head quality attestation, cumulative lineage, human merge, and promotion record.",
+      "evidence": [
+        "docs/specs/SPEC-019-promotion-release.md"
+      ],
+      "id": "control.promotion-release",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-007",
+        "SPEC-008",
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-018",
+        "SPEC-019"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-020 is draft and recursive candidate generation is not enabled."
+      ],
+      "category": "shadow_lab",
+      "description": "Bounded meta-harness experiments against locked evaluators and editable surfaces.",
+      "evidence": [
+        "docs/specs/SPEC-020-meta-harness-lab.md"
+      ],
+      "id": "control.meta-harness-lab",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-014",
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-018",
+        "SPEC-019",
+        "SPEC-020"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-021 is draft and adaptive production routing is disabled."
+      ],
+      "category": "shadow_lab",
+      "description": "Adaptive harness routing and measured cross-model transfer.",
+      "evidence": [
+        "docs/specs/SPEC-021-adaptive-routing.md"
+      ],
+      "id": "control.adaptive-routing",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-008",
+        "SPEC-012",
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-019",
+        "SPEC-020",
+        "SPEC-021"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-022 is draft and community content cannot enter runtime/evaluation paths."
+      ],
+      "category": "community",
+      "description": "Sanitized contribution packets, provenance, independence, and collaborative evolution.",
+      "evidence": [
+        "docs/specs/SPEC-022-collaborative-evolution.md"
+      ],
+      "id": "control.collaborative-evolution",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-002",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-014",
+        "SPEC-016",
+        "SPEC-018",
+        "SPEC-019",
+        "SPEC-021",
+        "SPEC-022"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-023 is draft and public governance workflows are not implemented."
+      ],
+      "category": "community",
+      "description": "Open-source contribution, correction, moderation, stewardship, and growth workflows.",
+      "evidence": [
+        "docs/specs/SPEC-023-open-source-governance.md"
+      ],
+      "id": "control.open-source-governance",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-007",
+        "SPEC-015",
+        "SPEC-019",
+        "SPEC-022",
+        "SPEC-023"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-024 is draft and no production identity/credential broker is deployed."
+      ],
+      "category": "security",
+      "description": "Private identities, credential references, one-use grants, revocation, rotation, and break glass.",
+      "evidence": [
+        "docs/specs/SPEC-024-private-control-plane.md"
+      ],
+      "id": "control.private-control-plane",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-002",
+        "SPEC-003",
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-007",
+        "SPEC-008",
+        "SPEC-009",
+        "SPEC-014",
+        "SPEC-015",
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-019",
+        "SPEC-024"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-025 is draft and no accepted deployment epoch, canary, restore, or rollback controller exists.",
+        "Hosted beta may require an explicit amendment to the local-first deployment decision."
+      ],
+      "category": "operations",
+      "description": "Install, durable operation, human activation, canary, pause, backup, restore, upgrade, rollback, and kill path.",
+      "evidence": [
+        "docs/specs/SPEC-025-deployment-durable-workflows.md",
+        "docs/product/deployment.md"
+      ],
+      "id": "control.deployment",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-014",
+        "SPEC-015",
+        "SPEC-019",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "SPEC-026 revision 1 explicitly defers training and cannot enable a provider, dataset upload, job, checkpoint import, or route."
+      ],
+      "category": "deferred_lab",
+      "description": "Readiness dossier for possible future training and reinforcement-learning research.",
+      "evidence": [
+        "docs/specs/SPEC-026-training-rl-lab.md"
+      ],
+      "id": "control.training-rl",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-018",
+        "SPEC-019",
+        "SPEC-020",
+        "SPEC-022",
+        "SPEC-025",
+        "SPEC-026"
+      ],
+      "status": "deferred"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The implementation has a read-only loopback observation adapter and separate fixture controls, but no hosted authentication, authoritative journal projection, watch stream, or command bus.",
+        "Every mutation is intentionally disabled."
+      ],
+      "category": "ui_surface",
+      "description": "Organization health, active versus accepted version, queue, spend, backup, and incident overview.",
+      "evidence": [
+        "apps/control-center",
+        "apps/control-center/tests",
+        "docs/product/README.md"
+      ],
+      "id": "ui.overview",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "preparatory"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No durable decision inbox or destination-aware command path exists."
+      ],
+      "category": "ui_surface",
+      "description": "Risk- and expiry-ordered human decisions with evidence and exact action previews.",
+      "evidence": [
+        "docs/product/README.md"
+      ],
+      "id": "ui.inbox",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-015",
+        "SPEC-024"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No event-derived work-order, attempt, checkpoint, or cost query surface exists."
+      ],
+      "category": "ui_surface",
+      "description": "Work-order DAG, attempts, leases, checkpoints, retries, budgets, and stable blockers.",
+      "evidence": [
+        "docs/product/README.md"
+      ],
+      "id": "ui.work",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-008"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The source registry, retrieval receipts, and evidence graph are not implemented."
+      ],
+      "category": "ui_surface",
+      "description": "Sources, retrieval receipts, evidence bodies, claims, mechanisms, and contradictions.",
+      "evidence": [
+        "docs/product/README.md"
+      ],
+      "id": "ui.research",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-009",
+        "SPEC-010",
+        "SPEC-011"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The evaluation registry, candidate archive, and exact-head attestation are not implemented."
+      ],
+      "category": "ui_surface",
+      "description": "Frozen candidates, lineage, diffs, tests, evaluations, comparisons, uncertainty, and cost.",
+      "evidence": [
+        "docs/product/README.md"
+      ],
+      "id": "ui.candidates",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-018",
+        "SPEC-019"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The GitHub lifecycle and promotion owner contracts are not implemented.",
+        "The UI must never gain merge authority."
+      ],
+      "category": "ui_surface",
+      "description": "PR head, check runs, attestations, human merge observation, promotion, and deployment lineage.",
+      "evidence": [
+        "docs/product/README.md"
+      ],
+      "id": "ui.releases",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-007",
+        "SPEC-008",
+        "SPEC-019",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No deployed journal, queue, environment, backup, or recovery control exists."
+      ],
+      "category": "ui_surface",
+      "description": "Journal, queues, environments, connectors, backups, restore, rollback, reconciliation, and incidents.",
+      "evidence": [
+        "docs/product/README.md",
+        "docs/product/deployment.md"
+      ],
+      "id": "ui.operations",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-014",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No authenticated identity/grant projection or credential broker exists."
+      ],
+      "category": "ui_surface",
+      "description": "Redacted identities, grants, denials, rotation health, audit correlation, and break-glass workflow.",
+      "evidence": [
+        "docs/product/README.md"
+      ],
+      "id": "ui.security",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-000",
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-024"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No versioned settings command surface exists."
+      ],
+      "category": "ui_surface",
+      "description": "Source policy, budgets, destinations, environments, retention, and feature-flag settings.",
+      "evidence": [
+        "docs/product/README.md"
+      ],
+      "id": "ui.settings",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-009",
+        "SPEC-015",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The component uses fixture data and has no authentication, live projection adapter, command bus, or external provider reads.",
+        "Its owner specs are not operational and deployment is disabled."
+      ],
+      "category": "deployment_component",
+      "description": "Private browser UI hosted on Cloud Run or, optionally, Vercel.",
+      "evidence": [
+        "apps/control-center",
+        "apps/control-center/tests",
+        "docs/product/deployment.md"
+      ],
+      "id": "component.control-ui",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "preparatory"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "The component is not implemented and SPEC-006, SPEC-008, SPEC-024, and SPEC-025 are draft."
+      ],
+      "category": "deployment_component",
+      "description": "Authenticated command and projection-query API on Cloud Run.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.control-api",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No production journal backend is implemented and SPEC-004 is draft."
+      ],
+      "category": "deployment_component",
+      "description": "Cloud SQL PostgreSQL journal, projections, reservations, and transactional outbox.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.event-store",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No Cloud Tasks adapter or dispatch conformance exists."
+      ],
+      "category": "deployment_component",
+      "description": "Cloud Tasks queues for explicit at-least-once dispatch, pacing, retry, and backpressure.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.dispatch-queue",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No leased outbox relay, deterministic task identity, or ambiguous-enqueue reconciler exists."
+      ],
+      "category": "deployment_component",
+      "description": "Cloud Run relay from committed transactional-outbox rows to idempotently named Cloud Tasks deliveries.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.outbox-relay",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No trusted Cloud Run worker adapter has passed the future executor conformance suite."
+      ],
+      "category": "deployment_component",
+      "description": "Cloud Run worker for trusted deterministic validation and bounded handlers.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.trusted-worker",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-014",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No sandbox project, admission policy, or dispatcher exists."
+      ],
+      "category": "deployment_component",
+      "description": "Cloud Run dispatcher that creates one policy-bound GKE Job per untrusted attempt.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.sandbox-dispatcher",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-005",
+        "SPEC-014",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No GKE Autopilot gVisor environment has been provisioned or attested.",
+        "The SPEC-014 isolation threat suite has not run."
+      ],
+      "category": "deployment_component",
+      "description": "GKE Autopilot Job with gVisor, resource limits, no ambient credentials, and restricted egress.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.sandbox-worker",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-005",
+        "SPEC-014",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No hosted CAS/storage-binding provider has passed conformance and recovery tests."
+      ],
+      "category": "deployment_component",
+      "description": "Cloud Storage content-addressed artifacts and independent backup copies.",
+      "evidence": [
+        "docs/product/deployment.md",
+        "researcher/scripts/artifact_store.py"
+      ],
+      "id": "component.artifact-store",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-002",
+        "SPEC-003",
+        "SPEC-010",
+        "SPEC-018",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No broker or real capability provider exists."
+      ],
+      "category": "deployment_component",
+      "description": "Artifact gateway enforcing attempt-bound storage grants without credential, effect, SQL, or canonical-write authority.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.artifact-gateway",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-003",
+        "SPEC-005",
+        "SPEC-014",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No separately permissioned non-GitHub effect workers or provider reconciliation contracts exist."
+      ],
+      "category": "deployment_component",
+      "description": "Operation-family-specific external-effect workers with no SQL or artifact-transfer authority.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.external-effect-worker",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-014",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No Secret Manager provider, identity mapping, rotation, or revocation path is implemented."
+      ],
+      "category": "deployment_component",
+      "description": "Secret Manager and workload-identity-backed credential broker.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.credential-broker",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-014",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No production GitHub App installation, signature verifier, or reconciler exists."
+      ],
+      "category": "deployment_component",
+      "description": "Minimal GitHub webhook ingress and separately permissioned observer/proposer/reconciler identities.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.github-ingress",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-007",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No separately permissioned GitHub proposer/check worker, typed effect receipt, or ambiguity reconciler exists."
+      ],
+      "category": "deployment_component",
+      "description": "Scoped GitHub proposal/check effect worker and provider-state reconciler; never a merge or administration identity.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.github-effect-worker",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-005",
+        "SPEC-007",
+        "SPEC-019",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No production notification outbox or approved destination provider exists."
+      ],
+      "category": "deployment_component",
+      "description": "Durable redacted notification dispatcher with destination reconciliation.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.notification-dispatcher",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-015",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No integrated metrics, traces, logs, audit correlation, or SLO evidence exists."
+      ],
+      "category": "deployment_component",
+      "description": "Cloud Logging, Monitoring, Trace, Error Reporting, and Audit Logs with redaction.",
+      "evidence": [
+        "docs/product/deployment.md"
+      ],
+      "id": "component.observability",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-008",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No accepted deployment controller, active epoch, leadership lease, or recovery implementation exists."
+      ],
+      "category": "deployment_component",
+      "description": "Local orgd/orgctl and hosted deployment controller for schedule, canary, pause, restore, upgrade, and rollback.",
+      "evidence": [
+        "docs/product/deployment.md",
+        "docs/specs/SPEC-025-deployment-durable-workflows.md"
+      ],
+      "id": "component.deployment-controller",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-019",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "blockers": [
+        "No measured trigger or accepted durable-workflow provider decision exists."
+      ],
+      "category": "deployment_component",
+      "description": "Optional future callback/wait adapter for Google Cloud Workflows or Temporal; never canonical state.",
+      "evidence": [
+        "docs/product/deployment.md",
+        "docs/specs/SPEC-025-deployment-durable-workflows.md"
+      ],
+      "id": "component.workflow-adapter",
+      "product_id": "research-control-center",
+      "required_specs": [
+        "SPEC-005",
+        "SPEC-008",
+        "SPEC-025"
+      ],
+      "status": "deferred"
+    }
+  ],
+  "environments": [
+    {
+      "activation_enabled": false,
+      "components": [
+        "component.artifact-store",
+        "component.control-api",
+        "component.control-ui",
+        "component.deployment-controller",
+        "component.event-store",
+        "component.observability",
+        "component.trusted-worker"
+      ],
+      "id": "developer-local",
+      "required_specs": [],
+      "status": "manual-engineering-only"
+    },
+    {
+      "activation_enabled": false,
+      "components": [
+        "component.artifact-gateway",
+        "component.artifact-store",
+        "component.control-api",
+        "component.control-ui",
+        "component.credential-broker",
+        "component.deployment-controller",
+        "component.event-store",
+        "component.external-effect-worker",
+        "component.github-ingress",
+        "component.notification-dispatcher",
+        "component.observability",
+        "component.trusted-worker"
+      ],
+      "id": "pilot-local",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-007",
+        "SPEC-008",
+        "SPEC-014",
+        "SPEC-015",
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-018",
+        "SPEC-019",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "blocked"
+    },
+    {
+      "activation_enabled": false,
+      "components": [
+        "component.artifact-gateway",
+        "component.artifact-store",
+        "component.control-api",
+        "component.control-ui",
+        "component.credential-broker",
+        "component.deployment-controller",
+        "component.dispatch-queue",
+        "component.event-store",
+        "component.external-effect-worker",
+        "component.github-effect-worker",
+        "component.github-ingress",
+        "component.notification-dispatcher",
+        "component.observability",
+        "component.outbox-relay",
+        "component.sandbox-dispatcher",
+        "component.sandbox-worker",
+        "component.trusted-worker"
+      ],
+      "id": "gcp-development",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-007",
+        "SPEC-008",
+        "SPEC-014",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    },
+    {
+      "activation_enabled": false,
+      "components": [
+        "component.artifact-gateway",
+        "component.artifact-store",
+        "component.control-api",
+        "component.control-ui",
+        "component.credential-broker",
+        "component.deployment-controller",
+        "component.dispatch-queue",
+        "component.event-store",
+        "component.external-effect-worker",
+        "component.github-effect-worker",
+        "component.github-ingress",
+        "component.notification-dispatcher",
+        "component.observability",
+        "component.outbox-relay",
+        "component.sandbox-dispatcher",
+        "component.sandbox-worker",
+        "component.trusted-worker"
+      ],
+      "id": "gcp-staging-shadow",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-007",
+        "SPEC-008",
+        "SPEC-009",
+        "SPEC-010",
+        "SPEC-011",
+        "SPEC-012",
+        "SPEC-013",
+        "SPEC-014",
+        "SPEC-015",
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-018",
+        "SPEC-019",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "blocked"
+    },
+    {
+      "activation_enabled": false,
+      "components": [
+        "component.artifact-gateway",
+        "component.artifact-store",
+        "component.control-api",
+        "component.control-ui",
+        "component.credential-broker",
+        "component.deployment-controller",
+        "component.dispatch-queue",
+        "component.event-store",
+        "component.external-effect-worker",
+        "component.github-effect-worker",
+        "component.github-ingress",
+        "component.notification-dispatcher",
+        "component.observability",
+        "component.outbox-relay",
+        "component.sandbox-dispatcher",
+        "component.sandbox-worker",
+        "component.trusted-worker"
+      ],
+      "id": "gcp-production-proposal",
+      "required_specs": [
+        "SPEC-000",
+        "SPEC-001",
+        "SPEC-002",
+        "SPEC-003",
+        "SPEC-004",
+        "SPEC-005",
+        "SPEC-006",
+        "SPEC-007",
+        "SPEC-008",
+        "SPEC-009",
+        "SPEC-010",
+        "SPEC-011",
+        "SPEC-012",
+        "SPEC-013",
+        "SPEC-014",
+        "SPEC-015",
+        "SPEC-016",
+        "SPEC-017",
+        "SPEC-018",
+        "SPEC-019",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "blocked"
+    },
+    {
+      "activation_enabled": false,
+      "components": [
+        "component.control-ui"
+      ],
+      "id": "vercel-ui-preview",
+      "required_specs": [
+        "SPEC-006",
+        "SPEC-008",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "alternative-planned"
+    },
+    {
+      "activation_enabled": false,
+      "components": [
+        "component.artifact-store",
+        "component.credential-broker",
+        "component.deployment-controller",
+        "component.event-store",
+        "component.observability"
+      ],
+      "id": "recovery-clean-room",
+      "required_specs": [
+        "SPEC-004",
+        "SPEC-008",
+        "SPEC-024",
+        "SPEC-025"
+      ],
+      "status": "planned"
+    }
+  ],
+  "product_id": "agent-skills-suite",
+  "schema_version": "1.0.0",
+  "test_gates": [
+    {
+      "evidence": [
+        "researcher/scripts/validate_governance.py",
+        "governance/fixtures/authority-decisions.jsonl"
+      ],
+      "id": "authority-exhaustive",
+      "status": "implemented"
+    },
+    {
+      "evidence": [
+        "researcher/scripts/validate_repo.py",
+        "researcher/scripts/validate_public_repo.py",
+        "researcher/scripts/validate_platform_compat.py"
+      ],
+      "id": "repository-and-packaging",
+      "status": "implemented"
+    },
+    {
+      "evidence": [
+        "researcher/scripts/validate_schemas.py",
+        "researcher/schemas/typescript"
+      ],
+      "id": "schema-cross-runtime",
+      "status": "implemented"
+    },
+    {
+      "evidence": [
+        "researcher/benchmarks/router/results-published/2026-05-19.md"
+      ],
+      "id": "router-quality",
+      "status": "implemented"
+    },
+    {
+      "evidence": [
+        "researcher/benchmarks/PLAN.md",
+        "The current Stage-3 suite has only one task."
+      ],
+      "id": "skill-effectiveness",
+      "status": "blocked"
+    },
+    {
+      "evidence": [
+        "researcher/benchmarks/PLAN.md",
+        "Stage-4 composition is future work."
+      ],
+      "id": "skill-composition",
+      "status": "planned"
+    },
+    {
+      "evidence": [
+        "docs/specs/SPEC-004-event-journal.md",
+        "docs/specs/SPEC-005-work-orders.md"
+      ],
+      "id": "journal-replay-concurrency-and-crash",
+      "status": "planned"
+    },
+    {
+      "evidence": [
+        "docs/specs/SPEC-005-work-orders.md",
+        "docs/specs/SPEC-025-deployment-durable-workflows.md"
+      ],
+      "id": "work-recovery-and-ambiguous-effects",
+      "status": "planned"
+    },
+    {
+      "evidence": [
+        "docs/specs/SPEC-009-source-registry.md",
+        "docs/specs/SPEC-010-retrieval-evidence.md"
+      ],
+      "id": "retrieval-ssrf-and-evidence-integrity",
+      "status": "planned"
+    },
+    {
+      "evidence": [
+        "docs/specs/SPEC-012-context-compiler.md",
+        "docs/specs/SPEC-013-agent-role-contracts.md"
+      ],
+      "id": "context-firewall-and-role-separation",
+      "status": "planned"
+    },
+    {
+      "evidence": [
+        "docs/specs/SPEC-014-runtime-hermes.md",
+        "docs/product/deployment.md"
+      ],
+      "id": "executor-isolation-and-egress",
+      "status": "blocked"
+    },
+    {
+      "evidence": [
+        "docs/specs/SPEC-016-evaluation-registry.md",
+        "docs/specs/SPEC-017-evaluation-runner.md",
+        "docs/specs/SPEC-018-candidate-archive.md"
+      ],
+      "id": "evaluation-independence-and-statistics",
+      "status": "planned"
+    },
+    {
+      "evidence": [
+        "docs/specs/SPEC-007-github-pr-lifecycle.md",
+        "docs/specs/SPEC-019-promotion-release.md"
+      ],
+      "id": "github-exact-head-and-no-merge-authority",
+      "status": "planned"
+    },
+    {
+      "evidence": [
+        "docs/specs/SPEC-002-public-private-boundary.md",
+        "docs/specs/SPEC-024-private-control-plane.md"
+      ],
+      "id": "privacy-secrets-and-capabilities",
+      "status": "planned"
+    },
+    {
+      "evidence": [
+        "apps/control-center/README.md",
+        "apps/control-center/tests/api-routes.test.ts",
+        "apps/control-center/tests/fixture-adapter.test.ts",
+        "apps/control-center/tests/navigation.test.ts",
+        "apps/control-center/tests/security-contract.test.ts",
+        "apps/control-center/tests/view-model.test.ts"
+      ],
+      "id": "ui-fixture-contract",
+      "status": "implemented"
+    },
+    {
+      "evidence": [
+        "apps/control-center/README.md",
+        "No automated browser accessibility receipt is committed for this uncommitted candidate."
+      ],
+      "id": "ui-browser-accessibility",
+      "status": "blocked"
+    },
+    {
+      "evidence": [
+        "docs/specs/SPEC-025-deployment-durable-workflows.md",
+        "docs/product/deployment.md"
+      ],
+      "id": "deployment-canary-backup-restore-and-rollback",
+      "status": "blocked"
+    },
+    {
+      "evidence": [
+        "docs/product/deployment.md",
+        "No integrated hosted measurement exists."
+      ],
+      "id": "hosted-load-latency-and-cost",
+      "status": "planned"
+    },
+    {
+      "evidence": [
+        "docs/product/README.md",
+        "docs/product/deployment.md"
+      ],
+      "id": "source-to-pr-to-canary-end-to-end",
+      "status": "planned"
+    }
+  ]
+}

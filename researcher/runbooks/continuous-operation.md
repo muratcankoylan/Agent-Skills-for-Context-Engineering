@@ -1,43 +1,38 @@
-# Continuous Operation Runbook
+# Supervised Legacy Loop Runbook
 
-This runbook explains how to run the researcher harness as a daemon on macOS so it can advance the research-to-skill loop for days without manual intervention.
+This runbook describes the repository's legacy file-based loop for supervised,
+local testing. It is not a production activation procedure. The loop predates
+the specification-owned journal, work-order, identity, capability, deployment,
+and recovery contracts. Those contracts are not an operational runtime. Keep
+the launchd jobs uninstalled unless a future SPEC-025 activation epoch is
+human-approved over implemented dependencies.
 
-## What Runs
+## What Can Be Run Manually
 
-| Job | Frequency | Purpose |
+| Command | Scheduling | Purpose |
 | --- | --- | --- |
-| `loop_step.py` | every 10 minutes | pull from inbox, advance one active run by one state, park anything that needs human or judge review |
-| `loop_discover.py` | twice daily (05:00 and 17:00 local) | append new candidate sources from configured feeds into the inbox |
-| `loop_daily.py` | once daily (06:30 local) | run repo validation, activation cases, benchmarks, write a dated snapshot, flag volatile claims due for review |
-| `loop_status.py` | piggy-backs on every `loop_step` and `loop_daily` | refresh the dashboard and parked review surface |
+| `loop_step.py` | manual only | reap closed runs and park active runs that need an explicit operator action; it never initializes a run or advances evidence-bearing state |
+| `loop_discover.py` | manual only | append normalized entries from the reviewed manual seed to the logically append-only candidate catalog |
+| `loop_daily.py` | manual only | run a reduced gate and scenario-catalog profile, write a dated snapshot, flag volatile claims due for review |
+| `loop_status.py` | manual only | fail closed over queue/run integrity, then refresh the dashboard and parked review surface |
 
-All schedules and budgets live in `researcher/orchestration/config.json`. Default budgets:
+No scheduler is active. The checked-in configuration contains only admission and
+health bounds that the manual commands actually consume:
 
-- max active runs: 3
-- max runs per day: 6
 - max parked: 12
-- max failures per day: 5
 - max inbox size: 200
+- max manual-seed additions per discovery invocation: 8
 
-When any budget is exceeded the loop stops doing destructive work and continues only with bookkeeping until the human reviews.
+`loop_step.py` stops its bookkeeping path when the parked bound is full.
+`loop_discover.py` enforces the inbox capacity and per-invocation addition
+limit. There is no active daily-run, failure, retry, or automatic quarantine
+budget.
 
-## Install
+## Activation Is Disabled
 
-```bash
-researcher/orchestration/launchd/install.sh
-```
-
-The script:
-
-1. Substitutes the repository path into the launchd plists.
-2. Writes them under `~/Library/LaunchAgents/`.
-3. Bootstraps them under the current user agent domain.
-4. Enables the labels so they survive logout/login.
-
-Logs land in `researcher/reports/logs/`:
-
-- `loop_step.log`, `loop_discover.log`, `loop_daily.log`, `loop_status.log`
-- `launchd-loop-step.out` and `.err` for raw launchd output
+`researcher/orchestration/launchd/install.sh` fails closed. Do not copy or
+bootstrap the checked-in plists manually. They remain migration evidence for a
+future SPEC-025 adapter, not an authorized service definition.
 
 ## Uninstall
 
@@ -50,13 +45,27 @@ researcher/orchestration/launchd/uninstall.sh
 You can run the loop scripts directly without launchd:
 
 ```bash
-python3 researcher/scripts/loop_discover.py            # pull new sources into inbox
-python3 researcher/scripts/loop_step.py --allow-fetch  # advance one step
-python3 researcher/scripts/loop_daily.py               # benchmarks + snapshot
+python3 researcher/scripts/loop_status.py --initialize-runtime  # explicit one-time runtime ledger creation
+python3 researcher/scripts/loop_discover.py            # copy reviewed manual-seed entries into the catalog
+python3 researcher/scripts/research_loop.py init \
+  --title "..." --url "https://..."                     # explicit run creation
+python3 researcher/scripts/loop_step.py                # bookkeeping or park one existing run
+python3 researcher/scripts/loop_daily.py               # reduced health profile + snapshot
 python3 researcher/scripts/loop_status.py              # refresh dashboard
 ```
 
-`--allow-fetch` enables HTTP GET retrieval through Python's stdlib `urllib`. Without it the loop parks runs that need source retrieval and waits for a human.
+The initialization command creates only missing empty ledgers and validates all
+four. It does not repair existing bytes. Run it before `loop_discover.py`,
+`loop_step.py`, `loop_daily.py`, or ordinary status projection. Per-run
+`research_loop.py` commands validate managed run state independently and do not
+require the global queue ledgers.
+
+Network retrieval is absent from the legacy loop. Acquire evidence through a
+reviewed, bounded operator process outside these commands and record a local
+file with
+`research_loop.py retrieve --file ...`. The future SPEC-009/SPEC-010 path must
+prove connector allowlists, SSRF and redirect confinement, immutable capture,
+integrity, and resource limits before unattended retrieval can be enabled.
 
 ## Human Review Surface
 
@@ -65,9 +74,9 @@ Read these files when checking on the loop:
 - `researcher/reports/status.md` - high-level dashboard.
 - `researcher/reports/parked-review.md` - runs waiting for a reviewer.
 - `researcher/reports/snapshots/<date>.md` - daily snapshot.
-- `researcher/reports/benchmark-history.jsonl` - append-only benchmark trend.
-- `researcher/queue/inbox.jsonl` - candidate sources awaiting initialization.
-- `researcher/queue/quarantine.jsonl` - sources removed from rotation.
+- `researcher/reports/benchmark-history.jsonl` - ignored runtime history written only when recording is requested. Each record binds the tracked checkout and contains two executed deterministic checks, catalog consistency, and zero executed scenarios.
+- `researcher/queue/inbox.jsonl` - candidate discovery catalog; it is not an executable work queue.
+- `researcher/queue/quarantine.jsonl` - legacy/manual quarantine records; no automatic quarantine path is active.
 
 Parked runs require one of these actions:
 
@@ -78,13 +87,21 @@ Parked runs require one of these actions:
 | `needs human or model action from state proposed` | finish the proposal and run `research_loop.py novelty --run-dir <run>` |
 | `needs merge approval` | review the PR notes; merge only after explicit approval |
 
-## Safety
+Close a legacy run only as `rejected`, `reference-only`, or `abandoned`.
+`accepted` is deliberately unavailable because the legacy run lacks the
+specification-owned freeze and authority pipeline.
+
+## Current Safety Boundary
 
 - The loop never invokes LLMs or paid APIs.
-- Source retrieval uses stdlib `urllib` with a 30-second timeout and a 1.5MB cap.
-- Sources that fail twice are quarantined.
-- The mechanism registry can only be updated through `research_loop.py promote-mechanisms` with a recorded reviewer; the loop does not edit it.
+- The legacy commands perform no network retrieval.
+- Inbox entries are never consumed or quarantined automatically; a human creates
+  a run explicitly and curates the catalog record.
+- `research_loop.py promote-mechanisms` always fails closed. Run-local mechanism
+  proposals do not modify the registry or its historical ledgers.
 - Push and merge are always human-controlled.
+- `loop_daily.py` is a reduced local health profile, not a substitute for the
+  pinned CI gate manifest or a deployment health check.
 
 ## Daily Rhythm
 
@@ -92,5 +109,6 @@ A reasonable cadence for a human running this:
 
 1. Morning: read the latest snapshot and parked review.
 2. Pick up to three parked runs and either advance, reject, or abandon them.
-3. Approve any mechanism promotions whose runs are publish-ready.
-4. Leave the loop running for the next day.
+3. Treat any mechanism proposal as advisory input to a separate reviewed repository change; the legacy command cannot promote it.
+4. Run the reduced daily check or status projection again after changes. Nothing
+   remains scheduled in the background.

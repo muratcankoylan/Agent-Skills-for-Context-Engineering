@@ -1,0 +1,13 @@
+{
+  "schema": "research-design-claim-ledger/v1",
+  "authority": "none",
+  "accessed": "2026-09-07",
+  "scope": "Design evidence only; not a promoted mechanism or project performance result",
+  "claims": [
+    {"id":"ADAS-SEPARATION","class":"reported_method","authors":"Shengran Hu, Cong Lu, Jeff Clune","title":"Automated Design of Agentic Systems","version":"2408.08435v2","date":"2025-03-02","url":"https://arxiv.org/html/2408.08435v2","locator":"Methods, evaluation setup, limitations","claim":"Separate search and evaluation, including validation and test populations.","confidence":"high for method, untested transfer to this project"},
+    {"id":"DGM-MEASUREMENT","class":"reported_failure","authors":"Jenny Zhang et al.","title":"Darwin Godel Machine","version":"2505.22954v2","date":"2025-09-26","url":"https://arxiv.org/html/2505.22954v2","locator":"Appendix H reward hacking","claim":"Candidate-controlled logging can corrupt apparent improvement.","confidence":"high for reported failure; not independently reproduced"},
+    {"id":"ALPHAEVOLVE-VERIFIER","class":"reported_constraint","authors":"Alexander Novikov et al.","title":"AlphaEvolve","version":"2506.13131v1","date":"2025-06-16","url":"https://arxiv.org/html/2506.13131v1","locator":"Sections 2.4 and 6","claim":"Automated evaluation is central and limits applicable domains.","confidence":"high for method"},
+    {"id":"RQGM-EPOCHS","class":"reported_method","authors":"Alex Iacob et al.","title":"The Red Queen Godel Machine","version":"2606.26294v2","date":"2026-06-29","url":"https://arxiv.org/pdf/2606.26294","locator":"Sections 3.4-3.5, Appendices F/G","claim":"Evaluator transitions require fixed epochs and independent anchors.","qualification":"Preliminary; calibrated posterior and stationarity assumptions. Not a global-convergence or paired-significance guarantee.","confidence":"high for description; untested applicability"},
+    {"id":"ADAPTIVE-HOLDOUT","class":"conditional_theoretical_result","authors":"Cynthia Dwork, Vitaly Feldman, Moritz Hardt, Toniann Pitassi, Omer Reingold, Aaron Roth","title":"Generalization in Adaptive Data Analysis and Holdout Reuse","version":"1506.02629v2","date":"2015-09-25","url":"https://arxiv.org/html/1506.02629v2","locator":"Adaptive analysis and reusable holdout results","claim":"Adaptive reuse needs protection beyond an ordinary fixed holdout.","qualification":"This implementation does not implement Thresholdout or inherit its guarantees.","confidence":"high within stated assumptions"}
+  ]
+}

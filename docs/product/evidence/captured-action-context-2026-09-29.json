@@ -1,0 +1,25 @@
+{
+  "schema": "captured-action-context-measurement/v1",
+  "authority": "none",
+  "date": "2026-09-29",
+  "sample": "One retained initial live captured-actions-v1 study; four researcher decisions.",
+  "method": "Lengths of integer-profile canonicalized UTF-8 values in the initial inspect_context result. Repeated bytes equal source-index bytes multiplied by the three subsequent decisions. Private content and input digests are omitted.",
+  "measurements": {
+    "decisions": 4,
+    "sources": 21,
+    "registered_spans": 48,
+    "source_index_canonical_utf8_bytes": 22412,
+    "corpus_canonical_utf8_bytes": 37052,
+    "inspection_result_canonical_utf8_bytes": 59526,
+    "later_prompts_repeating_source_index": 3,
+    "avoidable_repeated_unescaped_canonical_bytes": 67236
+  },
+  "change": "Keep the source index in each decision header, but omit its duplicate in inspect_context history. Restore the shared research rubric and validated capture-coverage header.",
+  "limits": {
+    "token_savings_measured": false,
+    "cost_savings_measured": false,
+    "causal_quality_improvement_established": false,
+    "additional_source_content_acquired": false,
+    "scientific_quality_verified": false
+  }
+}

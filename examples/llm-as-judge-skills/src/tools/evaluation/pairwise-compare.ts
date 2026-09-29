@@ -1,8 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { openai } from '@ai-sdk/openai';
-import { generateText } from 'ai';
-import { config } from '../../config/index.js';
+import { JudgeRuntime, requireJudgeRuntime } from '../../runtime/judge-runtime.js';
 
 export const PairwiseCompareInputSchema = z.object({
   responseA: z.string().describe('First response to compare'),
@@ -53,6 +51,7 @@ export const PairwiseCompareOutputSchema = z.object({
 export type PairwiseCompareOutput = z.infer<typeof PairwiseCompareOutputSchema>;
 
 async function evaluatePair(
+  runtime: JudgeRuntime,
   first: string,
   second: string,
   prompt: string,
@@ -104,14 +103,22 @@ Respond with valid JSON:
   }
 }`;
 
-  const result = await generateText({
-    model: openai(config.openai.model),
+  const result = await runtime.generate({
     system: systemPrompt,
     prompt: userPrompt,
     temperature: 0.3
   });
 
-  const parsed = JSON.parse(result.text);
+  const parsed = z.object({
+    analysis: PairwiseCompareOutputSchema.shape.analysis,
+    comparison: PairwiseCompareOutputSchema.shape.comparison.length(criteria.length),
+    result: z.object({ winner: z.enum(['A', 'B', 'TIE']), confidence: z.number().min(0).max(1) })
+  }).parse(JSON.parse(result.text));
+  if (new Set(parsed.comparison.map(c => c.criterion)).size !== criteria.length ||
+      parsed.comparison.some(c => !criteria.includes(c.criterion)) ||
+      (!allowTie && (parsed.result.winner === 'TIE' || parsed.comparison.some(c => c.winner === 'TIE')))) {
+    throw new Error('Invalid pairwise judgment.');
+  }
   
   return {
     winner: parsed.result.winner,
@@ -121,13 +128,17 @@ Respond with valid JSON:
   };
 }
 
-export async function executePairwiseCompare(input: PairwiseCompareInput): Promise<PairwiseCompareOutput> {
+export async function executePairwiseCompare(input: PairwiseCompareInput, runtime?: JudgeRuntime): Promise<PairwiseCompareOutput> {
+  input = PairwiseCompareInputSchema.parse(input);
+  if (new Set(input.criteria).size !== input.criteria.length) throw new Error('Criteria must be unique.');
   const startTime = Date.now();
 
   try {
+    const judge = requireJudgeRuntime(runtime);
     if (input.swapPositions) {
       // First pass: A first, B second
       const pass1 = await evaluatePair(
+        judge,
         input.responseA,
         input.responseB,
         input.prompt,
@@ -138,6 +149,7 @@ export async function executePairwiseCompare(input: PairwiseCompareInput): Promi
 
       // Second pass: B first, A second
       const pass2 = await evaluatePair(
+        judge,
         input.responseB,
         input.responseA,
         input.prompt,
@@ -149,6 +161,7 @@ export async function executePairwiseCompare(input: PairwiseCompareInput): Promi
       // Map pass2 result back
       const pass2WinnerMapped = pass2.winner === 'A' ? 'B' : pass2.winner === 'B' ? 'A' : 'TIE';
       const consistent = pass1.winner === pass2WinnerMapped;
+      if (!consistent && !input.allowTie) throw new Error('Position-sensitive judgment cannot choose a reliable winner.');
 
       // Determine final winner
       let finalWinner: 'A' | 'B' | 'TIE';
@@ -164,14 +177,17 @@ export async function executePairwiseCompare(input: PairwiseCompareInput): Promi
       }
 
       // Merge comparisons
-      const mergedComparison = pass1.comparison.map((c, i) => {
-        const c2 = pass2.comparison[i];
+      const mergedComparison = pass1.comparison.map(c => {
+        const c2 = pass2.comparison.find(second => second.criterion === c.criterion)!;
         const c2WinnerMapped = c2.winner === 'A' ? 'B' : c2.winner === 'B' ? 'A' : 'TIE';
         return {
           ...c,
           winner: c.winner === c2WinnerMapped ? c.winner : 'TIE' as const
         };
       });
+      if (!input.allowTie && mergedComparison.some(c => c.winner === 'TIE')) {
+        throw new Error('Position-sensitive criterion cannot choose a reliable winner.');
+      }
 
       // Find differentiators
       const differentiators = mergedComparison
@@ -192,13 +208,14 @@ export async function executePairwiseCompare(input: PairwiseCompareInput): Promi
         },
         metadata: {
           evaluationTimeMs: Date.now() - startTime,
-          model: config.openai.model,
+          model: runtime?.modelId ?? 'unconfigured',
           positionsSwapped: true
         }
       };
     } else {
       // Single pass without swap
       const result = await evaluatePair(
+        judge,
         input.responseA,
         input.responseB,
         input.prompt,
@@ -220,12 +237,12 @@ export async function executePairwiseCompare(input: PairwiseCompareInput): Promi
         differentiators,
         metadata: {
           evaluationTimeMs: Date.now() - startTime,
-          model: config.openai.model,
+          model: runtime?.modelId ?? 'unconfigured',
           positionsSwapped: false
         }
       };
     }
-  } catch (error) {
+  } catch {
     return {
       success: false,
       winner: 'TIE',
@@ -238,7 +255,7 @@ export async function executePairwiseCompare(input: PairwiseCompareInput): Promi
       differentiators: [],
       metadata: {
         evaluationTimeMs: Date.now() - startTime,
-        model: config.openai.model,
+        model: runtime?.modelId ?? 'unconfigured',
         positionsSwapped: input.swapPositions
       }
     };
@@ -250,6 +267,5 @@ export const pairwiseCompareTool = tool({
 Use for subjective evaluations like tone, persuasiveness, style.
 More reliable than direct scoring for preferences.`,
   parameters: PairwiseCompareInputSchema,
-  execute: executePairwiseCompare
+  execute: input => executePairwiseCompare(input)
 });
-

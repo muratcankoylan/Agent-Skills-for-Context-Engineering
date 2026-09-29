@@ -1,6 +1,8 @@
 # PR Readiness Runbook
 
-Use this checklist before an autonomous researcher prepares a PR.
+Use this checklist before a supervised research run prepares PR content. Run
+readiness is advisory evidence; it grants no acceptance, registry, push, merge,
+or production authority.
 
 ## Required Artifacts
 
@@ -8,7 +10,7 @@ Use this checklist before an autonomous researcher prepares a PR.
 - [ ] Skill proposal exists and names the target path.
 - [ ] Skill proposal records novelty-check command, verdict, max mechanism overlap, and top mechanism overlaps.
 - [ ] `validate_run.py --run-dir <run>` passes and `run-state.json` is at `pr_ready` or `closed`.
-- [ ] Mechanism proposals are either promoted, rejected, or explicitly deferred with rationale.
+- [ ] Mechanism proposals are explicitly deferred or routed to a separate reviewed repository change; the legacy promotion command is disabled.
 - [ ] Research thread records discovery, evaluation, and draft decisions.
 - [ ] All cited sources were retrieved successfully.
 - [ ] Rejected or partial sources are recorded as gaps, not cited as evidence.
@@ -44,7 +46,8 @@ If publishing a new skill, update:
 - [ ] `python3 researcher/scripts/validate_platform_compat.py --require-reference-validator` passes.
 - [ ] `python3 researcher/scripts/validate_repo.py --strict` passes.
 - [ ] `python3 researcher/scripts/skill_health.py --strict --no-history` passes.
-- [ ] Activation regression cases and researcher benchmarks pass, or failures are listed as risks.
+- [ ] Activation regression cases and the two executable benchmark checks pass, or failures are listed as risks.
+- [ ] Scenario-catalog consistency is reported separately as zero executed adversarial scenarios.
 - [ ] The PR body states that merge requires human approval.
 - [ ] No secrets, credentials, or private source material are included.
 

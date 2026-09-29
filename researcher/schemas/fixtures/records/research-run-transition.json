@@ -1,0 +1,26 @@
+{
+  "classification": "private_operational",
+  "closure": null,
+  "evidence": "researcher/runs/20260810-120000-journal-contract",
+  "from_state": null,
+  "history_index": 0,
+  "initialization": {
+    "created_at": "2026-08-10T12:00:00Z",
+    "editable_surfaces": [
+      "researcher/runs/20260810-120000-journal-contract/sources/",
+      "researcher/runs/20260810-120000-journal-contract/proposals/"
+    ],
+    "locked_surfaces": [
+      "governance/constitution.yaml",
+      "researcher/rubrics/content-curation.md"
+    ],
+    "source_url": "https://example.com/research",
+    "title": "Journal contract fixture"
+  },
+  "kind": "ResearchRunTransition",
+  "reason": "run initialized",
+  "run_id": "20260810-120000-journal-contract",
+  "schema_version": "1.0.0",
+  "to_state": "initialized",
+  "transition_source": "file_state_history"
+}

@@ -1,7 +1,7 @@
 {
   "deduplicated": [],
   "deduplicated_count": 0,
-  "input_count": 50,
+  "input_count": 58,
   "migrated": [
     {
       "kind": "LegacyClaim",
@@ -55,6 +55,16 @@
     },
     {
       "kind": "LegacyClaim",
+      "legacy_key": "claim-context-packet-frozen-development-20260907",
+      "new_digest": "sha256:0f4c0d05cea7fef917385d40fcf97ac5b10fa5450b6155b2e58bcfef2b927c33",
+      "new_id": "rec_a91418af-1f1a-50f8-bbdf-d7957b4cd606",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:e93939f0860e0145c3951262216846f0e495647301a1fad90433aa4c3230ef4e",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:731a127f90811211a2e016407cf9790b2f51c3d65626e1a7942c7066d9b5bf59"
+    },
+    {
+      "kind": "LegacyClaim",
       "legacy_key": "claim-evaluation-browsecomp-variance",
       "new_digest": "sha256:389b81f7b4799b7912ec430e976889a59229a8ae1f246e66954f579017d49f52",
       "new_id": "rec_c7b61002-ecd2-5fa9-9b43-68c50ad3d953",
@@ -65,6 +75,16 @@
     },
     {
       "kind": "LegacyClaim",
+      "legacy_key": "claim-harness-action-context-duplication-20260929",
+      "new_digest": "sha256:139e2b5356990e6ca9271383a1c255eb13f2f06079c0d2ee4552845ff5914011",
+      "new_id": "rec_79927070-482b-51df-bfad-4089b34ec6ab",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:1541cc472d0a5356b1e47813b63ba13a43745e7c9926ba53fa460452d28573aa",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:26d7c5b1f1c3dda17c457cc1dd352e7105fc462ce71ac8cfe4a7e39be3c9bbfa"
+    },
+    {
+      "kind": "LegacyClaim",
       "legacy_key": "claim-harness-locked-evaluator",
       "new_digest": "sha256:05c4174719c8d4d625927fc91c4ae18abf0963ad3de41a927b1a86c747eeb4ca",
       "new_id": "rec_85ecaf5c-4ff2-523f-9df7-e03877cd6771",
@@ -72,6 +92,26 @@
       "source_bytes_digest": "sha256:83f3c65582418812a45d1c105d8c3be9e5f07a9ef3d5c0f53163bc848ea6ffcb",
       "source_path": "researcher/claims/index.jsonl",
       "source_record_digest": "sha256:e9b98fba8ec5445a62696ac4aab2b19f7482f8858901aeff2c6caa93c740e28d"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-harness-raindrop-ui-canary-20260929",
+      "new_digest": "sha256:1df31657430b6399990a3c8c77a6bfbbf70007d90dc67eabb4e13faea522b201",
+      "new_id": "rec_8ca44096-bc9b-5b5e-8208-4edbf7f035ec",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:b25c249ccf9949af204fb93c9115d6bd6305d8248992b73d436aef7ea78fdf94",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:03f662dac257e79534cb3eaa1eae07e54adba71e7dea311500e3f258971d4b2b"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-harness-tracing-local-overhead-20260929",
+      "new_digest": "sha256:61039b39c503a77df440a95d4689b75241528d4af7bffe750ec6fcfd31d3c503",
+      "new_id": "rec_d2031f5d-2423-5431-98ea-c75773a83b8a",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:ead65717b3c6ecab744d84c2a2c5a324ede926c84ec36ea0151aaa65a230331b",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:2807ab413a559e9124e2933d856e9424ddf6cd0186adaa3e387fbb0524479a4b"
     },
     {
       "kind": "LegacyClaim",
@@ -252,6 +292,46 @@
       "source_bytes_digest": "sha256:c2c0d8dc6c372405ed13e9eb11d05a92989f4fe5c91cda758de68005210e500c",
       "source_path": "researcher/claims/index.jsonl",
       "source_record_digest": "sha256:8167bbb73561416a0b1768273e2c673e5d76857960bccd867ada6e8727fb4764"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-setup-firecrawl-free-payg-20260929",
+      "new_digest": "sha256:df9857312467f78d4ec08a3507b6d6155d0a0a249b8030a5f94f55af32dfd7cd",
+      "new_id": "rec_8f5e6d0c-ee4f-54bf-8320-83c85cd2c6d4",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:458ddfef8966c90362689c43cbe42b95cb01ee8f8a6d0bebed05955c842984bc",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:4422443a8991a583e52a9b2080c62689aedc8b830735a60f2ba00d0b0fbf57eb"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-setup-openalex-free-access-20260929",
+      "new_digest": "sha256:ee780287ad7a4f984e859cab4a1592e94cd7777ed3693db69599a18b4dbb35af",
+      "new_id": "rec_d0311614-32ec-5799-ab83-7a2556036e72",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:2ba560d1f5d0f339983f23d7c346fb4a8751d9e6f17ed371f53ece45bcf35c29",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:ae55a08597a62644681c38572e73bc8bbf88f2d656898c7f48dde539bc6b81b6"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-setup-parallel-notify-only-20260929",
+      "new_digest": "sha256:7f2208a90d241a5da46ed9cf4984c61e0bc18197b3c5c37c0147594eebb295b6",
+      "new_id": "rec_76456e72-b0e0-50c7-911b-ee8b93e241bf",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:be7b6b1900beeff540b159f6b6e41ec4bb0a36cf7a215d0762fd26cfdb4cef10",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:143d7648eb1effadbd9a07042288f20d6cb45dd8395beeab2a91cfe94b8ddfab"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-setup-x-billing-controls-20260929",
+      "new_digest": "sha256:70116b7b540e30abf424f95cf34cfae11c95624d6be1d455cca1b67580306b6b",
+      "new_id": "rec_52e74beb-c0d8-5af2-b071-5e9c6636c920",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:d3dcc155400cc2bd4ff08c55d6ea97378054a89744aaac6b66950be733ea52c5",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:868a1154b965805dc2809fa61b062837ad8b4655ae7aeae0a39b0eae4bdf6f0f"
     },
     {
       "kind": "LegacyClaim",
@@ -486,12 +566,12 @@
     {
       "kind": "LegacyQueueRecord",
       "legacy_key": "S001",
-      "new_digest": "sha256:7768d69d21041e95a2e2cb533823b6dc9ee04d07607c7894358261a864599d71",
+      "new_digest": "sha256:11aa8cc850d4738232e5dba3aac1d2a9495ef6965d86fad03eeaedc3049633e4",
       "new_id": "rec_bfc7c90f-6a1b-5bd6-a108-efad022789fa",
       "rollback": "pass",
-      "source_bytes_digest": "sha256:f9ba2299717cc1b10c64da93a709ccc21b60c55057076168aabd3c48b689dd4a",
+      "source_bytes_digest": "sha256:0d51c094bcc69ddb56c667de95ede8769581f2772844b455d14793d0da3b227e",
       "source_path": "researcher/runs/20260515-035228-executable-autonomous-research-frameworks/sources/queue.jsonl",
-      "source_record_digest": "sha256:f96283b154fd05e466e69e3ae4801e92c366856dad2d3bd39848b4c2e98688f0"
+      "source_record_digest": "sha256:0ab303f7f84347e41f0fa05f7de914609a15ab9ff725b9d10b3d9ca3dc02555f"
     },
     {
       "kind": "LegacyRunState",
@@ -504,10 +584,10 @@
       "source_record_digest": "sha256:e8ccf12edd075a1e634708a9d11351ad89dd8aa8ac71562e705298541ee4dbc0"
     }
   ],
-  "migrated_count": 50,
+  "migrated_count": 58,
   "mode": "dry-run",
   "quarantined": [],
   "quarantined_count": 0,
-  "report_digest": "sha256:6eeae0e8cc652c7a4d19e46e34f3486aa1b03b9df40ca4fde2cc168b1cc8e50f",
+  "report_digest": "sha256:fe2dd5db353b1669cb04b87d04b518fc3264c129e3d4cca0d281a7c244e8266a",
   "schema_version": "1.0.0"
 }

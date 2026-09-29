@@ -4,6 +4,8 @@ Status: active roadmap
 Date: 2026-08-10
 Architecture decisions: [ADR index](../decisions/README.md)
 
+Product-direction update, 10 September 2026: the target is a standalone open-source Python cloud service, not a Codex task or laptop daemon. Draft SPEC-014/024/025 and the [cloud service plan](../product/cloud-research-service.md) describe configurable native providers, registered read-only MCP, one coordinator on persistent local disk, and scoped proposal/notification effects. This changes neither lifecycle status nor historical acceptance evidence.
+
 ## Purpose
 
 This program converts the architecture into 27 reviewable implementation contracts. It is ordered so each pull request creates a usable layer, preserves the current repository, and supplies evidence needed by later layers.
@@ -17,7 +19,7 @@ The program is not a backlog of features. Each specification fixes an interface,
 3. Human merge is the only public acceptance or promotion event. Deployment activation is a separate SPEC-025 event and cannot precede the accepted merge.
 4. Every state-changing command carries an actor, source event, target, reason, idempotency key, and expected prior version.
 5. Canonical state is repository or control-plane data, never chat history, an agent session, or a framework-private database.
-6. All external runtimes use versioned adapters. Hermes is the first operator runtime, not the organization database.
+6. Model providers and tools use versioned adapters. The reference runtime is the standalone Python service; Hermes and other agent harnesses are optional adapters, never the organization database or mandatory scheduler.
 7. Evaluation policy, constitution, merge authority, hidden tests, and editable-surface policy are outside ordinary optimizer control.
 8. Organizational-effect modes form `observe < shadow < proposal < production`. Mode, data-classification ceiling, action grants, isolation, and budget are separate constraints; satisfying one never enlarges another.
 9. Every accepted implementation includes migration, rollback, observability, tests, and an operator runbook.
@@ -149,7 +151,7 @@ flowchart TD
     S006 --> S013
     S012 --> S013
 
-    S003 --> S014["SPEC-014 Execution Environment, Executor Protocol, and Hermes Integration"]
+    S003 --> S014["SPEC-014 Execution Environment, Executor Protocol, and Provider Adapters"]
     S005 --> S014
     S006 --> S014
     S008 --> S014
@@ -256,7 +258,7 @@ The graph expresses lifecycle prerequisites, not a requirement to serialize ever
 
 ### Implementation dependency versus operational activation
 
-Interfaces and offline conformance deliberately precede the complete private control plane. GitHub, X, Hermes, model, and email adapters in SPEC-007, SPEC-009, SPEC-014, SPEC-015, and SPEC-017 are first implemented with fixtures, fake providers, the repository's existing supervised benchmark path, or explicitly supervised test credentials. They remain feature-gated for continuous operation until SPEC-024 supplies brokered identities and SPEC-025 supplies deployment and recovery. External collaborative intake in SPEC-022 remains closed until SPEC-023 activates contribution, disclosure, moderation, and maintainer rules. This is not an exception to key policy; it lets public contracts and negative tests exist before private operations are enabled.
+Interfaces and offline conformance deliberately precede the complete private control plane. GitHub, X, native model, registered MCP, optional harness, and delivery adapters in SPEC-007, SPEC-009, SPEC-014, SPEC-015, and SPEC-017 begin with fixtures and bounded explicit test configuration. The standalone service may exercise configured providers in non-production development; that is not accepted owner conformance or production activation. Production operation remains gated on SPEC-024 identity controls and SPEC-025 deployment/recovery evidence. The historical zero-call benchmark runner is unchanged by this development service. External collaborative intake in SPEC-022 remains closed until SPEC-023 activates contribution, disclosure, moderation, and maintainer rules.
 
 ## Specification index
 
@@ -288,7 +290,7 @@ Interfaces and offline conformance deliberately precede the complete private con
 | [SPEC-011](SPEC-011-evidence-graph.md) | Claims and mechanisms | Evidence graph with contradiction and provenance edges |
 | [SPEC-012](SPEC-012-context-compiler.md) | Context compiler and memory | Typed requests, retrieval, token packing, and immutable packages |
 | [SPEC-013](SPEC-013-agent-role-contracts.md) | Roles, prompts, and skills | Capability-scoped role manifests and prompt provenance |
-| [SPEC-014](SPEC-014-runtime-hermes.md) | Environment, executor, and Hermes | Attested execution environment, runtime-neutral executor, and Hermes adapter |
+| [SPEC-014](SPEC-014-runtime-hermes.md) | Environment, executor, and providers | Standalone Python runtime, native provider and registered-tool adapters, and optional harness integration |
 | [SPEC-015](SPEC-015-notifications-content.md) | Notifications and content | Transactional outbox, review packets, and draft-only publishing |
 
 ### Wave 3: evaluated change and promotion

@@ -14,7 +14,7 @@ All autonomous work will execute as immutable, typed, budgeted work orders. A de
 
 ## Context and current repository touchpoints
 
-The JSONL queue, file locks, atomic writes, launchd loop, and research-run state machine provide a safe single-process baseline. They do not yet separate approved intent from an execution lease, distinguish an executor report from an accepted result, or reconcile late and ambiguous effects across runtimes. This specification preserves the local-first design and makes those boundaries explicit before Hermes or another model runtime is introduced.
+The legacy JSONL queue, advisory locks, launchd wrappers, and research-run state machine are migration inputs, not a safe atomic baseline. Shared append, state-transition, failure-propagation, crash-durability, and recovery invariants remain incomplete and unproven. This specification preserves the local-first design while replacing those implicit behaviors with explicit work, lease, result, and reducer boundaries before Hermes or another model runtime is introduced.
 
 ## Goals
 

@@ -1,0 +1,12 @@
+[Unit]
+Description=Explicitly enabled bounded research trace export cadence
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=1min
+AccuracySec=10s
+Persistent=false
+Unit=context-research-traces.service
+
+[Install]
+WantedBy=timers.target

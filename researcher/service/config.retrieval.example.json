@@ -1,0 +1,42 @@
+{
+  "schema": "research-service/v1",
+  "repository": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+  "base_branch": "main",
+  "models": {},
+  "limits": {
+    "daily_model_calls": 0,
+    "run_model_calls": 0,
+    "daily_budget_microusd": 0,
+    "run_budget_microusd": 0,
+    "context_bytes": 65536,
+    "max_output_tokens": 256,
+    "timeout_seconds": 30,
+    "max_runs_per_tick": 1,
+    "daily_source_requests": 8,
+    "run_source_requests": 8
+  },
+  "schedules": [
+    {
+      "id": "daily-context-observations",
+      "mode": "retrieve",
+      "interval_seconds": 86400,
+      "query": "Context engineering, agent memory, retrieval, and evaluation research",
+      "sources": ["hacker_news", "deepmind", "huggingface", "microsoft_research"],
+      "source_queries": {
+        "hacker_news": "agent",
+        "deepmind": "",
+        "huggingface": "",
+        "microsoft_research": ""
+      }
+    }
+  ],
+  "github": {
+    "enabled": false,
+    "credential_env": "RESEARCH_GITHUB_TOKEN",
+    "reviewer": "muratcankoylan",
+    "notify": false
+  },
+  "mcp_tools": [],
+  "source_credentials": {},
+  "source_cost_microusd": {}
+}

@@ -2,14 +2,18 @@
 """Build and reconcile the repository's deterministic corpus inventory.
 
 The inventory is a derived view, never an authority over its inputs. It has no
-wall-clock timestamp or embedded Git SHA. Instead it binds to exact canonical
-input bytes through ``source_tree_digest`` and lists every contributing path
-and digest. This avoids self-referential commit hashes in a committed output.
+wall-clock timestamp or embedded Git SHA. ``source_tree_digest`` binds only the
+exact byte snapshots that :class:`InventoryBuilder` consumed and lists those
+declared inputs. It is not an exhaustive repository or runtime-behavior digest,
+a freeze or security boundary, or a promise that daily, status, or validator
+results can be reproduced from the digest. This avoids both self-referential
+generated-output hashes and an unsound completeness claim.
 """
 
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import os
@@ -227,6 +231,14 @@ VALIDATOR_OWNERSHIP = (
         ],
     },
     {
+        "id": "specification-development-plan",
+        "path": "researcher/scripts/spec_program.py",
+        "owns": [
+            "non-authoritative exact-source planning coverage",
+            "acceptance-criterion planning identity and dependency drift",
+        ],
+    },
+    {
         "id": "export-policy",
         "path": "researcher/scripts/validate_export.py",
         "owns": ["classification export routes", "public projections", "staged export closure"],
@@ -236,7 +248,7 @@ VALIDATOR_OWNERSHIP = (
         "path": "researcher/scripts/validate_public_repo.py",
         "owns": [
             "tracked local paths",
-            "private runtime roots",
+            "private runtime and run-init staging roots",
             "credential filenames",
             "private-key material",
         ],
@@ -267,9 +279,13 @@ VALIDATOR_OWNERSHIP = (
         "owns": ["activation boundary smoke tests"],
     },
     {
-        "id": "adversarial-benchmarks",
+        "id": "deterministic-benchmark-catalog",
         "path": "researcher/scripts/run_benchmarks.py",
-        "owns": ["deterministic benchmark composition", "adversarial scenario execution"],
+        "owns": [
+            "repository and activation gate invocation",
+            "adversarial scenario catalog consistency",
+            "explicit non-execution accounting",
+        ],
     },
     {
         "id": "router-report",
@@ -281,6 +297,231 @@ VALIDATOR_OWNERSHIP = (
             "published router report rendering",
         ],
     },
+)
+
+SUPERVISED_LOOP_COMPONENTS = (
+    {
+        "id": "loop-common",
+        "path": "researcher/scripts/loop_common.py",
+        "owns": "legacy queue locking, atomic local writes with typed uncertain-durability failures, and run discovery helpers",
+    },
+    {
+        "id": "loop-discovery",
+        "path": "researcher/scripts/loop_discover.py",
+        "owns": "manual-seed normalization and bounded inbox admission",
+    },
+    {
+        "id": "loop-step",
+        "path": "researcher/scripts/loop_step.py",
+        "owns": "one-step supervised bookkeeping with network retrieval disabled",
+    },
+    {
+        "id": "loop-daily",
+        "path": "researcher/scripts/loop_daily.py",
+        "owns": "reduced local health profile and daily snapshot",
+    },
+    {
+        "id": "loop-status",
+        "path": "researcher/scripts/loop_status.py",
+        "owns": "human-facing legacy-loop status projection",
+    },
+    {
+        "id": "research-run-state",
+        "path": "researcher/scripts/research_loop.py",
+        "owns": "supervised research-run commands and legal state transitions",
+    },
+    {
+        "id": "research-run-readiness",
+        "path": "researcher/scripts/validate_run.py",
+        "owns": "single-run structure, history, and publication-readiness validation",
+    },
+)
+
+SUPERVISED_LOOP_TEST_FILES = (
+    "researcher/scripts/tests/test_benchmark_catalog.py",
+    "researcher/scripts/tests/test_build_inventory.py",
+    "researcher/scripts/tests/test_launchd_safety.py",
+    "researcher/scripts/tests/test_loop_common.py",
+    "researcher/scripts/tests/test_loop_common_locking.py",
+    "researcher/scripts/tests/test_loop_daily_fail_closed.py",
+    "researcher/scripts/tests/test_loop_discover.py",
+    "researcher/scripts/tests/test_loop_import_provenance.py",
+    "researcher/scripts/tests/test_loop_lock_capability.py",
+    "researcher/scripts/tests/test_loop_status_fail_closed.py",
+    "researcher/scripts/tests/test_loop_step.py",
+    "researcher/scripts/tests/test_public_repo.py",
+    "researcher/scripts/tests/test_research_loop_state_machine.py",
+    "researcher/scripts/tests/test_validate_run_hardening.py",
+)
+SUPERVISED_LOOP_TEST_PREFIXES = (
+    "test_benchmark_catalog",
+    "test_build_inventory",
+    "test_launchd",
+    "test_loop",
+    "test_public_repo",
+    "test_research_loop",
+    "test_validate_run",
+)
+
+SUPERVISED_SCRIPT_FILES = (
+    "researcher/scripts/__init__.py",
+    "researcher/scripts/adversarial_scenarios.py",
+    "researcher/scripts/artifact_store.py",
+    "researcher/scripts/build_inventory.py",
+    "researcher/scripts/check_activation_cases.py",
+    "researcher/scripts/compare_skill_revisions.py",
+    "researcher/scripts/export_policy.py",
+    "researcher/scripts/event_store.py",
+    "researcher/scripts/governance_policy.py",
+    "researcher/scripts/local_rehearsal.py",
+    "researcher/scripts/local_scheduler.py",
+    "researcher/scripts/loop_common.py",
+    "researcher/scripts/loop_daily.py",
+    "researcher/scripts/loop_discover.py",
+    "researcher/scripts/loop_status.py",
+    "researcher/scripts/loop_step.py",
+    "researcher/scripts/migrate_legacy.py",
+    "researcher/scripts/novelty_check.py",
+    "researcher/scripts/prompt_compiler.py",
+    "researcher/scripts/render_router_report.py",
+    "researcher/scripts/run_projector.py",
+    "researcher/scripts/research_loop.py",
+    "researcher/scripts/research_context.py",
+    "researcher/scripts/research_articles.py",
+    "researcher/scripts/research_articles_large.py",
+    "researcher/scripts/research_discovery.py",
+    "researcher/scripts/research_evidence.py",
+    "researcher/scripts/research_evolution.py",
+    "researcher/scripts/research_experiment.py",
+    "researcher/scripts/research_pipeline.py",
+    "researcher/scripts/research_sourcing.py",
+    "researcher/scripts/run_benchmarks.py",
+    "researcher/scripts/schema_contract.py",
+    "researcher/scripts/skill_frontmatter.py",
+    "researcher/scripts/skill_health.py",
+    "researcher/scripts/source_connectors.py",
+    "researcher/scripts/source_search.py",
+    "researcher/scripts/spec_program.py",
+    "researcher/scripts/tests/__init__.py",
+    "researcher/scripts/tests/test_adversarial_scenarios.py",
+    "researcher/scripts/tests/test_artifact_store.py",
+    "researcher/scripts/tests/test_benchmark_catalog.py",
+    "researcher/scripts/tests/test_build_inventory.py",
+    "researcher/scripts/tests/test_export_policy.py",
+    "researcher/scripts/tests/test_deliberative_writing_safety.py",
+    "researcher/scripts/tests/test_event_store.py",
+    "researcher/scripts/tests/test_example_api_budget.py",
+    "researcher/scripts/tests/test_example_calculator.py",
+    "researcher/scripts/tests/test_install_safety.py",
+    "researcher/scripts/tests/test_judge_agent_frontmatter.py",
+    "researcher/scripts/tests/test_governance_policy.py",
+    "researcher/scripts/tests/test_launchd_safety.py",
+    "researcher/scripts/tests/test_hosted_agents_sandbox_manager.py",
+    "researcher/scripts/tests/test_local_rehearsal.py",
+    "researcher/scripts/tests/test_local_scheduler.py",
+    "researcher/scripts/tests/test_loop_common.py",
+    "researcher/scripts/tests/test_loop_common_locking.py",
+    "researcher/scripts/tests/test_loop_daily_fail_closed.py",
+    "researcher/scripts/tests/test_loop_discover.py",
+    "researcher/scripts/tests/test_loop_import_provenance.py",
+    "researcher/scripts/tests/test_loop_lock_capability.py",
+    "researcher/scripts/tests/test_loop_status_fail_closed.py",
+    "researcher/scripts/tests/test_loop_step.py",
+    "researcher/scripts/tests/test_public_repo.py",
+    "researcher/scripts/tests/test_pipeline_template_paths.py",
+    "researcher/scripts/tests/test_product_readiness.py",
+    "researcher/scripts/tests/test_validate_pr_package.py",
+    "researcher/scripts/tests/test_prompt_compiler.py",
+    "researcher/scripts/tests/test_render_router_report.py",
+    "researcher/scripts/tests/test_research_loop_state_machine.py",
+    "researcher/scripts/tests/test_research_context.py",
+    "researcher/scripts/tests/test_research_articles.py",
+    "researcher/scripts/tests/test_research_articles_large.py",
+    "researcher/scripts/tests/test_research_discovery.py",
+    "researcher/scripts/tests/test_research_campaign_replay.py",
+    "researcher/scripts/tests/test_research_evidence.py",
+    "researcher/scripts/tests/test_research_evolution.py",
+    "researcher/scripts/tests/test_research_experiment.py",
+    "researcher/scripts/tests/test_research_pipeline.py",
+    "researcher/scripts/tests/test_research_pipeline_adversarial.py",
+    "researcher/scripts/tests/test_schema_contract.py",
+    "researcher/scripts/tests/test_skill_frontmatter.py",
+    "researcher/scripts/tests/test_source_connectors.py",
+    "researcher/scripts/tests/test_source_search.py",
+    "researcher/scripts/tests/test_source_sourcing.py",
+    "researcher/scripts/tests/test_research_sourcing.py",
+    "researcher/scripts/tests/test_spec_lifecycle.py",
+    "researcher/scripts/tests/test_spec_program.py",
+    "researcher/scripts/tests/test_validate_run_hardening.py",
+    "researcher/scripts/validate_authority_contract.py",
+    "researcher/scripts/validate_export.py",
+    "researcher/scripts/validate_event_journal.py",
+    "researcher/scripts/validate_governance.py",
+    "researcher/scripts/validate_platform_compat.py",
+    "researcher/scripts/validate_product_readiness.py",
+    "researcher/scripts/validate_pr_package.py",
+    "researcher/scripts/validate_public_repo.py",
+    "researcher/scripts/validate_repo.py",
+    "researcher/scripts/validate_run.py",
+    "researcher/scripts/validate_schemas.py",
+    "researcher/scripts/validate_spec_lifecycle.py",
+)
+SUPERVISED_ORCHESTRATION_FILES = (
+    "researcher/orchestration/config.json",
+    "researcher/orchestration/launchd/com.context-engineering.loop-daily.plist",
+    "researcher/orchestration/launchd/com.context-engineering.loop-discover.plist",
+    "researcher/orchestration/launchd/com.context-engineering.loop-step.plist",
+    "researcher/orchestration/launchd/install.sh",
+    "researcher/orchestration/launchd/run-loop-daily.sh",
+    "researcher/orchestration/launchd/run-loop-discover.sh",
+    "researcher/orchestration/launchd/run-loop-step.sh",
+    "researcher/orchestration/launchd/uninstall.sh",
+    "researcher/orchestration/prompts/README.md",
+    "researcher/orchestration/prompts/attempt-manifest.template.md",
+    "researcher/orchestration/prompts/fresh-verifier-brief.md",
+    "researcher/orchestration/prompts/organization-root-brief.md",
+    "researcher/orchestration/prompts/resume-brief.template.md",
+    "researcher/orchestration/prompts/spec-work-brief.template.md",
+)
+SUPERVISED_TEMPLATE_FILES = (
+    "researcher/templates/mechanism-proposal.jsonl",
+    "researcher/templates/research-thread.md",
+    "researcher/templates/skill-proposal.md",
+    "researcher/templates/source-evaluation.json",
+)
+SUPERVISED_DISCOVERY_FILES = ("researcher/discovery/manual-seed.jsonl",)
+SUPERVISED_CLOSED_ROOTS = (
+    ("researcher/scripts", SUPERVISED_SCRIPT_FILES, frozenset({"__pycache__"})),
+    ("researcher/orchestration", SUPERVISED_ORCHESTRATION_FILES, frozenset()),
+    ("researcher/templates", SUPERVISED_TEMPLATE_FILES, frozenset()),
+    ("researcher/discovery", SUPERVISED_DISCOVERY_FILES, frozenset()),
+)
+SUPERVISED_PACKAGE_INITIALIZERS = (
+    "researcher/__init__.py",
+    "researcher/scripts/__init__.py",
+)
+
+REFERENCE_RUN_FILES = (
+    "THREAD.md",
+    "proposals/mechanism-proposal.jsonl",
+    "proposals/skill-proposal.md",
+    "reports/closure.json",
+    "reports/validation-report.json",
+    "reports/validation-report.md",
+    "run-state.json",
+    "sources/evaluations/source-evaluation-draft.json",
+    "sources/evidence/deep-research-summary.md",
+    "sources/evidence/raw/autonomous-research-frameworks-executable.json",
+    "sources/evidence/raw/autonomous-research-harness-evolution.json",
+    "sources/queue.jsonl",
+)
+REFERENCE_RUN_DIRECTORIES = (
+    "proposals",
+    "reports",
+    "sources",
+    "sources/evaluations",
+    "sources/evidence",
+    "sources/evidence/raw",
 )
 
 LIVE_DOCUMENT_LINKS = {
@@ -504,9 +745,15 @@ def atomic_write_text(path: Path, text: str) -> None:
 
 class InventoryBuilder:
     def __init__(self, root: Path) -> None:
-        self.root = root.resolve()
+        # Keep the caller's lexical root as well as its canonical filesystem
+        # identity. macOS commonly exposes /var as the /private/var symlink;
+        # paths constructed from either spelling still need an in-root lexical
+        # name without resolving the source itself and hiding a symlink.
+        self.lexical_root = Path(os.path.abspath(root))
+        self.root = self.lexical_root.resolve()
         self.findings: list[Finding] = []
         self.sources: dict[str, dict[str, Any]] = {}
+        self._source_bytes: dict[str, bytes] = {}
         self.skill_names: set[str] = set()
         self.mechanisms: dict[str, dict[str, Any]] = {}
         self.claims: dict[str, dict[str, Any]] = {}
@@ -528,45 +775,266 @@ class InventoryBuilder:
             if normalized.is_absolute() or ".." in normalized.parts:
                 raise InventoryError(f"path escapes repository: {path}")
             return normalized.as_posix()
-        try:
-            # Preserve the lexical repository path here. add_source resolves
-            # the target separately so a symlink can be reported against its
-            # in-repository name instead of escaping before a typed finding is
-            # emitted.
-            lexical = Path(os.path.abspath(value))
-            return lexical.relative_to(self.root).as_posix()
-        except ValueError as exc:
-            raise InventoryError(f"path escapes repository: {path}") from exc
+        # Preserve the lexical repository path here. add_source validates the
+        # filesystem identity separately so an in-repository symlink is
+        # reported against its lexical name instead of resolved away.
+        lexical = Path(os.path.abspath(value))
+        for candidate_root in (self.lexical_root, self.root):
+            try:
+                return lexical.relative_to(candidate_root).as_posix()
+            except ValueError:
+                continue
+        raise InventoryError(f"path escapes repository: {path}")
 
     def add_source(self, path: Path) -> tuple[str, int]:
         relative = self.relative(path)
+        cached = self._source_bytes.get(relative)
+        if cached is not None:
+            return sha256_bytes(cached), len(cached)
+        components = PurePosixPath(relative).parts
+        zero_digest = "sha256:" + "0" * 64
+        if not components:
+            self.add_finding("PATH_ESCAPE", relative, "source path is empty")
+            return zero_digest, 0
+
+        nofollow = getattr(os, "O_NOFOLLOW", 0)
+        nonblock = getattr(os, "O_NONBLOCK", 0)
+        directory_flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | nofollow
+        directory_fd: int | None = None
+        directory_fds: list[int] = []
+        directory_identities: list[tuple[Path, tuple[int, int]]] = []
+        verification_directory_fds: list[int] = []
+        source_fd: int | None = None
+        verification_source_fd: int | None = None
         try:
-            resolved = path.resolve(strict=True)
-            resolved.relative_to(self.root)
-        except (OSError, ValueError) as exc:
-            self.add_finding("PATH_ESCAPE", relative, f"source is missing or escapes repository: {exc}")
-            return "sha256:" + "0" * 64, 0
-        if path.is_symlink() or not resolved.is_file():
-            self.add_finding("PATH_ESCAPE", relative, "canonical input must be a regular non-symlink file")
-            return "sha256:" + "0" * 64, 0
-        body = resolved.read_bytes()
+            root_info = os.lstat(self.root)
+            if stat.S_ISLNK(root_info.st_mode) or not stat.S_ISDIR(root_info.st_mode):
+                raise InventoryError("trusted repository root is not a real directory")
+            directory_fd = os.open(self.root, directory_flags)
+            directory_fds.append(directory_fd)
+            opened_root = os.fstat(directory_fd)
+            if (root_info.st_dev, root_info.st_ino) != (
+                opened_root.st_dev,
+                opened_root.st_ino,
+            ):
+                raise InventoryError("repository root changed while opening source")
+            directory_identities.append(
+                (self.root, (opened_root.st_dev, opened_root.st_ino))
+            )
+
+            lexical = self.root
+            for component in components[:-1]:
+                lexical /= component
+                lexical_info = os.lstat(lexical)
+                if stat.S_ISLNK(lexical_info.st_mode) or not stat.S_ISDIR(
+                    lexical_info.st_mode
+                ):
+                    raise InventoryError(
+                        f"source ancestor is not a real directory: {component}"
+                    )
+                child_fd = os.open(component, directory_flags, dir_fd=directory_fd)
+                opened_info = os.fstat(child_fd)
+                if (
+                    not stat.S_ISDIR(opened_info.st_mode)
+                    or (lexical_info.st_dev, lexical_info.st_ino)
+                    != (opened_info.st_dev, opened_info.st_ino)
+                ):
+                    os.close(child_fd)
+                    raise InventoryError(
+                        f"source ancestor changed while opening: {component}"
+                    )
+                directory_fd = child_fd
+                directory_fds.append(child_fd)
+                directory_identities.append(
+                    (lexical, (opened_info.st_dev, opened_info.st_ino))
+                )
+
+            lexical_final = lexical / components[-1]
+            lexical_info = os.lstat(lexical_final)
+            if (
+                stat.S_ISLNK(lexical_info.st_mode)
+                or not stat.S_ISREG(lexical_info.st_mode)
+                or lexical_info.st_nlink != 1
+            ):
+                raise InventoryError(
+                    "source must be a real single-link regular file"
+                )
+            source_fd = os.open(
+                components[-1],
+                os.O_RDONLY | nofollow | nonblock,
+                dir_fd=directory_fd,
+            )
+            before = os.fstat(source_fd)
+            if (
+                not stat.S_ISREG(before.st_mode)
+                or before.st_nlink != 1
+                or (lexical_info.st_dev, lexical_info.st_ino)
+                != (before.st_dev, before.st_ino)
+            ):
+                raise InventoryError("source identity changed while opening")
+            chunks: list[bytes] = []
+            while True:
+                chunk = os.read(source_fd, 1024 * 1024)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+            after = os.fstat(source_fd)
+            final_entry = os.stat(
+                components[-1], dir_fd=directory_fd, follow_symlinks=False
+            )
+            identity_before = (
+                before.st_dev,
+                before.st_ino,
+                before.st_size,
+                before.st_mtime_ns,
+                before.st_ctime_ns,
+            )
+            identity_after = (
+                after.st_dev,
+                after.st_ino,
+                after.st_size,
+                after.st_mtime_ns,
+                after.st_ctime_ns,
+            )
+            if (
+                identity_before != identity_after
+                or not stat.S_ISREG(after.st_mode)
+                or after.st_nlink != 1
+                or (after.st_dev, after.st_ino)
+                != (final_entry.st_dev, final_entry.st_ino)
+                or not stat.S_ISREG(final_entry.st_mode)
+                or final_entry.st_nlink != 1
+            ):
+                raise InventoryError("source changed while it was being hashed")
+            body = b"".join(chunks)
+            if len(body) != after.st_size:
+                raise InventoryError("source byte count differs from stable file size")
+
+            # A stable source descriptor is not sufficient: an ancestor can be
+            # renamed away and replaced while the old descriptor remains valid.
+            # Reopen the complete lexical chain and require every current name
+            # to still designate the exact directory identity opened before the
+            # read. Keep the verification descriptors open until acceptance.
+            verification_parent_fd: int | None = None
+            for index, (lexical_directory, expected_identity) in enumerate(
+                directory_identities
+            ):
+                current_info = os.lstat(lexical_directory)
+                if stat.S_ISLNK(current_info.st_mode) or not stat.S_ISDIR(
+                    current_info.st_mode
+                ):
+                    raise InventoryError(
+                        "source ancestor became unsafe while it was being hashed"
+                    )
+                if index == 0:
+                    reopened_fd = os.open(lexical_directory, directory_flags)
+                else:
+                    reopened_fd = os.open(
+                        components[index - 1],
+                        directory_flags,
+                        dir_fd=verification_parent_fd,
+                    )
+                verification_directory_fds.append(reopened_fd)
+                reopened_info = os.fstat(reopened_fd)
+                current_identity = (current_info.st_dev, current_info.st_ino)
+                reopened_identity = (reopened_info.st_dev, reopened_info.st_ino)
+                if (
+                    not stat.S_ISDIR(reopened_info.st_mode)
+                    or current_identity != expected_identity
+                    or reopened_identity != expected_identity
+                ):
+                    raise InventoryError(
+                        "source ancestor identity changed while it was being hashed"
+                    )
+                verification_parent_fd = reopened_fd
+
+            current_final_info = os.lstat(self.root.joinpath(*components))
+            verification_source_fd = os.open(
+                components[-1],
+                os.O_RDONLY | nofollow | nonblock,
+                dir_fd=verification_parent_fd,
+            )
+            reopened_final = os.fstat(verification_source_fd)
+            reopened_identity = (
+                reopened_final.st_dev,
+                reopened_final.st_ino,
+                reopened_final.st_size,
+                reopened_final.st_mtime_ns,
+                reopened_final.st_ctime_ns,
+            )
+            settled = os.fstat(source_fd)
+            settled_identity = (
+                settled.st_dev,
+                settled.st_ino,
+                settled.st_size,
+                settled.st_mtime_ns,
+                settled.st_ctime_ns,
+            )
+            if (
+                stat.S_ISLNK(current_final_info.st_mode)
+                or not stat.S_ISREG(current_final_info.st_mode)
+                or current_final_info.st_nlink != 1
+                or not stat.S_ISREG(reopened_final.st_mode)
+                or reopened_final.st_nlink != 1
+                or (current_final_info.st_dev, current_final_info.st_ino)
+                != (reopened_final.st_dev, reopened_final.st_ino)
+                or reopened_identity != identity_after
+                or settled_identity != identity_after
+            ):
+                raise InventoryError(
+                    "source lexical identity changed while it was being hashed"
+                )
+        except (InventoryError, OSError) as exc:
+            self.add_finding(
+                "PATH_ESCAPE",
+                relative,
+                f"source is missing or has an unsafe filesystem identity: {exc}",
+            )
+            return zero_digest, 0
+        finally:
+            if verification_source_fd is not None:
+                os.close(verification_source_fd)
+            if source_fd is not None:
+                os.close(source_fd)
+            for opened_fd in reversed(verification_directory_fds):
+                os.close(opened_fd)
+            for opened_fd in reversed(directory_fds):
+                os.close(opened_fd)
         digest = sha256_bytes(body)
+        self._source_bytes[relative] = body
         self.sources[relative] = {"path": relative, "digest": digest, "size_bytes": len(body)}
         return digest, len(body)
 
-    def load_json(self, path: Path) -> Any | None:
+    def read_source_bytes(self, path: Path) -> bytes:
+        """Return the exact byte snapshot recorded by ``add_source``."""
+
+        relative = self.relative(path)
         self.add_source(path)
         try:
-            return parse_json_text(path.read_text(encoding="utf-8"))
-        except (OSError, UnicodeError, json.JSONDecodeError, DuplicateKeyError) as exc:
+            return self._source_bytes[relative]
+        except KeyError as exc:
+            raise InventoryError(f"source snapshot is unavailable: {relative}") from exc
+
+    def read_source_text(self, path: Path) -> str:
+        return self.read_source_bytes(path).decode("utf-8")
+
+    def load_json(self, path: Path) -> Any | None:
+        try:
+            return parse_json_text(self.read_source_text(path))
+        except (
+            OSError,
+            UnicodeError,
+            json.JSONDecodeError,
+            DuplicateKeyError,
+            InventoryError,
+        ) as exc:
             self.add_finding("PARSE_ERROR", path, str(exc))
             return None
 
     def load_jsonl(self, path: Path) -> list[tuple[int, dict[str, Any], str]]:
-        self.add_source(path)
         try:
-            lines = path.read_text(encoding="utf-8").splitlines()
-        except (OSError, UnicodeError) as exc:
+            lines = self.read_source_text(path).splitlines()
+        except (OSError, UnicodeError, InventoryError) as exc:
             self.add_finding("PARSE_ERROR", path, str(exc))
             return []
         records: list[tuple[int, dict[str, Any], str]] = []
@@ -610,6 +1078,7 @@ class InventoryBuilder:
         examples = self.build_examples()
         manifests = self.build_manifests()
         validators = self.build_validators()
+        supervised_loop = self.build_supervised_loop()
         schemas = self.build_schemas()
         export_contracts = self.build_export_contracts()
         schema_contracts = self.build_schema_contracts()
@@ -711,6 +1180,7 @@ class InventoryBuilder:
             "examples": examples,
             "manifests": manifests,
             "validators": validators,
+            "supervised_loop": supervised_loop,
             "schemas": schemas,
             "export_contracts": export_contracts,
             "schema_contracts": schema_contracts,
@@ -746,6 +1216,7 @@ class InventoryBuilder:
                     "effectiveness": benchmark_runners["status"]["effectiveness"],
                     "paid_results": "runtime_or_published_only",
                 },
+                "supervised_loop": supervised_loop["status"],
                 "historical_reports_are_snapshots": True,
             },
             "validator_ownership": validators["records"],
@@ -765,8 +1236,10 @@ class InventoryBuilder:
                 continue
             digest, _ = self.add_source(skill_file)
             try:
-                frontmatter, issues = parse_frontmatter(skill_file.read_text(encoding="utf-8"))
-            except (OSError, UnicodeError) as exc:
+                frontmatter, issues = parse_frontmatter(
+                    self.read_source_text(skill_file)
+                )
+            except (OSError, UnicodeError, InventoryError) as exc:
                 self.add_finding("PARSE_ERROR", skill_file, str(exc), skill_dir.name)
                 continue
             for issue in issues:
@@ -1000,8 +1473,14 @@ class InventoryBuilder:
             skill_path = self.root / expected_path
             body_claim_ids: list[str] = []
             if skill_path.exists():
-                text = skill_path.read_text(encoding="utf-8")
-                body_claim_ids = sorted(claim_id for claim_id in self.claims if claim_id in text)
+                try:
+                    text = self.read_source_text(skill_path)
+                except (OSError, UnicodeError, InventoryError) as exc:
+                    self.add_finding("PARSE_ERROR", skill_path, str(exc), name)
+                else:
+                    body_claim_ids = sorted(
+                        claim_id for claim_id in self.claims if claim_id in text
+                    )
             records.append(
                 {
                     "id": name,
@@ -1107,6 +1586,8 @@ class InventoryBuilder:
 
     def build_adversarial(self) -> tuple[dict[str, Any], dict[str, Any]]:
         scenario_dir = self.root / "researcher" / "benchmarks" / "scenarios"
+        methodology_path = self.root / "researcher" / "benchmarks" / "README.md"
+        methodology_digest, methodology_size = self.add_source(methodology_path)
         scenario_records: list[dict[str, Any]] = []
         scenarios: dict[str, dict[str, Any]] = {}
         for path in sorted(scenario_dir.glob("*.jsonl")):
@@ -1152,6 +1633,12 @@ class InventoryBuilder:
             self._category(
                 "researcher/benchmarks/scenarios/*.jsonl",
                 sorted(scenario_records, key=lambda item: item["id"]),
+                execution_status="catalog_only",
+                methodology={
+                    "path": self.relative(methodology_path),
+                    "digest": methodology_digest,
+                    "size_bytes": methodology_size,
+                },
             ),
             self._category("researcher/benchmarks/goldens/adversarial-goldens.json", golden_records),
         )
@@ -1354,14 +1841,14 @@ class InventoryBuilder:
         try:
             version_lines = [
                 line.partition(":")[2].strip()
-                for line in root_skill_path.read_text(encoding="utf-8").splitlines()
+                for line in self.read_source_text(root_skill_path).splitlines()
                 if line.startswith("**Version**:")
             ]
             if len(version_lines) == 1:
                 root_version = version_lines[0]
             else:
                 self.add_finding("UNKNOWN_SCHEMA", root_skill_path, "expected exactly one **Version** line")
-        except (OSError, UnicodeError) as exc:
+        except (OSError, UnicodeError, InventoryError) as exc:
             self.add_finding("PARSE_ERROR", root_skill_path, str(exc))
         marketplace_version = None
         marketplace_skills: list[str] = []
@@ -1419,10 +1906,16 @@ class InventoryBuilder:
             records.append({**descriptor, "digest": digest})
         support_records: list[dict[str, Any]] = []
         for relative in (
+            ".gitignore",
             ".github/workflows/validate.yml",
             "requirements-dev.in",
             "requirements-dev.txt",
             "researcher/scripts/tests/test_render_router_report.py",
+            "researcher/scripts/tests/test_benchmark_catalog.py",
+            "researcher/scripts/tests/test_public_repo.py",
+            "researcher/scripts/tests/test_spec_program.py",
+            "docs/product/spec-execution-plan.json",
+            "docs/product/living-organization-plan.md",
         ):
             path = self.root / relative
             if not path.is_file():
@@ -1434,6 +1927,895 @@ class InventoryBuilder:
             "declared validator ownership",
             records,
             support_files=support_records,
+        )
+
+    def scan_closed_tree(self, root: Path, *, artifact_id: str) -> dict[str, str]:
+        """Return every descendant's no-follow filesystem type.
+
+        Closed committed fixtures may not delegate any part of their identity to
+        a symlink, device, pipe, socket, or hard-linked alias. The caller compares
+        this complete mapping with a declared manifest, including directories.
+        """
+
+        observed: dict[str, str] = {}
+        pending: list[tuple[Path, PurePosixPath]] = [(root, PurePosixPath())]
+        while pending:
+            directory, prefix = pending.pop()
+            try:
+                entries = sorted(os.scandir(directory), key=lambda entry: entry.name)
+            except OSError as exc:
+                self.add_finding(
+                    "PARSE_ERROR",
+                    directory,
+                    f"cannot inspect closed fixture: {exc}",
+                    artifact_id,
+                )
+                continue
+            for entry in entries:
+                relative = prefix / entry.name
+                relative_text = relative.as_posix()
+                path = directory / entry.name
+                try:
+                    info = entry.stat(follow_symlinks=False)
+                except OSError as exc:
+                    observed[relative_text] = "unsafe"
+                    self.add_finding(
+                        "PARSE_ERROR",
+                        path,
+                        f"cannot inspect closed fixture entry: {exc}",
+                        artifact_id,
+                    )
+                    continue
+                if stat.S_ISDIR(info.st_mode):
+                    observed[relative_text] = "directory"
+                    pending.append((path, relative))
+                elif stat.S_ISREG(info.st_mode) and info.st_nlink == 1:
+                    observed[relative_text] = "file"
+                else:
+                    observed[relative_text] = "unsafe"
+                    self.add_finding(
+                        "UNREGISTERED_SUPERVISED_LOOP_COMPONENT",
+                        path,
+                        "closed reference-run entries must be real, single-link "
+                        "directories or regular files",
+                        artifact_id,
+                    )
+        return observed
+
+    def collect_supervised_loop_tests(self, tests_root: Path) -> list[str]:
+        """Resolve the closed supervised-test manifest without following links."""
+
+        expected_by_name = {
+            Path(relative).name: relative for relative in SUPERVISED_LOOP_TEST_FILES
+        }
+        try:
+            root_info = os.lstat(tests_root)
+        except OSError as exc:
+            self.add_finding(
+                "MISSING_SUPERVISED_LOOP_TEST",
+                tests_root,
+                f"cannot inspect supervised-test root: {exc}",
+                "supervised-loop-tests",
+            )
+            return []
+        if stat.S_ISLNK(root_info.st_mode) or not stat.S_ISDIR(root_info.st_mode):
+            self.add_finding(
+                "UNSAFE_SUPERVISED_LOOP_TEST",
+                tests_root,
+                "supervised-test root must be a real directory",
+                "supervised-loop-tests",
+            )
+            return []
+
+        try:
+            entries = sorted(os.scandir(tests_root), key=lambda entry: entry.name)
+        except OSError as exc:
+            self.add_finding(
+                "MISSING_SUPERVISED_LOOP_TEST",
+                tests_root,
+                f"cannot enumerate supervised-test root: {exc}",
+                "supervised-loop-tests",
+            )
+            return []
+
+        safe_expected: set[str] = set()
+        for entry in entries:
+            if not entry.name.endswith(".py") or not any(
+                entry.name.startswith(prefix)
+                for prefix in SUPERVISED_LOOP_TEST_PREFIXES
+            ):
+                continue
+            path = tests_root / entry.name
+            try:
+                info = entry.stat(follow_symlinks=False)
+            except OSError as exc:
+                self.add_finding(
+                    "UNSAFE_SUPERVISED_LOOP_TEST",
+                    path,
+                    f"cannot inspect supervised test: {exc}",
+                    entry.name,
+                )
+                continue
+            relative = expected_by_name.get(entry.name)
+            if relative is None:
+                self.add_finding(
+                    "UNREGISTERED_SUPERVISED_LOOP_TEST",
+                    path,
+                    "matching supervised test is absent from the closed manifest",
+                    entry.name,
+                )
+            if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                self.add_finding(
+                    "UNSAFE_SUPERVISED_LOOP_TEST",
+                    path,
+                    "supervised test must be a real single-link regular file",
+                    entry.name,
+                )
+                continue
+            if relative is None:
+                continue
+            safe_expected.add(entry.name)
+
+        for name in sorted(set(expected_by_name) - safe_expected):
+            path = tests_root / name
+            if not any(
+                finding.path == self.relative(path)
+                and finding.code == "UNSAFE_SUPERVISED_LOOP_TEST"
+                for finding in self.findings
+            ):
+                self.add_finding(
+                    "MISSING_SUPERVISED_LOOP_TEST",
+                    path,
+                    "declared supervised test is missing",
+                    name,
+                )
+        return sorted(expected_by_name[name] for name in safe_expected)
+
+    def collect_closed_supervised_root(
+        self,
+        root_relative: str,
+        expected_files: tuple[str, ...],
+        excluded_directory_names: frozenset[str],
+    ) -> list[str]:
+        """Validate one exact supervised source root without admitting extras."""
+
+        root = self.root / root_relative
+        current = self.root
+        try:
+            for component in PurePosixPath(root_relative).parts:
+                current /= component
+                info = os.lstat(current)
+                if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+                    raise InventoryError(
+                        f"closed supervised root ancestor is unsafe: {component}"
+                    )
+        except (InventoryError, OSError) as exc:
+            self.add_finding(
+                "UNSAFE_SUPERVISED_SOURCE_ROOT",
+                root,
+                str(exc),
+                root_relative,
+            )
+            return []
+
+        prefix = f"{root_relative}/"
+        expected_relative = {
+            relative.removeprefix(prefix): relative
+            for relative in expected_files
+            if relative.startswith(prefix)
+        }
+        if len(expected_relative) != len(expected_files):
+            self.add_finding(
+                "PARSE_ERROR",
+                root,
+                "closed supervised manifest contains a path outside its root",
+                root_relative,
+            )
+            return []
+        expected_directories: set[str] = set()
+        for relative in expected_relative:
+            parent = PurePosixPath(relative).parent
+            while parent != PurePosixPath("."):
+                expected_directories.add(parent.as_posix())
+                parent = parent.parent
+
+        safe_files: set[str] = set()
+
+        def inspect_generated_cache(
+            directory: Path,
+            relative_parent: PurePosixPath,
+        ) -> None:
+            """Allow only ordinary interpreter cache entries in an exclusion.
+
+            The directory is excluded from the declared-input digest, not from
+            namespace validation. In particular, a source or config file under
+            ``__pycache__`` must not disappear from diagnostics merely because
+            generated bytecode is allowed there.
+            """
+
+            try:
+                entries = sorted(os.scandir(directory), key=lambda entry: entry.name)
+            except OSError as exc:
+                self.add_finding(
+                    "UNSAFE_SUPERVISED_SOURCE_FILE",
+                    directory,
+                    f"cannot inspect generated cache exclusion: {exc}",
+                    relative_parent.as_posix(),
+                )
+                return
+            for entry in entries:
+                relative = relative_parent / entry.name
+                path = directory / entry.name
+                try:
+                    info = entry.stat(follow_symlinks=False)
+                except OSError as exc:
+                    self.add_finding(
+                        "UNSAFE_SUPERVISED_SOURCE_FILE",
+                        path,
+                        f"cannot inspect generated cache entry: {exc}",
+                        relative.as_posix(),
+                    )
+                    continue
+                ordinary_bytecode = (
+                    stat.S_ISREG(info.st_mode)
+                    and info.st_nlink == 1
+                    and re.fullmatch(
+                        r"[A-Za-z_][A-Za-z0-9_]*\.cpython-[0-9]+"
+                        r"(?:\.opt-[0-9]+)?\.pyc",
+                        entry.name,
+                    )
+                    is not None
+                )
+                if ordinary_bytecode:
+                    continue
+                code = (
+                    "UNREGISTERED_SUPERVISED_SOURCE_FILE"
+                    if stat.S_ISREG(info.st_mode) and info.st_nlink == 1
+                    else "UNSAFE_SUPERVISED_SOURCE_FILE"
+                )
+                self.add_finding(
+                    code,
+                    path,
+                    "generated cache exclusion contains a non-bytecode or unsafe entry",
+                    relative.as_posix(),
+                )
+
+        pending: list[tuple[Path, PurePosixPath]] = [(root, PurePosixPath())]
+        while pending:
+            directory, relative_parent = pending.pop()
+            try:
+                entries = sorted(os.scandir(directory), key=lambda entry: entry.name)
+            except OSError as exc:
+                self.add_finding(
+                    "UNSAFE_SUPERVISED_SOURCE_ROOT",
+                    directory,
+                    f"cannot enumerate closed supervised root: {exc}",
+                    root_relative,
+                )
+                continue
+            for entry in entries:
+                relative = relative_parent / entry.name
+                relative_text = relative.as_posix()
+                path = directory / entry.name
+                try:
+                    info = entry.stat(follow_symlinks=False)
+                except OSError as exc:
+                    self.add_finding(
+                        "UNSAFE_SUPERVISED_SOURCE_FILE",
+                        path,
+                        f"cannot inspect supervised source: {exc}",
+                        relative_text,
+                    )
+                    continue
+                if stat.S_ISDIR(info.st_mode):
+                    if entry.name in excluded_directory_names:
+                        inspect_generated_cache(path, relative)
+                        continue
+                    if relative_text not in expected_directories:
+                        self.add_finding(
+                            "UNREGISTERED_SUPERVISED_SOURCE_FILE",
+                            path,
+                            "directory is absent from the closed supervised manifest",
+                            relative_text,
+                        )
+                        continue
+                    pending.append((path, relative))
+                    continue
+                expected = expected_relative.get(relative_text)
+                if expected is None:
+                    self.add_finding(
+                        "UNREGISTERED_SUPERVISED_SOURCE_FILE",
+                        path,
+                        "file is absent from the closed supervised manifest",
+                        relative_text,
+                    )
+                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                    self.add_finding(
+                        "UNSAFE_SUPERVISED_SOURCE_FILE",
+                        path,
+                        "supervised source must be a real single-link regular file",
+                        relative_text,
+                    )
+                    continue
+                if expected is not None:
+                    safe_files.add(expected)
+
+        for relative in sorted(set(expected_files) - safe_files):
+            path = self.root / relative
+            if not any(
+                finding.path == self.relative(path)
+                and finding.code == "UNSAFE_SUPERVISED_SOURCE_FILE"
+                for finding in self.findings
+            ):
+                self.add_finding(
+                    "MISSING_SUPERVISED_SOURCE_FILE",
+                    path,
+                    "declared supervised source is missing",
+                    relative,
+                )
+        return sorted(safe_files)
+
+    def build_supervised_loop(self) -> dict[str, Any]:
+        """Bind the legacy supervised loop without treating it as activation authority."""
+
+        records: list[dict[str, Any]] = []
+        for descriptor in SUPERVISED_LOOP_COMPONENTS:
+            relative = descriptor["path"]
+            path = self.root / relative
+            if not path.is_file():
+                self.add_finding(
+                    "PARSE_ERROR",
+                    path,
+                    "declared supervised-loop component is missing",
+                    descriptor["id"],
+                )
+                continue
+            digest, size = self.add_source(path)
+            records.append({**descriptor, "digest": digest, "size_bytes": size})
+
+        scripts_root = self.root / "researcher" / "scripts"
+
+        support_paths = [
+            "researcher/__init__.py",
+            "researcher/scripts/__init__.py",
+            "researcher/discovery/manual-seed.jsonl",
+            "researcher/orchestration/config.json",
+            "researcher/runbooks/continuous-operation.md",
+            "researcher/templates/source-evaluation.json",
+            "researcher/templates/skill-proposal.md",
+            "researcher/templates/mechanism-proposal.jsonl",
+            "researcher/scripts/novelty_check.py",
+            "researcher/scripts/validate_repo.py",
+            "researcher/scripts/run_benchmarks.py",
+            "researcher/scripts/check_activation_cases.py",
+            "researcher/scripts/skill_frontmatter.py",
+            "researcher/orchestration/launchd/install.sh",
+            "researcher/orchestration/launchd/uninstall.sh",
+            "researcher/orchestration/launchd/run-loop-step.sh",
+            "researcher/orchestration/launchd/run-loop-discover.sh",
+            "researcher/orchestration/launchd/run-loop-daily.sh",
+            "researcher/orchestration/launchd/com.context-engineering.loop-step.plist",
+            "researcher/orchestration/launchd/com.context-engineering.loop-discover.plist",
+            "researcher/orchestration/launchd/com.context-engineering.loop-daily.plist",
+        ]
+        reference_run = (
+            self.root
+            / "researcher"
+            / "runs"
+            / "20260515-035228-executable-autonomous-research-frameworks"
+        )
+        runs_root = reference_run.parent
+        safe_reference_root = True
+        for candidate in (self.root / "researcher", runs_root, reference_run):
+            try:
+                info = os.lstat(candidate)
+            except OSError:
+                safe_reference_root = False
+                break
+            if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+                safe_reference_root = False
+                break
+        if not safe_reference_root:
+            self.add_finding(
+                "PARSE_ERROR",
+                reference_run,
+                "committed reference-run fixture is missing or unsafe",
+                "legacy-reference-run",
+            )
+        else:
+            expected_reference_entries = {
+                **{
+                    relative: "directory"
+                    for relative in REFERENCE_RUN_DIRECTORIES
+                },
+                **{relative: "file" for relative in REFERENCE_RUN_FILES},
+            }
+            observed_reference_entries = self.scan_closed_tree(
+                reference_run,
+                artifact_id="legacy-reference-run",
+            )
+            missing_reference_entries = sorted(
+                set(expected_reference_entries) - set(observed_reference_entries)
+            )
+            extra_reference_entries = sorted(
+                set(observed_reference_entries) - set(expected_reference_entries)
+            )
+            mismatched_reference_entries = sorted(
+                relative
+                for relative in set(expected_reference_entries).intersection(
+                    observed_reference_entries
+                )
+                if observed_reference_entries[relative]
+                != expected_reference_entries[relative]
+            )
+            if missing_reference_entries:
+                self.add_finding(
+                    "PARSE_ERROR",
+                    reference_run,
+                    "committed reference-run manifest is missing entries: "
+                    f"{missing_reference_entries}",
+                    "legacy-reference-run",
+                )
+            if extra_reference_entries:
+                self.add_finding(
+                    "UNREGISTERED_SUPERVISED_LOOP_COMPONENT",
+                    reference_run,
+                    "committed reference-run manifest has unregistered entries: "
+                    f"{extra_reference_entries}",
+                    "legacy-reference-run",
+                )
+            for relative in mismatched_reference_entries:
+                self.add_finding(
+                    "UNREGISTERED_SUPERVISED_LOOP_COMPONENT",
+                    reference_run / relative,
+                    "committed reference-run entry has an unsafe filesystem identity "
+                    f"({observed_reference_entries[relative]} != "
+                    f"{expected_reference_entries[relative]})",
+                    "legacy-reference-run",
+                )
+            reference_state_path = reference_run / "run-state.json"
+            reference_state = (
+                self.load_json(reference_state_path)
+                if observed_reference_entries.get("run-state.json") == "file"
+                else None
+            )
+            if not isinstance(reference_state, dict) or (
+                reference_state.get("current_state") != "closed"
+                or reference_state.get("close_status") != "reference-only"
+                or reference_state.get("run_id") != reference_run.name
+            ):
+                self.add_finding(
+                    "PARSE_ERROR",
+                    reference_state_path,
+                    "committed reference run must be closed as reference-only with exact run_id",
+                    "legacy-reference-run",
+                )
+            for relative in REFERENCE_RUN_FILES:
+                if observed_reference_entries.get(relative) == "file":
+                    support_paths.append(self.relative(reference_run / relative))
+        tests_root = scripts_root / "tests"
+        support_paths.extend(self.collect_supervised_loop_tests(tests_root))
+        for root_relative, expected_files, exclusions in SUPERVISED_CLOSED_ROOTS:
+            support_paths.extend(
+                self.collect_closed_supervised_root(
+                    root_relative,
+                    expected_files,
+                    exclusions,
+                )
+            )
+        support_paths.extend(SUPERVISED_PACKAGE_INITIALIZERS)
+        support_paths = sorted(set(support_paths))
+
+        registered_python = {
+            descriptor["path"] for descriptor in SUPERVISED_LOOP_COMPONENTS
+        } | {
+            relative
+            for relative in support_paths
+            if relative.startswith("researcher/") and relative.endswith(".py")
+        }
+        discovered_dependencies: set[str] = set()
+        pending = [
+            *(descriptor["path"] for descriptor in SUPERVISED_LOOP_COMPONENTS),
+            *SUPERVISED_PACKAGE_INITIALIZERS,
+        ]
+        visited: set[str] = set()
+        while pending:
+            relative = pending.pop()
+            if relative in visited:
+                continue
+            visited.add(relative)
+            path = self.root / relative
+            if not path.is_file():
+                continue
+            try:
+                tree = ast.parse(self.read_source_text(path), filename=relative)
+            except (OSError, UnicodeError, SyntaxError, InventoryError) as exc:
+                self.add_finding("PARSE_ERROR", path, str(exc), relative)
+                continue
+
+            importlib_modules: set[str] = set()
+            import_module_names: set[str] = set()
+            builtins_modules: set[str] = set()
+            builtin_import_names: set[str] = {"__import__"}
+            subprocess_modules: set[str] = set()
+            subprocess_functions: set[str] = set()
+            os_modules: set[str] = set()
+            os_execution_functions: dict[str, str] = {}
+            sys_modules: set[str] = set()
+            python_executable_names: set[str] = set()
+            assignments: dict[str, list[ast.expr]] = {}
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.Assign, ast.AnnAssign)):
+                    value = node.value
+                    targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                    if value is not None:
+                        for target in targets:
+                            if isinstance(target, ast.Name):
+                                assignments.setdefault(target.id, []).append(value)
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        bound = alias.asname or alias.name.split(".")[0]
+                        if alias.name == "importlib" or alias.name.startswith("importlib."):
+                            importlib_modules.add(bound)
+                        if alias.name == "builtins" or alias.name.startswith("builtins."):
+                            builtins_modules.add(bound)
+                        if alias.name == "subprocess" or alias.name.startswith("subprocess."):
+                            subprocess_modules.add(bound)
+                        if alias.name == "os" or alias.name.startswith("os."):
+                            os_modules.add(bound)
+                        if alias.name == "sys" or alias.name.startswith("sys."):
+                            sys_modules.add(bound)
+                elif isinstance(node, ast.ImportFrom) and node.level == 0:
+                    if node.module == "importlib":
+                        for alias in node.names:
+                            if alias.name == "import_module":
+                                import_module_names.add(alias.asname or alias.name)
+                            elif alias.name == "*":
+                                import_module_names.add("import_module")
+                    elif node.module == "builtins":
+                        for alias in node.names:
+                            if alias.name == "__import__":
+                                builtin_import_names.add(alias.asname or alias.name)
+                    elif node.module == "subprocess":
+                        for alias in node.names:
+                            if alias.name in {
+                                "call",
+                                "check_call",
+                                "check_output",
+                                "Popen",
+                                "run",
+                            }:
+                                subprocess_functions.add(alias.asname or alias.name)
+                    elif node.module == "os":
+                        for alias in node.names:
+                            if alias.name.startswith(("exec", "spawn")):
+                                os_execution_functions[alias.asname or alias.name] = alias.name
+                    elif node.module == "sys":
+                        for alias in node.names:
+                            if alias.name == "executable":
+                                python_executable_names.add(alias.asname or alias.name)
+
+            dynamic_argument_nodes: set[int] = set()
+
+            def dynamic_import_kind(call: ast.Call) -> str | None:
+                function = call.func
+                if isinstance(function, ast.Name):
+                    if function.id in import_module_names:
+                        return "importlib.import_module"
+                    if function.id in builtin_import_names:
+                        return "__import__"
+                if isinstance(function, ast.Attribute) and isinstance(
+                    function.value, ast.Name
+                ):
+                    if (
+                        function.attr == "import_module"
+                        and function.value.id in importlib_modules
+                    ):
+                        return "importlib.import_module"
+                    if (
+                        function.attr == "__import__"
+                        and function.value.id in builtins_modules
+                    ):
+                        return "builtins.__import__"
+                return None
+
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+                dynamic_kind = dynamic_import_kind(node)
+                if dynamic_kind is None:
+                    continue
+                self.add_finding(
+                    "DYNAMIC_SUPERVISED_LOOP_IMPORT",
+                    path,
+                    f"unsupported dynamic import call {dynamic_kind} at line {node.lineno}",
+                    relative,
+                )
+                for argument in [
+                    *node.args,
+                    *(keyword.value for keyword in node.keywords),
+                ]:
+                    dynamic_argument_nodes.update(id(value) for value in ast.walk(argument))
+
+            def expand_expression(
+                expression: ast.expr,
+                seen: frozenset[str] = frozenset(),
+            ) -> list[ast.expr]:
+                if isinstance(expression, ast.Name) and expression.id not in seen:
+                    values = assignments.get(expression.id)
+                    if values:
+                        expanded: list[ast.expr] = []
+                        for value in values:
+                            expanded.extend(
+                                expand_expression(value, seen | {expression.id})
+                            )
+                        return expanded
+                return [expression]
+
+            def is_python_executable(expression: ast.expr) -> bool:
+                for value in expand_expression(expression):
+                    if (
+                        isinstance(value, ast.Attribute)
+                        and value.attr == "executable"
+                        and isinstance(value.value, ast.Name)
+                        and value.value.id in sys_modules
+                    ):
+                        return True
+                    if isinstance(value, ast.Name) and value.id in python_executable_names:
+                        return True
+                    if isinstance(value, ast.Constant) and isinstance(value.value, str):
+                        executable = PurePosixPath(value.value).name
+                        if re.fullmatch(r"python(?:3(?:\.[0-9]+)?)?", executable):
+                            return True
+                return False
+
+            def contains_static_python_path(expression: ast.expr) -> bool:
+                for value in expand_expression(expression):
+                    if isinstance(value, ast.Constant) and isinstance(value.value, str):
+                        if value.value.endswith(".py"):
+                            return True
+                    if any(
+                        isinstance(child, ast.Constant)
+                        and isinstance(child.value, str)
+                        and child.value.endswith(".py")
+                        for child in ast.walk(value)
+                    ):
+                        return True
+                return False
+
+            def check_python_argv(argv_expression: ast.expr, line: int) -> None:
+                for argv in expand_expression(argv_expression):
+                    if not isinstance(argv, (ast.List, ast.Tuple)) or not argv.elts:
+                        continue
+                    if not is_python_executable(argv.elts[0]) or len(argv.elts) < 2:
+                        continue
+                    script = argv.elts[1]
+                    if (
+                        isinstance(script, ast.Constant)
+                        and isinstance(script.value, str)
+                        and script.value.startswith("-")
+                    ):
+                        continue
+                    if contains_static_python_path(script):
+                        continue
+                    self.add_finding(
+                        "DYNAMIC_SUPERVISED_LOOP_ENTRYPOINT",
+                        path,
+                        "computed Python subprocess entrypoint is unsupported "
+                        f"at line {line}",
+                        relative,
+                    )
+
+            subprocess_methods = {
+                "call",
+                "check_call",
+                "check_output",
+                "Popen",
+                "run",
+            }
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+                function = node.func
+                is_subprocess = (
+                    isinstance(function, ast.Name)
+                    and function.id in subprocess_functions
+                ) or (
+                    isinstance(function, ast.Attribute)
+                    and function.attr in subprocess_methods
+                    and isinstance(function.value, ast.Name)
+                    and function.value.id in subprocess_modules
+                )
+                if is_subprocess:
+                    argv = node.args[0] if node.args else next(
+                        (
+                            keyword.value
+                            for keyword in node.keywords
+                            if keyword.arg == "args"
+                        ),
+                        None,
+                    )
+                    if argv is not None:
+                        check_python_argv(argv, node.lineno)
+                    continue
+                os_method: str | None = None
+                if isinstance(function, ast.Name):
+                    os_method = os_execution_functions.get(function.id)
+                elif (
+                    isinstance(function, ast.Attribute)
+                    and isinstance(function.value, ast.Name)
+                    and function.value.id in os_modules
+                    and function.attr.startswith(("exec", "spawn"))
+                ):
+                    os_method = function.attr
+                if os_method is None:
+                    continue
+                if os_method.startswith("exec") and len(node.args) >= 2:
+                    if is_python_executable(node.args[0]):
+                        check_python_argv(node.args[1], node.lineno)
+                elif os_method.startswith("spawn") and len(node.args) >= 3:
+                    if is_python_executable(node.args[1]):
+                        check_python_argv(node.args[2], node.lineno)
+
+            local_dependencies: set[str] = set()
+            current_package = list(PurePosixPath(relative).parent.parts)
+
+            def module_candidate(
+                module_name: str,
+                *,
+                definitely_local: bool,
+            ) -> str | None:
+                if module_name.startswith("researcher.") or module_name == "researcher":
+                    module_path = module_name.replace(".", "/")
+                elif current_package == ["researcher", "scripts"]:
+                    module_path = f"researcher/scripts/{module_name.split('.')[0]}"
+                else:
+                    return None
+                file_candidate = f"{module_path}.py"
+                package_candidate = f"{module_path}/__init__.py"
+                if (self.root / file_candidate).is_file():
+                    return file_candidate
+                if (self.root / package_candidate).is_file():
+                    return package_candidate
+                return file_candidate if definitely_local else None
+
+            for node in ast.walk(tree):
+                module_names: list[tuple[str, bool]] = []
+                if isinstance(node, ast.ImportFrom):
+                    if node.level > 0:
+                        ascents = node.level - 1
+                        if ascents > len(current_package):
+                            self.add_finding(
+                                "UNREGISTERED_SUPERVISED_LOOP_DEPENDENCY",
+                                path,
+                                f"relative import escapes package at line {node.lineno}",
+                                relative,
+                            )
+                            continue
+                        base = current_package[: len(current_package) - ascents]
+                        if node.module:
+                            resolved = ".".join([*base, *node.module.split(".")])
+                            module_names.append((resolved, True))
+                            if (self.root / resolved.replace(".", "/")).is_dir():
+                                module_names.extend(
+                                    (f"{resolved}.{alias.name}", True)
+                                    for alias in node.names
+                                    if alias.name != "*"
+                                )
+                        else:
+                            module_names.extend(
+                                (".".join([*base, alias.name]), True)
+                                for alias in node.names
+                                if alias.name != "*"
+                            )
+                    elif node.level == 0 and node.module:
+                        if node.module in {"researcher", "researcher.scripts"}:
+                            module_names.append((node.module, True))
+                            module_names.extend(
+                                (f"{node.module}.{alias.name}", True)
+                                for alias in node.names
+                                if alias.name != "*"
+                            )
+                        else:
+                            module_names.append(
+                                (
+                                    node.module,
+                                    node.module.startswith("researcher."),
+                                )
+                            )
+                elif isinstance(node, ast.Import):
+                    module_names.extend(
+                        (
+                            alias.name,
+                            alias.name == "researcher"
+                            or alias.name.startswith("researcher."),
+                        )
+                        for alias in node.names
+                    )
+                for module_name, definitely_local in module_names:
+                    candidate = module_candidate(
+                        module_name,
+                        definitely_local=definitely_local,
+                    )
+                    if candidate is not None:
+                        local_dependencies.add(candidate)
+                if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                    if id(node) in dynamic_argument_nodes:
+                        continue
+                    literal_path = PurePosixPath(node.value)
+                    if node.value.endswith(".py") and "/" not in node.value:
+                        candidate = f"researcher/scripts/{node.value}"
+                        if (self.root / candidate).is_file():
+                            local_dependencies.add(candidate)
+                    elif (
+                        len(literal_path.parts) == 3
+                        and literal_path.parts[:2] == ("researcher", "scripts")
+                        and literal_path.name.endswith(".py")
+                        and str(literal_path) == node.value
+                    ):
+                        local_dependencies.add(node.value)
+            for dependency in sorted(local_dependencies):
+                discovered_dependencies.add(dependency)
+                # AST discovery is diagnostic only. Never read or source-bind
+                # a path until the explicit support manifest has independently
+                # admitted it.
+                if dependency in registered_python and dependency not in visited:
+                    pending.append(dependency)
+
+        for relative in sorted(discovered_dependencies - registered_python):
+            path = self.root / relative
+            self.add_finding(
+                "UNREGISTERED_SUPERVISED_LOOP_DEPENDENCY",
+                path,
+                "local runtime dependency is absent from the declared supervised-loop support manifest",
+                relative,
+            )
+
+        support_records: list[dict[str, Any]] = []
+        for relative in support_paths:
+            path = self.root / relative
+            if not path.is_file():
+                self.add_finding(
+                    "PARSE_ERROR",
+                    path,
+                    "supervised-loop support file is missing",
+                    relative,
+                )
+                continue
+            digest, size = self.add_source(path)
+            support_records.append(
+                {"path": relative, "digest": digest, "size_bytes": size}
+            )
+
+        return self._category(
+            "legacy supervised loop; replacement authority belongs to SPEC-004, SPEC-005, SPEC-008, SPEC-009, SPEC-010, and SPEC-025",
+            records,
+            support_files=support_records,
+            binding_scope="declared_component_binding",
+            support_manifest={
+                "kind": "explicit_declared_nonexhaustive",
+                "closed_roots": [
+                    root_relative
+                    for root_relative, _expected, _exclusions in SUPERVISED_CLOSED_ROOTS
+                ],
+                "package_initializers": list(SUPERVISED_PACKAGE_INITIALIZERS),
+                "reference_fixture": {
+                    "files": len(REFERENCE_RUN_FILES),
+                    "directories": len(REFERENCE_RUN_DIRECTORIES),
+                },
+                "generated_cache_exclusion": "ordinary_cpython_bytecode_only",
+            },
+            ast_scan="defense_in_depth_nonexhaustive",
+            digest_role="inventory_input_change_detection_only_not_freeze_or_security_boundary",
+            result_reproducibility="not_claimed_for_daily_status_or_validator_results",
+            status={
+                "launchd_installer": "disabled",
+                "launchd_wrappers": "dormant_inert",
+                "direct_execution": "supervised_only",
+                "declared_network_retrieval": "removed",
+                "runtime_authority": "none",
+                "scenario_execution": "catalog_only",
+            },
         )
 
     def build_schemas(self) -> dict[str, Any]:
@@ -1736,8 +3118,8 @@ class InventoryBuilder:
                 )
 
         try:
-            index_text = index_path.read_text(encoding="utf-8")
-        except (OSError, UnicodeError):
+            index_text = self.read_source_text(index_path)
+        except (OSError, UnicodeError, InventoryError):
             index_text = ""
 
         roadmap_sections, malformed_roadmap = markdown_level_two_sections(index_text)
@@ -1808,9 +3190,9 @@ class InventoryBuilder:
             filename_number = filename_match.group("number")
             filename_id = f"SPEC-{filename_number}"
             try:
-                exact_bytes = path.read_bytes()
+                exact_bytes = self.read_source_bytes(path)
                 text = exact_bytes.decode("utf-8")
-            except (OSError, UnicodeError) as exc:
+            except (OSError, UnicodeError, InventoryError) as exc:
                 self.add_finding("PARSE_ERROR", path, str(exc), filename_id)
                 continue
             if b"\r" in exact_bytes:
@@ -2606,8 +3988,8 @@ class InventoryBuilder:
         if index_path.is_file():
             self.add_source(index_path)
             try:
-                index_text = index_path.read_text(encoding="utf-8")
-            except (OSError, UnicodeError) as exc:
+                index_text = self.read_source_text(index_path)
+            except (OSError, UnicodeError, InventoryError) as exc:
                 self.add_finding("PARSE_ERROR", index_path, str(exc))
                 index_text = ""
         else:
@@ -2678,8 +4060,8 @@ class InventoryBuilder:
             filename_number = filename_match.group("number")
             filename_id = f"ADR-{filename_number}"
             try:
-                text = path.read_text(encoding="utf-8")
-            except (OSError, UnicodeError) as exc:
+                text = self.read_source_text(path)
+            except (OSError, UnicodeError, InventoryError) as exc:
                 self.add_finding("PARSE_ERROR", path, str(exc), filename_id)
                 continue
             lines = text.splitlines()
@@ -3015,8 +4397,8 @@ class InventoryBuilder:
         for relative, required_link in LIVE_DOCUMENT_LINKS.items():
             path = self.root / relative
             try:
-                text = path.read_text(encoding="utf-8")
-            except (OSError, UnicodeError) as exc:
+                text = self.read_source_text(path)
+            except (OSError, UnicodeError, InventoryError) as exc:
                 self.add_finding("PARSE_ERROR", path, str(exc))
                 continue
             if required_link not in text:
@@ -3041,9 +4423,10 @@ def render_summary(inventory: dict[str, Any]) -> str:
         ("Provenance-tracked claims", artifacts["claims"]["count"]),
         ("Activation cases", artifacts["activation_cases"]["count"]),
         ("Router prompts", artifacts["router_prompts"]["count"]),
-        ("Adversarial scenarios", artifacts["adversarial_scenarios"]["count"]),
+        ("Adversarial scenario catalog entries", artifacts["adversarial_scenarios"]["count"]),
         ("Adversarial goldens", artifacts["adversarial_goldens"]["count"]),
         ("Effectiveness tasks", artifacts["effectiveness_tasks"]["count"]),
+        ("Supervised loop components", artifacts["supervised_loop"]["count"]),
         ("Example projects", artifacts["examples"]["count"]),
     ]
     lines = [
@@ -3053,7 +4436,12 @@ def render_summary(inventory: dict[str, Any]) -> str:
         "This is a generated view of canonical repository artifacts, not a second source of truth.",
         "",
         f"- Schema: `{inventory['schema_version']}`",
-        f"- Source tree: `{inventory['source_tree_digest']}`",
+        f"- Declared input digest: `{inventory['source_tree_digest']}`",
+        (
+            "- Digest scope: exact byte snapshots consumed by InventoryBuilder only; "
+            "not an exhaustive runtime-behavior digest, freeze/security boundary, or "
+            "daily/status/validator result-reproduction guarantee."
+        ),
         f"- Unresolved references: `{len(inventory['unresolved_references'])}`",
         "",
         "| Artifact | Count |",
@@ -3065,6 +4453,11 @@ def render_summary(inventory: dict[str, Any]) -> str:
         f"- Plugin version: `{artifacts['manifests']['versions']['open_plugin']}`",
         f"- Router runner: `{inventory['compatibility']['benchmark_runner']['router']}`",
         f"- Effectiveness runner: `{inventory['compatibility']['benchmark_runner']['effectiveness']}`",
+        f"- Legacy launchd installer: `{artifacts['supervised_loop']['status']['launchd_installer']}`",
+        f"- Legacy launchd wrappers: `{artifacts['supervised_loop']['status']['launchd_wrappers']}`",
+        f"- Legacy direct execution: `{artifacts['supervised_loop']['status']['direct_execution']}`",
+        f"- Legacy declared network retrieval: `{artifacts['supervised_loop']['status']['declared_network_retrieval']}`",
+        f"- Adversarial scenarios: `{artifacts['adversarial_scenarios']['execution_status']}`",
         "",
         (
             "Historical reports retain the counts and measurements from their dated snapshot. "
@@ -3119,7 +4512,7 @@ def main() -> int:
         atomic_write_text(summary_path, summary_text)
         print(
             f"Inventory written: {artifacts_count(inventory)} artifact records, "
-            f"digest {inventory['source_tree_digest'][7:19]}"
+            f"declared-input digest {inventory['source_tree_digest'][7:19]}"
         )
         return 0
 
@@ -3137,7 +4530,8 @@ def main() -> int:
         return 1
     print(
         f"Inventory check passed: {artifacts_count(inventory)} artifact records, "
-        f"{len(inventory['sources'])} canonical sources, digest {inventory['source_tree_digest'][7:19]}"
+        f"{len(inventory['sources'])} declared input snapshots, "
+        f"digest {inventory['source_tree_digest'][7:19]}"
     )
     return 0
 

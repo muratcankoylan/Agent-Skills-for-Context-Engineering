@@ -25,7 +25,7 @@
   "id": "freeze_018f3e40-7b80-7a21-8000-000000000009",
   "kind": "FreezeReceipt",
   "root_production_epoch": "main@a1841d1",
-  "schema_registry_digest": "sha256:2bf3242fd6b4cbf9e42ef2470bceff7787b870fdd08842fc1a4d90fadc9806e0",
+  "schema_registry_digest": "sha256:4dd1f2e66bd6302eecb4b1cb876b5e288f4a6a82b036c87f3bde8889a56b228f",
   "schema_version": "1.0.0",
   "total_size_bytes": 2,
   "tree_digest": "sha256:16ac029ab329f91b89c6e6bb0c24e5b1c228f29d55356bad4a5d783413ad97af"

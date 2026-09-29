@@ -1,23 +1,8 @@
 {
   "schema_version": "0.1.0",
-  "_mode_doc": "mode currently reserved for future paid-LLM feeds (judge/synthesis). HTTP retrieval is controlled by --allow-fetch on loop_step.",
-  "mode": "dry-run",
   "budgets": {
-    "max_active_runs": 3,
-    "max_runs_per_day": 6,
     "max_parked": 12,
-    "max_failures_per_day": 5,
     "max_inbox_size": 200
-  },
-  "intervals": {
-    "loop_step_minutes": 10,
-    "loop_discover_hours": 12,
-    "loop_daily_hour_utc": 6
-  },
-  "human_review": {
-    "park_on_verdicts": ["HUMAN_REVIEW", "REJECT"],
-    "park_on_novelty": ["human_review", "likely_duplicate"],
-    "notification_file": "researcher/reports/parked-review.md"
   },
   "feeds": {
     "manual_seed": "researcher/discovery/manual-seed.jsonl",
@@ -25,7 +10,6 @@
     "enable_web_search": false
   },
   "limits": {
-    "discovery_max_new_per_run": 8,
-    "loop_step_max_advances": 1
+    "discovery_max_new_per_run": 8
   }
 }

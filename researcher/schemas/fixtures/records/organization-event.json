@@ -1,0 +1,67 @@
+{
+  "actor": {
+    "class": "research_proposer",
+    "id": "autonomous-research-loop"
+  },
+  "authority": {
+    "action": "research",
+    "actor_class": "research_proposer",
+    "constitution_digest": "sha256:b207657ecd4d47239ed7b1fa6b6d75f1664848460e762bb435af789be4173697",
+    "constitution_version": "1.0.0",
+    "context_digest": "sha256:201408310b22d12cfe9985f79928b13a556793f3575c92943e9af917bb8bfcb5",
+    "matched_rule": "proposer-research",
+    "outcome": "allowed",
+    "reason_code": "DISCLOSED_RESEARCH_PROPOSAL_ALLOWED",
+    "resource": "research_artifact"
+  },
+  "causation_event_id": null,
+  "classification": "private_operational",
+  "correlation_event_id": "evt_018f3e40-7b80-7a21-8000-000000000004",
+  "detail_ref": null,
+  "event_type": "research_run.initialized",
+  "id": "evt_018f3e40-7b80-7a21-8000-000000000004",
+  "id_origin": "native",
+  "idempotency": {
+    "key_digest": "sha256:159adf21296e05e80adc39fddad10980ff1d1445b825f33ddd853520999b7108",
+    "scope": "research_loop"
+  },
+  "kind": "OrganizationEvent",
+  "occurred_at": "2026-08-10T12:00:00Z",
+  "payload": {
+    "classification": "private_operational",
+    "closure": null,
+    "evidence": "researcher/runs/20260810-120000-journal-contract",
+    "from_state": null,
+    "history_index": 0,
+    "initialization": {
+      "created_at": "2026-08-10T12:00:00Z",
+      "editable_surfaces": [
+        "researcher/runs/20260810-120000-journal-contract/sources/",
+        "researcher/runs/20260810-120000-journal-contract/proposals/"
+      ],
+      "locked_surfaces": [
+        "governance/constitution.yaml",
+        "researcher/rubrics/content-curation.md"
+      ],
+      "source_url": "https://example.com/research",
+      "title": "Journal contract fixture"
+    },
+    "kind": "ResearchRunTransition",
+    "reason": "run initialized",
+    "run_id": "20260810-120000-journal-contract",
+    "schema_version": "1.0.0",
+    "to_state": "initialized",
+    "transition_source": "journal_native"
+  },
+  "payload_digest": "sha256:1460c408caab0d36c0dc0f0561b8838e049c9f55a070d764c29e58269cb057b3",
+  "repository": {
+    "commit_sha": "b2576ba4aeb61a10f228674110dd1354a74cb227",
+    "pull_request": null
+  },
+  "schema_version": "1.0.0",
+  "subject": {
+    "id": "20260810-120000-journal-contract",
+    "kind": "research_run",
+    "version": 1
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "schema": "research-service/v1",
+  "repository": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+  "base_branch": "main",
+  "models": {
+    "researcher": {
+      "provider": "openai",
+      "model": "REPLACE_WITH_TESTED_MODEL_ID",
+      "credential_env": "OPENAI_API_KEY",
+      "input_microusd_per_million_tokens": "REPLACE_WITH_VERIFIED_INTEGER_PRICE_CEILING",
+      "output_microusd_per_million_tokens": "REPLACE_WITH_VERIFIED_INTEGER_PRICE_CEILING"
+    },
+    "critic": {
+      "provider": "anthropic",
+      "model": "REPLACE_WITH_TESTED_MODEL_ID",
+      "credential_env": "ANTHROPIC_API_KEY",
+      "input_microusd_per_million_tokens": "REPLACE_WITH_VERIFIED_INTEGER_PRICE_CEILING",
+      "output_microusd_per_million_tokens": "REPLACE_WITH_VERIFIED_INTEGER_PRICE_CEILING"
+    },
+    "skill_editor": {
+      "provider": "openai",
+      "model": "REPLACE_WITH_TESTED_MODEL_ID",
+      "credential_env": "OPENAI_API_KEY",
+      "input_microusd_per_million_tokens": "REPLACE_WITH_VERIFIED_INTEGER_PRICE_CEILING",
+      "output_microusd_per_million_tokens": "REPLACE_WITH_VERIFIED_INTEGER_PRICE_CEILING"
+    },
+    "evaluator": {
+      "provider": "gemini",
+      "model": "REPLACE_WITH_TESTED_MODEL_ID",
+      "credential_env": "GEMINI_API_KEY",
+      "input_microusd_per_million_tokens": "REPLACE_WITH_VERIFIED_INTEGER_PRICE_CEILING",
+      "output_microusd_per_million_tokens": "REPLACE_WITH_VERIFIED_INTEGER_PRICE_CEILING"
+    }
+  },
+  "limits": {
+    "daily_model_calls": 10,
+    "run_model_calls": 5,
+    "daily_budget_microusd": 5000000,
+    "run_budget_microusd": 1000000,
+    "context_bytes": 65536,
+    "max_output_tokens": 4096,
+    "timeout_seconds": 60,
+    "max_runs_per_tick": 1,
+    "daily_source_requests": 30
+  },
+  "schedules": [
+    {
+      "id": "evidence-transfer",
+      "interval_seconds": 86400,
+      "query": "How should agents preserve source provenance and qualifiers during context transfer?",
+      "skills": [
+        "context-fundamentals"
+      ],
+      "sources": [
+        "arxiv",
+        "deepmind"
+      ],
+      "mcp_reads": []
+    }
+  ],
+  "github": {
+    "enabled": false,
+    "credential_env": "RESEARCH_GITHUB_TOKEN",
+    "reviewer": "muratcankoylan",
+    "notify": false
+  },
+  "mcp_tools": []
+}

@@ -1,0 +1,57 @@
+[Unit]
+Description=Private loopback context research operator API (pre-release)
+After=network.target
+ConditionPathIsDirectory=/srv/context-research/release/.git
+ConditionPathExists=/var/lib/context-research/service.sqlite3
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=context-research
+Group=context-research
+UMask=0077
+WorkingDirectory=/srv/context-research/release
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUTF8=1
+Environment=RESEARCH_RELEASE_DIR=/srv/context-research/release
+Environment=RESEARCH_DEPENDENCY_LOCK=/opt/context-research/requirements-dev.txt
+Environment=RESEARCH_CODEX_DEPENDENCY_LOCK=/opt/context-research/requirements-codex-linux.txt
+Environment=RESEARCH_CODEX_PYTHON=/opt/context-research/codex-venv/bin/python
+EnvironmentFile=/etc/context-research/release.env
+EnvironmentFile=/etc/context-research/operator.env
+ExecStart=/opt/context-research/venv/bin/python -B /opt/context-research/launch.py api --config /etc/context-research/service.json --state /var/lib/context-research --repo /srv/context-research/release --host 127.0.0.1 --port 8787
+StateDirectory=context-research
+StateDirectoryMode=0700
+ReadOnlyPaths=/srv/context-research/release /opt/context-research /etc/context-research
+ReadWritePaths=/var/lib/context-research
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+NoNewPrivileges=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET
+CPUQuota=25%
+MemoryMax=256M
+MemorySwapMax=0
+TasksMax=32
+LimitNOFILE=256
+LimitCORE=0
+TimeoutStopSec=15
+KillMode=control-group
+Restart=on-failure
+RestartSec=15
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

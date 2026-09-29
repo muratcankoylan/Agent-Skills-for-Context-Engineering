@@ -1,0 +1,14 @@
+# Build context is the repository root, but no source/corpus/private data is sent.
+**
+!requirements-dev.txt
+!researcher/
+researcher/*
+!researcher/service/
+researcher/service/*
+!researcher/service/requirements-mcp.txt
+!researcher/service/deploy/
+researcher/service/deploy/*
+!researcher/service/deploy/Dockerfile
+!researcher/service/deploy/Dockerfile.dockerignore
+!researcher/service/deploy/launch.py
+!researcher/service/deploy/requirements-codex-linux.txt

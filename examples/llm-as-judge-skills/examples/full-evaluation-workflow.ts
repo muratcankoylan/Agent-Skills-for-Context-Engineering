@@ -9,7 +9,6 @@
  * Run: npx tsx examples/full-evaluation-workflow.ts
  */
 
-import 'dotenv/config';
 import { EvaluatorAgent } from '../src/agents/evaluator.js';
 import { validateConfig } from '../src/config/index.js';
 
@@ -113,6 +112,7 @@ async function main() {
     responseB: alternativeResponse,
     prompt,
     criteria: ['accuracy', 'depth', 'clarity'],
+    allowTie: true,
     swapPositions: true
   });
 
@@ -132,5 +132,7 @@ async function main() {
   console.log(`Better response: ${comparisonResult.success ? comparisonResult.winner : 'N/A'}`);
 }
 
-main().catch(console.error);
-
+main().catch(error => {
+  console.error(error instanceof Error ? error.message : 'Example failed.');
+  process.exitCode = 1;
+});

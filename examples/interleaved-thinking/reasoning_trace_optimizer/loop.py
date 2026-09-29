@@ -6,7 +6,7 @@ running iterative improvements until convergence or max iterations.
 """
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
@@ -17,16 +17,15 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 from reasoning_trace_optimizer.analyzer import TraceAnalyzer, format_analysis_report
+from reasoning_trace_optimizer.api_budget import PaidAPIBudget
 from reasoning_trace_optimizer.capture import TraceCapture, format_trace_for_display
 from reasoning_trace_optimizer.models import (
     AnalysisResult,
     LoopIteration,
     LoopResult,
-    OptimizationResult,
     ReasoningTrace,
 )
 from reasoning_trace_optimizer.optimizer import PromptOptimizer, format_optimization_report
-
 
 console = Console()
 
@@ -87,6 +86,7 @@ class OptimizationLoop:
         api_key: str | None = None,
         base_url: str = "https://api.minimax.io/anthropic",
         model: str = "MiniMax-M2.1",
+        api_budget: PaidAPIBudget | None = None,
     ):
         """
         Initialize the optimization loop.
@@ -98,14 +98,21 @@ class OptimizationLoop:
             model: Model to use for all components
         """
         self.config = config or LoopConfig()
+        self.api_budget = api_budget or PaidAPIBudget()
 
-        # Initialize components with same configuration
-        self.capture = TraceCapture(api_key=api_key, base_url=base_url, model=model)
-        self.analyzer = TraceAnalyzer(api_key=api_key, base_url=base_url, model=model)
-        self.optimizer = PromptOptimizer(api_key=api_key, base_url=base_url, model=model)
+        # One ledger covers capture, analysis, and optimization calls and retries.
+        component_options = {
+            "api_key": api_key,
+            "base_url": base_url,
+            "model": model,
+            "api_budget": self.api_budget,
+        }
+        self.capture = TraceCapture(**component_options)
+        self.analyzer = TraceAnalyzer(**component_options)
+        self.optimizer = PromptOptimizer(**component_options)
 
         # Create artifacts directory
-        if self.config.save_artifacts:
+        if self.config.save_artifacts and not self.api_budget.dry_run:
             Path(self.config.artifacts_dir).mkdir(parents=True, exist_ok=True)
 
     def run(

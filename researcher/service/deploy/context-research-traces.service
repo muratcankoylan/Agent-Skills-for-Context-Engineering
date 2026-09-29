@@ -1,0 +1,35 @@
+[Unit]
+Description=Bounded metadata-only research trace delivery to Raindrop
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/context-research/trace-literals.env
+ConditionPathIsDirectory=/var/lib/context-research/authority/telemetry
+
+[Service]
+Type=oneshot
+User=context-research
+Group=context-research
+UMask=0077
+WorkingDirectory=/srv/context-research/release
+Environment=PYTHONDONTWRITEBYTECODE=1
+# Operator installation authorizes one <=100-span batch per activation.
+# No new journal, uncertain-delivery replay, or agent work is admitted here.
+ExecStart=/opt/context-research/venv/bin/python -B -m researcher.service.trace_cli export --state /var/lib/context-research/authority --env-file /etc/context-research/trace-literals.env --limit 100 --live
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+NoNewPrivileges=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadOnlyPaths=/srv/context-research/release /opt/context-research /etc/context-research
+ReadWritePaths=/var/lib/context-research/authority/telemetry
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=256M
+TasksMax=32
+LimitCORE=0
+TimeoutStartSec=30
+TimeoutStopSec=5
+KillMode=control-group
+StandardOutput=journal
+StandardError=journal

@@ -1,49 +1,47 @@
-import { openai } from '@ai-sdk/openai';
-import { generateText } from 'ai';
-import { config } from '../config/index.js';
+import { JudgeRuntime, requireJudgeRuntime } from '../runtime/judge-runtime.js';
 import { 
   executeDirectScore, 
   executePairwiseCompare, 
   executeGenerateRubric,
+  DirectScoreInputSchema,
   type DirectScoreInput,
   type PairwiseCompareInput,
   type GenerateRubricInput
 } from '../tools/evaluation/index.js';
 
 export interface EvaluatorAgentConfig {
-  model?: string;
+  runtime?: JudgeRuntime;
   temperature?: number;
-  maxTokens?: number;
 }
 
 export class EvaluatorAgent {
-  private model: string;
+  private runtime?: JudgeRuntime;
   private temperature: number;
 
   constructor(agentConfig?: EvaluatorAgentConfig) {
-    this.model = agentConfig?.model || config.openai.model;
-    this.temperature = agentConfig?.temperature || 0.3;
+    this.runtime = agentConfig?.runtime;
+    this.temperature = agentConfig?.temperature ?? 0.3;
   }
 
   /**
    * Score a response against defined criteria
    */
   async score(input: DirectScoreInput) {
-    return executeDirectScore(input);
+    return executeDirectScore(input, this.runtime);
   }
 
   /**
    * Compare two responses and pick the better one
    */
   async compare(input: PairwiseCompareInput) {
-    return executePairwiseCompare(input);
+    return executePairwiseCompare(input, this.runtime);
   }
 
   /**
    * Generate a rubric for a criterion
    */
   async generateRubric(input: GenerateRubricInput) {
-    return executeGenerateRubric(input);
+    return executeGenerateRubric(input, this.runtime);
   }
 
   /**
@@ -54,22 +52,36 @@ export class EvaluatorAgent {
     prompt: string,
     criteria: Array<{ name: string; description: string; weight?: number }>
   ) {
-    // Generate rubrics for each criterion
-    const rubrics = await Promise.all(
-      criteria.map(c => this.generateRubric({
+    criteria = DirectScoreInputSchema.parse({
+      response, prompt, criteria: criteria.map(c => ({ ...c, weight: c.weight ?? 1 }))
+    }).criteria;
+    if (!criteria.length || new Set(criteria.map(c => c.name)).size !== criteria.length) {
+      throw new Error('Criteria must be non-empty and unique.');
+    }
+    if (!criteria.some(c => (c.weight ?? 1) > 0)) throw new Error('Criteria must have positive total weight.');
+    // Sequential work provides backpressure and stops before downstream spend
+    // when any required rubric is denied or invalid.
+    const rubrics = [];
+    for (const c of criteria) {
+      const rubric = await this.generateRubric({
         criterionName: c.name,
         criterionDescription: c.description,
         scale: '1-5',
         includeExamples: false,
         strictness: 'balanced'
-      }))
-    );
+      });
+      if (!rubric.success) throw new Error('Required rubric unavailable; scoring not attempted.');
+      rubrics.push(rubric);
+    }
 
     // Build combined rubric
     const levelDescriptions: Record<string, string> = {};
-    rubrics[0]?.levels?.forEach(level => {
-      levelDescriptions[String(level.score)] = level.description;
-    });
+    for (const rubric of rubrics) {
+      for (const level of rubric.levels) {
+        const key = String(level.score);
+        levelDescriptions[key] = (levelDescriptions[key] ?? '') + `${rubric.criterion.name}: ${level.description}\n`;
+      }
+    }
 
     // Score using generated rubric
     return this.score({
@@ -78,7 +90,7 @@ export class EvaluatorAgent {
       criteria: criteria.map((c) => ({
         name: c.name,
         description: c.description,
-        weight: c.weight || 1
+        weight: c.weight ?? 1
       })),
       rubric: {
         scale: '1-5',
@@ -91,8 +103,7 @@ export class EvaluatorAgent {
    * Chat-based evaluation for custom queries
    */
   async chat(userMessage: string) {
-    const result = await generateText({
-      model: openai(this.model),
+    const result = await requireJudgeRuntime(this.runtime).generate({
       system: `You are an expert evaluator of AI-generated content.
 Your role is to assess quality, identify issues, and provide actionable feedback.
 Be objective, specific, and constructive in your evaluations.`,
@@ -109,4 +120,3 @@ Be objective, specific, and constructive in your evaluations.`,
 
 // Default instance
 export const evaluatorAgent = new EvaluatorAgent();
-

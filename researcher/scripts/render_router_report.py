@@ -2,7 +2,7 @@
 """Render a published-quality Markdown report from router benchmark results.
 
 Reads per-run JSON files produced by runRouter.ts and emits:
-  - Per-model top-1 / top-3 accuracy with bootstrap 95% CIs
+  - Per-model top-1 / top-3 accuracy with prompt-cluster bootstrap 95% CIs
   - Per-model format failure rate
   - Per-model wall time stats
   - Per-skill confusion matrix (when expected was X, what was predicted)
@@ -58,11 +58,15 @@ def strict_json_loads(text: str, label: str) -> Any:
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
-    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    for line_number, line in enumerate(
+        path.read_text(encoding="utf-8").splitlines(), start=1
+    ):
         if line.strip():
             value = strict_json_loads(line, f"{path}:{line_number}")
             if not isinstance(value, dict):
-                raise ValueError(f"JSONL record must be an object: {path}:{line_number}")
+                raise ValueError(
+                    f"JSONL record must be an object: {path}:{line_number}"
+                )
             records.append(value)
     return records
 
@@ -88,13 +92,17 @@ def fixture_digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
 
 
-def load_summary_metadata(summary_path: Path, expected_fixture_digest: str) -> dict[str, Any]:
+def load_summary_metadata(
+    summary_path: Path, expected_fixture_digest: str
+) -> dict[str, Any]:
     if not summary_path.exists():
         raise ValueError(f"router summary is missing: {summary_path}")
     if summary_path.is_symlink() or not summary_path.is_file():
         raise ValueError(f"router summary is not a regular file: {summary_path}")
     try:
-        summary = strict_json_loads(summary_path.read_text(encoding="utf-8"), str(summary_path))
+        summary = strict_json_loads(
+            summary_path.read_text(encoding="utf-8"), str(summary_path)
+        )
     except ValueError as error:
         raise ValueError(f"invalid router summary JSON: {error}") from error
     if not isinstance(summary, dict):
@@ -104,9 +112,13 @@ def load_summary_metadata(summary_path: Path, expected_fixture_digest: str) -> d
             "router summary fixture digest does not match the supplied fixture: "
             f"{summary.get('fixture_sha')!r} != {expected_fixture_digest!r}"
         )
-    if not isinstance(summary.get("seed"), int) or isinstance(summary.get("seed"), bool):
+    if not isinstance(summary.get("seed"), int) or isinstance(
+        summary.get("seed"), bool
+    ):
         raise ValueError("router summary seed must be an integer")
-    if not isinstance(summary.get("reps"), int) or isinstance(summary.get("reps"), bool):
+    if not isinstance(summary.get("reps"), int) or isinstance(
+        summary.get("reps"), bool
+    ):
         raise ValueError("router summary reps must be an integer")
     if summary["reps"] <= 0:
         raise ValueError("router summary reps must be positive")
@@ -131,7 +143,9 @@ def build_prompt_index(prompts_list: list[dict[str, Any]]) -> dict[str, dict[str
         if not isinstance(prompt_id, str) or not prompt_id:
             raise ValueError(f"router fixture record {index} requires prompt_id")
         if not isinstance(expected, str) or not expected:
-            raise ValueError(f"router fixture {prompt_id} requires expected_primary_skill")
+            raise ValueError(
+                f"router fixture {prompt_id} requires expected_primary_skill"
+            )
         if prompt_id in prompts:
             raise ValueError(f"router fixture contains duplicate prompt_id {prompt_id}")
         prompts[prompt_id] = prompt
@@ -152,7 +166,9 @@ def validate_records(
     reps = summary["reps"]
     seed = summary["seed"]
     if summary.get("prompts") != len(prompts):
-        raise ValueError("router summary prompt count does not match the supplied fixture")
+        raise ValueError(
+            "router summary prompt count does not match the supplied fixture"
+        )
     expected_total_runs = len(prompts) * len(models) * reps
     if "total_runs" in summary:
         total_runs = summary["total_runs"]
@@ -164,7 +180,12 @@ def validate_records(
                 f"{total_runs} != {expected_total_runs}"
             )
     expected_identities = {
-        (prompt_id, model_id, rep, expected_shuffle_seed(prompt_id, model_id, rep, seed))
+        (
+            prompt_id,
+            model_id,
+            rep,
+            expected_shuffle_seed(prompt_id, model_id, rep, seed),
+        )
         for prompt_id in prompts
         for model_id in models
         for rep in range(reps)
@@ -181,7 +202,9 @@ def validate_records(
         rep = record.get("rep")
         shuffle_seed = record.get("shuffle_seed")
         if not isinstance(prompt_id, str) or prompt_id not in prompts:
-            raise ValueError(f"router result {index} has foreign prompt_id {prompt_id!r}")
+            raise ValueError(
+                f"router result {index} has foreign prompt_id {prompt_id!r}"
+            )
         if not isinstance(model_id, str) or not model_id or model_id not in models:
             raise ValueError(f"router result {index} has foreign model_id {model_id!r}")
         if not isinstance(rep, int) or isinstance(rep, bool) or rep < 0 or rep >= reps:
@@ -212,7 +235,12 @@ def validate_records(
             f"missing={missing[:5]!r}, extra={extra[:5]!r}"
         )
 
-    score_fields = {"predicted_primary", "predicted_top3", "top1_correct", "top3_correct"}
+    score_fields = {
+        "predicted_primary",
+        "predicted_top3",
+        "top1_correct",
+        "top3_correct",
+    }
     for record, status, identity in validated_records:
         present_score_fields = score_fields.intersection(record)
         if status != "finished":
@@ -226,7 +254,9 @@ def validate_records(
         predicted_primary = record.get("predicted_primary")
         predicted_top3 = record.get("predicted_top3")
         if not isinstance(predicted_primary, str) or not predicted_primary:
-            raise ValueError(f"finished router result {identity!r} requires predicted_primary")
+            raise ValueError(
+                f"finished router result {identity!r} requires predicted_primary"
+            )
         if (
             not isinstance(predicted_top3, list)
             or not 1 <= len(predicted_top3) <= 3
@@ -234,14 +264,20 @@ def validate_records(
             or len(set(predicted_top3)) != len(predicted_top3)
             or predicted_top3[0] != predicted_primary
         ):
-            raise ValueError(f"finished router result {identity!r} has invalid predicted_top3")
+            raise ValueError(
+                f"finished router result {identity!r} has invalid predicted_top3"
+            )
         expected_skill = prompts[identity[0]]["expected_primary_skill"]
         recomputed_top1 = predicted_primary == expected_skill
         recomputed_top3 = expected_skill in predicted_top3
         if record.get("top1_correct") is not recomputed_top1:
-            raise ValueError(f"finished router result {identity!r} has forged top1_correct")
+            raise ValueError(
+                f"finished router result {identity!r} has forged top1_correct"
+            )
         if record.get("top3_correct") is not recomputed_top3:
-            raise ValueError(f"finished router result {identity!r} has forged top3_correct")
+            raise ValueError(
+                f"finished router result {identity!r} has forged top3_correct"
+            )
 
 
 def validate_comparable_summaries(
@@ -264,10 +300,13 @@ def validate_comparable_record_sets(
     candidate: list[dict[str, Any]], baseline: list[dict[str, Any]]
 ) -> None:
     def identities(records: list[dict[str, Any]]) -> set[tuple[str, str, int]]:
-        return {
+        result = {
             (record["prompt_id"], record["model_id"], record["rep"])
             for record in records
         }
+        if len(result) != len(records):
+            raise ValueError("duplicate router result identity in comparison")
+        return result
 
     candidate_ids = identities(candidate)
     baseline_ids = identities(baseline)
@@ -292,20 +331,60 @@ def validate_comparable_record_sets(
         raise ValueError("router baseline usable population is not comparable")
 
 
-def bootstrap_ci(values: list[int], iterations: int = 2000, seed: int = 0) -> tuple[float, float, float]:
-    if not values:
-        return (0.0, 0.0, 0.0)
+def prompt_cluster_totals(
+    records: list[dict[str, Any]], score_field: str
+) -> dict[str, tuple[int, int]]:
+    """Keep every observed replication inside its prompt sampling unit."""
+
+    clusters: dict[str, tuple[int, int]] = {}
+    for record in records:
+        prompt_id = record["prompt_id"]
+        score, count = clusters.get(prompt_id, (0, 0))
+        clusters[prompt_id] = (score + int(record[score_field]), count + 1)
+    return clusters
+
+
+def bootstrap_cluster_ci(
+    clusters: dict[str, tuple[int, int]], iterations: int = 2000, seed: int = 0
+) -> tuple[float | None, float | None, float | None]:
+    """Bootstrap a usable-call ratio by resampling complete prompt clusters.
+
+    Totals may contain signed paired differences. Zero-usable prompts are not
+    quality clusters; their exclusion and missingness bounds are reported by
+    the caller. Sorting identities makes resampling independent of file order.
+    """
+
+    if not clusters:
+        return (None, None, None)
+    totals = [clusters[prompt_id] for prompt_id in sorted(clusters)]
+    point = sum(score for score, _count in totals) / sum(
+        count for _score, count in totals
+    )
+    if len(totals) < 2:
+        return (point, None, None)
     rng = random.Random(seed)
-    n = len(values)
+    n = len(totals)
     samples: list[float] = []
     for _ in range(iterations):
-        draw = [values[rng.randrange(n)] for _ in range(n)]
-        samples.append(sum(draw) / n)
+        score_sum = 0
+        count_sum = 0
+        for _ in range(n):
+            score, count = totals[rng.randrange(n)]
+            score_sum += score
+            count_sum += count
+        samples.append(score_sum / count_sum)
     samples.sort()
-    point = sum(values) / n
     lower = samples[int(iterations * 0.025)]
     upper = samples[int(iterations * 0.975)]
     return (point, lower, upper)
+
+
+def rounded_interval(lower: float | None, upper: float | None) -> list[float] | None:
+    return (
+        [round(lower, 4), round(upper, 4)]
+        if lower is not None and upper is not None
+        else None
+    )
 
 
 def stable_seed(label: str) -> int:
@@ -318,7 +397,8 @@ def validate_status(record: dict[str, Any]) -> str:
     status = record.get("status")
     if status not in KNOWN_STATUSES:
         identity = "/".join(
-            str(record.get(field, "unknown")) for field in ("model_id", "prompt_id", "rep")
+            str(record.get(field, "unknown"))
+            for field in ("model_id", "prompt_id", "rep")
         )
         raise ValueError(f"unknown router result status {status!r} for {identity}")
     return status
@@ -345,10 +425,14 @@ def summarize_per_model(records: list[dict[str, Any]]) -> dict[str, dict[str, An
         usable = [r for r in model_records if is_usable_finished(r)]
         top1 = [int(r["top1_correct"]) for r in usable]
         top3 = [int(r["top3_correct"]) for r in usable]
-        format_failures = sum(1 for r in model_records if r.get("status") == "format_failure")
+        format_failures = sum(
+            1 for r in model_records if r.get("status") == "format_failure"
+        )
         sdk_errors = sum(1 for r in model_records if r.get("status") == "error")
         cancelled = sum(1 for r in model_records if r.get("status") == "cancelled")
-        unavailable = sum(1 for r in model_records if r.get("status") == "model_unavailable")
+        unavailable = sum(
+            1 for r in model_records if r.get("status") == "model_unavailable"
+        )
         dry_runs = sum(1 for r in model_records if r.get("status") == "dry_run")
         invalid_finished = sum(
             1
@@ -363,16 +447,34 @@ def summarize_per_model(records: list[dict[str, Any]]) -> dict[str, dict[str, An
         total_records = len(model_records)
         usable_records = len(usable)
 
-        top1_point, top1_lower, top1_upper = bootstrap_ci(
-            top1, seed=stable_seed(f"{model_id}:top1")
+        top1_clusters = prompt_cluster_totals(usable, "top1_correct")
+        top3_clusters = prompt_cluster_totals(usable, "top3_correct")
+        total_prompt_counts: dict[str, int] = defaultdict(int)
+        for record in model_records:
+            total_prompt_counts[record["prompt_id"]] += 1
+        usable_clusters = len(top1_clusters)
+        partial_clusters = sum(
+            count < total_prompt_counts[prompt_id]
+            for prompt_id, (_score, count) in top1_clusters.items()
         )
-        top3_point, top3_lower, top3_upper = bootstrap_ci(
-            top3, seed=stable_seed(f"{model_id}:top3")
+        top1_point, top1_lower, top1_upper = bootstrap_cluster_ci(
+            top1_clusters, seed=stable_seed(f"{model_id}:top1")
+        )
+        top3_point, top3_lower, top3_upper = bootstrap_cluster_ci(
+            top3_clusters, seed=stable_seed(f"{model_id}:top3")
         )
 
         summary[model_id] = {
             "total_records": total_records,
             "usable_records": usable_records,
+            "total_prompt_clusters": len(total_prompt_counts),
+            "usable_prompt_clusters": usable_clusters,
+            "partially_usable_prompt_clusters": partial_clusters,
+            "unusable_prompt_clusters": len(total_prompt_counts) - usable_clusters,
+            "ci_method": "prompt-cluster-percentile-bootstrap-2000-v1",
+            "interval_status": "available"
+            if usable_clusters >= 2
+            else "insufficient_prompt_clusters",
             "format_failures": format_failures,
             "sdk_errors": sdk_errors,
             "cancelled": cancelled,
@@ -383,17 +485,76 @@ def summarize_per_model(records: list[dict[str, Any]]) -> dict[str, dict[str, An
                 (usable_records + invalid_finished + format_failures) / total_records, 4
             ),
             "usable_rate": round(usable_records / total_records, 4),
-            "top1_accuracy": round(top1_point, 4) if top1 else None,
-            "top1_ci": [round(top1_lower, 4), round(top1_upper, 4)] if top1 else None,
-            "top3_accuracy": round(top3_point, 4) if top3 else None,
-            "top3_ci": [round(top3_lower, 4), round(top3_upper, 4)] if top3 else None,
-            "median_duration_ms": int(statistics.median(durations)) if durations else None,
-            "p95_duration_ms": int(sorted(durations)[int(0.95 * len(durations)) - 1]) if len(durations) >= 20 else None,
+            "top1_accuracy": round(top1_point, 4) if top1_point is not None else None,
+            "top1_ci": rounded_interval(top1_lower, top1_upper),
+            "top3_accuracy": round(top3_point, 4) if top3_point is not None else None,
+            "top3_ci": rounded_interval(top3_lower, top3_upper),
+            "top1_missingness_bounds": [
+                round(sum(top1) / total_records, 4),
+                round((sum(top1) + total_records - usable_records) / total_records, 4),
+            ],
+            "top3_missingness_bounds": [
+                round(sum(top3) / total_records, 4),
+                round((sum(top3) + total_records - usable_records) / total_records, 4),
+            ],
+            "median_duration_ms": int(statistics.median(durations))
+            if durations
+            else None,
+            "p95_duration_ms": int(sorted(durations)[int(0.95 * len(durations)) - 1])
+            if len(durations) >= 20
+            else None,
         }
     return summary
 
 
-def build_confusion(records: list[dict[str, Any]], prompts: dict[str, dict[str, Any]]) -> dict[str, dict[str, int]]:
+def summarize_paired_deltas(
+    candidate: list[dict[str, Any]], baseline: list[dict[str, Any]]
+) -> dict[str, dict[str, Any]]:
+    """Pair exact usable identities first, then bootstrap prompt-level clusters."""
+
+    validate_comparable_record_sets(candidate, baseline)
+    baseline_index = {
+        (record["prompt_id"], record["model_id"], record["rep"]): record
+        for record in baseline
+    }
+    differences: dict[str, list[dict[str, Any]]] = {
+        record["model_id"]: [] for record in candidate
+    }
+    for record in candidate:
+        if not is_usable_finished(record):
+            continue
+        previous = baseline_index[
+            (record["prompt_id"], record["model_id"], record["rep"])
+        ]
+        differences[record["model_id"]].append(
+            {
+                "prompt_id": record["prompt_id"],
+                "top1_difference": int(record["top1_correct"])
+                - int(previous["top1_correct"]),
+                "top3_difference": int(record["top3_correct"])
+                - int(previous["top3_correct"]),
+            }
+        )
+    summary: dict[str, dict[str, Any]] = {}
+    for model_id, paired in sorted(differences.items()):
+        stats: dict[str, Any] = {
+            "paired_records": len(paired),
+            "paired_prompt_clusters": len({record["prompt_id"] for record in paired}),
+        }
+        for metric in ("top1", "top3"):
+            point, lower, upper = bootstrap_cluster_ci(
+                prompt_cluster_totals(paired, f"{metric}_difference"),
+                seed=stable_seed(f"{model_id}:paired:{metric}"),
+            )
+            stats[f"{metric}_delta"] = round(point, 4) if point is not None else None
+            stats[f"{metric}_delta_ci"] = rounded_interval(lower, upper)
+        summary[model_id] = stats
+    return summary
+
+
+def build_confusion(
+    records: list[dict[str, Any]], prompts: dict[str, dict[str, Any]]
+) -> dict[str, dict[str, int]]:
     matrix: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     for r in records:
         if not is_usable_finished(r):
@@ -406,7 +567,9 @@ def build_confusion(records: list[dict[str, Any]], prompts: dict[str, dict[str, 
     return {expected: dict(row) for expected, row in matrix.items()}
 
 
-def per_prompt_breakdown(records: list[dict[str, Any]], prompts: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+def per_prompt_breakdown(
+    records: list[dict[str, Any]], prompts: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
     by_prompt: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for r in records:
         by_prompt[r["prompt_id"]].append(r)
@@ -437,8 +600,12 @@ def per_prompt_breakdown(records: list[dict[str, Any]], prompts: dict[str, dict[
     return rows
 
 
-def hardest_prompts(per_prompt: list[dict[str, Any]], n: int = 10) -> list[dict[str, Any]]:
-    usable_rows = [row for row in per_prompt if isinstance(row.get("top1_rate"), (int, float))]
+def hardest_prompts(
+    per_prompt: list[dict[str, Any]], n: int = 10
+) -> list[dict[str, Any]]:
+    usable_rows = [
+        row for row in per_prompt if isinstance(row.get("top1_rate"), (int, float))
+    ]
     return sorted(usable_rows, key=lambda row: row["top1_rate"])[:n]
 
 
@@ -454,7 +621,12 @@ def format_ci(value: Any) -> str:
     return f"[{value[0]:.3f}, {value[1]:.3f}]"
 
 
-def render(summary: dict[str, dict[str, Any]], confusion: dict[str, dict[str, int]], per_prompt: list[dict[str, Any]], meta: dict[str, Any]) -> str:
+def render(
+    summary: dict[str, dict[str, Any]],
+    confusion: dict[str, dict[str, int]],
+    per_prompt: list[dict[str, Any]],
+    meta: dict[str, Any],
+) -> str:
     lines: list[str] = []
     lines.append("# Router Benchmark Results")
     lines.append("")
@@ -481,7 +653,21 @@ def render(summary: dict[str, dict[str, Any]], confusion: dict[str, dict[str, in
         "in-prompt descriptions. Accuracy and confidence intervals use only `finished` records with "
         "both boolean score fields. SDK errors, cancellations, dry runs, legacy model-unavailable "
         "records, and malformed finished records are reported as outcomes but never scored as "
-        "incorrect. Confidence intervals are 95% bootstrap with 2000 resamples."
+        "incorrect. The point estimate remains accuracy across usable calls. Confidence intervals "
+        "are 95% percentile bootstrap with 2000 resamples of complete prompt clusters, preserving "
+        "all observed replications within each sampled prompt. Prompt IDs are sorted and seeds are "
+        "stable, so result-file order does not change the interval. Fewer than two usable prompt "
+        "clusters produces no interval."
+    )
+    lines.append("")
+    lines.append(
+        "These exploratory intervals are conditional on usable outcomes and assume independent "
+        "prompt clusters; they do not establish power, remove selection bias, or cover dependence "
+        "between different prompts from one task family. A release-gating study must preregister "
+        "its actual independent groups, paired analysis, missingness and multiplicity policy. "
+        "An entirely unscored prompt contributes no quality cluster. The missingness bounds below "
+        "show all unscored planned outcomes as wrong versus right; they are sensitivity bounds, "
+        "not imputed scores or confidence intervals."
     )
     lines.append("")
     lines.append("## Per-model leaderboard")
@@ -495,7 +681,9 @@ def render(summary: dict[str, dict[str, Any]], confusion: dict[str, dict[str, in
         "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | "
         "--- | --- |"
     )
-    for model_id, stats in sorted(summary.items(), key=lambda item: -(item[1].get("top1_accuracy") or 0)):
+    for model_id, stats in sorted(
+        summary.items(), key=lambda item: -(item[1].get("top1_accuracy") or 0)
+    ):
         top1 = stats.get("top1_accuracy")
         top1_ci = stats.get("top1_ci")
         top3 = stats.get("top3_accuracy")
@@ -520,6 +708,23 @@ def render(summary: dict[str, dict[str, Any]], confusion: dict[str, dict[str, in
         )
 
     lines.append("")
+    lines.append("### Prompt coverage and missingness sensitivity")
+    lines.append("")
+    lines.append(
+        "| Model | Usable / Total prompt clusters | Partly usable | Unscored prompts | "
+        "Interval status | Top-1 missingness bounds | Top-3 missingness bounds |"
+    )
+    lines.append("| --- | --- | --- | --- | --- | --- | --- |")
+    for model_id, stats in sorted(summary.items()):
+        lines.append(
+            f"| `{model_id}` | {stats.get('usable_prompt_clusters')} / "
+            f"{stats.get('total_prompt_clusters')} | {stats.get('partially_usable_prompt_clusters')} | "
+            f"{stats.get('unusable_prompt_clusters')} | {stats.get('interval_status')} | "
+            f"{format_ci(stats.get('top1_missingness_bounds'))} | "
+            f"{format_ci(stats.get('top3_missingness_bounds'))} |"
+        )
+
+    lines.append("")
     lines.append("## Per-skill confusion (when expected is X, predicted is Y)")
     lines.append("")
     lines.append(
@@ -531,7 +736,9 @@ def render(summary: dict[str, dict[str, Any]], confusion: dict[str, dict[str, in
     for row in confusion.values():
         all_predicted.update(row.keys())
     sorted_predicted = sorted(all_predicted)
-    header = "| Expected \\ Predicted |" + "".join(f" `{p}` |" for p in sorted_predicted)
+    header = "| Expected \\ Predicted |" + "".join(
+        f" `{p}` |" for p in sorted_predicted
+    )
     sep = "| --- |" + "".join(" --- |" for _ in sorted_predicted)
     lines.append(header)
     lines.append(sep)
@@ -552,7 +759,9 @@ def render(summary: dict[str, dict[str, Any]], confusion: dict[str, dict[str, in
     lines.append("")
     lines.append("## Hardest prompts (lowest top-1 across all models)")
     lines.append("")
-    lines.append("| Prompt | Expected | Usable / Total | Top-1 Rate | Predicted Primaries |")
+    lines.append(
+        "| Prompt | Expected | Usable / Total | Top-1 Rate | Predicted Primaries |"
+    )
     lines.append("| --- | --- | --- | --- | --- |")
     for row in hardest:
         predicted = ", ".join(f"`{p}`" for p in row["unique_predicted_primary"][:5])
@@ -570,7 +779,9 @@ def render(summary: dict[str, dict[str, Any]], confusion: dict[str, dict[str, in
     lines.append("python3 researcher/scripts/render_router_report.py \\")
     lines.append("    --results researcher/benchmarks/router/results/<run> \\")
     lines.append("    --fixture researcher/benchmarks/router/prompts.jsonl \\")
-    lines.append("    --output researcher/benchmarks/router/results-published/<date>.md")
+    lines.append(
+        "    --output researcher/benchmarks/router/results-published/<date>.md"
+    )
     lines.append("```")
     lines.append("")
     lines.append(
@@ -593,15 +804,33 @@ def delta_section(
     baseline_confusion: dict[str, dict[str, int]],
     baseline_per_prompt: list[dict[str, Any]],
     baseline_label: str,
+    *,
+    paired_summary: dict[str, dict[str, Any]] | None = None,
 ) -> list[str]:
     lines: list[str] = []
     lines.append("## Delta vs baseline")
     lines.append("")
     lines.append(f"_baseline: {baseline_label}_")
     lines.append("")
+    if paired_summary is None:
+        lines.append(
+            "Unpaired descriptive deltas: only aggregate summaries were supplied. "
+            "No paired uncertainty or significance is available."
+        )
+    else:
+        lines.append(
+            "Per-model differences pair the exact (prompt, model, replication) usable identities "
+            "before resampling whole prompt clusters. Candidate and baseline must have identical "
+            "planned and usable populations. Intervals remain conditional on shared usable outcomes; "
+            "they do not show improvement on missing outcomes. Per-skill and previously-hardest "
+            "prompt tables are descriptive exploratory deltas, not significance tests."
+        )
+    lines.append("")
     lines.append("### Per-model accuracy change")
     lines.append("")
-    lines.append("| Model | Baseline Top-1 | New Top-1 | Delta | Baseline Top-3 | New Top-3 | Delta |")
+    lines.append(
+        "| Model | Baseline Top-1 | New Top-1 | Delta | Baseline Top-3 | New Top-3 | Delta |"
+    )
     lines.append("| --- | --- | --- | --- | --- | --- | --- |")
     models = sorted(set(new_summary) | set(baseline_summary))
     for model in models:
@@ -609,19 +838,47 @@ def delta_section(
         nt1 = new_summary.get(model, {}).get("top1_accuracy")
         bt3 = baseline_summary.get(model, {}).get("top3_accuracy")
         nt3 = new_summary.get(model, {}).get("top3_accuracy")
-        d1 = (nt1 - bt1) if isinstance(bt1, (int, float)) and isinstance(nt1, (int, float)) else None
-        d3 = (nt3 - bt3) if isinstance(bt3, (int, float)) and isinstance(nt3, (int, float)) else None
+        d1 = (
+            (nt1 - bt1)
+            if isinstance(bt1, (int, float)) and isinstance(nt1, (int, float))
+            else None
+        )
+        d3 = (
+            (nt3 - bt3)
+            if isinstance(bt3, (int, float)) and isinstance(nt3, (int, float))
+            else None
+        )
         bt1_s = f"{bt1:.3f}" if isinstance(bt1, (int, float)) else "-"
         nt1_s = f"{nt1:.3f}" if isinstance(nt1, (int, float)) else "-"
         bt3_s = f"{bt3:.3f}" if isinstance(bt3, (int, float)) else "-"
         nt3_s = f"{nt3:.3f}" if isinstance(nt3, (int, float)) else "-"
         d1_s = f"{'+' if d1 and d1 > 0 else ''}{d1:.3f}" if d1 is not None else "-"
         d3_s = f"{'+' if d3 and d3 > 0 else ''}{d3:.3f}" if d3 is not None else "-"
-        lines.append(f"| `{model}` | {bt1_s} | {nt1_s} | {d1_s} | {bt3_s} | {nt3_s} | {d3_s} |")
+        lines.append(
+            f"| `{model}` | {bt1_s} | {nt1_s} | {d1_s} | {bt3_s} | {nt3_s} | {d3_s} |"
+        )
+    if paired_summary is not None:
+        lines.append("")
+        lines.append("### Paired prompt-cluster uncertainty")
+        lines.append("")
+        lines.append(
+            "| Model | Paired records | Prompt clusters | Top-1 delta | 95% CI | Top-3 delta | 95% CI |"
+        )
+        lines.append("| --- | --- | --- | --- | --- | --- | --- |")
+        for model_id, stats in sorted(paired_summary.items()):
+            lines.append(
+                f"| `{model_id}` | {stats['paired_records']} | {stats['paired_prompt_clusters']} | "
+                f"{format_rate(stats['top1_delta'])} | {format_ci(stats['top1_delta_ci'])} | "
+                f"{format_rate(stats['top3_delta'])} | {format_ci(stats['top3_delta_ci'])} |"
+            )
     lines.append("")
     lines.append("### Per-skill top-1 rate change")
     lines.append("")
-    lines.append("Counts a row as correct when the predicted primary equals the expected primary.")
+    lines.append(
+        "Counts a row as correct when the predicted primary equals the expected primary. "
+        "These pooled per-skill rates and 0.05 shift markers are descriptive, not paired "
+        "confidence intervals, practical-effect decisions, or significance tests."
+    )
     lines.append("")
     lines.append("| Skill (expected) | Baseline | New | Delta |")
     lines.append("| --- | --- | --- | --- |")
@@ -637,7 +894,11 @@ def delta_section(
         n_rate = n_correct / n_total if n_total else 0.0
         delta = n_rate - b_rate
         delta_s = f"{'+' if delta > 0 else ''}{delta:.3f}"
-        marker = " <- improved" if delta >= 0.05 else (" <- regressed" if delta <= -0.05 else "")
+        marker = (
+            " <- improved"
+            if delta >= 0.05
+            else (" <- regressed" if delta <= -0.05 else "")
+        )
         lines.append(
             f"| `{skill}` | {b_correct}/{b_total} = {b_rate:.3f} | {n_correct}/{n_total} = {n_rate:.3f} | {delta_s}{marker} |"
         )
@@ -671,11 +932,25 @@ def delta_section(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Render router benchmark report")
-    parser.add_argument("--results", type=Path, required=True, help="Directory of per-run JSON files")
-    parser.add_argument("--fixture", type=Path, required=True, help="Router prompts JSONL")
-    parser.add_argument("--output", type=Path, required=True, help="Destination Markdown file")
-    parser.add_argument("--baseline", type=Path, help="Optional baseline results directory to compute deltas against")
-    parser.add_argument("--baseline-label", type=str, help="Human label for the baseline (e.g. '2026-05-15 v2.2.0 descriptions')")
+    parser.add_argument(
+        "--results", type=Path, required=True, help="Directory of per-run JSON files"
+    )
+    parser.add_argument(
+        "--fixture", type=Path, required=True, help="Router prompts JSONL"
+    )
+    parser.add_argument(
+        "--output", type=Path, required=True, help="Destination Markdown file"
+    )
+    parser.add_argument(
+        "--baseline",
+        type=Path,
+        help="Optional baseline results directory to compute deltas against",
+    )
+    parser.add_argument(
+        "--baseline-label",
+        type=str,
+        help="Human label for the baseline (e.g. '2026-05-15 v2.2.0 descriptions')",
+    )
     args = parser.parse_args()
 
     if not args.results.exists():
@@ -715,13 +990,16 @@ def main() -> int:
             raise ValueError(f"baseline results directory is missing: {args.baseline}")
         baseline_records = load_run_records(args.baseline)
         baseline_summary_path = args.baseline / "summary.json"
-        baseline_meta = load_summary_metadata(baseline_summary_path, computed_fixture_digest)
+        baseline_meta = load_summary_metadata(
+            baseline_summary_path, computed_fixture_digest
+        )
         validate_records(baseline_records, prompts, baseline_meta)
         validate_comparable_summaries(summary_meta, baseline_meta)
         validate_comparable_record_sets(records, baseline_records)
         baseline_summary = summarize_per_model(baseline_records)
         baseline_confusion = build_confusion(baseline_records, prompts)
         baseline_per_prompt = per_prompt_breakdown(baseline_records, prompts)
+        paired_summary = summarize_paired_deltas(records, baseline_records)
         delta = delta_section(
             summary,
             confusion,
@@ -730,13 +1008,25 @@ def main() -> int:
             baseline_confusion,
             baseline_per_prompt,
             args.baseline_label or str(args.baseline),
+            paired_summary=paired_summary,
         )
         rendered = rendered.rstrip("\n") + "\n\n" + "\n".join(delta) + "\n"
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(rendered, encoding="utf-8")
     print(f"wrote {args.output}")
-    print(json.dumps({"models": meta["models"], "total_runs": meta["total_runs"], "per_model_top1": {k: v.get("top1_accuracy") for k, v in summary.items()}}, indent=2))
+    print(
+        json.dumps(
+            {
+                "models": meta["models"],
+                "total_runs": meta["total_runs"],
+                "per_model_top1": {
+                    k: v.get("top1_accuracy") for k, v in summary.items()
+                },
+            },
+            indent=2,
+        )
+    )
     return 0
 
 

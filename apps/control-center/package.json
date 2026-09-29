@@ -1,0 +1,34 @@
+{
+  "name": "@agent-skills/control-center",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && npm run --silent prepare:standalone",
+    "prepare:standalone": "node scripts/prepare-standalone.mjs",
+    "start": "npm run --silent prepare:standalone && node .next/standalone/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test --test-reporter=spec tests/*.test.ts",
+    "test:runtime": "node scripts/smoke-standalone.mjs",
+    "test:watch": "node --experimental-strip-types --test --watch tests/*.test.ts",
+    "verify": "npm run test && npm run typecheck && npm run build && npm run test:runtime"
+  },
+  "dependencies": {
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "overrides": {
+    "sharp": "0.35.4"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.8.3"
+  }
+}

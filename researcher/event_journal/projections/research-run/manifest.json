@@ -1,0 +1,9 @@
+{
+  "application_id": 1095388749,
+  "digest": "sha256:f2e9f7f963211a9d933ea2421d2ecb04c0c50531973c31535f50fe18c56d5af9",
+  "path": "researcher/event_journal/projections/research-run/0001-initial.sql",
+  "projector_name": "research-run",
+  "projector_version": "1.0.0",
+  "schema_version": "1.0.0",
+  "user_version": 1
+}

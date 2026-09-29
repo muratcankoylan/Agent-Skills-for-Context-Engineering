@@ -43,6 +43,23 @@ LEGACY_ADAPTER_KEY_FIELDS = {
     "LegacyQueueRecord": "id",
     "LegacyRunState": "run_id",
 }
+RUN_EVENT_IMPORT_NAMESPACE = uuid.UUID("b5a8ef43-d10b-5dd9-9406-31c558426e6d")
+RUN_EVENT_IMPORT_IDEMPOTENCY_SCOPE = "research_loop_file_shadow"
+RUN_EVENT_IMPORT_ACTOR = {
+    "id": "research-loop-file-shadow",
+    "class": "legacy_file_bridge",
+}
+RUN_EVENT_IMPORT_AUTHORITY = {
+    "outcome": "legacy_authority_not_recorded",
+    "actor_class": "legacy_file_bridge",
+    "action": "mirror_legacy_state",
+    "resource": "research_run",
+    "reason_code": "LEGACY_AUTHORITY_NOT_RECORDED",
+    "constitution_version": None,
+    "constitution_digest": None,
+    "context_digest": None,
+    "matched_rule": None,
+}
 
 
 class ContractError(ValueError):
@@ -265,6 +282,34 @@ def deterministic_import_id(prefix: str, namespace: uuid.UUID, legacy_key: str) 
     return f"{prefix}_{uuid.uuid5(namespace, legacy_key)}"
 
 
+def deterministic_run_event_id(run_id: str, history_index: int) -> str:
+    """Return the fixed SPEC-004 identity for one file-history slot."""
+
+    if (
+        not run_id
+        or isinstance(history_index, bool)
+        or not isinstance(history_index, int)
+        or not 0 <= history_index < SAFE_INTEGER_MAX
+    ):
+        raise ContractError("INVALID_ID", "run-event import identity inputs are invalid")
+    key = f"research-run-transition/v1:{run_id}:{history_index}"
+    return deterministic_import_id("evt", RUN_EVENT_IMPORT_NAMESPACE, key)
+
+
+def deterministic_run_event_idempotency_digest(run_id: str, history_index: int) -> str:
+    """Bind retry identity to the same stable file-history slot."""
+
+    if (
+        not run_id
+        or isinstance(history_index, bool)
+        or not isinstance(history_index, int)
+        or not 0 <= history_index < SAFE_INTEGER_MAX
+    ):
+        raise ContractError("INVALID_DIGEST", "run-event idempotency inputs are invalid")
+    key = f"research-run-transition-idempotency/v1:{run_id}:{history_index}"
+    return sha256_bytes(key.encode("utf-8"))
+
+
 def validate_typed_id(
     value: str,
     *,
@@ -308,6 +353,7 @@ class SchemaRegistry:
         self.by_kind = {entry.kind: entry for entry in self.entries if entry.status == "active"}
         self._schemas: dict[str, dict[str, Any]] = {}
         self._validators: dict[tuple[str, str], Draft202012Validator] = {}
+        self._id_origins: dict[tuple[str, str], frozenset[str]] = {}
 
     @classmethod
     def load(cls, path: Path = DEFAULT_REGISTRY_PATH) -> "SchemaRegistry":
@@ -448,6 +494,16 @@ class SchemaRegistry:
             except SchemaError as exc:
                 raise ContractError("SCHEMA_INVALID", "registered schema fails meta-validation") from exc
             self._schemas[entry.schema_id] = schema
+            id_origin = schema.get("properties", {}).get("id_origin")
+            if isinstance(id_origin, Mapping) and isinstance(id_origin.get("enum"), list):
+                origins = frozenset(
+                    value for value in id_origin["enum"] if isinstance(value, str)
+                )
+            elif isinstance(id_origin, Mapping) and isinstance(id_origin.get("const"), str):
+                origins = frozenset({id_origin["const"]})
+            else:
+                origins = frozenset({"native"})
+            self._id_origins[(entry.kind, entry.version)] = origins
             resources_by_id[entry.schema_id] = Resource.from_contents(schema)
         registry: Registry[Any] = Registry().with_resources(resources_by_id.items())
         checker = FormatChecker()
@@ -535,6 +591,12 @@ class SchemaRegistry:
                 str(record["artifact_kind"]),
                 str(record["artifact_schema_version"]),
             )
+            target_origin = str(record["artifact_id_origin"])
+            if target_origin not in self._id_origins[(target.kind, target.version)]:
+                raise ContractError(
+                    "ARTIFACT_TARGET_INVALID",
+                    "artifact reference target does not support the declared ID origin",
+                )
             if target.id_prefix is None:
                 raise ContractError(
                     "ARTIFACT_TARGET_INVALID",
@@ -543,8 +605,47 @@ class SchemaRegistry:
             validate_typed_id(
                 str(record["artifact_id"]),
                 expected_prefix=target.id_prefix,
-                id_origin=str(record["artifact_id_origin"]),
+                id_origin=target_origin,
             )
+        elif entry.kind == "OrganizationEvent":
+            payload = record["payload"]
+            if not isinstance(payload, Mapping):
+                raise ContractError("EVENT_PAYLOAD_MISMATCH", "event payload is not an object")
+            self.validate(payload, kind="ResearchRunTransition", version="1.0.0")
+            detail_ref = record["detail_ref"]
+            if detail_ref is not None:
+                if not isinstance(detail_ref, Mapping):
+                    raise ContractError("EVENT_DETAIL_REF_INVALID", "event detail reference is invalid")
+                target = self.resolve_for_read(
+                    str(detail_ref["artifact_kind"]),
+                    str(detail_ref["artifact_schema_version"]),
+                )
+                if target.kind == "OrganizationEvent":
+                    raise ContractError(
+                        "EVENT_DETAIL_REF_INVALID",
+                        "an event detail reference cannot target an organization event",
+                    )
+                if target.id_prefix is None:
+                    raise ContractError(
+                        "ARTIFACT_TARGET_INVALID",
+                        "event detail target has no typed identity",
+                    )
+                target_origin = str(detail_ref["artifact_id_origin"])
+                if target_origin not in self._id_origins[(target.kind, target.version)]:
+                    raise ContractError(
+                        "ARTIFACT_TARGET_INVALID",
+                        "event detail target does not support the declared ID origin",
+                    )
+                validate_typed_id(
+                    str(detail_ref["artifact_id"]),
+                    expected_prefix=target.id_prefix,
+                    id_origin=target_origin,
+                )
+                if detail_ref["classification"] not in target.classifications:
+                    raise ContractError(
+                        "CLASSIFICATION_MISMATCH",
+                        "event detail classification is not permitted for its target",
+                    )
         return entry
 
     def _validate_artifact_envelope(self, record: Mapping[str, Any]) -> None:
@@ -662,6 +763,150 @@ class SchemaRegistry:
                 raise ContractError("CANDIDATE_CYCLE", "candidate cannot be its own parent")
             if "revision_of" in record and record["revision_of"] not in parent_ids:
                 raise ContractError("CANDIDATE_PARENT_MISMATCH", "revision_of must also be a parent")
+        elif entry.kind == "ResearchRunTransition":
+            history_index = record["history_index"]
+            from_state = record["from_state"]
+            to_state = record["to_state"]
+            initialization = record["initialization"]
+            closure = record["closure"]
+            if history_index == 0:
+                if from_state is not None or to_state != "initialized" or initialization is None:
+                    raise ContractError(
+                        "RUN_EVENT_TRANSITION_INVALID",
+                        "first run transition must initialize the subject",
+                    )
+            elif from_state is None or to_state == "initialized" or from_state == to_state:
+                raise ContractError(
+                    "RUN_EVENT_TRANSITION_INVALID",
+                    "later run transition has inconsistent states",
+                )
+            if (to_state == "initialized") != (initialization is not None):
+                raise ContractError(
+                    "RUN_EVENT_TRANSITION_INVALID",
+                    "run initialization metadata disagrees with the target state",
+                )
+            if isinstance(initialization, Mapping) and set(
+                initialization["locked_surfaces"]
+            ).intersection(initialization["editable_surfaces"]):
+                raise ContractError(
+                    "RUN_EVENT_TRANSITION_INVALID",
+                    "run initialization surfaces cannot be both locked and editable",
+                )
+            if (to_state == "closed") != (closure is not None):
+                raise ContractError(
+                    "RUN_EVENT_TRANSITION_INVALID",
+                    "run closure metadata disagrees with the target state",
+                )
+            if isinstance(closure, Mapping) and closure["reason"] != record["reason"]:
+                raise ContractError(
+                    "RUN_EVENT_TRANSITION_INVALID",
+                    "run closure reason disagrees with the transition",
+                )
+        elif entry.kind == "OrganizationEvent":
+            payload = record["payload"]
+            if not isinstance(payload, Mapping):
+                raise ContractError("EVENT_PAYLOAD_MISMATCH", "event payload is not an object")
+            if record["payload_digest"] != canonical_digest(dict(payload)):
+                raise ContractError(
+                    "EVENT_PAYLOAD_DIGEST_MISMATCH",
+                    "event payload digest is invalid",
+                )
+            subject = record["subject"]
+            event_type = f"research_run.{payload['to_state']}"
+            if (
+                record["event_type"] != event_type
+                or subject["id"] != payload["run_id"]
+                or subject["version"] != payload["history_index"] + 1
+                or record["classification"] != payload["classification"]
+            ):
+                raise ContractError(
+                    "EVENT_PAYLOAD_MISMATCH",
+                    "event routing fields disagree with the run transition",
+                )
+            if record["actor"]["class"] != record["authority"]["actor_class"]:
+                raise ContractError(
+                    "EVENT_AUTHORITY_MISMATCH",
+                    "event actor disagrees with its authority decision",
+                )
+            source = payload["transition_source"]
+            imported = source == "file_state_history"
+            authority = record["authority"]
+            if imported:
+                run_id = str(payload["run_id"])
+                history_index = int(payload["history_index"])
+                expected_id = deterministic_run_event_id(run_id, history_index)
+                expected_correlation = deterministic_run_event_id(run_id, 0)
+                expected_causation = (
+                    None
+                    if history_index == 0
+                    else deterministic_run_event_id(run_id, history_index - 1)
+                )
+                if (
+                    record["id_origin"] != "legacy_import"
+                    or record["id"] != expected_id
+                    or record["correlation_event_id"] != expected_correlation
+                    or record["causation_event_id"] != expected_causation
+                    or record["idempotency"]
+                    != {
+                        "scope": RUN_EVENT_IMPORT_IDEMPOTENCY_SCOPE,
+                        "key_digest": deterministic_run_event_idempotency_digest(
+                            run_id, history_index
+                        ),
+                    }
+                    or record["actor"] != RUN_EVENT_IMPORT_ACTOR
+                    or authority != RUN_EVENT_IMPORT_AUTHORITY
+                    or record["repository"] != {"commit_sha": None, "pull_request": None}
+                    or record["classification"] != "private_operational"
+                    or payload["classification"] != "private_operational"
+                    or record["detail_ref"] is not None
+                ):
+                    raise ContractError(
+                        "RUN_EVENT_ORIGIN_MISMATCH",
+                        "file-shadow event provenance is not deterministic",
+                    )
+            elif (
+                record["id_origin"] != "native"
+                or record["idempotency"]["scope"] == RUN_EVENT_IMPORT_IDEMPOTENCY_SCOPE
+                or authority["outcome"] != "allowed"
+                or authority["constitution_version"] is None
+                or authority["constitution_digest"] is None
+                or authority["context_digest"] is None
+                or authority["matched_rule"] is None
+            ):
+                raise ContractError(
+                    "RUN_EVENT_ORIGIN_MISMATCH",
+                    "native run event lacks an allowed authority decision",
+                )
+            if payload["to_state"] == "initialized":
+                initialization = payload["initialization"]
+                if not isinstance(initialization, Mapping) or initialization["created_at"] != record["occurred_at"]:
+                    raise ContractError(
+                        "EVENT_PAYLOAD_MISMATCH",
+                        "initialization time disagrees with the event",
+                    )
+            if payload["to_state"] == "closed":
+                closure = payload["closure"]
+                if not isinstance(closure, Mapping) or closure["closed_at"] != record["occurred_at"]:
+                    raise ContractError(
+                        "EVENT_PAYLOAD_MISMATCH",
+                        "closure time disagrees with the event",
+                    )
+            causation = record["causation_event_id"]
+            if subject["version"] == 1:
+                valid_causation = causation is None and record["correlation_event_id"] == record["id"]
+            else:
+                valid_causation = causation is not None and causation != record["id"]
+            if not valid_causation:
+                raise ContractError(
+                    "EVENT_CAUSATION_INVALID",
+                    "event correlation or causation is inconsistent",
+                )
+            detail_ref = record["detail_ref"]
+            if isinstance(detail_ref, Mapping) and detail_ref["classification"] != record["classification"]:
+                raise ContractError(
+                    "EVENT_DETAIL_REF_INVALID",
+                    "event detail classification disagrees with the event",
+                )
         elif entry.kind == "ExportApproval":
             expected = "approved" if record["decision"] == "approve" else "rejected"
             if record["state"] != expected:

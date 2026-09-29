@@ -16,6 +16,12 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 from researcher.scripts.build_inventory import (
     InventoryBuilder,
+    REFERENCE_RUN_FILES,
+    SUPERVISED_DISCOVERY_FILES,
+    SUPERVISED_LOOP_TEST_FILES,
+    SUPERVISED_ORCHESTRATION_FILES,
+    SUPERVISED_SCRIPT_FILES,
+    SUPERVISED_TEMPLATE_FILES,
     atomic_write_text,
     pretty_json,
     render_summary,
@@ -42,6 +48,7 @@ from researcher.scripts.validate_authority_contract import (
     load_authority_vocabulary_schema,
     parse_authority_vocabulary,
 )
+from researcher.scripts.validate_repo import Validator as RepositoryValidator
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -52,6 +59,7 @@ def copy_fixture(source: Path, target: Path) -> None:
 
     target.mkdir(parents=True, exist_ok=True)
     for relative in [
+        ".gitignore",
         ".claude-plugin/marketplace.json",
         ".plugin/plugin.json",
         ".github/workflows/validate.yml",
@@ -61,7 +69,10 @@ def copy_fixture(source: Path, target: Path) -> None:
         "CLAUDE.md",
         "requirements-dev.in",
         "requirements-dev.txt",
+        "docs/product/spec-execution-plan.json",
+        "docs/product/living-organization-plan.md",
         "researcher/README.md",
+        "researcher/__init__.py",
         "researcher/mechanisms/registry.jsonl",
         "researcher/mechanisms/ledgers/accepted.jsonl",
         "researcher/mechanisms/ledgers/rejected.jsonl",
@@ -81,6 +92,7 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/benchmarks/router/prompts.jsonl",
         "researcher/benchmarks/scenarios/adversarial.jsonl",
         "researcher/benchmarks/goldens/adversarial-goldens.json",
+        "researcher/benchmarks/README.md",
         "researcher/benchmarks/PLAN.md",
         "researcher/benchmarks/router/README.md",
         "researcher/benchmarks/effectiveness/README.md",
@@ -117,7 +129,6 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/scripts/validate_export.py",
         "researcher/scripts/export_policy.py",
         "researcher/scripts/validate_public_repo.py",
-        "researcher/scripts/tests/test_public_repo.py",
         "researcher/scripts/tests/test_spec_lifecycle.py",
         "researcher/artifacts/README.md",
         "researcher/runbooks/schema-migration.md",
@@ -132,7 +143,48 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/scripts/skill_health.py",
         "researcher/scripts/check_activation_cases.py",
         "researcher/scripts/run_benchmarks.py",
+        "researcher/scripts/__init__.py",
+        "researcher/scripts/novelty_check.py",
+        "researcher/scripts/skill_frontmatter.py",
+        "researcher/scripts/loop_common.py",
+        "researcher/scripts/loop_discover.py",
+        "researcher/scripts/loop_step.py",
+        "researcher/scripts/loop_daily.py",
+        "researcher/scripts/loop_status.py",
+        "researcher/scripts/research_loop.py",
+        "researcher/scripts/validate_run.py",
+        "researcher/discovery/manual-seed.jsonl",
+        "researcher/templates/source-evaluation.json",
+        "researcher/templates/skill-proposal.md",
+        "researcher/templates/mechanism-proposal.jsonl",
+        "researcher/orchestration/config.json",
+        "researcher/runbooks/continuous-operation.md",
+        "researcher/orchestration/launchd/install.sh",
+        "researcher/orchestration/launchd/uninstall.sh",
+        "researcher/orchestration/launchd/run-loop-step.sh",
+        "researcher/orchestration/launchd/run-loop-discover.sh",
+        "researcher/orchestration/launchd/run-loop-daily.sh",
+        "researcher/orchestration/launchd/com.context-engineering.loop-step.plist",
+        "researcher/orchestration/launchd/com.context-engineering.loop-discover.plist",
+        "researcher/orchestration/launchd/com.context-engineering.loop-daily.plist",
     ]:
+        source_path = source / relative
+        target_path = target / relative
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path, target_path)
+
+    for relative in SUPERVISED_LOOP_TEST_FILES:
+        loop_test = source / relative
+        target_path = target / relative
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(loop_test, target_path)
+
+    for relative in (
+        *SUPERVISED_SCRIPT_FILES,
+        *SUPERVISED_ORCHESTRATION_FILES,
+        *SUPERVISED_TEMPLATE_FILES,
+        *SUPERVISED_DISCOVERY_FILES,
+    ):
         source_path = source / relative
         target_path = target / relative
         target_path.parent.mkdir(parents=True, exist_ok=True)
@@ -157,10 +209,6 @@ def copy_fixture(source: Path, target: Path) -> None:
 
     shutil.copytree(source / "docs" / "specs", target / "docs" / "specs")
     shutil.copytree(source / "docs" / "decisions", target / "docs" / "decisions")
-    shutil.copytree(
-        source / "researcher" / "orchestration" / "prompts",
-        target / "researcher" / "orchestration" / "prompts",
-    )
     review = source / "docs" / "reviews" / "2026-08-15-autonomous-organization-readiness.md"
     target_review = target / review.relative_to(source)
     target_review.parent.mkdir(parents=True, exist_ok=True)
@@ -169,6 +217,17 @@ def copy_fixture(source: Path, target: Path) -> None:
     source_tasks = source / "researcher" / "benchmarks" / "effectiveness" / "tasks"
     target_tasks = target / "researcher" / "benchmarks" / "effectiveness" / "tasks"
     shutil.copytree(source_tasks, target_tasks)
+    shutil.copytree(
+        source
+        / "researcher"
+        / "runs"
+        / "20260515-035228-executable-autonomous-research-frameworks",
+        target
+        / "researcher"
+        / "runs"
+        / "20260515-035228-executable-autonomous-research-frameworks",
+        ignore=shutil.ignore_patterns(".run-state.lock"),
+    )
 
 
 def finding_codes(root: Path) -> set[str]:
@@ -502,6 +561,41 @@ class RepositoryInventoryTests(unittest.TestCase):
         second = InventoryBuilder(root).build()["source_tree_digest"]
         self.assertEqual(first, second)
 
+    def test_source_tree_digest_is_declared_input_identity_not_runtime_freeze(
+        self,
+    ) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()
+        undeclared = root / "researcher/unbound_probe.json"
+        undeclared.write_text('{"runtime":"outside-declared-inputs"}\n', encoding="utf-8")
+        after = InventoryBuilder(root).build()
+        self.assertEqual(before["source_tree_digest"], after["source_tree_digest"])
+        self.assertNotIn(
+            "researcher/unbound_probe.json",
+            {source["path"] for source in after["sources"]},
+        )
+        supervised = after["artifacts"]["supervised_loop"]
+        self.assertEqual(supervised["binding_scope"], "declared_component_binding")
+        self.assertEqual(
+            supervised["digest_role"],
+            "inventory_input_change_detection_only_not_freeze_or_security_boundary",
+        )
+        self.assertEqual(
+            after["repository_revision"],
+            {
+                "kind": "canonical_source_tree",
+                "digest": after["source_tree_digest"],
+                "git_commit_excluded_to_avoid_self_reference": True,
+            },
+        )
+        schema = json.loads(
+            (root / "researcher/corpus/inventory.schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        Draft202012Validator(schema).validate(after)
+
     def test_canonical_input_change_updates_source_tree_digest(self) -> None:
         temporary, root = self.fixture()
         self.addCleanup(temporary.cleanup)
@@ -666,6 +760,729 @@ class RepositoryInventoryTests(unittest.TestCase):
             "researcher/scripts/tests/test_render_router_report.py",
             support_paths,
         )
+
+    def test_adversarial_scenarios_are_declared_catalog_only(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        category = inventory["artifacts"]["adversarial_scenarios"]
+        self.assertEqual(category["execution_status"], "catalog_only")
+        methodology = category["methodology"]
+        self.assertEqual(methodology["path"], "researcher/benchmarks/README.md")
+        sources = {record["path"]: record for record in inventory["sources"]}
+        self.assertEqual(
+            methodology["digest"],
+            sources["researcher/benchmarks/README.md"]["digest"],
+        )
+        support_paths = {
+            record["path"]
+            for record in inventory["artifacts"]["validators"]["support_files"]
+        }
+        self.assertIn(
+            "researcher/scripts/tests/test_benchmark_catalog.py",
+            support_paths,
+        )
+
+    def test_supervised_loop_declared_binding_is_disabled_and_source_bound(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        category = inventory["artifacts"]["supervised_loop"]
+        self.assertEqual(category["binding_scope"], "declared_component_binding")
+        self.assertEqual(category["ast_scan"], "defense_in_depth_nonexhaustive")
+        self.assertEqual(
+            category["digest_role"],
+            "inventory_input_change_detection_only_not_freeze_or_security_boundary",
+        )
+        self.assertEqual(
+            category["result_reproducibility"],
+            "not_claimed_for_daily_status_or_validator_results",
+        )
+        self.assertEqual(
+            category["support_manifest"],
+            {
+                "kind": "explicit_declared_nonexhaustive",
+                "closed_roots": [
+                    "researcher/scripts",
+                    "researcher/orchestration",
+                    "researcher/templates",
+                    "researcher/discovery",
+                ],
+                "package_initializers": [
+                    "researcher/__init__.py",
+                    "researcher/scripts/__init__.py",
+                ],
+                "reference_fixture": {"files": 12, "directories": 6},
+                "generated_cache_exclusion": "ordinary_cpython_bytecode_only",
+            },
+        )
+        self.assertEqual(
+            category["status"],
+            {
+                "launchd_installer": "disabled",
+                "launchd_wrappers": "dormant_inert",
+                "direct_execution": "supervised_only",
+                "declared_network_retrieval": "removed",
+                "runtime_authority": "none",
+                "scenario_execution": "catalog_only",
+            },
+        )
+        records = {record["path"]: record for record in category["records"]}
+        support = {record["path"]: record for record in category["support_files"]}
+        self.assertEqual(
+            set(records),
+            {
+                "researcher/scripts/loop_common.py",
+                "researcher/scripts/loop_discover.py",
+                "researcher/scripts/loop_step.py",
+                "researcher/scripts/loop_daily.py",
+                "researcher/scripts/loop_status.py",
+                "researcher/scripts/research_loop.py",
+                "researcher/scripts/validate_run.py",
+            },
+        )
+        self.assertIn("researcher/orchestration/launchd/install.sh", support)
+        self.assertIn("researcher/orchestration/launchd/run-loop-step.sh", support)
+        self.assertIn("researcher/runbooks/continuous-operation.md", support)
+        self.assertIn("researcher/scripts/novelty_check.py", support)
+        self.assertIn("researcher/templates/source-evaluation.json", support)
+        self.assertIn("researcher/discovery/manual-seed.jsonl", support)
+        self.assertIn("researcher/scripts/tests/test_loop_common.py", support)
+        self.assertIn(
+            "researcher/scripts/tests/test_validate_run_hardening.py", support
+        )
+        self.assertEqual(
+            {
+                relative
+                for relative in support
+                if relative.startswith("researcher/scripts/tests/test_")
+            },
+            {
+                relative
+                for relative in SUPERVISED_SCRIPT_FILES
+                if "/tests/test_" in relative
+            },
+        )
+        self.assertTrue(set(SUPERVISED_LOOP_TEST_FILES).issubset(support))
+        self.assertIn(
+            "researcher/runs/20260515-035228-executable-autonomous-research-frameworks/run-state.json",
+            support,
+        )
+        sources = {record["path"]: record for record in inventory["sources"]}
+        for relative, record in {**records, **support}.items():
+            self.assertEqual(record["digest"], sources[relative]["digest"])
+
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()
+        path = root / "researcher/scripts/loop_common.py"
+        path.write_text(path.read_text(encoding="utf-8") + "\n# mutation\n", encoding="utf-8")
+        after = InventoryBuilder(root).build()
+        before_record = {
+            record["path"]: record
+            for record in before["artifacts"]["supervised_loop"]["records"]
+        }["researcher/scripts/loop_common.py"]
+        after_record = {
+            record["path"]: record
+            for record in after["artifacts"]["supervised_loop"]["records"]
+        }["researcher/scripts/loop_common.py"]
+        self.assertNotEqual(before_record["digest"], after_record["digest"])
+        self.assertNotEqual(before["source_tree_digest"], after["source_tree_digest"])
+
+        support_before = after["source_tree_digest"]
+        novelty = root / "researcher/scripts/novelty_check.py"
+        novelty.write_text(
+            novelty.read_text(encoding="utf-8") + "\n# dependency mutation\n",
+            encoding="utf-8",
+        )
+        after_dependency_mutation = InventoryBuilder(root).build()
+        self.assertNotEqual(
+            support_before,
+            after_dependency_mutation["source_tree_digest"],
+        )
+
+        rogue = root / "researcher/scripts/loop_shadow.py"
+        rogue.write_text("raise RuntimeError('unregistered')\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        changed = builder.build()
+        self.assertIn(
+            "UNREGISTERED_SUPERVISED_SOURCE_FILE",
+            {finding.code for finding in builder.findings},
+        )
+        self.assertNotIn(
+            "researcher/scripts/loop_shadow.py",
+            {record["path"] for record in changed["sources"]},
+        )
+
+        adapter = root / "researcher/scripts/fetch_adapter.py"
+        adapter.write_text("def fetch():\n    return None\n", encoding="utf-8")
+        loop_step = root / "researcher/scripts/loop_step.py"
+        loop_step.write_text(
+            loop_step.read_text(encoding="utf-8")
+            + "\nfrom .fetch_adapter import fetch\n",
+            encoding="utf-8",
+        )
+        dependency_builder = InventoryBuilder(root)
+        dependency_inventory = dependency_builder.build()
+        self.assertIn(
+            "UNREGISTERED_SUPERVISED_LOOP_DEPENDENCY",
+            {finding.code for finding in dependency_builder.findings},
+        )
+        self.assertNotIn(
+            "researcher/scripts/fetch_adapter.py",
+            {record["path"] for record in dependency_inventory["sources"]},
+        )
+
+        shutil.rmtree(
+            root
+            / "researcher"
+            / "runs"
+            / "20260515-035228-executable-autonomous-research-frameworks"
+        )
+        missing_reference = InventoryBuilder(root)
+        missing_reference.build()
+        self.assertIn(
+            "PARSE_ERROR",
+            {finding.code for finding in missing_reference.findings},
+        )
+
+    def test_supervised_loop_fixture_copies_declared_support_manifest(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        builder = InventoryBuilder(root)
+        builder.build()
+        self.assertEqual(builder.findings, [])
+
+        loop_step = root / "researcher/scripts/loop_step.py"
+        loop_step.write_text(
+            loop_step.read_text(encoding="utf-8")
+            + "\nfrom . import missing_fixture_dependency\n",
+            encoding="utf-8",
+        )
+        missing_dependency = InventoryBuilder(root)
+        missing_dependency.build()
+        self.assertIn(
+            "UNREGISTERED_SUPERVISED_LOOP_DEPENDENCY",
+            {finding.code for finding in missing_dependency.findings},
+        )
+
+    def test_supervised_loop_ast_diagnostic_resolves_package_import_aliases(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        loop_step = root / "researcher/scripts/loop_step.py"
+        loop_step.write_text(
+            loop_step.read_text(encoding="utf-8")
+            + "\nfrom researcher.scripts import (\n"
+            + "    loop_common as common_helpers,\n"
+            + "    validate_run as run_validation,\n"
+            + ")\n",
+            encoding="utf-8",
+        )
+        registered_aliases = InventoryBuilder(root)
+        registered_aliases.build()
+        self.assertEqual(registered_aliases.findings, [])
+
+        loop_step.write_text(
+            loop_step.read_text(encoding="utf-8")
+            + "\nfrom researcher.scripts import unbound_helper as helper\n",
+            encoding="utf-8",
+        )
+        missing_alias = InventoryBuilder(root)
+        inventory = missing_alias.build()
+        self.assertIn(
+            "UNREGISTERED_SUPERVISED_LOOP_DEPENDENCY",
+            {finding.code for finding in missing_alias.findings},
+        )
+        self.assertNotIn(
+            "researcher/scripts/unbound_helper.py",
+            {record["path"] for record in inventory["sources"]},
+        )
+
+    def test_closed_supervised_roots_reject_unregistered_files(self) -> None:
+        for relative in (
+            "researcher/scripts/untracked_helper.py",
+            "researcher/scripts/__pycache__/unbound_probe.py",
+            "researcher/orchestration/unbound-policy.json",
+        ):
+            with self.subTest(relative=relative):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("{}\n" if path.suffix == ".json" else "VALUE = 1\n")
+                builder = InventoryBuilder(root)
+                inventory = builder.build()
+                self.assertIn(
+                    "UNREGISTERED_SUPERVISED_SOURCE_FILE",
+                    {finding.code for finding in builder.findings},
+                )
+                self.assertNotIn(relative, {record["path"] for record in inventory["sources"]})
+
+    def test_package_initializer_imports_participate_in_static_closure(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        root_initializer = root / "researcher/__init__.py"
+        scripts_initializer = root / "researcher/scripts/__init__.py"
+        root_initializer.write_text(
+            root_initializer.read_text(encoding="utf-8")
+            + "\nfrom . import scripts as bound_scripts\n",
+            encoding="utf-8",
+        )
+        scripts_initializer.write_text(
+            scripts_initializer.read_text(encoding="utf-8")
+            + "\nfrom . import loop_common as bound_common\n",
+            encoding="utf-8",
+        )
+        bound = InventoryBuilder(root)
+        bound.build()
+        self.assertEqual(bound.findings, [])
+
+        scripts_initializer.write_text(
+            scripts_initializer.read_text(encoding="utf-8")
+            + "\nfrom .. import root_unbound\n",
+            encoding="utf-8",
+        )
+        unbound = InventoryBuilder(root)
+        inventory = unbound.build()
+        self.assertIn(
+            "UNREGISTERED_SUPERVISED_LOOP_DEPENDENCY",
+            {finding.code for finding in unbound.findings},
+        )
+        self.assertNotIn(
+            "researcher/root_unbound.py",
+            {record["path"] for record in inventory["sources"]},
+        )
+
+    def test_direct_dynamic_import_calls_are_diagnosed_without_admitting_targets(
+        self,
+    ) -> None:
+        variants = {
+            "literal": (
+                "import importlib\n"
+                "DYNAMIC = importlib.import_module('researcher.scripts.unbound_helper')\n"
+            ),
+            "module-alias": (
+                "import importlib as il\n"
+                "DYNAMIC = il.import_module('researcher.scripts.unbound_helper')\n"
+            ),
+            "function-alias": (
+                "from importlib import import_module as load\n"
+                "DYNAMIC = load('researcher.scripts.unbound_helper')\n"
+            ),
+            "computed-name": (
+                "import importlib\n"
+                "MODULE_NAME = 'researcher.scripts.' + 'unbound_helper'\n"
+                "DYNAMIC = importlib.import_module(MODULE_NAME)\n"
+            ),
+            "builtin": "DYNAMIC = __import__('researcher.scripts.unbound_helper')\n",
+        }
+        for variant, snippet in variants.items():
+            with self.subTest(variant=variant):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                target = root / "researcher/scripts/unbound_helper.py"
+                target.write_text("VALUE = 1\n", encoding="utf-8")
+                component = root / "researcher/scripts/loop_step.py"
+                component.write_text(
+                    component.read_text(encoding="utf-8") + "\n" + snippet,
+                    encoding="utf-8",
+                )
+                builder = InventoryBuilder(root)
+                inventory = builder.build()
+                self.assertIn(
+                    "DYNAMIC_SUPERVISED_LOOP_IMPORT",
+                    {finding.code for finding in builder.findings},
+                )
+                self.assertNotIn(
+                    "researcher/scripts/unbound_helper.py",
+                    {record["path"] for record in inventory["sources"]},
+                )
+
+    def test_python_entrypoint_literal_diagnostics_use_declared_support(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        component = root / "researcher/scripts/loop_step.py"
+        component.write_text(
+            component.read_text(encoding="utf-8")
+            + "\nBOUND_ENTRYPOINT = 'researcher/scripts/loop_common.py'\n",
+            encoding="utf-8",
+        )
+        bound = InventoryBuilder(root)
+        bound.build()
+        self.assertEqual(bound.findings, [])
+
+        component.write_text(
+            component.read_text(encoding="utf-8")
+            + "\nMISSING_ENTRYPOINT = 'researcher/scripts/unbound_helper.py'\n",
+            encoding="utf-8",
+        )
+        missing = InventoryBuilder(root)
+        inventory = missing.build()
+        self.assertIn(
+            "UNREGISTERED_SUPERVISED_LOOP_DEPENDENCY",
+            {finding.code for finding in missing.findings},
+        )
+        self.assertNotIn(
+            "researcher/scripts/unbound_helper.py",
+            {record["path"] for record in inventory["sources"]},
+        )
+
+    def test_computed_python_process_entrypoints_are_diagnosed_without_flagging_git(
+        self,
+    ) -> None:
+        variants = {
+            "subprocess": (
+                "import subprocess\n"
+                "COMPUTED_SCRIPT = resolve_script()\n"
+                "subprocess.run([sys.executable, COMPUTED_SCRIPT], check=False)\n"
+                "subprocess.run(['git', 'status'], check=False)\n"
+            ),
+            "os-exec": (
+                "import os\n"
+                "COMPUTED_SCRIPT = resolve_script()\n"
+                "os.execv(sys.executable, [sys.executable, COMPUTED_SCRIPT])\n"
+            ),
+        }
+        for variant, snippet in variants.items():
+            with self.subTest(variant=variant):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                component = root / "researcher/scripts/loop_step.py"
+                component.write_text(
+                    component.read_text(encoding="utf-8") + "\n" + snippet,
+                    encoding="utf-8",
+                )
+                builder = InventoryBuilder(root)
+                builder.build()
+                dynamic = [
+                    finding
+                    for finding in builder.findings
+                    if finding.code == "DYNAMIC_SUPERVISED_LOOP_ENTRYPOINT"
+                ]
+                self.assertEqual(len(dynamic), 1, builder.findings)
+
+    @unittest.skipIf(not hasattr(os, "symlink"), "symlink support required")
+    def test_generic_source_reader_rejects_symlinked_ancestor(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        templates = root / "researcher/templates"
+        detached = templates.with_name("templates-real")
+        templates.rename(detached)
+        templates.symlink_to(detached.name, target_is_directory=True)
+        target = templates / "source-evaluation.json"
+        builder = InventoryBuilder(root)
+        digest, size = builder.add_source(target)
+        self.assertEqual((digest, size), ("sha256:" + "0" * 64, 0))
+        self.assertIn("PATH_ESCAPE", {finding.code for finding in builder.findings})
+        self.assertNotIn(
+            "researcher/templates/source-evaluation.json", builder.sources
+        )
+
+    def test_generic_source_reader_rejects_hardlinked_file(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        target = root / "researcher/templates/source-evaluation.json"
+        os.link(target, root / "template-alias.json")
+        builder = InventoryBuilder(root)
+        digest, size = builder.add_source(target)
+        self.assertEqual((digest, size), ("sha256:" + "0" * 64, 0))
+        self.assertIn("PATH_ESCAPE", {finding.code for finding in builder.findings})
+        self.assertNotIn(
+            "researcher/templates/source-evaluation.json", builder.sources
+        )
+
+    def test_generic_source_reader_rejects_directory_swap_during_read(self) -> None:
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name) / "repo"
+        data = root / "data"
+        replacement = root / "replacement"
+        data.mkdir(parents=True)
+        replacement.mkdir()
+        target = data / "input.txt"
+        target.write_text("snapshot-a\n", encoding="utf-8")
+        (replacement / "input.txt").write_text("snapshot-b\n", encoding="utf-8")
+        detached = root / "data-detached"
+        real_read = os.read
+        swapped = False
+
+        def swap_directory_then_read(descriptor: int, size: int) -> bytes:
+            nonlocal swapped
+            if not swapped:
+                swapped = True
+                data.rename(detached)
+                replacement.rename(data)
+            return real_read(descriptor, size)
+
+        builder = InventoryBuilder(root)
+        with mock.patch(
+            "researcher.scripts.build_inventory.os.read",
+            side_effect=swap_directory_then_read,
+        ):
+            digest, size = builder.add_source(target)
+        self.assertTrue(swapped)
+        self.assertEqual((digest, size), ("sha256:" + "0" * 64, 0))
+        self.assertIn("PATH_ESCAPE", {finding.code for finding in builder.findings})
+        self.assertNotIn("data/input.txt", builder.sources)
+
+    def test_json_parsers_use_the_hashed_byte_snapshot(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        json_path = root / "snapshot.json"
+        original_json = b'{"version":1}\n'
+        json_path.write_bytes(original_json)
+        builder = InventoryBuilder(root)
+        real_add_source = builder.add_source
+
+        def add_json_then_mutate(path: Path) -> tuple[str, int]:
+            result = real_add_source(path)
+            json_path.write_text('{"version":2}\n', encoding="utf-8")
+            return result
+
+        with mock.patch.object(
+            builder,
+            "add_source",
+            side_effect=add_json_then_mutate,
+        ):
+            self.assertEqual(builder.load_json(json_path), {"version": 1})
+        self.assertEqual(
+            builder.sources["snapshot.json"]["digest"],
+            f"sha256:{hashlib.sha256(original_json).hexdigest()}",
+        )
+
+        jsonl_path = root / "snapshot.jsonl"
+        original_jsonl = b'{"version":1}\n'
+        jsonl_path.write_bytes(original_jsonl)
+        real_add_source = builder.add_source
+
+        def add_jsonl_then_mutate(path: Path) -> tuple[str, int]:
+            result = real_add_source(path)
+            jsonl_path.write_text('{"version":2}\n', encoding="utf-8")
+            return result
+
+        with mock.patch.object(
+            builder,
+            "add_source",
+            side_effect=add_jsonl_then_mutate,
+        ):
+            records = builder.load_jsonl(jsonl_path)
+        self.assertEqual(records[0][1], {"version": 1})
+        self.assertEqual(
+            builder.sources["snapshot.jsonl"]["digest"],
+            f"sha256:{hashlib.sha256(original_jsonl).hexdigest()}",
+        )
+
+    def test_supervised_test_manifest_rejects_extra_missing_and_hardlink(self) -> None:
+        expected_codes = {
+            "extra": "UNREGISTERED_SUPERVISED_LOOP_TEST",
+            "missing": "MISSING_SUPERVISED_LOOP_TEST",
+            "hardlink": "UNSAFE_SUPERVISED_LOOP_TEST",
+        }
+        for mutation, expected_code in expected_codes.items():
+            with self.subTest(mutation=mutation):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                tests_root = root / "researcher/scripts/tests"
+                target = tests_root / "test_loop_common.py"
+                extra = tests_root / "test_loop_untracked_local.py"
+                if mutation == "extra":
+                    extra.write_text("def test_untracked():\n    pass\n", encoding="utf-8")
+                elif mutation == "missing":
+                    target.unlink()
+                else:
+                    os.link(target, root / "test-loop-common-alias.py")
+
+                builder = InventoryBuilder(root)
+                inventory = builder.build()
+                self.assertIn(
+                    expected_code,
+                    {finding.code for finding in builder.findings},
+                )
+                if mutation == "extra":
+                    self.assertNotIn(
+                        "researcher/scripts/tests/test_loop_untracked_local.py",
+                        {record["path"] for record in inventory["sources"]},
+                    )
+
+    @unittest.skipIf(not hasattr(os, "symlink"), "symlink support required")
+    def test_supervised_test_manifest_rejects_symlinks(self) -> None:
+        for target_kind in ("expected", "extra"):
+            with self.subTest(target_kind=target_kind):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                tests_root = root / "researcher/scripts/tests"
+                detached = tests_root / "detached-loop-test.py"
+                detached.write_text("def test_detached():\n    pass\n", encoding="utf-8")
+                if target_kind == "expected":
+                    link = tests_root / "test_loop_common.py"
+                    link.unlink()
+                else:
+                    link = tests_root / "test_loop_untracked_local.py"
+                link.symlink_to(detached.name)
+
+                builder = InventoryBuilder(root)
+                builder.build()
+                codes = {finding.code for finding in builder.findings}
+                self.assertIn("UNSAFE_SUPERVISED_LOOP_TEST", codes)
+                if target_kind == "extra":
+                    self.assertIn("UNREGISTERED_SUPERVISED_LOOP_TEST", codes)
+
+    def test_run_init_staging_public_boundary_is_source_bound(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        sources = {record["path"]: record for record in inventory["sources"]}
+        validators = {
+            record["id"]: record
+            for record in inventory["artifacts"]["validators"]["records"]
+        }
+        validator_support = {
+            record["path"]
+            for record in inventory["artifacts"]["validators"]["support_files"]
+        }
+        supervised_support = {
+            record["path"]
+            for record in inventory["artifacts"]["supervised_loop"]["support_files"]
+        }
+        public_validator = validators["public-repository-boundary"]
+        self.assertIn("private runtime and run-init staging roots", public_validator["owns"])
+        self.assertEqual(
+            public_validator["digest"],
+            sources["researcher/scripts/validate_public_repo.py"]["digest"],
+        )
+        for relative in (".gitignore", "researcher/scripts/tests/test_public_repo.py"):
+            with self.subTest(relative=relative):
+                self.assertIn(relative, validator_support)
+                self.assertEqual(
+                    sources[relative]["digest"],
+                    f"sha256:{hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()}",
+                )
+        self.assertIn(
+            "researcher/scripts/tests/test_public_repo.py", supervised_support
+        )
+
+    def test_reference_run_uses_exact_twelve_file_manifest(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        support_paths = {
+            record["path"]
+            for record in inventory["artifacts"]["supervised_loop"]["support_files"]
+            if record["path"].startswith(
+                "researcher/runs/"
+                "20260515-035228-executable-autonomous-research-frameworks/"
+            )
+        }
+        prefix = (
+            "researcher/runs/"
+            "20260515-035228-executable-autonomous-research-frameworks/"
+        )
+        self.assertEqual(
+            support_paths,
+            {f"{prefix}{relative}" for relative in REFERENCE_RUN_FILES},
+        )
+        self.assertEqual(len(support_paths), 12)
+
+    @unittest.skipIf(not hasattr(os, "symlink"), "symlink support required")
+    def test_managed_run_roots_reject_symlinked_ancestors(self) -> None:
+        for boundary in ("researcher", "runs", "reference"):
+            with self.subTest(boundary=boundary):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                researcher = root / "researcher"
+                runs = researcher / "runs"
+                reference = (
+                    runs
+                    / "20260515-035228-executable-autonomous-research-frameworks"
+                )
+                target = {"researcher": researcher, "runs": runs, "reference": reference}[
+                    boundary
+                ]
+                detached = target.with_name(f"{target.name}-real")
+                target.rename(detached)
+                target.symlink_to(detached.name, target_is_directory=True)
+
+                builder = InventoryBuilder(root)
+                builder.build()
+                self.assertTrue(
+                    any(
+                        finding.artifact_id == "legacy-reference-run"
+                        and "missing or unsafe" in finding.message
+                        for finding in builder.findings
+                    ),
+                    builder.findings,
+                )
+
+                validator = RepositoryValidator(root)
+                validator.validate_runs()
+                self.assertTrue(
+                    any(
+                        "must be a real directory" in finding.message
+                        for finding in validator.findings
+                    ),
+                    validator.findings,
+                )
+
+    @unittest.skipIf(not hasattr(os, "symlink"), "symlink support required")
+    def test_reference_run_rejects_symlinked_descendant_ancestor(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        reference = (
+            root
+            / "researcher"
+            / "runs"
+            / "20260515-035228-executable-autonomous-research-frameworks"
+        )
+        evidence = reference / "sources" / "evidence"
+        detached = evidence.with_name("evidence-real")
+        evidence.rename(detached)
+        evidence.symlink_to(detached.name, target_is_directory=True)
+
+        builder = InventoryBuilder(root)
+        builder.build()
+        self.assertIn(
+            "UNREGISTERED_SUPERVISED_LOOP_COMPONENT",
+            {finding.code for finding in builder.findings},
+        )
+        validator = RepositoryValidator(root)
+        validator.validate_runs()
+        self.assertTrue(
+            any(
+                "unsafe filesystem identity" in finding.message
+                or "real directory or regular file" in finding.message
+                for finding in validator.findings
+            ),
+            validator.findings,
+        )
+
+    def test_reference_run_rejects_missing_extra_and_hardlinked_entries(self) -> None:
+        mutations = ("missing", "extra-file", "extra-directory", "hardlink")
+        for mutation in mutations:
+            with self.subTest(mutation=mutation):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                reference = (
+                    root
+                    / "researcher"
+                    / "runs"
+                    / "20260515-035228-executable-autonomous-research-frameworks"
+                )
+                if mutation == "missing":
+                    (reference / "THREAD.md").unlink()
+                elif mutation == "extra-file":
+                    (reference / "unregistered.txt").write_text(
+                        "unregistered\n", encoding="utf-8"
+                    )
+                elif mutation == "extra-directory":
+                    (reference / "unregistered").mkdir()
+                else:
+                    os.link(reference / "THREAD.md", root / "thread-alias.md")
+
+                builder = InventoryBuilder(root)
+                builder.build()
+                self.assertTrue(
+                    any(
+                        finding.artifact_id == "legacy-reference-run"
+                        for finding in builder.findings
+                    ),
+                    builder.findings,
+                )
+
+                validator = RepositoryValidator(root)
+                validator.validate_runs()
+                self.assertTrue(validator.findings)
 
     def test_authority_validator_ownership_and_sources_are_split_exactly(self) -> None:
         inventory = InventoryBuilder(ROOT).build()
@@ -834,10 +1651,10 @@ class RepositoryInventoryTests(unittest.TestCase):
     def test_architecture_decisions_are_inventory_backed(self) -> None:
         inventory = InventoryBuilder(ROOT).build()
         decisions = inventory["artifacts"]["architecture_decisions"]
-        self.assertEqual(decisions["count"], 10)
+        self.assertEqual(decisions["count"], 11)
         self.assertEqual(
             {record["id"] for record in decisions["records"]},
-            {f"ADR-{number:04d}" for number in range(1, 11)},
+            {f"ADR-{number:04d}" for number in range(1, 12)},
         )
 
     def test_orchestration_briefs_are_inventory_backed_and_non_authoritative(self) -> None:

@@ -1,0 +1,13 @@
+{
+  "application_id": 1095388748,
+  "latest_version": 1,
+  "migrations": [
+    {
+      "digest": "sha256:7930c0d426f8262f22199ec7097ca741a0f9581c60265f0a3b52111514c5b3a7",
+      "name": "initial",
+      "path": "researcher/event_journal/migrations/0001-initial.sql",
+      "version": 1
+    }
+  ],
+  "schema_version": "1.0.0"
+}

@@ -7,6 +7,8 @@ on:
   # pull request so dependent layers receive the same gates as the base layer.
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review]
+  merge_group:
+    types: [checks_requested]
   workflow_dispatch:
 
 permissions:
@@ -15,12 +17,20 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # The expanded Python suite plus three lockfile installs and a production UI
+    # build no longer fit the historical five-minute ceiling on a cold runner.
+    # Keep this conservative cap until hosted p95 timing supports splitting or
+    # lowering it.
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
+          # Repository-controlled validators and npm scripts run later. Do not
+          # leave the job token in Git configuration for them to recover.
+          # This public repository's lifecycle fetches use anonymous read access.
+          persist-credentials: false
 
       - name: Pin lifecycle Git authorities
         id: lifecycle-authorities
@@ -29,6 +39,8 @@ jobs:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
           PUSH_BEFORE_SHA: ${{ github.event.before }}
+          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+          MERGE_GROUP_BASE_REF: ${{ github.event.merge_group.base_ref }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           GIT_NO_REPLACE_OBJECTS: "1"
           GIT_CONFIG_NOSYSTEM: "1"
@@ -44,6 +56,20 @@ jobs:
               PROMOTED_SHA="$(git --no-replace-objects rev-parse \
                 "refs/remotes/origin/$DEFAULT_BRANCH^{commit}")"
             fi
+          elif [ "$EVENT_NAME" = "merge_group" ]; then
+            # The synthetic merge-group head includes unpromoted proposals.
+            # Its event-pinned protected-default base, not HEAD or a later
+            # fetched branch tip, owns both lifecycle authority inputs.
+            if [ -z "$DEFAULT_BRANCH" ] || [ "$MERGE_GROUP_BASE_REF" != "refs/heads/$DEFAULT_BRANCH" ]; then
+              echo "Merge-group lifecycle validation requires the protected default branch" >&2
+              exit 2
+            fi
+            if [[ ! "$MERGE_GROUP_BASE_SHA" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || [[ "$MERGE_GROUP_BASE_SHA" =~ ^0+$ ]]; then
+              echo "Merge-group lifecycle validation requires an exact nonzero base SHA" >&2
+              exit 2
+            fi
+            BASE_SHA="$MERGE_GROUP_BASE_SHA"
+            PROMOTED_SHA="$MERGE_GROUP_BASE_SHA"
           elif [ "$EVENT_NAME" = "push" ]; then
             if [ -z "$PUSH_BEFORE_SHA" ] || [ "$PUSH_BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
               echo "Lifecycle validation requires a nonzero push-before SHA" >&2
@@ -116,11 +142,15 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: |
+            apps/control-center/package-lock.json
             researcher/benchmarks/sdk-runner/package-lock.json
             researcher/schemas/typescript/package-lock.json
 
       - name: Install validation dependencies
-        run: pip install --require-hashes -r requirements-dev.txt
+        run: |
+          # Resolve both profiles together; sequential installs can hide conflicts.
+          pip install --require-hashes --only-binary=:all: -r requirements-dev.txt -r researcher/service/requirements-mcp.txt
+          python -m pip check
 
       - name: Compile researcher scripts
         run: |
@@ -133,6 +163,23 @@ jobs:
             researcher/scripts/export_policy.py \
             researcher/scripts/schema_contract.py \
             researcher/scripts/artifact_store.py \
+            researcher/scripts/event_store.py \
+            researcher/scripts/run_projector.py \
+            researcher/scripts/validate_event_journal.py \
+            researcher/scripts/local_scheduler.py \
+            researcher/scripts/local_rehearsal.py \
+            researcher/scripts/prompt_compiler.py \
+            researcher/scripts/source_connectors.py \
+            researcher/scripts/research_context.py \
+            researcher/scripts/research_articles.py \
+            researcher/scripts/research_articles_large.py \
+            researcher/scripts/research_discovery.py \
+            researcher/scripts/research_sourcing.py \
+            researcher/scripts/research_evidence.py \
+            researcher/scripts/research_evolution.py \
+            researcher/scripts/research_experiment.py \
+            researcher/scripts/research_pipeline.py \
+            researcher/scripts/adversarial_scenarios.py \
             researcher/scripts/migrate_legacy.py \
             researcher/scripts/tests/test_skill_frontmatter.py \
             researcher/scripts/tests/test_build_inventory.py \
@@ -141,6 +188,24 @@ jobs:
             researcher/scripts/tests/test_governance_policy.py \
             researcher/scripts/tests/test_schema_contract.py \
             researcher/scripts/tests/test_artifact_store.py \
+            researcher/scripts/tests/test_event_store.py \
+            researcher/scripts/tests/test_local_scheduler.py \
+            researcher/scripts/tests/test_local_rehearsal.py \
+            researcher/scripts/tests/test_prompt_compiler.py \
+            researcher/scripts/tests/test_source_connectors.py \
+            researcher/scripts/tests/test_research_context.py \
+            researcher/scripts/tests/test_research_articles.py \
+            researcher/scripts/tests/test_research_articles_large.py \
+            researcher/scripts/tests/test_research_discovery.py \
+            researcher/scripts/tests/test_research_campaign_replay.py \
+            researcher/scripts/tests/test_research_sourcing.py \
+            researcher/scripts/tests/test_source_sourcing.py \
+            researcher/scripts/tests/test_research_evidence.py \
+            researcher/scripts/tests/test_research_evolution.py \
+            researcher/scripts/tests/test_research_experiment.py \
+            researcher/scripts/tests/test_research_pipeline.py \
+            researcher/scripts/tests/test_research_pipeline_adversarial.py \
+            researcher/scripts/tests/test_adversarial_scenarios.py \
             researcher/scripts/tests/test_render_router_report.py \
             researcher/scripts/tests/test_public_repo.py \
             researcher/scripts/validate_governance.py \
@@ -162,11 +227,28 @@ jobs:
             researcher/scripts/loop_step.py \
             researcher/scripts/loop_daily.py \
             researcher/scripts/loop_status.py \
+            researcher/scripts/validate_product_readiness.py \
+            researcher/scripts/tests/test_product_readiness.py \
+            researcher/scripts/tests/test_example_api_budget.py \
+            researcher/scripts/tests/test_example_calculator.py \
             examples/long-horizon-prompt-lab/scripts/build_lab.py \
-            examples/long-horizon-prompt-lab/scripts/validate_site.py
+            examples/long-horizon-prompt-lab/scripts/validate_site.py \
+            examples/interleaved-thinking/reasoning_trace_optimizer/*.py \
+            examples/interleaved-thinking/examples/03_full_optimization.py \
+            examples/interleaved-thinking/tests/test_api_budget.py \
+            examples/interleaved-thinking/tests/test_calculator.py
 
       - name: Researcher unit tests
         run: python -m unittest discover -s researcher/scripts/tests -p 'test_*.py'
+
+      - name: Standalone service contracts and offline fault tests
+        run: |
+          python -m compileall -q researcher/service
+          python -m unittest discover -s researcher/service/tests -p 'test_*.py'
+          python -m unittest discover -s researcher/service/deploy -p 'test_*.py'
+
+      - name: Context packing and provenance scenarios (no model calls)
+        run: python researcher/scripts/research_context.py --benchmark
 
       - name: Public repository boundary
         run: python researcher/scripts/validate_public_repo.py
@@ -177,6 +259,12 @@ jobs:
       - name: Generated repository inventory
         run: python researcher/scripts/build_inventory.py --check
 
+      - name: Product readiness declaration
+        run: python researcher/scripts/validate_product_readiness.py
+
+      - name: Non-authoritative specification execution plan
+        run: python researcher/scripts/spec_program.py check docs/product/spec-execution-plan.json
+
       - name: Public export boundary
         run: >-
           python researcher/scripts/validate_export.py check
@@ -186,11 +274,16 @@ jobs:
         run: |
           python researcher/scripts/validate_schemas.py --check
           python researcher/scripts/migrate_legacy.py --dry-run
+          python researcher/scripts/validate_event_journal.py --check
+
+      - name: Executable adversarial contract fixtures
+        run: python researcher/scripts/adversarial_scenarios.py --json
 
       - name: TypeScript schema conformance
         working-directory: researcher/schemas/typescript
         run: |
           npm ci --ignore-scripts
+          npm audit --omit=dev
           npm run typecheck
           npm test
 
@@ -198,10 +291,18 @@ jobs:
         working-directory: researcher/benchmarks/sdk-runner
         run: |
           npm ci --ignore-scripts
+          npm audit --omit=dev
           npm run typecheck
           npm test
           npm run router:dry-run -- --models gpt-5.5 --reps 1 --max-runs 112 --max-budget-usd 2
           npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 12 --max-budget-usd 2
+
+      - name: Read-only control-center contract
+        working-directory: apps/control-center
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm audit --omit=dev
+          npm run verify
 
       - name: Build and validate long-horizon prompting site
         run: |

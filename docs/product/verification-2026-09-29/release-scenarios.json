@@ -1,0 +1,196 @@
+{
+  "complete_catalog": true,
+  "deployment_activation": false,
+  "executed_tests": 443,
+  "hosted_github_execution": false,
+  "live_provider_execution": false,
+  "passed": true,
+  "planned_scenarios": 11,
+  "scenarios": [
+    {
+      "elapsed_ms": 4686,
+      "errors": [],
+      "executed": 87,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_agents_runtime": 43,
+        "test_openai_agents": 44
+      },
+      "passed": true,
+      "planned": 87,
+      "scenario": "managed-lifecycle",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 2025,
+      "errors": [],
+      "executed": 8,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_github_runner_recovery": 8
+      },
+      "passed": true,
+      "planned": 8,
+      "scenario": "runner-recovery",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 3581,
+      "errors": [],
+      "executed": 22,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_openai_campaign": 22
+      },
+      "passed": true,
+      "planned": 22,
+      "scenario": "budget-and-uncertainty",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 3626,
+      "errors": [],
+      "executed": 37,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_citation_spans": 11,
+        "test_primary_profile": 6,
+        "test_retrieval_handoff": 20
+      },
+      "passed": true,
+      "planned": 37,
+      "scenario": "capture-grounding",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 27066,
+      "errors": [],
+      "executed": 25,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_research_pipeline": 25
+      },
+      "passed": true,
+      "planned": 25,
+      "scenario": "pipeline-checkpoints",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 28837,
+      "errors": [],
+      "executed": 25,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_month_simulation": 2,
+        "test_organization": 23
+      },
+      "passed": true,
+      "planned": 25,
+      "scenario": "daily-restarts",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 3804,
+      "errors": [],
+      "executed": 27,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_recovery_bundle": 27
+      },
+      "passed": true,
+      "planned": 27,
+      "scenario": "artifact-recovery",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 2277,
+      "errors": [],
+      "executed": 26,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_candidate_review": 26
+      },
+      "passed": true,
+      "planned": 26,
+      "scenario": "frozen-candidates",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 167,
+      "errors": [],
+      "executed": 19,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_github": 19
+      },
+      "passed": true,
+      "planned": 19,
+      "scenario": "publication-boundary",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 768,
+      "errors": [],
+      "executed": 46,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_api": 16,
+        "test_environment": 30
+      },
+      "passed": true,
+      "planned": 46,
+      "scenario": "operator-isolation",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 1313,
+      "errors": [],
+      "executed": 121,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_managed_traces": 25,
+        "test_trace_cli": 17,
+        "test_trace_export": 24,
+        "test_trace_integration": 4,
+        "test_tracing": 51
+      },
+      "passed": true,
+      "planned": 121,
+      "scenario": "trace-isolation",
+      "skipped": [],
+      "unexpected_successes": []
+    }
+  ],
+  "schema": "research-release-rehearsal/v1",
+  "scientific_effectiveness_measured": false,
+  "scope": "deterministic harness fault scenarios with injected providers",
+  "source": {
+    "commit": "c6cd52017b247804373339e1c3c103d42554b0a1",
+    "implementation_digest": "sha256:f88b2b8f2588ade754d530cc4c5a46d79e5b8f00a60b48a89d22d417e422c725",
+    "release_source_digest": "sha256:392858896e5aa9d90b489f3f25ff0816fc573e07530b199ed5ce1a583526dd4b",
+    "release_source_files": 893,
+    "scenario_source_digest": "sha256:77a95439e5df5381b002bf405ae8c582e5f68e74d7d3c38979858af60e6005fa",
+    "scenario_source_files": 200
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/organization-event.schema.json",
+  "title": "OrganizationEvent 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "id_origin",
+    "kind",
+    "event_type",
+    "occurred_at",
+    "subject",
+    "idempotency",
+    "actor",
+    "authority",
+    "correlation_event_id",
+    "causation_event_id",
+    "repository",
+    "payload",
+    "payload_digest",
+    "detail_ref",
+    "classification"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "id": {
+      "type": "string",
+      "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-[57][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "id_origin": {"enum": ["native", "legacy_import"]},
+    "kind": {"const": "OrganizationEvent"},
+    "event_type": {
+      "type": "string",
+      "pattern": "^research_run\\.(initialized|retrieved|evaluated|proposed|novelty_checked|validated|pr_ready|closed)$"
+    },
+    "occurred_at": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "subject": {"$ref": "#/$defs/subject"},
+    "idempotency": {"$ref": "#/$defs/idempotency"},
+    "actor": {"$ref": "#/$defs/actor"},
+    "authority": {"$ref": "#/$defs/authority"},
+    "correlation_event_id": {"$ref": "#/$defs/event_id"},
+    "causation_event_id": {
+      "oneOf": [
+        {"$ref": "#/$defs/event_id"},
+        {"type": "null"}
+      ]
+    },
+    "repository": {"$ref": "#/$defs/repository"},
+    "payload": {
+      "$ref": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/research-run-transition.schema.json"
+    },
+    "payload_digest": {"$ref": "#/$defs/digest"},
+    "detail_ref": {
+      "oneOf": [
+        {"$ref": "#/$defs/detail_ref"},
+        {"type": "null"}
+      ]
+    },
+    "classification": {"$ref": "#/$defs/classification"}
+  },
+  "$defs": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-[57][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "classification": {
+      "enum": ["public", "public_derived", "private_operational", "private_human", "restricted_source"]
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "version"],
+      "properties": {
+        "kind": {"const": "research_run"},
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9]{8}-[0-9]{6}-[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "maxLength": 96
+        },
+        "version": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}
+      }
+    },
+    "idempotency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "key_digest"],
+      "properties": {
+        "scope": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]*$", "maxLength": 128},
+        "key_digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "class": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "actor_class",
+        "action",
+        "resource",
+        "reason_code",
+        "constitution_version",
+        "constitution_digest",
+        "context_digest",
+        "matched_rule"
+      ],
+      "properties": {
+        "outcome": {"enum": ["allowed", "legacy_authority_not_recorded"]},
+        "actor_class": {"type": "string", "minLength": 1, "maxLength": 128},
+        "action": {"type": "string", "minLength": 1, "maxLength": 128},
+        "resource": {"type": "string", "minLength": 1, "maxLength": 128},
+        "reason_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]+$"},
+        "constitution_version": {
+          "oneOf": [
+            {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+            {"type": "null"}
+          ]
+        },
+        "constitution_digest": {
+          "oneOf": [
+            {"$ref": "#/$defs/digest"},
+            {"type": "null"}
+          ]
+        },
+        "context_digest": {
+          "oneOf": [
+            {"$ref": "#/$defs/digest"},
+            {"type": "null"}
+          ]
+        },
+        "matched_rule": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 128},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit_sha", "pull_request"],
+      "properties": {
+        "commit_sha": {
+          "oneOf": [
+            {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+            {"type": "null"}
+          ]
+        },
+        "pull_request": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["number", "head_sha"],
+              "properties": {
+                "number": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+                "head_sha": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"}
+              }
+            },
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "detail_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "artifact_id_origin",
+        "artifact_kind",
+        "artifact_schema_version",
+        "digest",
+        "classification"
+      ],
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*_[0-9a-f]{8}-[0-9a-f]{4}-[57][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "artifact_id_origin": {"enum": ["native", "legacy_import"]},
+        "artifact_kind": {"type": "string", "minLength": 1},
+        "artifact_schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "digest": {"$ref": "#/$defs/digest"},
+        "classification": {"$ref": "#/$defs/classification"}
+      }
+    }
+  }
+}

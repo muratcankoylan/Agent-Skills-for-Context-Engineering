@@ -13,6 +13,7 @@ from typing import Any, Callable
 
 import anthropic
 
+from reasoning_trace_optimizer.api_budget import PaidAPIBudget, PaidAPIBudgetError
 from reasoning_trace_optimizer.models import (
     ReasoningTrace,
     ThinkingBlock,
@@ -44,6 +45,7 @@ class TraceCapture:
         api_key: str | None = None,
         base_url: str = "https://api.minimax.io/anthropic",
         model: str = "MiniMax-M2.1",
+        api_budget: PaidAPIBudget | None = None,
     ):
         """
         Initialize TraceCapture with M2.1 configuration.
@@ -54,10 +56,14 @@ class TraceCapture:
             model: Model to use (MiniMax-M2.1, MiniMax-M2.1-lightning, MiniMax-M2)
         """
         self.model = model
-        self.client = anthropic.Anthropic(
-            api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"),
-            base_url=base_url,
-        )
+        self.api_budget = api_budget or PaidAPIBudget()
+        self._client = None
+        if not self.api_budget.dry_run:
+            self._client = anthropic.Anthropic(
+                api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"),
+                base_url=base_url,
+                max_retries=0,
+            )
 
     def run(
         self,
@@ -105,8 +111,12 @@ class TraceCapture:
                 if tools:
                     params["tools"] = tools
 
-                # Make API call
-                response = self.client.messages.create(**params)
+                # Reserve immediately before the retry-disabled SDK attempt.
+                with self.api_budget.attempt("trace_capture.run", max_tokens) as attempt:
+                    if self._client is None:  # Dry-run raises before this branch.
+                        raise RuntimeError("paid API client is unavailable")
+                    response = self._client.messages.create(**params)
+                    attempt.record_usage(response)
 
                 # Process response content blocks
                 thinking_blocks, text_blocks, tool_use_blocks = self._process_response(
@@ -149,6 +159,8 @@ class TraceCapture:
                 trace.success = False
                 trace.error = f"Reached maximum turns ({max_turns}) without completion"
 
+        except PaidAPIBudgetError:
+            raise
         except Exception as e:
             trace.success = False
             trace.error = str(e)
@@ -295,33 +307,40 @@ class TraceCapture:
                 tool_use_blocks = []
                 current_content = []
 
-                with self.client.messages.stream(**params) as stream:
-                    for event in stream:
-                        if event.type == "content_block_start":
-                            if hasattr(event, "content_block"):
-                                current_content.append(event.content_block)
+                with self.api_budget.attempt(
+                    "trace_capture.run_streaming",
+                    max_tokens,
+                ) as attempt:
+                    if self._client is None:  # Dry-run raises before this branch.
+                        raise RuntimeError("paid API client is unavailable")
+                    with self._client.messages.stream(**params) as stream:
+                        for event in stream:
+                            if event.type == "content_block_start":
+                                if hasattr(event, "content_block"):
+                                    current_content.append(event.content_block)
 
-                        elif event.type == "content_block_delta":
-                            if hasattr(event, "delta"):
-                                if event.delta.type == "thinking_delta":
-                                    chunk = event.delta.thinking
-                                    thinking_buffer += chunk
-                                    if on_thinking:
-                                        on_thinking(chunk)
+                            elif event.type == "content_block_delta":
+                                if hasattr(event, "delta"):
+                                    if event.delta.type == "thinking_delta":
+                                        chunk = event.delta.thinking
+                                        thinking_buffer += chunk
+                                        if on_thinking:
+                                            on_thinking(chunk)
 
-                                elif event.delta.type == "text_delta":
-                                    chunk = event.delta.text
-                                    text_buffer += chunk
-                                    if on_text:
-                                        on_text(chunk)
+                                    elif event.delta.type == "text_delta":
+                                        chunk = event.delta.text
+                                        text_buffer += chunk
+                                        if on_text:
+                                            on_text(chunk)
 
-                    # Get final message for tool_use blocks
-                    final_message = stream.get_final_message()
-                    for block in final_message.content:
-                        if block.type == "tool_use":
-                            tool_use_blocks.append(block)
-                            if on_tool_call:
-                                on_tool_call(block.name, block.input)
+                        # Get final message for tool_use blocks
+                        final_message = stream.get_final_message()
+                        for block in final_message.content:
+                            if block.type == "tool_use":
+                                tool_use_blocks.append(block)
+                                if on_tool_call:
+                                    on_tool_call(block.name, block.input)
+                    attempt.record_usage(final_message)
 
                 # Record thinking block
                 if thinking_buffer:
@@ -366,6 +385,8 @@ class TraceCapture:
                 trace.success = False
                 trace.error = f"Reached maximum turns ({max_turns})"
 
+        except PaidAPIBudgetError:
+            raise
         except Exception as e:
             trace.success = False
             trace.error = str(e)

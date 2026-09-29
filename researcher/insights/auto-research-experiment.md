@@ -1,5 +1,13 @@
 # Auto-Research Experiment: Lessons From Building The Researcher OS
 
+> Historical, non-normative experiment record. Claims below about unattended
+> scheduling, HTTP retrieval, retry/quarantine automation, accepted closure,
+> mechanism promotion, and executed adversarial scenarios are not current
+> capabilities. Launchd entry points are inert; runtime ledgers require explicit
+> initialization; evidence attachment is manual; accepted closure and mechanism
+> promotion fail closed; scenario records are catalog-only. Use the supervised
+> runbook for current operator guidance.
+
 This document records what was actually learned across the multi-session experiment that built the v2.2.0 researcher operating system. It is meant to be read alongside `researcher/README.md` and `runbooks/continuous-operation.md`, not in place of them.
 
 ## Context

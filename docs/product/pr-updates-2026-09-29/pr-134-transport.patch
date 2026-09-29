@@ -1,0 +1,129 @@
+diff --git a/researcher/service/openai_agents.py b/researcher/service/openai_agents.py
+index 95899e9..9f99476 100644
+--- a/researcher/service/openai_agents.py
++++ b/researcher/service/openai_agents.py
+@@ -235,11 +235,14 @@ def _native(method: str, url: str, headers: Mapping[str, str], body: bytes | Non
+         connection.request(method, target.path + ("?" + target.query if target.query else ""), body, dict(headers))
+         response = connection.getresponse()
+         pairs = response.getheaders()
+-        for name in ("content-type", "content-length", "content-encoding", "transfer-encoding"):
++        framing_headers = {"content-type", "content-length", "content-encoding", "transfer-encoding"}
++        for name in framing_headers:
+             if sum(key.lower() == name for key, _ in pairs) > 1:
+                 _fail("MALFORMED_TRANSPORT")
++        # Uninterpreted list-valued headers may repeat; retain only framing.
++        response_headers = {key: value for key, value in pairs if key.lower() in framing_headers}
+         if response.status not in (200, 201, 202, 204):
+-            return response.status, dict(pairs), b""
++            return response.status, response_headers, b""
+         chunks, size = [], 0
+         while size <= MAX_BYTES:
+             remaining = deadline - time.monotonic()
+@@ -254,7 +257,7 @@ def _native(method: str, url: str, headers: Mapping[str, str], body: bytes | Non
+             size += len(chunk)
+         if size > MAX_BYTES:
+             _fail("RESPONSE_TOO_LARGE")
+-        return response.status, dict(pairs), b"".join(chunks)
++        return response.status, response_headers, b"".join(chunks)
+     finally:
+         connection.close()
+ 
+@@ -337,7 +340,10 @@ class AgentsClient:
+                 _fail("AUTH_ERROR")
+             if status == 429:
+                 _fail("RATE_OR_SPEND_LIMIT")
+-            if status not in ((200, 202, 204) if operation_key is not None else (200,)):
++            success_statuses = (200, 202, 204) if operation_key is not None else (200,)
++            if method == "POST" and path == "" and operation_key is None:
++                success_statuses = (200, 201)
++            if status not in success_statuses:
+                 _fail("HTTP_ERROR")
+             if normalized.get("content-encoding", "identity").lower() != "identity":
+                 _fail("UNEXPECTED_ENCODING")
+diff --git a/researcher/service/tests/test_openai_agents.py b/researcher/service/tests/test_openai_agents.py
+index b114e10..d9536de 100644
+--- a/researcher/service/tests/test_openai_agents.py
++++ b/researcher/service/tests/test_openai_agents.py
+@@ -1,6 +1,7 @@
+ """Offline managed Agents API wire contracts; no model availability or cost claim."""
+ 
+ import base64
++import io
+ import json
+ import os
+ from pathlib import Path
+@@ -85,6 +86,15 @@ class AgentsClientTests(unittest.TestCase):
+         self.client().create(payload)
+         self.assertEqual(json.loads(self.transport.call_args.args[3]), payload)
+ 
++    def test_create_accepts_http_201_once(self):
++        client = self.client(status=201)
++        self.assertEqual(client.create(request()), session())
++        self.assertEqual(self.transport.call_count, 1)
++
++    def test_http_201_is_not_success_for_retrieval_or_cancellation(self):
++        self.assert_error("HTTP_ERROR", lambda: self.client(status=201).retrieve(SESSION), ambiguous=False)
++        self.assert_error("HTTP_ERROR", lambda: self.client(status=201).cancel(SESSION, "op-1"))
++
+     def test_retrieve_checks_identity_and_preserves_nullable_usage(self):
+         self.assertIsNone(self.client().retrieve(SESSION)["usage"])
+         method, url, _, body, _ = self.transport.call_args.args
+@@ -207,7 +217,7 @@ class AgentsClientTests(unittest.TestCase):
+ 
+     def test_http_errors_are_safe_conservative_and_never_retried(self):
+         for status, code in ((302, "REDIRECT_REFUSED"), (401, "AUTH_ERROR"), (403, "AUTH_ERROR"),
+-                             (429, "RATE_OR_SPEND_LIMIT"), (500, "HTTP_ERROR"), (201, "HTTP_ERROR")):
++                             (429, "RATE_OR_SPEND_LIMIT"), (500, "HTTP_ERROR"), (202, "HTTP_ERROR")):
+             client = self.client(raw=SECRET.encode(), status=status, headers={"Location": "https://untrusted.example"})
+             self.assert_error(code, lambda: client.create(request()))
+             client = self.client(raw=SECRET.encode(), status=status)
+@@ -271,14 +281,16 @@ class AgentsClientTests(unittest.TestCase):
+         self.assert_error("INVALID_IDENTIFIER", lambda: client.create(request()))
+ 
+     def test_create_malformed_usage_retains_safe_session_id_for_recovery(self):
+-        client = self.client(session(usage={}))
+-        with self.assertRaises(AgentsError) as caught:
+-            client.create(request())
+-        self.assertEqual(caught.exception.code, "MALFORMED_USAGE")
+-        self.assertEqual(caught.exception.session_id, SESSION)
+-        self.assertTrue(caught.exception.ambiguous)
+-        self.assertNotIn(SESSION, str(caught.exception))
+-        self.assertEqual(self.transport.call_count, 1)
++        for status in (200, 201):
++            with self.subTest(status=status):
++                client = self.client(session(usage={}), status=status)
++                with self.assertRaises(AgentsError) as caught:
++                    client.create(request())
++                self.assertEqual(caught.exception.code, "MALFORMED_USAGE")
++                self.assertEqual(caught.exception.session_id, SESSION)
++                self.assertTrue(caught.exception.ambiguous)
++                self.assertNotIn(SESSION, str(caught.exception))
++                self.assertEqual(self.transport.call_count, 1)
+ 
+     def test_create_never_retains_reflected_or_invalid_session_identity(self):
+         for data in (session(id="../unsafe"), session(id=SECRET), session(metadata={"reflected": SECRET}),
+@@ -403,5 +415,24 @@ class IsolatedTransportTests(unittest.TestCase):
+             connection.close.assert_called_once()
+ 
+ 
++    def test_native_repeated_cors_headers_do_not_reject_created_or_read_session(self):
++        for status in (200, 201):
++            with self.subTest(status=status):
++                connection, response = MagicMock(), MagicMock()
++                response.status = status
++                response.getheaders.return_value = [("Content-Type", "application/json"),
++                    ("Access-Control-Expose-Headers", "X-Request-ID"),
++                    ("access-control-expose-headers", "X-RateLimit-Limit")]
++                body = io.BytesIO(json.dumps(session()).encode())
++                response.read1.side_effect = body.read1
++                connection.getresponse.return_value = response
++                client = AgentsClient(SECRET, _native, timeout_seconds=20)
++                with patch("researcher.service.openai_agents.http.client.HTTPSConnection", return_value=connection):
++                    result = client.create(request()) if status == 201 else client.retrieve(SESSION)
++                self.assertEqual(result["id"], SESSION)
++                connection.request.assert_called_once()
++                connection.close.assert_called_once()
++
++
+ if __name__ == "__main__":
+     unittest.main()

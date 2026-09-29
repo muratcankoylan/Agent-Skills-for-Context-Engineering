@@ -19,6 +19,7 @@ import sys
 import time
 from typing import Callable, Mapping
 from urllib.parse import quote, unquote, urlencode, urlsplit
+from .tracing import annotate, instrument
 
 MAX_BYTES = 1_048_576
 BASE_URL = "https://api.openai.com/v1/agents/sessions"
@@ -239,7 +240,8 @@ def _native(method: str, url: str, headers: Mapping[str, str], body: bytes | Non
         for name in framing_headers:
             if sum(key.lower() == name for key, _ in pairs) > 1:
                 _fail("MALFORMED_TRANSPORT")
-        # Uninterpreted list-valued headers may repeat; retain only framing.
+        # Uninterpreted list-valued headers (for example CORS expose headers)
+        # can legally repeat. Only decoding/framing fields cross this boundary.
         response_headers = {key: value for key, value in pairs if key.lower() in framing_headers}
         if response.status not in (200, 201, 202, 204):
             return response.status, response_headers, b""
@@ -301,7 +303,9 @@ class AgentsClient:
     def __repr__(self) -> str:
         return f"AgentsClient(timeout_seconds={self._timeout})"
 
+    @instrument("managed.http")
     def _request(self, method: str, path: str, payload: dict | None = None, operation_key: str | None = None) -> dict:
+        annotate(provider="openai", transport="https", **{"http.method": method})
         if self._credential in path or self._credential in unquote(path):
             _fail("CREDENTIAL_REFLECTION", False)
         ambiguous = method != "GET"
@@ -323,11 +327,13 @@ class AgentsClient:
             if len(body) > MAX_BYTES:
                 _fail("REQUEST_TOO_LARGE", False)
         try:
+            annotate(input_bytes=0 if body is None else len(body))
             status, response_headers, raw = self._transport(method, BASE_URL + path, headers, body, self._timeout)
             if type(status) is not int or not isinstance(response_headers, Mapping) or not isinstance(raw, bytes):
                 _fail("MALFORMED_TRANSPORT")
             if len(raw) > MAX_BYTES:
                 _fail("RESPONSE_TOO_LARGE")
+            annotate(output_bytes=len(raw), **{"http.status_code": status})
             if any(not isinstance(key, str) or not isinstance(value, str) for key, value in response_headers.items()):
                 _fail("MALFORMED_TRANSPORT")
             _json_tree(dict(response_headers), self._credential, ambiguous=ambiguous)
@@ -342,6 +348,8 @@ class AgentsClient:
                 _fail("RATE_OR_SPEND_LIMIT")
             success_statuses = (200, 202, 204) if operation_key is not None else (200,)
             if method == "POST" and path == "" and operation_key is None:
+                # Session creation returns 201. Do not broaden read/cancel
+                # success codes or lose a created session's recovery identity.
                 success_statuses = (200, 201)
             if status not in success_statuses:
                 _fail("HTTP_ERROR")
@@ -428,6 +436,20 @@ class AgentsClient:
 
     def turns(self, session_id: str, after: str | None = None) -> dict:
         return self._list(session_id, "turns", after)
+
+    def traces(self, session_id: str, after: str | None = None) -> dict:
+        """Read one OTLP snapshot page, never a live stream or usage invoice."""
+        session_id = _identifier(session_id, ambiguous=False)
+        query = {"limit": 20, "order": "asc"}
+        if after is not None:
+            query["after"] = _identifier(after, ambiguous=False)
+        try:
+            page = _page(self._request("GET", f"/{quote(session_id, safe='')}/traces?{urlencode(query)}"))
+            if len(page["data"]) > 20 or after is not None and page["last_id"] == after:
+                _fail("PAGINATION_NOT_ADVANCING")
+            return page
+        except AgentsError as error:
+            _fail(error.code, False)
 
     def items(self, session_id: str, turn_id: str, after: str | None = None) -> dict:
         """Return the full page. The caller filters turn_id after pagination.

@@ -1,8 +1,84 @@
 # Agent Skills for Context Engineering
 
-A comprehensive, open collection of Agent Skills focused on context engineering and harness engineering principles for building production-grade AI agent systems. These skills teach the art and science of curating context, designing agent operating loops, and evaluating agent behavior across any agent platform.
+An open-source context-engineering skill corpus and a developing, repository-owned research harness. The skills are portable instructions; the harness collects research, preserves source evidence, prepares bounded skill proposals, and evaluates changes before human review.
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/muratcankoylan/Agent-Skills-for-Context-Engineering)
+
+## Standalone research service (pre-release)
+
+The [current architecture](docs/product/research-organization-architecture.md)
+maps the implementation, evidence, missing connections and launch gates. This is
+a standalone Python service, not a Codex task or desktop scheduler. The current
+[GitHub deployment and merge plan](docs/product/github-release-plan-2026-09-29.md)
+records the earlier private GitHub control plane, durable pre-effect admission,
+managed Agents API and separately credentialed draft-PR publisher design. Its
+36-PR inventory is a dated snapshot. The [Codex SDK migration](docs/product/codex-sdk-runtime-migration.md)
+supersedes the target agent runtime, not the historical test evidence. The Linux
+coordinator is the first SDK reference topology; the [Control Center](apps/control-center/README.md)
+is currently loopback-only. No cloud deployment or unattended managed research
+is claimed. The new [release rehearsal](.github/workflows/release-rehearsal.yml)
+is secret-free CI, not a production scheduler.
+
+| Path | Implemented scope | Boundary |
+| --- | --- | --- |
+| [Daily retrieval](researcher/service/DAILY_RETRIEVAL.md) | arXiv, company feeds, HN, X and OpenAlex; capture replay, bounded context digest and optional primary HTML excerpts | Observations, not qualified findings; zero model calls |
+| [Codex SDK research](researcher/service/CODEX_SDK.md) | Pinned SDK threads for researcher, critic, editor and independent evaluation tasks; validated gateway receipts | No native shell/network tools; deterministic retrieval outside the model; no measured skill-effectiveness claim |
+| [Agent-selected research actions](researcher/service/AGENT_ACTIONS.md) | Opt-in context inspection, exact captured-span reads, methods/transfer specialist and finish/stop loop | Four decisions and one specialist; harness-dispatched, not SDK-native tools or unrestricted full-paper browsing |
+| [Budget authority](researcher/service/OPENAI_CAMPAIGN.md) | Shared cumulative reservations, commit-before-delivery gateway, immutable receipts and safe replay | Conservative estimates, not an invoice cap; no reset on runtime migration |
+| [Organization coordinator](researcher/service/ORGANIZATION.md) | Repo-owned foreground scheduling from bounded retrieval to the shared-budget pipeline, with durable per-job outcomes | Explicit activation; no automatic publication, budget reset or invented evaluation dataset |
+| [Candidate review](researcher/service/CANDIDATE_REVIEW.md) | Exact skill freeze, isolated full-checkout overlay, trusted inventory derivation and structural validators | No automatic acceptance; held-out dataset must be supplied independently |
+| [Cross-run learning](researcher/service/RESEARCH_PIPELINE.md) | Verified researcher-only prior hypotheses; exact duplicate candidates avoid repeat evaluation under the same completed evaluation contract | No gold/answer leakage, semantic novelty claim, or automatic cross-version history migration |
+| [Execution dossier](researcher/service/DOSSIER.md) | Private read-only evidence, research/critic/editor results, candidate/evaluation decisions and trace receipts | Local consistency checks, not scientific validation or public export |
+| [Artifact-complete recovery](researcher/runbooks/service-recovery.md) | Consistent database, captures, candidate artifacts and explicit session/budget authority closure | Fresh paused restore; original writer must be fenced and later effects reconciled |
+| [Managed compatibility](researcher/service/AGENTS_API.md) | Inspect, watch and cancel retained managed session identities | New default managed submissions retired; historical receipts keep their backend labels |
+| [Operator UI](apps/control-center/app/service/page.tsx) | Real, authenticated server-side status reads for the Python service | Read-only, loopback-only; does not yet control managed sessions |
+| [Private tracing](researcher/service/TRACING.md) | Operation/action spans, latency/usage metadata, SDK events, durable receipts and opt-in post-cycle Raindrop delivery | No raw content export; Linux templates are not installed; ingestion ACK is not dashboard readback |
+
+The integrated model-execution path now uses the [Codex SDK](researcher/service/CODEX_SDK.md)
+through the existing cumulative authority. Scheduled and manual pipelines use fresh
+SDK threads, source-bound context, frozen candidate validation and gold-free
+evaluation. New default native/managed model execution is refused; historical
+receipt replay and managed observation/cancellation remain available. The gateway
+admits one buffered, tool-free request per turn and commits its validated receipt
+before delivering output to the SDK. Started turns without final receipts require
+reconciliation, not automatic retry.
+
+Real SDK tests use synthetic local upstreams and prove execution/recovery wiring,
+not model quality. Linux tool-free execution and native-tool sandboxing are separate
+gates. This implementation is local integration work, not a published SDK release,
+cloud launch, autonomous skill acceptance or permission to spend.
+
+[September 29 connector evidence](docs/product/connector-verification-2026-09-29.md)
+records scoped API checks and the registered MCP bridge canary.
+Those observations do not establish research quality or production readiness.
+The separate [integration verification record](docs/product/research-integration-verification-2026-09-29.md)
+tracks replay-to-managed preparation and regression checks, not a scientific win.
+The [production exercise](docs/product/production-exercise-2026-09-29.md) records
+live model/connector checks, failure-derived fixes and the compressed month simulation.
+Start with the [service runbook](researcher/service/README.md),
+[credential setup](docs/product/provider-credentials.md), and
+[deployment gates](researcher/service/DEPLOYMENT.md). Filling keys does not start jobs.
+The latest [Raindrop UI and release verification](docs/product/raindrop-ui-release-verification-2026-09-29.md)
+records the corrected Event/trace contract, authenticated dashboard evidence from
+two real five-turn research cycles, graceful shutdown repair, root-Event restart
+gating and review-stack handoff.
+The earlier [agentic harness transport report](docs/product/agentic-raindrop-verification-2026-09-29.md)
+records actual SDK action-selection canaries, post-cycle cloud ingestion, discovered
+failures and fixes, private operator outputs, and the unchanged cumulative budget.
+Its transport acknowledgements did not establish visible Events; the newer report
+corrects that boundary. Functioning orchestration is not demonstrated research quality.
+
+The earlier [SDK and tracing verification report](docs/product/runtime-tracing-verification-2026-09-29.md)
+records its fault tests, synthetic Raindrop ingress ACK, exact source identities and
+the failing Linux native-write experiment. It distinguishes unpublished integration
+work from the reviewed PR stack and does not claim a cloud launch.
+The subsequent [SDK migration verification](docs/product/codex-sdk-migration-verification-2026-09-29.md)
+records the integrated caller/gateway, recovery and final tool-free Linux evidence.
+The earlier [research-organization closure](docs/product/research-organization-closure-2026-09-29.md)
+records implemented SDK/learning/retrieval/trace fixes, 1,081 passing service tests,
+actual-SDK cross-day scenarios, live research outputs and retained failures. It
+separates local trace creation from the then-pending Raindrop delivery approval and makes
+no claim that fixture results demonstrate better skills or month-long uptime.
 
 ## What is Context Engineering?
 
@@ -240,9 +316,20 @@ Integrates with context engineering skills: project-development, context-compres
 
 ## Researcher Operating System
 
-The [researcher](researcher/) directory is a file-based operating system for turning external research into skill changes. It exists so this repository can act as a compounding source of truth instead of an anthology.
+The [researcher](researcher/) directory contains the corpus, schemas, evidence
+tools, experiments and service implementation. Its target is an auditable
+research-to-proposal loop. The active service, managed canary and supervised
+legacy run tools have distinct state and authority boundaries; they must not be
+described as one already-deployed autonomous organization.
 
-### Measured router-benchmark results
+The [portable research improvement harness](docs/product/portable-harness.md)
+adds a provider-neutral, frozen data-policy experiment loop, with
+[measured local results](docs/product/portable-harness-results.md) and a
+[proposed paper protocol](docs/product/portable-harness-paper-protocol.md).
+It produces reviewable private proposals, not autonomous merges or production
+acceptance. The software is open source; operational evidence remains private.
+
+### Historical measured router-benchmark results
 
 The skill router (which decides whether the right skill gets loaded for a given task) has been benchmarked end-to-end against four frontier models via the [Cursor SDK](https://cursor.com/docs/sdk/typescript). Three full sweeps (50 prompts x 4 models x 3 replications = 600 calls each):
 
@@ -255,7 +342,7 @@ Per-skill effect size for the three skills the data flagged:
 | Skill | Baseline top-1 | After rewrite | Delta |
 | --- | --- | --- | --- |
 | `context-fundamentals` | 0.255 | 0.489 | +23.4pp |
-| `project-development` | 0.750 | 1.000 | +25pp (now perfect) |
+| `project-development` | 0.750 | 1.000 | +25pp on this historical fixture |
 | `tool-design` | 0.729 | 0.807 | +7.8pp |
 
 Per-model top-1 accuracy after the corpus-wide hardening pass:
@@ -267,7 +354,11 @@ Per-model top-1 accuracy after the corpus-wide hardening pass:
 | gpt-5.5 | 0.913 | 0.973 |
 | claude-opus-4-7 | 0.840 | 0.933 |
 
-Reproduce any of these numbers exactly via the runner under `researcher/benchmarks/sdk-runner/`.
+These are dated historical results. The current package under
+`researcher/benchmarks/sdk-runner/` can validate a dry-run plan but has no live
+executor, so it cannot reproduce the sweeps in this revision.
+They measured description routing, not the effectiveness of the current research
+service, full skill bodies, primary-source selection, or autonomous improvement.
 
 ### What it includes
 
@@ -275,13 +366,13 @@ Current counts and compatibility status are generated in the [live corpus invent
 
 - **Source registry** (`researcher/source-registry.md`): priority sources, exclusion rules, monitoring queries.
 - **Rubrics** (`researcher/rubrics/`): content curation, skill change, harness change, pairwise skill revision.
-- **Mechanism registry** (`researcher/mechanisms/registry.jsonl` + `ledgers/`): accepted behavior changes used as the primary novelty signal, with append-only accepted/rejected ledgers for institutional memory.
+- **Mechanism registry** (`researcher/mechanisms/registry.jsonl` + `ledgers/`): historically accepted behavior changes and accepted/rejected ledgers. New service proposals cannot promote themselves into this registry.
 - **Claim provenance** (`researcher/claims/index.jsonl`): provenance-tracked claims with source URL, evidence strength, volatility, and last reviewed date.
 - **Corpus index** (`researcher/corpus/index.json`): canonical machine-readable map of skills, activation scenarios, mechanism IDs, and claim IDs.
 - **Run state machine** (`researcher/runs/<run-id>/run-state.json`): `initialized -> retrieved -> evaluated -> proposed -> novelty_checked -> validated -> pr_ready -> closed`.
 - **Activation regression tests** (`researcher/fixtures/activation-cases.jsonl`): deterministic prompts that catch skill-boundary confusion.
-- **Adversarial benchmark harness** (`researcher/benchmarks/`): scenarios that try to game the loop (duplicate mechanisms, unretrieved evidence, wrong rubric math, self-approved rubric changes, weak-evidence novelty).
-- **Continuous loop** (`researcher/scripts/loop_*.py` + `researcher/orchestration/launchd/`): inbox, source discovery, one-state-at-a-time advancement, daily ops, parked review queue, launchd service definitions.
+- **Adversarial scenario catalog** (`researcher/benchmarks/`): closed descriptions and golden gate mappings for attacks such as duplicate mechanisms, unretrieved evidence, wrong rubric math, self-approved rubric changes, and weak-evidence novelty. These are design inputs until isolated executable fixtures invoke the named gates.
+- **Supervised legacy loop** (`researcher/scripts/loop_*.py` + `researcher/orchestration/launchd/`): local migration inputs for manual candidate bookkeeping, status over explicit run-state transitions, reduced health checks, and parked review. Network retrieval, accepted closure, mechanism promotion, and launchd activation are disabled. These files confer no autonomous or production authority.
 - **Skill health gate** (`researcher/scripts/skill_health.py`): deterministic body-quality scoring. Published scores remain dated evidence; local runs produce ignored runtime reports.
 - **Public export boundary** (`governance/export-policy.yaml` + `researcher/scripts/validate_export.py`): allowlisted projections from private or restricted records into reviewable public staging trees without publishing private source locators or digests.
 - **Schema and artifact contract** (`researcher/schemas/` + `researcher/scripts/artifact_store.py`): digest-pinned cross-runtime schemas, typed IDs, private bindings, exact-byte CAS, candidate freeze receipts, and Python/TypeScript conformance.
@@ -311,25 +402,27 @@ python3 researcher/scripts/check_activation_cases.py
 # Per-run readiness (active runs only)
 python3 researcher/scripts/validate_run.py --run-dir researcher/runs/<run-id>
 
-# Continuous loop, manual
+# Supervised legacy loop, manual
+python3 researcher/scripts/loop_status.py --initialize-runtime
 python3 researcher/scripts/loop_discover.py
-python3 researcher/scripts/loop_step.py --allow-fetch
+python3 researcher/scripts/loop_step.py
 python3 researcher/scripts/loop_daily.py
 python3 researcher/scripts/loop_status.py
 
-# Continuous loop, daemon (macOS)
-researcher/orchestration/launchd/install.sh    # install launchd jobs (10-min step, 12h discover, daily ops)
+# Inert launchd migration entry points (macOS)
+researcher/orchestration/launchd/install.sh    # fails closed; activation is not authorized
 researcher/orchestration/launchd/uninstall.sh  # remove launchd jobs
 ```
 
-See [researcher/runbooks/continuous-operation.md](researcher/runbooks/continuous-operation.md) for daemon details, budgets, and the human review surface.
+See [researcher/runbooks/continuous-operation.md](researcher/runbooks/continuous-operation.md) for the fail-closed boundary, consumed local limits, and human review surface.
 
-### Guarantees
+### Current legacy boundary
 
-- The current continuous loop never invokes paid LLMs or makes outbound writes; HTTP retrieval is stdlib-only with a 1.5 MB cap and a 30-second timeout.
-- Mechanism promotion requires a recorded human reviewer and a passing run-readiness check.
-- All queue mutations are atomic (temp file + `os.replace`) and serialized via `fcntl` locks.
-- Governed proposer agents may create candidate commits, push proposal branches, and open PRs after their gates pass. Only a verified human may merge or otherwise advance the accepted default-branch pointer.
+- The supervised legacy loop never invokes paid LLMs and has no network retrieval path. Its launchd installer and wrappers fail closed. Production activation requires a future specification-owned implementation and deployment evidence.
+- Runtime queue ledgers are ignored local state and must be created explicitly. Missing, malformed, or inconsistent ledgers fail closed; the tools do not silently repair them.
+- Legacy runs cannot close as `accepted`, and `research_loop.py promote-mechanisms` always fails closed. Run-local proposals and readiness reports grant no acceptance or registry authority.
+- Queue writers use atomic replacement and `fcntl` locks for local coordination. This is not a loss-proof journal, scheduler, or production queue.
+- Agents may prepare candidate changes only within the user's authorization. Push and merge remain explicitly human-controlled.
 
 ## Star History
 <img width="3664" height="2808" alt="star-history-2026526" src="https://github.com/user-attachments/assets/c9f88769-21b8-4762-9472-d4cf1fe1c802" />

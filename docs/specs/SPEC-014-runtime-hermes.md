@@ -1,4 +1,4 @@
-# SPEC-014: Execution Environment, Executor Protocol, and Hermes Integration
+# SPEC-014: Execution Environment, Executor Protocol, and Provider Adapters
 
 Status: draft
 Revision: 1
@@ -10,17 +10,19 @@ Depends on: SPEC-003, SPEC-005, SPEC-006, SPEC-008, SPEC-012, SPEC-013
 
 ## Decision
 
-Every model or tool execution will consume one immutable `ExecutionAttemptBundle` compiled against a SPEC-005 `AttemptReservation` and run under a versioned `ExecutionEnvironment` contract. SPEC-005 activates the lease only after it verifies and binds that bundle. Hermes Agent will be the first interactive and scheduled agent harness integrated through the runtime-neutral executor protocol. It receives frozen work, role, context, operation grants, environment, mode, and output contracts. Hermes sessions, ambient configuration, memory, cron state, and internal delegation are never canonical organizational state.
+Every model or tool execution will consume one immutable `ExecutionAttemptBundle` compiled against a SPEC-005 `AttemptReservation` and run under a versioned `ExecutionEnvironment` contract. SPEC-005 activates the lease only after it verifies and binds that bundle. The reference deployment is a standalone open-source Python application using the Codex SDK and its local app-server runtime for model-driven research, critique, editing and independent evaluation roles. It receives frozen work, role, context, operation grants, environment, mode, and output contracts. The Codex desktop app is an optional development client, not the service scheduler; the pinned SDK runtime is an application dependency. Hermes and other agent harnesses are optional adapters; their sessions, ambient configuration, memory, cron state, and internal delegation are never canonical organizational state.
 
-The organization remains operable through a reference local executor if Hermes is removed. Lost or restarted execution is not resumed from chat or harness memory: the old attempt is reconciled and closed, and a new attempt is created from reducer state and a validated checkpoint.
+The repository-owned service retains deterministic admission, retrieval, evidence storage, candidate freezing, scoring, accounting and publication authority outside SDK threads. The initial implementation pins `openai-codex==0.159.0` and its matching CLI dependency. Each role starts with fresh task context; an independent evaluator does not reuse proposer or critic session state. Actual provider requests pass through the service-owned gateway and the existing cumulative budget authority before dispatch. A logical SDK turn is not one provider request. The initial slice permits one tool-free request per turn and refuses further requests; future tool use, retries or multi-request turns require separately verified grants and per-request accounting. Direct native completions and managed Agents sessions are not fallback paths for new production role execution.
+
+The [Codex SDK runtime migration](../product/codex-sdk-runtime-migration.md) defines the current target and its staged evidence gates. The [managed research architecture](../product/openai-agents-research-architecture.md) and historical native/managed receipts remain migration evidence, not activation of the retired direction. Known historical managed sessions retain bounded observation and cancellation compatibility; an unknown prior outcome cannot authorize a new create, SDK retry or provider substitution. SDK process exit is likewise not proof that a dispatched provider request stopped.
 
 ## Context and current repository touchpoints
 
-The current loop is repo-native, Python-based, and launchd-scheduled. Hermes can add model and tool execution, operator interaction, and bounded internal delegation, but coupling authority or state to those conveniences would prevent replay, cross-harness evaluation, safe recovery, and later workflow-engine comparison.
+The legacy loop is repo-native Python migration code whose launchd activation and network retrieval are disabled. Existing source capture, context packing, candidate freezing, prompt compilation and deterministic evaluation are reusable components. The developmental SDK worker, gateway and campaign exercise the data-only `researcher -> critic -> skill_editor` path and fresh evaluation tasks in private state. Their receipts and local tests do not by themselves implement this complete draft contract, prove research effectiveness or activate accepted work. Tool-free startup and native-tool isolation are separate gates; local macOS evidence does not establish clean-Linux native-tool containment. Role schemas and SPEC-013 must agree before those roles acquire normative execution authority.
 
 ## Goals
 
-- Execute equivalent work-order contracts through Hermes and a reference adapter.
+- Execute equivalent work-order contracts through credential-free SDK fixtures, the pinned SDK runtime and separately reviewed optional adapters.
 - Preserve exact bundles, calls, outputs, costs, tool effects, checkpoints, cancellation, and reconciliation receipts.
 - Keep the queue, journal, reducers, and accepted decisions outside the harness.
 - Make runtime, model, tool, and environment differences measurable.
@@ -28,10 +30,10 @@ The current loop is repo-native, Python-based, and launchd-scheduled. Hermes can
 
 ## Non-goals
 
-- Forking Hermes or embedding organizational policy inside it.
-- Making Hermes cron, session storage, or memory the durable scheduler or source of truth.
+- Forking a model SDK or agent harness, or embedding organizational policy inside it.
+- Making Codex tasks, harness cron, session storage, or model memory the durable scheduler or source of truth.
 - Letting an executor apply reducer state, accept a decision, merge a PR, or broaden its own grant.
-- Treating Hermes internal subagents as independent organizational reviewers.
+- Treating internal subagents or differently named model roles as independent organizational reviewers.
 
 ## Invariants
 
@@ -44,7 +46,7 @@ The current loop is repo-native, Python-based, and launchd-scheduled. Hermes can
 7. Cron or any harness scheduler may wake the dispatcher only; it cannot own leases, cursors, retries, or research mutations.
 8. `trusted_local` runs only allowlisted reviewed deterministic repository code. Candidate, community, self-modifying, and hidden-evaluation code requires eligible isolation.
 9. Only declared outputs are frozen and collected; extraction, retention, reset, and destruction each return a receipt.
-10. Ambient Hermes memory, configuration, skills, plugins, MCP servers, and user or project settings are disabled by default or pinned explicitly in the bundle.
+10. Ambient runtime memory, configuration, skills, plugins, MCP servers, and user or project settings are disabled by default or pinned explicitly in the bundle.
 11. Each side-effecting adapter operation uses a stable operation key plus canonical collision digest and declares whether it is provider-idempotent, reconcilable, or non-reconcilable.
 12. Exact operation-key and collision-digest replay returns the original receipt; reuse with a different digest is a collision and performs no effect.
 
@@ -120,11 +122,19 @@ The operation key is stable over process restart and unique to attempt, adapter,
 
 Initial environment classes are `trusted_local` and `ephemeral_isolated`. The isolated class has no ambient credentials, accepts only bundle-authorized operations, starts from a pinned root, and exports only frozen declared artifacts. The provider remains replaceable behind conformance tests.
 
-Implement `reference-local` for allowlisted deterministic commands and `hermes-cli` for agent work. The Hermes adapter launches a pinned supported process interface inside the attested environment; supplies bundle, prompt, and context through immutable files or an equivalently attested channel; requests typed output; captures model, process, tool, and cost receipts; and normalizes exit conditions. Ambient Hermes memory, user settings, project skills, and global tool discovery are off unless every included source is enumerated and digested in the bundle.
+Implement `reference-local` for allowlisted deterministic commands and a pinned SDK executor for data-only agent work. The initial researcher emits an evidence-linked mechanism dossier, the critic emits narrow support/counterevidence findings, and the skill editor emits a bounded candidate patch without applying it. A critic is not automatically an independent score-bearing evaluator; evaluation uses fresh SDK threads, frozen candidate inputs and a gold-free task projection, with deterministic grading outside the worker. Candidate-authored code, shell commands, plugins and tests are never executed by this initial path; their execution requires the separately attested isolated environment and SPEC-017 evaluation boundary. Reviewed repository validators may inspect candidate data without loading candidate executables.
 
-Until SPEC-024, fake credential references cover conformance and live credentials require one supervised invocation. Continuous credentialed execution remains disabled until SPEC-024 supplies authenticated brokering and SPEC-025 supplies supervised deployment and recovery.
+The SDK worker owns the local thread/turn lifecycle, with a private clean home, explicit configuration and no provider credential. The parent gateway holds the credential and validates the exact allowed model, projected task input, tool exposure, generation parameters and resource ceilings before reserving each actual request in the existing accounting store. It commits the validated provider receipt before delivering completion to the worker, then binds the SDK result to that receipt and the recorded thread/turn. Durable start without a matching result, including provider completion followed by lost SDK output, is quarantined rather than replayed. Neither a new worker nor a new gateway may reset accumulated spend or unknown liability. `ModelProvider.generate` remains a historical transport/control contract; wrapping an SDK turn behind one such call does not establish per-request accounting. Provider-reported usage and cost estimates are evidence, not an independently verified account-wide bill.
 
-Hermes operator input enters the SPEC-006 authenticated path as `ChannelDelivery -> IngressReceipt -> CommandIntent`; Hermes cannot construct a trusted command intent directly. Scheduled Hermes tasks call a SPEC-008-observable dispatcher tick with stable identity and no direct mutation path.
+Historical `ManagedSessionAdapter` compatibility implements observation/reconciliation of retained locators, not new production submission or `ModelProvider.generate`. Its private locator binds the exact request and local create intent to a remote session and its root/subagent turns. A known ID is persisted before interpreting a successful result; an unknown create outcome cannot create again. Saved-turn/item pagination recovers results without inventing replayable event-stream cursors. Cancellation acknowledgement is distinct from observed terminal work, and remains available after local clock rollback. Nullable, mutable session usage is never counted as zero or as final billing. Any executor lacking a required bundle cost, token or deadline ceiling reports that capability unavailable; production activation remains denied until an accepted containment design resolves it.
+
+`ToolGateway.invoke(tool_ref, arguments, attempt_grant, operation_identity)` is a separate boundary. Initial MCP integration permits only operator-registered read operations with pinned server/tool/schema identity, approved HTTPS destination or pinned local executable, bounded arguments/output/time and a private credential binding. Server-provided tool annotations are untrusted descriptions, not proof of read-only behavior. Tool discovery cannot auto-install a server, widen scope, enable sampling, or add a writable tool. Source/tool responses are inert evidence with provenance, never instructions or capabilities. GitHub proposal writes and notification delivery use their owner outboxes, not model-visible general-purpose MCP tools.
+
+An optional `hermes-cli` or other harness adapter must suppress ambient state and pass the same bundle, effect, isolation and receipt tests. Removing it must leave the SDK reference path and deterministic service authority operational. Public records do not contain private endpoint or credential locators.
+
+Fake credential references and an injected gateway transport cover credential-free SDK contract tests. Separately authorized developmental SDK calls and registered read-only MCP retrieval may run under bounded non-production profiles with explicit credential references, destination policy, cumulative budgets and retained receipts. The existing OpenAI authority, including prior spend and unresolved reservations, must be reused without reset; its limit is not a cap on unrelated provider accounts. This evidence does not attest full SPEC-014 conformance. Production credentialed execution remains gated on SPEC-024 authenticated brokering and SPEC-025 accepted deployment and recovery. Historical zero-call benchmark commands retain their existing behavior until their separate activation change.
+
+CLI, UI and optional harness operator input enter the SPEC-006 authenticated path as `ChannelDelivery -> IngressReceipt -> CommandIntent`; clients cannot construct a trusted command intent directly. The service-owned timer emits a SPEC-005 admission request with stable schedule/slot identity. An external timer may wake admission but cannot dispatch model/tool effects directly.
 
 ## Output freezing
 
@@ -173,15 +183,15 @@ A malformed result receives only the bounded repair policy from SPEC-013, with s
 ## Implementation sequence
 
 1. Freeze bundle, environment, locator, executor, operation-identity, transition-registry, and receipt schemas; build reference and fake-provider conformance tests.
-2. Implement one isolated provider with attestation, bounded materialization, output freezing, reset, destruction, and crash reconciliation.
-3. Pin and inventory an eligible Hermes release, process surface, defaults, configuration inputs, and license.
-4. Implement Hermes capability discovery, ambient-state suppression, execution, polling, SPEC-005 checkpoint-envelope proposal, cancellation, collection, transition reduction, and reconciliation.
-5. Run deterministic and research fixtures through reference and Hermes adapters in observe and shadow modes.
-6. Add proposal effects, operator commands, and scheduled wakes only after reducer and private-control dependencies are active.
+2. Implement the standalone Python coordinator, isolated SDK worker and tool-free model gateway with an injected provider transport; prove complete inputs, bounded outputs and durable failure/unknown-outcome accounting without paid calls or ambient credentials.
+3. Route researcher, critic, editor and independent evaluation tasks through the same SDK/accounting boundary. Keep retrieval and registered read-only MCP operations service-owned, and pin their explicit configuration, grants and cumulative budgets. Refuse native/managed role fallback and prove credential-free completed-result replay.
+4. Run a bounded, separately authorized SDK/provider canary on public development inputs. Record actual thread/turn and provider identities, model, usage, failures and source/frozen-candidate/evaluation bindings; fixture outputs do not satisfy this evidence requirement. Native tools require a separate clean-Linux isolation and egress gate before activation.
+5. Add proposal effects, authenticated commands and scheduled service admission only after reducer, private-control and deployment dependencies are active. GitHub and notification owners retain effect authority.
+6. Add an isolated candidate-code evaluator or optional agent-harness adapter only through its reviewed conformance, attestation, reset, destruction and crash-reconciliation evidence. Neither is required for the initial data-only role path.
 
 ## Migration and rollback
 
-Hermes starts in shadow for selected work-order kinds. The current loop remains executable. Rollback disables new Hermes routing, fences and reconciles active handles, and creates new attempts on the prior executor from validated checkpoints. It never reassigns a live attempt handle across adapters.
+New adapters start in shadow for selected work-order kinds. The legacy launchd loop remains inert. Rollback disables new routing to the adapter, fences and reconciles active handles, and creates new attempts on a prior compatible executor from validated checkpoints. It never reassigns a live attempt handle across adapters or substitutes a provider after an uncertain charge. Historical private development records remain non-authoritative imported evidence.
 
 ## Observability
 
@@ -189,35 +199,43 @@ Record queue-to-start, provisioning, attestation, materialization, freeze, reset
 
 ## Verification
 
-- One work-order fixture produces schema-equivalent results on reference and Hermes adapters.
+- One frozen work-order fixture produces schema-conformant receipts through the actual SDK against injected transport and through a separately authorized provider canary; label these evidence classes distinctly and do not require identical model text.
 - A bundle compiled for an expired, superseded, mismatched, or unactivated attempt reservation is rejected before any provider effect.
-- Kill and recovery create a new attempt from reducer state, not from chat or Hermes memory.
-- Hermes, a tool, or an internal subagent cannot apply state, widen a grant, or satisfy independence.
+- Kill and recovery create a new attempt from reducer state, not from chat or harness memory.
+- A provider, tool, or internal subagent cannot apply state, widen a grant, or satisfy independence.
 - Shadow outputs can reach only isolated shadow reducers and indexes, never authoritative reducers, active indexes, outbox, GitHub, or accepted decisions.
 - Cancellation, ambiguous effects, and unknown outcomes reconcile according to adapter class.
 - Exact lost-ack replay of prepare, start, checkpoint, cancel, collect, cleanup, provision, materialize, freeze, reset, and destroy returns one original receipt; key/digest collisions perform no effect.
 - Every registered execution and environment transition has positive, illegal-edge, missing-guard, crash, and cleanup-obligation coverage.
-- Removing Hermes leaves discovery, validation, status, and manual operation functional.
+- Removing the Codex desktop app and optional harnesses leaves service scheduling, discovery, SDK execution, validation and status functional; removing the pinned SDK denies new model roles without disabling deterministic status or introducing fallback.
 - Environment roots, mounts, network, processes, limits, and credential absence match the manifest.
 - Path traversal, hardlink, symlink, device, socket, excess-count, sparse-file, and race fixtures cannot escape output policy.
 - Candidate, community, and hidden-evaluation fixtures cannot use `trusted_local`.
-- Undeclared ambient Hermes settings, memory, skills, or tools cause conformance failure.
+- Undeclared ambient settings, memory, skills, tools, MCP schema changes and unregistered endpoints cause conformance failure.
+- Researcher/critic/editor outputs cannot execute code or write repository, evaluator, credential or outbox state; malformed citations and candidate paths fail validation.
+- Provider timeout after possible execution retains unknown outcome and reserved cost; restart, key rotation and budget exhaustion cannot silently retry or switch providers. Durable SDK start without an effect and completed provider receipt without SDK completion both remain visible unresolved turns; recovery preserves them without creating a new worker request.
+- Every actual SDK-origin provider request is admitted before dispatch; duplicate/retry requests, request-shape drift and unsupported tools are denied. SDK result replay verifies the committed provider output and thread/turn identity; failed evaluation attempts remain in the denominator across repeated evaluation and origin verification.
+- A supposedly read-only MCP tool attempting writes, redirect escape, credential reflection, sampling or tool-set expansion is denied by the effective gateway boundary.
 
 ## Acceptance criteria
 
 - [ ] Executor and environment protocols have public offline conformance suites.
 - [ ] Every call consumes one immutable provenance-complete `ExecutionAttemptBundle`.
 - [ ] SPEC-005 activation binds the exact reservation and bundle before any runtime mutation.
-- [ ] Hermes version, configuration sources, model, tools, and receipts are pinned.
+- [ ] SDK and CLI versions, model IDs, effective configuration, tool schemas and receipts are pinned; optional harnesses use the same contracts and cannot activate silent native/managed fallback.
 - [ ] Canonical state survives session and workspace deletion.
 - [ ] Mode ceilings and operation grants are mechanically independent.
-- [ ] Hermes cron is only a wake mechanism and a non-Hermes executor remains usable.
+- [ ] Standalone service admission works without Codex desktop or harness cron and external wakes cannot bypass reservation or fencing; the pinned SDK is the model-role runtime dependency.
 - [ ] Output freezing and environment lifecycle pass adversarial filesystem and crash tests.
 - [ ] All mutating runtime operations have stable operation keys, collision digests, persistent receipts, and declared ambiguity behavior.
 - [ ] A machine-readable transition registry rejects illegal edges and requires terminal cleanup or retention receipts.
 - [ ] Candidate, community, and hidden-evaluation jobs require eligible isolation.
 - [ ] Continuous credentialed operation remains gated on SPEC-024 and SPEC-025.
+- [ ] Data-only researcher, critic and skill editor roles have bounded output contracts and no candidate-code execution or direct effect authority.
+- [ ] Registered read-only MCP conformance rejects tool/schema drift, ungranted operations, unsafe output and ambient server discovery.
+- [ ] SDK jobs bind durable start, effective task/configuration, thread/turn and committed gateway/result receipts; crash cuts, disconnects and cancellation ambiguity cannot duplicate work or fabricate stopped state, including during recovery of historical managed sessions.
+- [ ] Each actual SDK-origin provider request uses the existing cumulative budget authority before dispatch; missing usage, unknown liability and unsupported containment remain explicit, and fresh independent evaluation preserves failed outcomes without exposing hidden labels.
 
 ## Pull-request evidence
 
-Attach version and license inventory, bundle golden, environment and adapter conformance reports, effective-environment attestation, ambient-state suppression test, mode-isolation tests, adversarial output-freezing suite, cleanup receipts, live supervised Hermes smoke trace, process-loss recovery, cancellation and unknown-outcome tests, and Hermes-removal fallback demonstration.
+Attach version and license inventory, bundle golden, environment and adapter conformance reports, effective-environment attestation, ambient-state suppression test, mode-isolation tests, adversarial output-freezing suite, cleanup receipts, actual-SDK/injected-transport tests, separately authorized provider and read-only MCP canary receipts, process-loss recovery, cancellation and unknown-outcome tests, and a standalone no-desktop/no-Hermes demonstration with the pinned SDK installed. Distinguish tool-free startup from native-tool containment, local macOS evidence from clean-Linux evidence, and public deterministic fixtures from held-out effectiveness. Mark unimplemented isolation or optional adapters unavailable; development tests are not full draft-spec conformance or production acceptance.

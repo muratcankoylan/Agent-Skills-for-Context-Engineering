@@ -22,6 +22,8 @@
 | `LegacyMechanism` | 1.0.0 | SPEC-003 | active | legacy-adapter | n/a | n/a |
 | `LegacyQueueRecord` | 1.0.0 | SPEC-003 | active | legacy-adapter | n/a | n/a |
 | `LegacyRunState` | 1.0.0 | SPEC-003 | active | legacy-adapter | n/a | n/a |
+| `OrganizationEvent` | 1.0.0 | SPEC-004 | active | exact | `evt` | `public`, `public_derived`, `private_operational`, `private_human`, `restricted_source` |
+| `ResearchRunTransition` | 1.0.0 | SPEC-004 | active | exact | n/a | `public`, `public_derived`, `private_operational`, `private_human`, `restricted_source` |
 | `SchemaRegistry` | 1.0.0 | SPEC-003 | active | exact | n/a | n/a |
 | `StorageBinding` | 1.0.0 | SPEC-003 | active | exact | `bind` | `private_operational`, `restricted_source` |
 

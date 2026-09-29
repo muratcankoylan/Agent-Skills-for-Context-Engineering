@@ -1,6 +1,72 @@
+import { createHash } from "node:crypto";
+
 import { canonicalDigest } from "./canonicalize.js";
 import { ContractError } from "./errors.js";
 import type { JsonValue } from "./json.js";
+
+const RUN_EVENT_IMPORT_NAMESPACE = "b5a8ef43-d10b-5dd9-9406-31c558426e6d";
+const RUN_EVENT_IMPORT_IDEMPOTENCY_SCOPE = "research_loop_file_shadow";
+const RUN_EVENT_IMPORT_ACTOR: Record<string, JsonValue> = {
+  id: "research-loop-file-shadow",
+  class: "legacy_file_bridge",
+};
+const RUN_EVENT_IMPORT_AUTHORITY: Record<string, JsonValue> = {
+  outcome: "legacy_authority_not_recorded",
+  actor_class: "legacy_file_bridge",
+  action: "mirror_legacy_state",
+  resource: "research_run",
+  reason_code: "LEGACY_AUTHORITY_NOT_RECORDED",
+  constitution_version: null,
+  constitution_digest: null,
+  context_digest: null,
+  matched_rule: null,
+};
+
+export function deterministicRunEventId(runId: string, historyIndex: number): string {
+  validateRunEventImportInputs(runId, historyIndex, "INVALID_ID");
+  const key = `research-run-transition/v1:${runId}:${historyIndex}`;
+  return `evt_${uuidV5(RUN_EVENT_IMPORT_NAMESPACE, key)}`;
+}
+
+export function deterministicRunEventIdempotencyDigest(
+  runId: string,
+  historyIndex: number,
+): string {
+  validateRunEventImportInputs(runId, historyIndex, "INVALID_DIGEST");
+  const key = `research-run-transition-idempotency/v1:${runId}:${historyIndex}`;
+  return `sha256:${createHash("sha256").update(key, "utf8").digest("hex")}`;
+}
+
+function validateRunEventImportInputs(
+  runId: string,
+  historyIndex: number,
+  code: "INVALID_ID" | "INVALID_DIGEST",
+): void {
+  if (
+    runId.length === 0 ||
+    !Number.isSafeInteger(historyIndex) ||
+    historyIndex < 0 ||
+    historyIndex >= Number.MAX_SAFE_INTEGER
+  ) {
+    throw new ContractError(code, "run-event import identity inputs are invalid");
+  }
+}
+
+function uuidV5(namespace: string, name: string): string {
+  const namespaceBytes = Buffer.from(namespace.replaceAll("-", ""), "hex");
+  if (namespaceBytes.length !== 16) {
+    throw new ContractError("INVALID_ID", "run-event namespace is invalid");
+  }
+  const bytes = createHash("sha1")
+    .update(namespaceBytes)
+    .update(name, "utf8")
+    .digest()
+    .subarray(0, 16);
+  bytes[6] = (bytes[6]! & 0x0f) | 0x50;
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80;
+  const hex = bytes.toString("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 
 /** Apply the invariants that JSON Schema cannot express for registered records. */
 export function validateRecordSemantics(
@@ -19,6 +85,12 @@ export function validateRecordSemantics(
       return;
     case "CandidateArtifact":
       validateCandidateArtifact(record);
+      return;
+    case "ResearchRunTransition":
+      validateResearchRunTransition(record);
+      return;
+    case "OrganizationEvent":
+      validateOrganizationEvent(record);
       return;
     case "ExportApproval":
       validateExportApproval(record);
@@ -121,6 +193,188 @@ function validateCandidateArtifact(record: Record<string, JsonValue>): void {
   }
 }
 
+function validateResearchRunTransition(record: Record<string, JsonValue>): void {
+  const historyIndex = numberField(record, "history_index");
+  const fromState = record.from_state;
+  const toState = stringField(record, "to_state");
+  const initialization = record.initialization;
+  const closure = record.closure;
+  if (historyIndex === 0) {
+    if (fromState !== null || toState !== "initialized" || initialization === null) {
+      throw new ContractError(
+        "RUN_EVENT_TRANSITION_INVALID",
+        "first run transition must initialize the subject",
+      );
+    }
+  } else if (
+    typeof fromState !== "string" ||
+    toState === "initialized" ||
+    fromState === toState
+  ) {
+    throw new ContractError(
+      "RUN_EVENT_TRANSITION_INVALID",
+      "later run transition has inconsistent states",
+    );
+  }
+  if ((toState === "initialized") !== (initialization !== null)) {
+    throw new ContractError(
+      "RUN_EVENT_TRANSITION_INVALID",
+      "run initialization metadata disagrees with the target state",
+    );
+  }
+  if (initialization !== null) {
+    const initializationRecord = objectValue(
+      initialization,
+      "run initialization is not an object",
+    );
+    const locked = stringArrayField(initializationRecord, "locked_surfaces");
+    const editable = new Set(stringArrayField(initializationRecord, "editable_surfaces"));
+    if (locked.some((surface) => editable.has(surface))) {
+      throw new ContractError(
+        "RUN_EVENT_TRANSITION_INVALID",
+        "run initialization surfaces cannot be both locked and editable",
+      );
+    }
+  }
+  if ((toState === "closed") !== (closure !== null)) {
+    throw new ContractError(
+      "RUN_EVENT_TRANSITION_INVALID",
+      "run closure metadata disagrees with the target state",
+    );
+  }
+  if (closure !== null) {
+    const closureRecord = objectValue(closure, "run closure is not an object");
+    if (stringField(closureRecord, "reason") !== stringField(record, "reason")) {
+      throw new ContractError(
+        "RUN_EVENT_TRANSITION_INVALID",
+        "run closure reason disagrees with the transition",
+      );
+    }
+  }
+}
+
+function validateOrganizationEvent(record: Record<string, JsonValue>): void {
+  const payload = objectField(record, "payload");
+  if (stringField(record, "payload_digest") !== canonicalDigest(payload)) {
+    throw new ContractError(
+      "EVENT_PAYLOAD_DIGEST_MISMATCH",
+      "event payload digest is invalid",
+    );
+  }
+  const subject = objectField(record, "subject");
+  const eventType = `research_run.${stringField(payload, "to_state")}`;
+  if (
+    stringField(record, "event_type") !== eventType ||
+    stringField(subject, "id") !== stringField(payload, "run_id") ||
+    numberField(subject, "version") !== numberField(payload, "history_index") + 1 ||
+    stringField(record, "classification") !== stringField(payload, "classification")
+  ) {
+    throw new ContractError(
+      "EVENT_PAYLOAD_MISMATCH",
+      "event routing fields disagree with the run transition",
+    );
+  }
+  const actor = objectField(record, "actor");
+  const authority = objectField(record, "authority");
+  if (stringField(actor, "class") !== stringField(authority, "actor_class")) {
+    throw new ContractError(
+      "EVENT_AUTHORITY_MISMATCH",
+      "event actor disagrees with its authority decision",
+    );
+  }
+  const source = stringField(payload, "transition_source");
+  const imported = source === "file_state_history";
+  const repository = objectField(record, "repository");
+  if (imported) {
+    const runId = stringField(payload, "run_id");
+    const historyIndex = numberField(payload, "history_index");
+    const expectedId = deterministicRunEventId(runId, historyIndex);
+    const expectedCorrelation = deterministicRunEventId(runId, 0);
+    const expectedCausation =
+      historyIndex === 0 ? null : deterministicRunEventId(runId, historyIndex - 1);
+    const idempotency = objectField(record, "idempotency");
+    const deterministic =
+      record.id_origin === "legacy_import" &&
+      record.id === expectedId &&
+      record.correlation_event_id === expectedCorrelation &&
+      record.causation_event_id === expectedCausation &&
+      idempotency.scope === RUN_EVENT_IMPORT_IDEMPOTENCY_SCOPE &&
+      idempotency.key_digest === deterministicRunEventIdempotencyDigest(runId, historyIndex) &&
+      canonicalDigest(actor) === canonicalDigest(RUN_EVENT_IMPORT_ACTOR) &&
+      canonicalDigest(authority) === canonicalDigest(RUN_EVENT_IMPORT_AUTHORITY) &&
+      repository.commit_sha === null &&
+      repository.pull_request === null &&
+      record.classification === "private_operational" &&
+      payload.classification === "private_operational" &&
+      record.detail_ref === null;
+    if (!deterministic) {
+      throw new ContractError(
+        "RUN_EVENT_ORIGIN_MISMATCH",
+        "file-shadow event provenance is not deterministic",
+      );
+    }
+  } else {
+    const authorized =
+      record.id_origin === "native" &&
+      objectField(record, "idempotency").scope !== RUN_EVENT_IMPORT_IDEMPOTENCY_SCOPE &&
+      authority.outcome === "allowed" &&
+      typeof authority.constitution_version === "string" &&
+      typeof authority.constitution_digest === "string" &&
+      typeof authority.context_digest === "string" &&
+      typeof authority.matched_rule === "string";
+    if (!authorized) {
+      throw new ContractError(
+        "RUN_EVENT_ORIGIN_MISMATCH",
+        "native run event lacks an allowed authority decision",
+      );
+    }
+  }
+  const toState = stringField(payload, "to_state");
+  if (toState === "initialized") {
+    const initialization = objectValue(
+      payload.initialization,
+      "run initialization is not an object",
+    );
+    if (stringField(initialization, "created_at") !== stringField(record, "occurred_at")) {
+      throw new ContractError(
+        "EVENT_PAYLOAD_MISMATCH",
+        "initialization time disagrees with the event",
+      );
+    }
+  }
+  if (toState === "closed") {
+    const closure = objectValue(payload.closure, "run closure is not an object");
+    if (stringField(closure, "closed_at") !== stringField(record, "occurred_at")) {
+      throw new ContractError(
+        "EVENT_PAYLOAD_MISMATCH",
+        "closure time disagrees with the event",
+      );
+    }
+  }
+  const eventId = stringField(record, "id");
+  const subjectVersion = numberField(subject, "version");
+  const causation = record.causation_event_id;
+  const validCausation =
+    subjectVersion === 1
+      ? causation === null && record.correlation_event_id === eventId
+      : typeof causation === "string" && causation !== eventId;
+  if (!validCausation) {
+    throw new ContractError(
+      "EVENT_CAUSATION_INVALID",
+      "event correlation or causation is inconsistent",
+    );
+  }
+  if (record.detail_ref !== null) {
+    const detailRef = objectValue(record.detail_ref, "event detail reference is not an object");
+    if (detailRef.classification !== record.classification) {
+      throw new ContractError(
+        "EVENT_DETAIL_REF_INVALID",
+        "event detail classification disagrees with the event",
+      );
+    }
+  }
+}
+
 function validateExportApproval(record: Record<string, JsonValue>): void {
   const expected = stringField(record, "decision") === "approve" ? "approved" : "rejected";
   if (record.state !== expected) {
@@ -142,6 +396,14 @@ function objectField(
   key: string,
 ): Record<string, JsonValue> {
   return objectValue(record[key], `field ${key} is not an object`);
+}
+
+function stringArrayField(record: Record<string, JsonValue>, key: string): string[] {
+  const value = record[key];
+  if (!Array.isArray(value) || !value.every((item) => typeof item === "string")) {
+    schemaAssumption(`${key} is not a string array`);
+  }
+  return value as string[];
 }
 
 function objectValue(value: JsonValue | undefined, message: string): Record<string, JsonValue> {

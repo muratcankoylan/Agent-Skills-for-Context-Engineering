@@ -22,4 +22,8 @@ export {
   type ValidateRecordOptions,
   LoadedRuntimeRegistry,
 } from "./registry.js";
-export { validateRecordSemantics } from "./semantics.js";
+export {
+  deterministicRunEventId,
+  deterministicRunEventIdempotencyDigest,
+  validateRecordSemantics,
+} from "./semantics.js";

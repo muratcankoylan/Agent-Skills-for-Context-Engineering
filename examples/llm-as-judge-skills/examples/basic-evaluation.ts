@@ -6,7 +6,6 @@
  * Run: npx tsx examples/basic-evaluation.ts
  */
 
-import 'dotenv/config';
 import { EvaluatorAgent } from '../src/agents/evaluator.js';
 import { validateConfig } from '../src/config/index.js';
 
@@ -85,5 +84,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
-
+main().catch(error => {
+  console.error(error instanceof Error ? error.message : 'Example failed.');
+  process.exitCode = 1;
+});

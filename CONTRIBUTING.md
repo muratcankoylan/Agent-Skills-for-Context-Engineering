@@ -48,7 +48,15 @@ When adding new skills:
 
 ## Researcher Operating System Contributions
 
-The repository ships with a file-based research-to-skill operating system in `researcher/`. Contributions that introduce skill changes derived from external research should flow through it.
+The repository ships with a file-based research-to-skill operating system in `researcher/`. Contributions that introduce skill changes derived from external research should flow through its supervised workflow. The checked-in legacy loop is not an autonomous or production runtime: launchd activation, network retrieval, accepted closure, and mechanism promotion are disabled.
+
+Before running a legacy queue supervisor (`loop_discover.py`, `loop_step.py`,
+`loop_daily.py`, or `loop_status.py`), create and validate the four ignored
+runtime ledgers explicitly:
+
+```bash
+python3 researcher/scripts/loop_status.py --initialize-runtime
+```
 
 ### Run lifecycle
 
@@ -56,17 +64,23 @@ The repository ships with a file-based research-to-skill operating system in `re
 initialized -> retrieved -> evaluated -> proposed -> novelty_checked -> validated -> pr_ready -> closed
 ```
 
-Use `researcher/scripts/research_loop.py` subcommands rather than editing `run-state.json` by hand. Each transition appends to the run's thread log and updates the state machine atomically.
+Use `researcher/scripts/research_loop.py` subcommands rather than editing
+`run-state.json` by hand. The state transition is the authoritative atomic
+record. Its human-readable `THREAD.md` note is a best-effort, non-authoritative
+post-commit projection; a failed note emits a warning and does not roll back or
+misreport the committed state transition.
 
-### Mechanism promotion
+### Mechanism proposals
 
-New behavior changes proposed for the corpus go through `researcher/mechanisms/registry.jsonl`. The promotion path is gated:
+Run-local behavior changes may be drafted in the mechanism proposal file:
 
 1. Author the proposal in the run's `proposals/mechanism-proposal.jsonl`.
 2. Pass `validate_run.py --run-dir <run>`.
-3. Run `research_loop.py promote-mechanisms --run-dir <run> --reviewed-by <handle>`. This appends to the registry and to `researcher/mechanisms/ledgers/accepted.jsonl`.
+3. Treat the result as advisory input to a separate reviewed repository change.
 
-Rejected mechanisms append to `ledgers/rejected.jsonl` so future agents do not rediscover them.
+`research_loop.py promote-mechanisms` always fails closed. It does not append to
+the registry or the historical accepted/rejected ledgers, and run readiness
+does not grant promotion authority.
 
 ### Claim provenance
 
@@ -78,13 +92,15 @@ Runs that hit human-review gates land in `researcher/queue/parked.jsonl` and the
 
 1. Read `researcher/runs/<run-id>/THREAD.md` and `sources/evidence/`.
 2. Complete the next required step (retrieve, evaluate, propose, novelty, validate-run, or pr-ready).
-3. Close the run with `research_loop.py close --status accepted|rejected|reference-only|abandoned --reason <text> --reviewed-by <handle>`.
+3. Close the run with `research_loop.py close --status rejected|reference-only|abandoned --reason <text> --reviewed-by <handle>`.
 
-The continuous loop will reap closed runs into `researcher/queue/done.jsonl` on the next iteration.
+The legacy workflow cannot close a run as `accepted`. A manual
+`loop_step.py` invocation can reap closed runs into
+`researcher/queue/done.jsonl`; nothing runs in the background.
 
 ### Runtime state is not committed
 
-`researcher/runs/*/` (except the seed run), `researcher/queue/*.jsonl`, and `researcher/reports/{logs,snapshots,loop-events.jsonl,loop-failures.jsonl,status.md,parked-review.md}` are gitignored. PRs should not introduce new committed runs; bug fixtures belong in `researcher/fixtures/` instead.
+`researcher/runs/*/` (except the seed run), `researcher/queue/*.jsonl`, and `researcher/reports/{benchmark-history.jsonl,logs,snapshots,loop-events.jsonl,loop-failures.jsonl,status.md,parked-review.md}` are gitignored. PRs should not introduce new committed runs; bug fixtures belong in `researcher/fixtures/` instead.
 
 ## Skill Structure Requirements
 

@@ -90,6 +90,12 @@ Each detected pattern includes:
 
 ## Quick Start
 
+> **Safety scope:** this is an example, not a production billing or evidence
+> system. Each command enforces process-local caps on SDK attempts and requested
+> output-token capacity. It does not cap input tokens or dollars, and its
+> in-memory accounting records are not a durable audit ledger. Provider responses
+> without complete usage metadata fail the workflow.
+
 ### Installation
 
 ```bash
@@ -135,6 +141,16 @@ print(f"Overall Score: {analysis.overall_score}/100")
 for pattern in analysis.patterns:
     print(f"  [{pattern.severity.value}] {pattern.type.value}")
     print(f"    Suggestion: {pattern.suggestion}")
+```
+
+Before any paid CLI run, set explicit caps. `--dry-run` stops before the first
+provider call, emits `"evidence": false`, and exits with status 3 so automation
+cannot mistake it for completed evidence:
+
+```bash
+rto --max-api-attempts 4 --max-reserved-output-tokens 16000 \
+  capture "Explain quantum computing"
+rto --dry-run optimize "Research AI papers"
 ```
 
 ---

@@ -59,10 +59,12 @@ FORBIDDEN_TRACKED_PREFIXES = (
     "researcher/benchmarks/sdk-runner/node_modules/",
     "researcher/exports/private/",
     "researcher/exports/staging/",
+    "researcher/.run-init-staging/",
     "researcher/queue/.locks/",
     "researcher/reports/jsonl-quarantine/",
     "researcher/reports/logs/",
     "researcher/reports/snapshots/",
+    "researcher/runtime/",
     "researcher/schemas/reports/runtime/",
 )
 FORBIDDEN_TRACKED_PATHS = {
@@ -71,6 +73,7 @@ FORBIDDEN_TRACKED_PATHS = {
     "researcher/queue/parked.jsonl",
     "researcher/queue/quarantine.jsonl",
     "researcher/reports/effectiveness-history.jsonl",
+    "researcher/reports/benchmark-history.jsonl",
     "researcher/reports/loop-events.jsonl",
     "researcher/reports/loop-failures.jsonl",
     "researcher/reports/parked-review.md",

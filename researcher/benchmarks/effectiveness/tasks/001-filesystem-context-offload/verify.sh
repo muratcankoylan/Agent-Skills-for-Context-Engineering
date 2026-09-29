@@ -13,7 +13,10 @@ if [ ! -f .runner/final.txt ]; then
     exit 11
 fi
 
-if ! grep -q "${EXPECTED_LINE}" .runner/final.txt; then
+# An exact assignment is required. Substring matching also accepts 84750,
+# suffixes, and answers that contain both the right and a contradictory value.
+ASSIGNMENTS=$(LC_ALL=C grep -Eo '(^|[^[:alnum:]_])API_RATE_LIMIT[[:space:]]*=[[:space:]]*[^[:space:]`";,}]*' .runner/final.txt || true)
+if [ -z "$ASSIGNMENTS" ] || [ "$(printf '%s\n' "$ASSIGNMENTS" | LC_ALL=C sed -E 's/^[^[:alnum:]_]//; s/[[:space:]]//g' | sort -u)" != "$EXPECTED_LINE" ]; then
     echo "verify: final response does not contain ${EXPECTED_LINE}" >&2
     exit 12
 fi

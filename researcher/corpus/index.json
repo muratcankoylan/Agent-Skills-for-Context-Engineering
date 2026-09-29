@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "generated_by": "manual-breakthrough-roadmap-seed",
-  "updated_at": "2026-07-11",
+  "updated_at": "2026-09-07",
   "purpose": "Canonical machine-readable map for skills, mechanisms, claims, and activation scenarios.",
   "skills": [
     {
@@ -44,7 +44,7 @@
       "path": "skills/context-optimization/SKILL.md",
       "activation_scenarios": ["observation masking", "prefix cache strategy", "context partitioning", "token-budget optimization"],
       "mechanism_ids": ["retrievable-observation-masking"],
-      "claim_ids": ["claim-context-optimization-tool-output-dominance"]
+      "claim_ids": ["claim-context-optimization-tool-output-dominance", "claim-context-packet-frozen-development-20260907"]
     },
     {
       "name": "evaluation",
@@ -65,7 +65,7 @@
       "path": "skills/harness-engineering/SKILL.md",
       "activation_scenarios": ["autonomous research loops", "locked evaluators", "editable surfaces", "novelty gates", "human approval boundaries"],
       "mechanism_ids": ["locked-editable-surfaces", "structured-novelty-gate"],
-      "claim_ids": ["claim-harness-locked-evaluator"]
+      "claim_ids": ["claim-harness-locked-evaluator", "claim-setup-parallel-notify-only-20260929", "claim-setup-x-billing-controls-20260929", "claim-setup-openalex-free-access-20260929", "claim-setup-firecrawl-free-payg-20260929", "claim-harness-tracing-local-overhead-20260929", "claim-harness-action-context-duplication-20260929", "claim-harness-raindrop-ui-canary-20260929"]
     },
     {
       "name": "hosted-agents",
