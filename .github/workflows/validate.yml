@@ -5,8 +5,12 @@ on:
     branches: [main]
   # Stacked pull requests use proposal branches as their base. Validate every
   # pull request so dependent layers receive the same gates as the base layer.
-  pull_request: {}
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   validate:
@@ -14,15 +18,100 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Pin lifecycle Git authorities
+        id: lifecycle-authorities
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GIT_NO_REPLACE_OBJECTS: "1"
+          GIT_CONFIG_NOSYSTEM: "1"
+          GIT_CONFIG_GLOBAL: /dev/null
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            BASE_SHA="$PR_BASE_SHA"
+            if [ "$PR_BASE_REF" = "$DEFAULT_BRANCH" ]; then
+              PROMOTED_SHA="$PR_BASE_SHA"
+            else
+              git --no-replace-objects -c core.hooksPath=/dev/null fetch --no-tags origin \
+                "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
+              PROMOTED_SHA="$(git --no-replace-objects rev-parse \
+                "refs/remotes/origin/$DEFAULT_BRANCH^{commit}")"
+            fi
+          elif [ "$EVENT_NAME" = "push" ]; then
+            if [ -z "$PUSH_BEFORE_SHA" ] || [ "$PUSH_BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+              echo "Lifecycle validation requires a nonzero push-before SHA" >&2
+              exit 2
+            fi
+            BASE_SHA="$PUSH_BEFORE_SHA"
+            PROMOTED_SHA="$PUSH_BEFORE_SHA"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            git --no-replace-objects -c core.hooksPath=/dev/null fetch --no-tags origin \
+              "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
+            PROMOTED_SHA="$(git --no-replace-objects rev-parse \
+              "refs/remotes/origin/$DEFAULT_BRANCH^{commit}")"
+            BASE_SHA="$(git --no-replace-objects merge-base HEAD "$PROMOTED_SHA")"
+          else
+            echo "Unsupported lifecycle-validation event: $EVENT_NAME" >&2
+            exit 2
+          fi
+          if ! printf '%s\n' "$BASE_SHA" | grep -Eq '^[0-9a-f]{40}$|^[0-9a-f]{64}$'; then
+            echo "Lifecycle validation resolved an invalid transition-base SHA" >&2
+            exit 2
+          fi
+          if ! printf '%s\n' "$PROMOTED_SHA" | grep -Eq '^[0-9a-f]{40}$|^[0-9a-f]{64}$'; then
+            echo "Lifecycle validation resolved an invalid promoted-default SHA" >&2
+            exit 2
+          fi
+          git --no-replace-objects cat-file -e "$BASE_SHA^{commit}"
+          git --no-replace-objects cat-file -e "$PROMOTED_SHA^{commit}"
+          printf 'base_sha=%s\n' "$BASE_SHA" >> "$GITHUB_OUTPUT"
+          printf 'promoted_sha=%s\n' "$PROMOTED_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.12"
 
+      - name: Install pinned lifecycle parser dependency
+        run: |
+          python -m pip install \
+            --disable-pip-version-check \
+            --no-deps \
+            --only-binary=:all: \
+            --require-hashes \
+            -r /dev/stdin <<'REQUIREMENT'
+          pyyaml==6.0.3 \
+            --hash=sha256:ba1cc08a7ccde2d2ec775841541641e4548226580ab850948cbfda66a1befcdc
+          REQUIREMENT
+
+      - name: Specification lifecycle against protected base
+        env:
+          BASE_SHA: ${{ steps.lifecycle-authorities.outputs.base_sha }}
+          PROMOTED_SHA: ${{ steps.lifecycle-authorities.outputs.promoted_sha }}
+          GIT_NO_REPLACE_OBJECTS: "1"
+          GIT_CONFIG_NOSYSTEM: "1"
+          GIT_CONFIG_GLOBAL: /dev/null
+        run: >-
+          python researcher/scripts/validate_spec_lifecycle.py
+          --base-ref "$BASE_SHA"
+          --promoted-ref "$PROMOTED_SHA"
+
+      - name: Repository secret scan
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_VERSION: "8.30.1"
+
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: "22"
           cache: npm
@@ -31,7 +120,7 @@ jobs:
             researcher/schemas/typescript/package-lock.json
 
       - name: Install validation dependencies
-        run: pip install -r requirements-dev.txt
+        run: pip install --require-hashes -r requirements-dev.txt
 
       - name: Compile researcher scripts
         run: |
@@ -39,18 +128,24 @@ jobs:
             researcher/scripts/skill_frontmatter.py \
             researcher/scripts/governance_policy.py \
             researcher/scripts/build_inventory.py \
+            researcher/scripts/validate_authority_contract.py \
+            researcher/scripts/validate_spec_lifecycle.py \
             researcher/scripts/export_policy.py \
             researcher/scripts/schema_contract.py \
             researcher/scripts/artifact_store.py \
             researcher/scripts/migrate_legacy.py \
             researcher/scripts/tests/test_skill_frontmatter.py \
             researcher/scripts/tests/test_build_inventory.py \
+            researcher/scripts/tests/test_spec_lifecycle.py \
             researcher/scripts/tests/test_export_policy.py \
             researcher/scripts/tests/test_governance_policy.py \
             researcher/scripts/tests/test_schema_contract.py \
             researcher/scripts/tests/test_artifact_store.py \
+            researcher/scripts/tests/test_render_router_report.py \
+            researcher/scripts/tests/test_public_repo.py \
             researcher/scripts/validate_governance.py \
             researcher/scripts/validate_export.py \
+            researcher/scripts/validate_public_repo.py \
             researcher/scripts/validate_schemas.py \
             researcher/scripts/validate_platform_compat.py \
             researcher/scripts/validate_repo.py \
@@ -60,6 +155,7 @@ jobs:
             researcher/scripts/compare_skill_revisions.py \
             researcher/scripts/check_activation_cases.py \
             researcher/scripts/run_benchmarks.py \
+            researcher/scripts/render_router_report.py \
             researcher/scripts/skill_health.py \
             researcher/scripts/loop_common.py \
             researcher/scripts/loop_discover.py \
@@ -71,6 +167,9 @@ jobs:
 
       - name: Researcher unit tests
         run: python -m unittest discover -s researcher/scripts/tests -p 'test_*.py'
+
+      - name: Public repository boundary
+        run: python researcher/scripts/validate_public_repo.py
 
       - name: Governance policy
         run: python researcher/scripts/validate_governance.py --check
@@ -100,6 +199,7 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm run typecheck
+          npm test
           npm run router:dry-run -- --models gpt-5.5 --reps 1 --max-runs 112 --max-budget-usd 2
           npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 12 --max-budget-usd 2
 

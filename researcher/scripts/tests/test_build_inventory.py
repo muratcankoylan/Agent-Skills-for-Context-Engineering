@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -10,11 +11,36 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+import yaml
+from jsonschema import Draft202012Validator, FormatChecker
+
 from researcher.scripts.build_inventory import (
     InventoryBuilder,
     atomic_write_text,
     pretty_json,
     render_summary,
+)
+from researcher.scripts.governance_policy import Constitution
+from researcher.scripts.tests.test_spec_lifecycle import (
+    authority_conformance_document,
+    authority_documents,
+    canonical_json,
+    conforming_constitution,
+)
+from researcher.scripts.validate_authority_contract import (
+    AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+    AUTHORITY_CONSTITUTION_POLICY_PATH,
+    AUTHORITY_EVALUATOR_BUNDLE_VERSION,
+    AUTHORITY_EVALUATOR_COMPONENT_PATHS,
+    AUTHORITY_FIXTURE_MANIFEST_PATH,
+    AUTHORITY_VOCABULARY_PATH,
+    AUTHORITY_VOCABULARY_SCHEMA_ID,
+    AUTHORITY_VOCABULARY_SCHEMA_PATH,
+    AUTHORITY_VOCABULARY_SCHEMA_VERSION,
+    AuthorityVocabularyBinding,
+    build_authority_evaluator_bundle,
+    load_authority_vocabulary_schema,
+    parse_authority_vocabulary,
 )
 
 
@@ -28,10 +54,13 @@ def copy_fixture(source: Path, target: Path) -> None:
     for relative in [
         ".claude-plugin/marketplace.json",
         ".plugin/plugin.json",
+        ".github/workflows/validate.yml",
         "SKILL.md",
         "README.md",
         "AGENTS.md",
         "CLAUDE.md",
+        "requirements-dev.in",
+        "requirements-dev.txt",
         "researcher/README.md",
         "researcher/mechanisms/registry.jsonl",
         "researcher/mechanisms/ledgers/accepted.jsonl",
@@ -39,6 +68,8 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/claims/index.jsonl",
         "researcher/corpus/index.json",
         "researcher/corpus/inventory.schema.json",
+        "governance/constitution.yaml",
+        "governance/authority-vocabulary.schema.json",
         "governance/export-policy.yaml",
         "governance/export-policy.schema.json",
         "researcher/exports/schemas/export-records.schema.json",
@@ -50,16 +81,44 @@ def copy_fixture(source: Path, target: Path) -> None:
         "researcher/benchmarks/router/prompts.jsonl",
         "researcher/benchmarks/scenarios/adversarial.jsonl",
         "researcher/benchmarks/goldens/adversarial-goldens.json",
+        "researcher/benchmarks/PLAN.md",
+        "researcher/benchmarks/router/README.md",
+        "researcher/benchmarks/effectiveness/README.md",
+        "researcher/benchmarks/sdk-runner/README.md",
         "researcher/benchmarks/sdk-runner/package.json",
         "researcher/benchmarks/sdk-runner/package-lock.json",
         "researcher/benchmarks/sdk-runner/tsconfig.json",
         "researcher/benchmarks/sdk-runner/src/common.ts",
+        "researcher/benchmarks/sdk-runner/src/durableFs.test.ts",
+        "researcher/benchmarks/sdk-runner/src/durableFs.ts",
+        "researcher/benchmarks/sdk-runner/src/durableJson.test.ts",
+        "researcher/benchmarks/sdk-runner/src/durableJson.ts",
+        "researcher/benchmarks/sdk-runner/src/liveBlock.test.ts",
+        "researcher/benchmarks/sdk-runner/src/routerEngine.test.ts",
+        "researcher/benchmarks/sdk-runner/src/routerEngine.ts",
+        "researcher/benchmarks/sdk-runner/src/routerManifest.test.ts",
+        "researcher/benchmarks/sdk-runner/src/routerManifest.ts",
+        "researcher/benchmarks/sdk-runner/src/routerRunStore.test.ts",
+        "researcher/benchmarks/sdk-runner/src/routerRunStore.ts",
+        "researcher/benchmarks/sdk-runner/src/sdkImport.test.ts",
+        "researcher/benchmarks/sdk-runner/src/sourceFreeze.test.ts",
+        "researcher/benchmarks/sdk-runner/src/sourceFreeze.ts",
         "researcher/benchmarks/sdk-runner/src/runRouter.ts",
         "researcher/benchmarks/sdk-runner/src/runEffectiveness.ts",
+        "researcher/benchmarks/sdk-runner/test/denyCursorSdkLoader.mjs",
+        "researcher/benchmarks/sdk-runner/test/registerDenyCursorSdk.mjs",
         "researcher/scripts/validate_governance.py",
+        "researcher/scripts/governance_policy.py",
+        "researcher/scripts/validate_authority_contract.py",
         "researcher/scripts/build_inventory.py",
+        "researcher/scripts/render_router_report.py",
+        "researcher/scripts/tests/test_render_router_report.py",
+        "researcher/scripts/validate_spec_lifecycle.py",
         "researcher/scripts/validate_export.py",
         "researcher/scripts/export_policy.py",
+        "researcher/scripts/validate_public_repo.py",
+        "researcher/scripts/tests/test_public_repo.py",
+        "researcher/scripts/tests/test_spec_lifecycle.py",
         "researcher/artifacts/README.md",
         "researcher/runbooks/schema-migration.md",
         "researcher/scripts/validate_schemas.py",
@@ -96,6 +155,17 @@ def copy_fixture(source: Path, target: Path) -> None:
         target_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(readme, target_path)
 
+    shutil.copytree(source / "docs" / "specs", target / "docs" / "specs")
+    shutil.copytree(source / "docs" / "decisions", target / "docs" / "decisions")
+    shutil.copytree(
+        source / "researcher" / "orchestration" / "prompts",
+        target / "researcher" / "orchestration" / "prompts",
+    )
+    review = source / "docs" / "reviews" / "2026-08-15-autonomous-organization-readiness.md"
+    target_review = target / review.relative_to(source)
+    target_review.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(review, target_review)
+
     source_tasks = source / "researcher" / "benchmarks" / "effectiveness" / "tasks"
     target_tasks = target / "researcher" / "benchmarks" / "effectiveness" / "tasks"
     shutil.copytree(source_tasks, target_tasks)
@@ -105,6 +175,125 @@ def finding_codes(root: Path) -> set[str]:
     builder = InventoryBuilder(root)
     builder.build()
     return {finding.code for finding in builder.findings}
+
+
+def write_generic_spec000_revision_two(root: Path, *, status: str = "accepted") -> None:
+    path = root / "docs/specs/SPEC-000-program-constitution.md"
+    original_bytes = path.read_bytes()
+    prior_digest = f"sha256:{hashlib.sha256(original_bytes).hexdigest()}"
+    text = original_bytes.decode("utf-8")
+    if "Status: amended\n" in text:
+        text = text.replace("Status: amended", f"Status: {status}", 1)
+    else:
+        text = text.replace("Status: implemented", f"Status: {status}", 1)
+    text = text.replace("Revision: 1", "Revision: 2", 1)
+    text = text.replace("Revises: none", f"Revises: {prior_digest}", 1)
+    text = text.replace("Adoption decision: ADR-0005\n", "", 1)
+    text = text.replace("Lifecycle decision: ADR-0008\n", "", 1)
+    text = text.replace("Replacement: SPEC-000@2\n", "", 1)
+    path.write_text(text, encoding="utf-8")
+
+
+def write_authority_revision(
+    root: Path,
+    *,
+    status: str = "accepted",
+    include_conformance: bool = False,
+) -> AuthorityVocabularyBinding:
+    _registry, _fixture, registry_bytes, fixture_bytes = authority_documents()
+    schema_binding = load_authority_vocabulary_schema(root)
+    binding = parse_authority_vocabulary(
+        registry_bytes,
+        schema_binding=schema_binding,
+        expected_digest=f"sha256:{hashlib.sha256(registry_bytes).hexdigest()}",
+        expected_constitution_revision=2,
+        expected_registry_version=2,
+        fixture_manifest_bytes=fixture_bytes,
+    )
+    registry_path = root / AUTHORITY_VOCABULARY_PATH
+    fixture_path = root / AUTHORITY_FIXTURE_MANIFEST_PATH
+    registry_path.parent.mkdir(parents=True, exist_ok=True)
+    fixture_path.parent.mkdir(parents=True, exist_ok=True)
+    registry_path.write_bytes(registry_bytes)
+    fixture_path.write_bytes(fixture_bytes)
+
+    write_generic_spec000_revision_two(root, status=status)
+    spec_path = root / "docs/specs/SPEC-000-program-constitution.md"
+    spec_text = spec_path.read_text(encoding="utf-8")
+    authority_metadata = (
+        f"Authority vocabulary schema: {schema_binding.path}\n"
+        f"Authority vocabulary schema digest: {schema_binding.digest}\n"
+        f"Authority vocabulary schema version: {schema_binding.schema_version}\n"
+        f"Authority vocabulary: {binding.path}\n"
+        f"Authority vocabulary digest: {binding.digest}\n"
+        f"Authority vocabulary version: {binding.registry_version}\n"
+    )
+    spec_text = spec_text.replace(
+        "Dependency revisions: none\n",
+        f"Dependency revisions: none\n{authority_metadata}",
+        1,
+    )
+    spec_path.write_text(spec_text, encoding="utf-8")
+
+    if include_conformance:
+        policy_path = root / AUTHORITY_CONSTITUTION_POLICY_PATH
+        policy_document = conforming_constitution().document
+        policy_path.write_text(
+            yaml.safe_dump(policy_document, sort_keys=False),
+            encoding="utf-8",
+        )
+        constitution = Constitution.load(policy_path)
+        evaluator_components = tuple(
+            (relative, (root / relative).read_bytes())
+            for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS
+        )
+        _receipt, receipt_bytes = authority_conformance_document(
+            binding,
+            constitution,
+            evaluator_components,
+        )
+        receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+        receipt_path.parent.mkdir(parents=True, exist_ok=True)
+        receipt_path.write_bytes(receipt_bytes)
+
+    return binding
+
+
+def replace_spec000_metadata(root: Path, key: str, value: str) -> None:
+    path = root / "docs/specs/SPEC-000-program-constitution.md"
+    text = path.read_text(encoding="utf-8")
+    prefix = f"{key}: "
+    lines = text.splitlines(keepends=True)
+    matches = [index for index, line in enumerate(lines) if line.startswith(prefix)]
+    if len(matches) != 1:
+        raise AssertionError(f"expected one {key!r} metadata line, found {len(matches)}")
+    newline = "\n" if lines[matches[0]].endswith("\n") else ""
+    lines[matches[0]] = f"{prefix}{value}{newline}"
+    path.write_text("".join(lines), encoding="utf-8")
+
+
+def remove_spec000_metadata(root: Path, key: str) -> None:
+    path = root / "docs/specs/SPEC-000-program-constitution.md"
+    lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+    prefix = f"{key}: "
+    matches = [index for index, line in enumerate(lines) if line.startswith(prefix)]
+    if len(matches) != 1:
+        raise AssertionError(f"expected one {key!r} metadata line, found {len(matches)}")
+    del lines[matches[0]]
+    path.write_text("".join(lines), encoding="utf-8")
+
+
+def replace_spec004_status(root: Path, status: str) -> None:
+    path = root / "docs/specs/SPEC-004-event-journal.md"
+    text = path.read_text(encoding="utf-8")
+    text = text.replace("Status: draft", f"Status: {status}", 1)
+    text = text.replace(
+        "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003\n",
+        "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003\n"
+        "Dependency revisions: SPEC-000@2, SPEC-001@1, SPEC-002@1, SPEC-003@1\n",
+        1,
+    )
+    path.write_text(text, encoding="utf-8")
 
 
 class RepositoryInventoryTests(unittest.TestCase):
@@ -119,6 +308,169 @@ class RepositoryInventoryTests(unittest.TestCase):
         inventory = builder.build()
         self.assertEqual(builder.findings, [])
         self.assertEqual(inventory["unresolved_references"], [])
+
+    def test_authority_schema_is_canonical_meta_valid_and_matches_instances(self) -> None:
+        schema_path = ROOT / AUTHORITY_VOCABULARY_SCHEMA_PATH
+        exact_bytes = schema_path.read_bytes()
+        schema = json.loads(exact_bytes)
+        self.assertEqual(exact_bytes, canonical_json(schema))
+        Draft202012Validator.check_schema(schema)
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
+        registry, fixture, _registry_bytes, _fixture_bytes = authority_documents()
+        validator.validate(registry)
+        validator.validate(fixture)
+
+        binding = load_authority_vocabulary_schema(ROOT)
+        self.assertEqual(binding.path, AUTHORITY_VOCABULARY_SCHEMA_PATH)
+        self.assertEqual(binding.schema_id, AUTHORITY_VOCABULARY_SCHEMA_ID)
+        self.assertEqual(binding.schema_version, AUTHORITY_VOCABULARY_SCHEMA_VERSION)
+        self.assertEqual(
+            binding.digest,
+            f"sha256:{hashlib.sha256(exact_bytes).hexdigest()}",
+        )
+
+    def test_authority_schema_rejects_closed_shape_and_scalar_mutations(self) -> None:
+        schema = json.loads(
+            (ROOT / AUTHORITY_VOCABULARY_SCHEMA_PATH).read_text(encoding="utf-8")
+        )
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
+        registry, fixture, _registry_bytes, _fixture_bytes = authority_documents()
+
+        empty_dependency_fixture = json.loads(json.dumps(fixture))
+        empty_dependency_fixture["entries"][0]["cases"][0]["dependencies"] = []
+        validator.validate(empty_dependency_fixture)
+        empty_guard_fixture = json.loads(json.dumps(fixture))
+        empty_guard_fixture["entries"][0]["cases"][0]["context"] = {
+            "bounded_text": ""
+        }
+        validator.validate(empty_guard_fixture)
+
+        mutations: list[tuple[str, dict[str, object]]] = []
+        extra_root = json.loads(json.dumps(registry))
+        extra_root["unreviewed"] = True
+        mutations.append(("extra_root", extra_root))
+
+        legacy_entry = json.loads(json.dumps(registry))
+        first_entry = legacy_entry["entries"][0]
+        first_entry["actor_classes"] = ["human"]
+        first_entry.pop("actor_bindings")
+        mutations.append(("legacy_entry", legacy_entry))
+
+        empty_predicates = json.loads(json.dumps(registry))
+        empty_predicates["entries"][0]["actor_bindings"][0]["predicates"] = []
+        mutations.append(("empty_predicates", empty_predicates))
+
+        boolean_effect = json.loads(json.dumps(registry))
+        boolean_effect["entries"][0]["max_effect"]["max_targets"] = True
+        mutations.append(("boolean_effect", boolean_effect))
+
+        unbounded_token = json.loads(json.dumps(registry))
+        unbounded_token["entries"][0]["action"] = "a" * 129
+        mutations.append(("unbounded_token", unbounded_token))
+
+        present_boolean = json.loads(json.dumps(registry))
+        present_boolean["entries"][0]["actor_bindings"][0]["predicates"] = [
+            {
+                "key": "required_flag",
+                "operator": "present",
+                "value_type": "boolean",
+            }
+        ]
+        mutations.append(("present_boolean", present_boolean))
+
+        present_with_value = json.loads(json.dumps(registry))
+        present_with_value["entries"][0]["actor_bindings"][0]["predicates"] = [
+            {
+                "key": "required_text",
+                "operator": "present",
+                "value_type": "string",
+                "value": "forbidden",
+            }
+        ]
+        mutations.append(("present_with_value", present_with_value))
+
+        wrong_equals_type = json.loads(json.dumps(registry))
+        wrong_equals_type["entries"][0]["actor_bindings"][0]["predicates"] = [
+            {
+                "key": "portable_count",
+                "operator": "equals",
+                "value_type": "integer",
+                "value": "1",
+            }
+        ]
+        mutations.append(("wrong_equals_type", wrong_equals_type))
+
+        invalid_digest = json.loads(json.dumps(registry))
+        invalid_digest["entries"][0]["actor_bindings"][0]["predicates"] = [
+            {
+                "key": "bound_digest",
+                "operator": "equals",
+                "value_type": "sha256_digest",
+                "value": "sha256:ABC",
+            }
+        ]
+        mutations.append(("invalid_digest", invalid_digest))
+
+        for name, value in [
+            ("invalid_calendar_date", "2026-02-31T00:00:00Z"),
+            ("invalid_non_leap_day", "2026-02-29T00:00:00Z"),
+            ("invalid_century_leap_day", "1900-02-29T00:00:00Z"),
+            ("invalid_thirty_day_month", "2026-04-31T00:00:00Z"),
+            ("invalid_year_zero", "0000-01-01T00:00:00Z"),
+        ]:
+            invalid_calendar_date = json.loads(json.dumps(registry))
+            invalid_calendar_date["entries"][0]["actor_bindings"][0]["predicates"] = [
+                {
+                    "key": "deadline",
+                    "operator": "equals",
+                    "value_type": "utc_datetime",
+                    "value": value,
+                }
+            ]
+            mutations.append((name, invalid_calendar_date))
+
+        edge_whitespace = json.loads(json.dumps(fixture))
+        edge_whitespace["entries"][0]["cases"][0]["context"] = {
+            "bounded_text": " leading"
+        }
+        mutations.append(("edge_whitespace", edge_whitespace))
+
+        control_character = json.loads(json.dumps(fixture))
+        control_character["entries"][0]["cases"][0]["context"] = {
+            "bounded_text": "invalid\u0085text"
+        }
+        mutations.append(("control_character", control_character))
+
+        for name, mutation in mutations:
+            with self.subTest(name=name):
+                self.assertFalse(validator.is_valid(mutation))
+
+    def test_authority_schema_has_dormant_inventory_identity(self) -> None:
+        builder = InventoryBuilder(ROOT)
+        inventory = builder.build()
+        self.assertEqual(builder.findings, [])
+        exact_bytes = (ROOT / AUTHORITY_VOCABULARY_SCHEMA_PATH).read_bytes()
+        digest = f"sha256:{hashlib.sha256(exact_bytes).hexdigest()}"
+        self.assertEqual(
+            inventory["artifacts"]["authority_contracts"],
+            {
+                "owner": "SPEC-000",
+                "count": 1,
+                "records": [
+                    {
+                        "id": "authority-vocabulary-schema@2.0.0",
+                        "kind": "AuthorityVocabularySchema",
+                        "path": AUTHORITY_VOCABULARY_SCHEMA_PATH,
+                        "schema_id": AUTHORITY_VOCABULARY_SCHEMA_ID,
+                        "version": AUTHORITY_VOCABULARY_SCHEMA_VERSION,
+                        "digest": digest,
+                        "binding_state": "dormant_unbound",
+                    }
+                ],
+            },
+        )
+        sources = {record["path"]: record for record in inventory["sources"]}
+        self.assertEqual(sources[AUTHORITY_VOCABULARY_SCHEMA_PATH]["digest"], digest)
 
     def test_two_builds_are_byte_identical(self) -> None:
         first = InventoryBuilder(ROOT).build()
@@ -158,6 +510,1349 @@ class RepositoryInventoryTests(unittest.TestCase):
         skill.write_text(skill.read_text(encoding="utf-8") + "\n", encoding="utf-8")
         second = InventoryBuilder(root).build()["source_tree_digest"]
         self.assertNotEqual(first, second)
+
+    def test_unregistered_root_benchmark_runner_file_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "researcher/benchmarks/sdk-runner/unregistered.env"
+        path.write_text("UNREGISTERED=true\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        inventory = builder.build()
+        self.assertIn(
+            ("UNREGISTERED_BENCHMARK_RUNNER_CONTRACT", path.relative_to(root).as_posix()),
+            {(finding.code, finding.path) for finding in builder.findings},
+        )
+        self.assertIn(path.relative_to(root).as_posix(), {source["path"] for source in inventory["sources"]})
+
+    def test_unregistered_nested_benchmark_runner_file_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "researcher/benchmarks/sdk-runner/tools/dist/unregistered.js"
+        path.parent.mkdir(parents=True)
+        path.write_text("export const unsafe = true;\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        inventory = builder.build()
+        self.assertIn(
+            ("UNREGISTERED_BENCHMARK_RUNNER_CONTRACT", path.relative_to(root).as_posix()),
+            {(finding.code, finding.path) for finding in builder.findings},
+        )
+        self.assertIn(path.relative_to(root).as_posix(), {source["path"] for source in inventory["sources"]})
+
+    def test_benchmark_runner_vendor_and_generated_roots_are_excluded(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        runner_dir = root / "researcher/benchmarks/sdk-runner"
+        paths = [runner_dir / "node_modules/vendor.js", runner_dir / "dist/generated.js"]
+        for path in paths:
+            path.parent.mkdir(parents=True)
+            path.write_text("generated\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        inventory = builder.build()
+        source_paths = {source["path"] for source in inventory["sources"]}
+        for path in paths:
+            self.assertNotIn(path.relative_to(root).as_posix(), source_paths)
+        self.assertNotIn(
+            "UNREGISTERED_BENCHMARK_RUNNER_CONTRACT",
+            {finding.code for finding in builder.findings},
+        )
+
+    def test_benchmark_methodology_change_updates_source_tree_digest(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()
+        path = root / "researcher/benchmarks/PLAN.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\nMethodology candidate.\n", encoding="utf-8")
+        after = InventoryBuilder(root).build()
+        before_records = {
+            record["id"]: record for record in before["artifacts"]["benchmark_runners"]["records"]
+        }
+        after_records = {
+            record["id"]: record for record in after["artifacts"]["benchmark_runners"]["records"]
+        }
+        self.assertNotEqual(before_records["methodology:PLAN.md"]["digest"], after_records["methodology:PLAN.md"]["digest"])
+        self.assertNotEqual(before["source_tree_digest"], after["source_tree_digest"])
+
+    def test_benchmark_stage_readmes_are_records_and_sources(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        records = {
+            record["id"]: record
+            for record in inventory["artifacts"]["benchmark_runners"]["records"]
+        }
+        expected = {
+            "methodology:router:README.md": "researcher/benchmarks/router/README.md",
+            "methodology:effectiveness:README.md": (
+                "researcher/benchmarks/effectiveness/README.md"
+            ),
+        }
+        source_paths = {source["path"] for source in inventory["sources"]}
+        for record_id, path in expected.items():
+            with self.subTest(record_id=record_id):
+                self.assertEqual(records[record_id]["path"], path)
+                self.assertIn(path, source_paths)
+
+    def test_benchmark_stage_readme_mutations_update_bound_digests(self) -> None:
+        cases = {
+            "methodology:router:README.md": "researcher/benchmarks/router/README.md",
+            "methodology:effectiveness:README.md": (
+                "researcher/benchmarks/effectiveness/README.md"
+            ),
+        }
+        for record_id, relative in cases.items():
+            with self.subTest(record_id=record_id):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                before = InventoryBuilder(root).build()
+                path = root / relative
+                path.write_text(
+                    path.read_text(encoding="utf-8") + "\nReview mutation.\n",
+                    encoding="utf-8",
+                )
+                after = InventoryBuilder(root).build()
+                before_records = {
+                    record["id"]: record
+                    for record in before["artifacts"]["benchmark_runners"]["records"]
+                }
+                after_records = {
+                    record["id"]: record
+                    for record in after["artifacts"]["benchmark_runners"]["records"]
+                }
+                before_sources = {source["path"]: source for source in before["sources"]}
+                after_sources = {source["path"]: source for source in after["sources"]}
+                self.assertNotEqual(
+                    before_records[record_id]["digest"],
+                    after_records[record_id]["digest"],
+                )
+                self.assertNotEqual(
+                    before_sources[relative]["digest"],
+                    after_sources[relative]["digest"],
+                )
+                self.assertNotEqual(before["source_tree_digest"], after["source_tree_digest"])
+
+    def test_benchmark_runner_status_fails_closed_with_live_execution_removed(self) -> None:
+        category = InventoryBuilder(ROOT).build()["artifacts"]["benchmark_runners"]
+        self.assertEqual(
+            category["status"],
+            {"router": "dry_run_only", "effectiveness": "scaffold_dry_run_only"},
+        )
+        private_substrate = {
+            "src:durableFs.test.ts",
+            "src:durableFs.ts",
+            "src:durableJson.test.ts",
+            "src:durableJson.ts",
+            "src:routerEngine.test.ts",
+            "src:routerEngine.ts",
+            "src:routerManifest.test.ts",
+            "src:routerManifest.ts",
+            "src:routerRunStore.test.ts",
+            "src:routerRunStore.ts",
+            "src:sourceFreeze.test.ts",
+            "src:sourceFreeze.ts",
+        }
+        self.assertTrue(
+            private_substrate.issubset({record["id"] for record in category["records"]})
+        )
+
+    def test_router_report_accounting_and_evidence_are_source_bound(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        validator_paths = {
+            record["path"] for record in inventory["artifacts"]["validators"]["records"]
+        }
+        support_paths = {
+            record["path"]
+            for record in inventory["artifacts"]["validators"]["support_files"]
+        }
+        self.assertIn("researcher/scripts/render_router_report.py", validator_paths)
+        self.assertIn(
+            "researcher/scripts/tests/test_render_router_report.py",
+            support_paths,
+        )
+
+    def test_authority_validator_ownership_and_sources_are_split_exactly(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        validators = {
+            record["id"]: record
+            for record in inventory["artifacts"]["validators"]["records"]
+        }
+        self.assertEqual(
+            validators["authority-policy-evaluator"],
+            {
+                "id": "authority-policy-evaluator",
+                "path": "researcher/scripts/governance_policy.py",
+                "owns": [
+                    "Constitution decision evaluation",
+                    "fail-closed policy rule matching",
+                ],
+                "digest": validators["authority-policy-evaluator"]["digest"],
+            },
+        )
+        self.assertEqual(
+            validators["authority-catalog-contract"],
+            {
+                "id": "authority-catalog-contract",
+                "path": "researcher/scripts/validate_authority_contract.py",
+                "owns": [
+                    "standalone authority schema, registry, fixture, and semantic profile validation",
+                    "structural authority-policy closure",
+                    "authority evaluator-bundle identity",
+                    "authority conformance receipt validation",
+                ],
+                "digest": validators["authority-catalog-contract"]["digest"],
+            },
+        )
+        self.assertEqual(
+            validators["specification-lifecycle"]["owns"],
+            [
+                "base-aware specification status transitions",
+                "accepted contract revision identity",
+                "promoted revision predecessor authority",
+                "terminal specification decisions",
+            ],
+        )
+        sources = {record["path"]: record for record in inventory["sources"]}
+        for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+            with self.subTest(relative=relative):
+                self.assertEqual(
+                    sources[relative]["digest"],
+                    f"sha256:{hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()}",
+                )
+
+    def test_authority_evaluator_mutations_update_inventory_source_identity(self) -> None:
+        executable_components = (
+            relative
+            for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS
+            if relative != AUTHORITY_VOCABULARY_SCHEMA_PATH
+        )
+        for relative in executable_components:
+            with self.subTest(relative=relative):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                before = InventoryBuilder(root).build()
+                path = root / relative
+                path.write_bytes(path.read_bytes() + b"\n# inventory mutation\n")
+                builder = InventoryBuilder(root)
+                after = builder.build()
+                self.assertEqual(builder.findings, [])
+                before_sources = {
+                    record["path"]: record for record in before["sources"]
+                }
+                after_sources = {
+                    record["path"]: record for record in after["sources"]
+                }
+                self.assertNotEqual(
+                    before_sources[relative]["digest"],
+                    after_sources[relative]["digest"],
+                )
+                self.assertNotEqual(
+                    before["source_tree_digest"],
+                    after["source_tree_digest"],
+                )
+
+    def test_dormant_authority_schema_mutation_fails_the_code_pin(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before_builder = InventoryBuilder(root)
+        before = before_builder.build()
+        self.assertEqual(before_builder.findings, [])
+
+        path = root / AUTHORITY_VOCABULARY_SCHEMA_PATH
+        schema = json.loads(path.read_text(encoding="utf-8"))
+        schema["$defs"]["token"]["description"] = "inventory mutation"
+        path.write_bytes(canonical_json(schema))
+
+        after_builder = InventoryBuilder(root)
+        after = after_builder.build()
+        self.assertIn(
+            "AUTHORITY_VOCABULARY_SCHEMA_INVALID",
+            {finding.code for finding in after_builder.findings},
+        )
+        self.assertEqual(after["artifacts"]["authority_contracts"]["count"], 0)
+        self.assertNotEqual(before["source_tree_digest"], after["source_tree_digest"])
+
+    def test_authority_schema_invalid_missing_and_symlink_fail_closed(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / AUTHORITY_VOCABULARY_SCHEMA_PATH
+        schema = json.loads(path.read_text(encoding="utf-8"))
+        schema["x-authority-schema-version"] = "2.0.1"
+        path.write_bytes(canonical_json(schema))
+        builder = InventoryBuilder(root)
+        inventory = builder.build()
+        self.assertIn(
+            "AUTHORITY_VOCABULARY_SCHEMA_INVALID",
+            {finding.code for finding in builder.findings},
+        )
+        self.assertEqual(inventory["artifacts"]["authority_contracts"]["count"], 0)
+
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        (root / AUTHORITY_VOCABULARY_SCHEMA_PATH).unlink()
+        codes = finding_codes(root)
+        self.assertIn("AUTHORITY_VOCABULARY_SCHEMA_INVALID", codes)
+        self.assertIn("PATH_ESCAPE", codes)
+
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / AUTHORITY_VOCABULARY_SCHEMA_PATH
+        detached = path.with_name("authority-vocabulary.detached.schema.json")
+        path.rename(detached)
+        path.symlink_to(detached.name)
+        codes = finding_codes(root)
+        self.assertIn("AUTHORITY_VOCABULARY_SCHEMA_INVALID", codes)
+        self.assertIn("PATH_ESCAPE", codes)
+
+    def test_authority_schema_loader_and_source_digest_must_match(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        binding = load_authority_vocabulary_schema(root)
+        mismatched = mock.Mock(
+            path=binding.path,
+            digest="sha256:" + "0" * 64,
+            schema_id=binding.schema_id,
+            schema_version=binding.schema_version,
+        )
+        with mock.patch(
+            "researcher.scripts.build_inventory.load_authority_vocabulary_schema",
+            return_value=mismatched,
+        ):
+            builder = InventoryBuilder(root)
+            inventory = builder.build()
+        self.assertIn(
+            "AUTHORITY_VOCABULARY_SCHEMA_INVALID",
+            {finding.code for finding in builder.findings},
+        )
+        self.assertEqual(inventory["artifacts"]["authority_contracts"]["count"], 0)
+
+    def test_specification_program_is_inventory_backed(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        specifications = inventory["artifacts"]["specifications"]
+        self.assertEqual(specifications["count"], 27)
+        self.assertEqual(
+            {record["id"] for record in specifications["records"]},
+            {f"SPEC-{number:03d}" for number in range(27)},
+        )
+
+    def test_architecture_decisions_are_inventory_backed(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        decisions = inventory["artifacts"]["architecture_decisions"]
+        self.assertEqual(decisions["count"], 10)
+        self.assertEqual(
+            {record["id"] for record in decisions["records"]},
+            {f"ADR-{number:04d}" for number in range(1, 11)},
+        )
+
+    def test_orchestration_briefs_are_inventory_backed_and_non_authoritative(self) -> None:
+        inventory = InventoryBuilder(ROOT).build()
+        briefs = inventory["artifacts"]["orchestration_briefs"]
+        self.assertEqual(briefs["count"], 7)
+        self.assertEqual(
+            briefs["owner"],
+            "SPEC-005, SPEC-012, SPEC-013, and SPEC-014 bootstrap proposal",
+        )
+        self.assertEqual(briefs["authority"], "none")
+        self.assertEqual(briefs["activation_ceiling"], "supervised_proposal")
+        self.assertEqual(briefs["enforcement_boundary"], "external_harness")
+        self.assertEqual(briefs["attempt_manifest_instance_classification"], "private")
+        self.assertEqual(
+            briefs["model_visible_launch"],
+            "allowlisted_new_identity_projection_only",
+        )
+        self.assertEqual(
+            briefs["public_projection"],
+            "allowlisted_new_identity_projection_only",
+        )
+        self.assertEqual(
+            briefs["checkpoint_contract"],
+            "SPEC-005 CheckpointEnvelope with SPEC-012 ContextCheckpointPayload",
+        )
+        self.assertEqual(briefs["attempt_separation"], "builder_and_verifier_distinct")
+        self.assertTrue(briefs["closed_prompt_namespace"])
+        self.assertTrue(all(record["status"] == "bootstrap_proposal" for record in briefs["records"]))
+        roles = {record["role"] for record in briefs["records"]}
+        self.assertEqual(
+            roles,
+            {
+                "attempt_manifest_template",
+                "bundle_contract",
+                "readiness_review",
+                "resume_template",
+                "root_brief",
+                "verifier_brief",
+                "work_brief_template",
+            },
+        )
+        source_paths = {record["path"] for record in inventory["sources"]}
+        self.assertTrue({record["path"] for record in briefs["records"]} <= source_paths)
+
+    def test_orchestration_brief_change_updates_source_tree_digest(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        path = root / "researcher/orchestration/prompts/organization-root-brief.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+        after = InventoryBuilder(root).build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+
+    def test_orchestration_briefs_avoid_self_hashes_and_bind_verifier_criteria(self) -> None:
+        resume = (
+            ROOT / "researcher/orchestration/prompts/resume-brief.template.md"
+        ).read_text(encoding="utf-8")
+        verifier = (
+            ROOT / "researcher/orchestration/prompts/fresh-verifier-brief.md"
+        ).read_text(encoding="utf-8")
+        work_brief = (
+            ROOT / "researcher/orchestration/prompts/spec-work-brief.template.md"
+        ).read_text(encoding="utf-8")
+
+        envelope_block = resume.split("### SPEC-005 CheckpointEnvelope", 1)[1].split(
+            "```", 2
+        )[1]
+        self.assertNotIn("checkpoint_envelope_digest:", envelope_block)
+        self.assertIn(
+            "It is never a member of the envelope it hashes.",
+            resume,
+        )
+
+        ready_predicates = verifier.split("`ready` is permitted if and only if", 1)[1]
+        self.assertIn("criteria digest equals the exact criteria contract", ready_predicates)
+        self.assertIn("criteria-derivation receipt", ready_predicates)
+        self.assertIn("evaluator epoch, policy, rubric, thresholds", ready_predicates)
+        self.assertIn("required_passing_conclusion", ready_predicates)
+        self.assertIn("can never yield `ready`", ready_predicates)
+
+        self.assertNotIn("scheduled|decision_available", work_brief)
+        self.assertIn("event_driven_single_delivery_no_progress_polling", work_brief)
+        self.assertIn("never exposes hidden-evaluation scheduling or progress", work_brief)
+
+    def test_unregistered_orchestration_brief_is_reported_and_source_bound(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        extra = root / "researcher/orchestration/prompts/shadow-brief.md"
+        extra.write_text("# Shadow brief\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn(
+            "UNREGISTERED_ORCHESTRATION_BRIEF",
+            {finding.code for finding in builder.findings},
+        )
+
+    def test_architecture_decision_change_updates_source_tree_digest(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        path = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\nAmendment candidate.\n", encoding="utf-8")
+        after = InventoryBuilder(root).build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+
+    def test_unindexed_architecture_decision_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        source = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        extra = root / "docs/decisions/0007-unindexed.md"
+        extra.write_text(
+            source.read_text(encoding="utf-8")
+            .replace("ADR-0006", "ADR-0007", 1)
+            .replace("SPEC-000, SPEC-002", "SPEC-000", 1),
+            encoding="utf-8",
+        )
+        self.assertIn("MISSING_ADR_INDEX_LINK", finding_codes(root))
+
+    def test_hidden_architecture_decision_link_cannot_satisfy_index_coverage(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/README.md"
+        row = (
+            "- [ADR-0006: Validate the complete public release boundary]"
+            "(0006-validate-public-release-boundary.md)"
+        )
+        text = path.read_text(encoding="utf-8").replace(
+            row,
+            f"<!-- {row} -->\n   ```markdown\n{row}\n   ```",
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("MISSING_ADR_INDEX_LINK", finding_codes(root))
+
+    def test_case_variant_architecture_decision_extension_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        source = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        invalid = root / "docs/decisions/0007-shadow.MD"
+        invalid.write_text(
+            source.read_text(encoding="utf-8").replace("ADR-0006", "ADR-0007", 1),
+            encoding="utf-8",
+        )
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_ADR_FILENAME", {finding.code for finding in builder.findings})
+
+    def test_alternate_architecture_decision_extension_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        invalid = root / "docs/decisions/0007-shadow.markdown"
+        invalid.write_text("# ADR-0007: Shadow decision\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_ADR_FILENAME", {finding.code for finding in builder.findings})
+
+    def test_raw_html_cannot_hide_architecture_decision_index(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/README.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "## Records",
+            "<pre>\n## Records",
+            1,
+        )
+        path.write_text(text + "\n</pre>\n", encoding="utf-8")
+        self.assertIn("INVALID_ADR_INDEX", finding_codes(root))
+
+    def test_architecture_decision_metadata_is_strict_and_calendar_valid(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        text = path.read_text(encoding="utf-8")
+        text = text.replace("- Status: accepted", "- Status: accepted\n- Status: proposed", 1)
+        text = text.replace("- Date: 2026-08-10", "- Date: 2026-99-99", 1)
+        path.write_text(text, encoding="utf-8")
+        codes = finding_codes(root)
+        self.assertIn("INVALID_ADR_METADATA", codes)
+        self.assertIn("INVALID_ADR_DATE", codes)
+
+    def test_architecture_decision_supersession_is_explicit_and_resolved(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace(
+            "- Specs: SPEC-000, SPEC-002",
+            "- Specs: SPEC-000, SPEC-002\n- Supersedes: ADR-9999",
+            1,
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("DANGLING_ADR_SUPERSESSION", finding_codes(root))
+
+    def test_adr_supersession_must_point_backward(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        decisions = root / "docs/decisions"
+        first = decisions / "0007-first.md"
+        second = decisions / "0008-second.md"
+        first.write_text(
+            "# ADR-0007: First\n\n- Status: accepted\n- Date: 2026-08-11\n"
+            "- Spec: SPEC-004\n- Supersedes: ADR-0008\n\n## Decision\n\nFirst.\n",
+            encoding="utf-8",
+        )
+        second.write_text(
+            "# ADR-0008: Second\n\n- Status: accepted\n- Date: 2026-08-11\n"
+            "- Spec: SPEC-004\n- Supersedes: ADR-0007\n\n## Decision\n\nSecond.\n",
+            encoding="utf-8",
+        )
+        index = decisions / "README.md"
+        index.write_text(
+            index.read_text(encoding="utf-8")
+            + "\n- [ADR-0007: First](0007-first.md)\n"
+            + "- [ADR-0008: Second](0008-second.md)\n",
+            encoding="utf-8",
+        )
+        self.assertIn("INVALID_ADR_SUPERSESSION", finding_codes(root))
+
+    def test_spec_adoption_decision_must_be_accepted(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/0005-canonical-specification-program.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace("- Status: accepted", "- Status: proposed", 1)
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("UNACCEPTED_SPEC_ADOPTION_DECISION", finding_codes(root))
+
+    def test_spec_adoption_decision_must_scope_the_specification(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/0005-canonical-specification-program.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace(
+            "- Specs: SPEC-000 through SPEC-026",
+            "- Specs: SPEC-004 through SPEC-026",
+            1,
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("OUT_OF_SCOPE_SPEC_ADOPTION_DECISION", finding_codes(root))
+
+    def test_spec_heading_must_match_filename(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        path.write_text(
+            path.read_text(encoding="utf-8").replace("# SPEC-004:", "# SPEC-005:", 1),
+            encoding="utf-8",
+        )
+        self.assertIn("SPEC_FILENAME_MISMATCH", finding_codes(root))
+
+    def test_duplicate_specification_id_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        source = root / "docs/specs/SPEC-004-event-journal.md"
+        duplicate = root / "docs/specs/SPEC-027-duplicate.md"
+        shutil.copy2(source, duplicate)
+        self.assertIn("DUPLICATE_SPEC_ID", finding_codes(root))
+
+    def test_nonconforming_specification_filename_is_not_silently_ignored(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        source = root / "docs/specs/SPEC-026-training-rl-lab.md"
+        invalid = root / "docs/specs/SPEC-027.md"
+        invalid.write_text(
+            source.read_text(encoding="utf-8").replace("SPEC-026", "SPEC-027"),
+            encoding="utf-8",
+        )
+        self.assertIn("INVALID_SPEC_FILENAME", finding_codes(root))
+
+    def test_lowercase_specification_filename_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        source = root / "docs/specs/SPEC-026-training-rl-lab.md"
+        invalid = root / "docs/specs/spec-027-shadow.md"
+        invalid.write_text(
+            source.read_text(encoding="utf-8").replace("SPEC-026", "SPEC-027"),
+            encoding="utf-8",
+        )
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_SPEC_FILENAME", {finding.code for finding in builder.findings})
+
+    def test_case_variant_specification_extension_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        source = root / "docs/specs/SPEC-026-training-rl-lab.md"
+        invalid = root / "docs/specs/SPEC-027-shadow.MD"
+        invalid.write_text(
+            source.read_text(encoding="utf-8").replace("SPEC-026", "SPEC-027"),
+            encoding="utf-8",
+        )
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_SPEC_FILENAME", {finding.code for finding in builder.findings})
+
+    def test_alternate_specification_extension_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        invalid = root / "docs/specs/SPEC-027-shadow.markdown"
+        invalid.write_text("# SPEC-027: Shadow specification\n", encoding="utf-8")
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_SPEC_FILENAME", {finding.code for finding in builder.findings})
+
+    def test_raw_html_cannot_hide_specification_index(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "## Specification index",
+            "<pre>\n## Specification index",
+            1,
+        )
+        path.write_text(text + "\n</pre>\n", encoding="utf-8")
+        self.assertIn("INVALID_SPEC_INDEX", finding_codes(root))
+
+    def test_nested_specification_is_source_bound_and_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        before = InventoryBuilder(root).build()["source_tree_digest"]
+        source = root / "docs/specs/SPEC-004-event-journal.md"
+        nested = root / "docs/specs/archive/SPEC-004-conflict.md"
+        nested.parent.mkdir(parents=True)
+        shutil.copy2(source, nested)
+        builder = InventoryBuilder(root)
+        after = builder.build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+        self.assertIn("INVALID_SPEC_PATH", {finding.code for finding in builder.findings})
+
+    def test_invalid_specification_metadata_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        text = path.read_text(encoding="utf-8")
+        text = text.replace("Status: draft", "Status: maybe", 1)
+        text = text.replace("Classification: split", "Classification: unknown", 1)
+        text = text.replace("Wave: 1", "Wave: nine", 1)
+        path.write_text(text, encoding="utf-8")
+        codes = finding_codes(root)
+        self.assertIn("INVALID_SPEC_STATUS", codes)
+        self.assertIn("INVALID_SPEC_CLASSIFICATION", codes)
+        self.assertIn("INVALID_SPEC_WAVE", codes)
+
+    def test_specification_revision_metadata_is_strict(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        text = path.read_text(encoding="utf-8")
+        text = text.replace("Revision: 1", "Revision: 2", 1)
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("INVALID_SPEC_REVISION", finding_codes(root))
+
+    def test_specification_metadata_serialization_is_canonical(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace("Status: draft", "Status:    draft   ", 1)
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("INVALID_SPEC_METADATA_FORMAT", finding_codes(root))
+
+    def test_deferred_training_activation_is_revision_bound(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-026-training-rl-lab.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace("Activation: deferred", "Activation: active", 1)
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("INVALID_SPEC_ACTIVATION", finding_codes(root))
+
+    def test_active_specification_binds_every_direct_dependency_revision(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-002-public-private-boundary.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = (
+            original.replace("Status: amended\n", "Status: implemented\n", 1)
+            .replace(
+                "Lifecycle decision: ADR-0010\nReplacement: SPEC-002@2\n",
+                "",
+                1,
+            )
+            .replace(
+                "Dependency revisions: SPEC-000@1\n",
+                "Dependency revisions: none\n",
+                1,
+            )
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertEqual(
+            finding_codes(root),
+            {"SPEC_DEPENDENCY_REVISION_MISMATCH"},
+        )
+
+    def test_downstream_active_spec_requires_authority_vocabulary_floor(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace("Status: draft", "Status: architecture_reviewed", 1)
+        mutated = mutated.replace(
+            "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003\n",
+            "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003\n"
+            "Dependency revisions: SPEC-000@1, SPEC-001@1, SPEC-002@1, SPEC-003@1\n",
+            1,
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn(
+            "SPEC_AUTHORITY_VOCABULARY_NOT_READY",
+            finding_codes(root),
+        )
+
+    def test_spec000_revision_two_requires_registry_and_fixture(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_generic_spec000_revision_two(root)
+        self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
+        for relative in (
+            AUTHORITY_VOCABULARY_PATH,
+            AUTHORITY_FIXTURE_MANIFEST_PATH,
+        ):
+            with self.subTest(missing=relative):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                write_authority_revision(root)
+                (root / relative).unlink()
+                self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
+    def test_unowned_and_premature_authority_artifacts_are_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        _registry, _fixture, registry_bytes, fixture_bytes = authority_documents()
+        registry_path = root / AUTHORITY_VOCABULARY_PATH
+        fixture_path = root / AUTHORITY_FIXTURE_MANIFEST_PATH
+        registry_path.parent.mkdir(parents=True, exist_ok=True)
+        fixture_path.parent.mkdir(parents=True, exist_ok=True)
+        registry_path.write_bytes(registry_bytes)
+        fixture_path.write_bytes(fixture_bytes)
+        self.assertIn("UNEXPECTED_AUTHORITY_ARTIFACT", finding_codes(root))
+
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root, status="accepted", include_conformance=True)
+        self.assertIn("UNEXPECTED_AUTHORITY_ARTIFACT", finding_codes(root))
+
+    def test_authority_metadata_path_digest_and_version_are_exact(self) -> None:
+        mutations = (
+            ("Authority vocabulary schema", "governance/detached-authority.schema.json"),
+            ("Authority vocabulary schema digest", "sha256:" + "0" * 64),
+            ("Authority vocabulary schema version", "2.0.1"),
+            ("Authority vocabulary schema version", "02.0.0"),
+            ("Authority vocabulary", "governance/detached-authority.json"),
+            ("Authority vocabulary digest", "sha256:" + "0" * 64),
+            ("Authority vocabulary version", "3"),
+            ("Authority vocabulary version", "02"),
+        )
+        for key, value in mutations:
+            with self.subTest(key=key, value=value):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                write_authority_revision(root)
+                replace_spec000_metadata(root, key, value)
+                self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
+    def test_authority_schema_and_registry_metadata_are_atomic(self) -> None:
+        metadata_keys = (
+            "Authority vocabulary schema",
+            "Authority vocabulary schema digest",
+            "Authority vocabulary schema version",
+            "Authority vocabulary",
+            "Authority vocabulary digest",
+            "Authority vocabulary version",
+        )
+        for key in metadata_keys:
+            with self.subTest(missing=key):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                write_authority_revision(root)
+                remove_spec000_metadata(root, key)
+                builder = InventoryBuilder(root)
+                inventory = builder.build()
+                self.assertIn(
+                    "SPEC_AUTHORITY_VOCABULARY_INVALID",
+                    {finding.code for finding in builder.findings},
+                )
+                self.assertEqual(
+                    inventory["artifacts"]["authority_contracts"]["records"][0][
+                        "binding_state"
+                    ],
+                    "dormant_unbound",
+                )
+
+    def test_authority_registry_symlink_is_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root)
+        registry_path = root / AUTHORITY_VOCABULARY_PATH
+        detached_path = registry_path.with_name("authority-vocabulary-detached.json")
+        registry_path.rename(detached_path)
+        registry_path.symlink_to(detached_path.name)
+        codes = finding_codes(root)
+        self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", codes)
+        self.assertIn("PATH_ESCAPE", codes)
+
+    def test_noncanonical_authority_registry_json_is_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root)
+        registry_path = root / AUTHORITY_VOCABULARY_PATH
+        document = json.loads(registry_path.read_text(encoding="utf-8"))
+        noncanonical_bytes = json.dumps(document, sort_keys=True).encode("utf-8")
+        registry_path.write_bytes(noncanonical_bytes)
+        replace_spec000_metadata(
+            root,
+            "Authority vocabulary digest",
+            f"sha256:{hashlib.sha256(noncanonical_bytes).hexdigest()}",
+        )
+        self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
+    def test_authority_registry_semantic_drift_is_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root)
+        registry_path = root / AUTHORITY_VOCABULARY_PATH
+        document = json.loads(registry_path.read_text(encoding="utf-8"))
+        document["entries"][0]["actor_classes"] = ["invented_actor"]
+        mutated_bytes = canonical_json(document)
+        registry_path.write_bytes(mutated_bytes)
+        replace_spec000_metadata(
+            root,
+            "Authority vocabulary digest",
+            f"sha256:{hashlib.sha256(mutated_bytes).hexdigest()}",
+        )
+        self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
+    def test_authority_fixture_semantic_drift_is_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root)
+        fixture_path = root / AUTHORITY_FIXTURE_MANIFEST_PATH
+        fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
+        fixture["entries"][0]["cases"].pop()
+        fixture_bytes = canonical_json(fixture)
+        fixture_path.write_bytes(fixture_bytes)
+
+        registry_path = root / AUTHORITY_VOCABULARY_PATH
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        registry["fixture_manifest"]["digest"] = (
+            f"sha256:{hashlib.sha256(fixture_bytes).hexdigest()}"
+        )
+        registry_bytes = canonical_json(registry)
+        registry_path.write_bytes(registry_bytes)
+        replace_spec000_metadata(
+            root,
+            "Authority vocabulary digest",
+            f"sha256:{hashlib.sha256(registry_bytes).hexdigest()}",
+        )
+        self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
+    def test_implemented_authority_revision_requires_conformance(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root, status="implemented")
+        self.assertIn(
+            "SPEC_AUTHORITY_POLICY_CONFORMANCE_REQUIRED",
+            finding_codes(root),
+        )
+
+    def test_authority_policy_and_conformance_drift_are_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root, status="implemented", include_conformance=True)
+        policy_path = root / AUTHORITY_CONSTITUTION_POLICY_PATH
+        policy_path.write_text(
+            policy_path.read_text(encoding="utf-8") + "\n",
+            encoding="utf-8",
+        )
+        self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root, status="implemented", include_conformance=True)
+        receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        receipt["case_count"] += 1
+        receipt_path.write_bytes(canonical_json(receipt))
+        self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root, status="implemented", include_conformance=True)
+        receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        receipt["validator_bundle"]["digest"] = "sha256:" + "0" * 64
+        receipt_path.write_bytes(canonical_json(receipt))
+        self.assertIn("SPEC_AUTHORITY_VOCABULARY_INVALID", finding_codes(root))
+
+    def test_authority_inputs_are_inventory_source_bound(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        binding = write_authority_revision(
+            root,
+            status="implemented",
+            include_conformance=True,
+        )
+        builder = InventoryBuilder(root)
+        inventory = builder.build()
+        self.assertEqual(builder.findings, [])
+        sources = {record["path"]: record for record in inventory["sources"]}
+        expected_paths = {
+            AUTHORITY_VOCABULARY_PATH,
+            AUTHORITY_FIXTURE_MANIFEST_PATH,
+            AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+            AUTHORITY_CONSTITUTION_POLICY_PATH,
+            *AUTHORITY_EVALUATOR_COMPONENT_PATHS,
+        }
+        self.assertTrue(expected_paths.issubset(sources))
+        for relative in expected_paths:
+            exact_bytes = (root / relative).read_bytes()
+            self.assertEqual(
+                sources[relative]["digest"],
+                f"sha256:{hashlib.sha256(exact_bytes).hexdigest()}",
+            )
+        spec000 = next(
+            record
+            for record in inventory["artifacts"]["specifications"]["records"]
+            if record["id"] == "SPEC-000"
+        )
+        authority_record = spec000["authority_vocabulary"]
+        self.assertEqual(
+            authority_record["schema"],
+            {
+                "path": binding.schema_path,
+                "digest": binding.schema_digest,
+                "version": binding.schema_version,
+            },
+        )
+        self.assertEqual(authority_record["digest"], binding.digest)
+        self.assertEqual(
+            authority_record["fixture_manifest"]["digest"],
+            binding.fixture_manifest_digest,
+        )
+        self.assertIn("policy_conformance", authority_record)
+        self.assertEqual(
+            authority_record["policy_conformance"]["scope"],
+            "offline_class_policy_conformance",
+        )
+        self.assertEqual(
+            authority_record["policy_conformance"]["runtime_authority"],
+            "none",
+        )
+        expected_bundle = build_authority_evaluator_bundle(
+            tuple(
+                (relative, (root / relative).read_bytes())
+                for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS
+            )
+        )
+        self.assertEqual(expected_bundle.version, AUTHORITY_EVALUATOR_BUNDLE_VERSION)
+        self.assertEqual(
+            tuple(component.path for component in expected_bundle.components),
+            AUTHORITY_EVALUATOR_COMPONENT_PATHS,
+        )
+        self.assertEqual(
+            authority_record["policy_conformance"]["validator_bundle"],
+            expected_bundle.to_receipt_value(),
+        )
+        self.assertEqual(
+            inventory["artifacts"]["authority_contracts"]["records"][0][
+                "binding_state"
+            ],
+            "bound",
+        )
+
+        before = inventory["source_tree_digest"]
+        receipt_path = root / AUTHORITY_CONFORMANCE_RECEIPT_PATH
+        receipt_path.write_text(
+            receipt_path.read_text(encoding="utf-8") + "\n",
+            encoding="utf-8",
+        )
+        after = InventoryBuilder(root).build()["source_tree_digest"]
+        self.assertNotEqual(before, after)
+
+    def test_bound_authority_evaluator_mutation_invalidates_receipt_and_source_tree(self) -> None:
+        for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+            with self.subTest(relative=relative):
+                temporary, root = self.fixture()
+                self.addCleanup(temporary.cleanup)
+                write_authority_revision(
+                    root,
+                    status="implemented",
+                    include_conformance=True,
+                )
+                before_builder = InventoryBuilder(root)
+                before = before_builder.build()
+                self.assertEqual(before_builder.findings, [])
+
+                component = root / relative
+                component.write_bytes(component.read_bytes() + b"\n# changed component\n")
+                after_builder = InventoryBuilder(root)
+                after = after_builder.build()
+                self.assertIn(
+                    "SPEC_AUTHORITY_VOCABULARY_INVALID",
+                    {finding.code for finding in after_builder.findings},
+                )
+                after_sources = {
+                    record["path"]: record for record in after["sources"]
+                }
+                self.assertEqual(
+                    after_sources[relative]["digest"],
+                    f"sha256:{hashlib.sha256(component.read_bytes()).hexdigest()}",
+                )
+                self.assertNotEqual(
+                    before["source_tree_digest"],
+                    after["source_tree_digest"],
+                )
+
+    def test_downstream_stage_gates_use_validated_authority_binding(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root)
+        replace_spec004_status(root, "architecture_reviewed")
+        builder = InventoryBuilder(root)
+        builder.build()
+        self.assertEqual(builder.findings, [])
+
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(root)
+        replace_spec004_status(root, "implemented")
+        self.assertIn(
+            "SPEC_AUTHORITY_POLICY_CONFORMANCE_REQUIRED",
+            finding_codes(root),
+        )
+
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        write_authority_revision(
+            root,
+            status="implemented",
+            include_conformance=True,
+        )
+        replace_spec004_status(root, "implemented")
+        builder = InventoryBuilder(root)
+        builder.build()
+        self.assertEqual(builder.findings, [])
+
+    def test_terminal_specification_requires_decision_and_replacement(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "Status: draft", "Status: superseded", 1
+        )
+        path.write_text(text, encoding="utf-8")
+        result = finding_codes(root)
+        self.assertIn("MISSING_SPEC_LIFECYCLE_DECISION", result)
+        self.assertIn("MISSING_SPEC_REPLACEMENT", result)
+
+    def test_active_specification_cannot_claim_a_lifecycle_decision(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace(
+            "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003\n",
+            "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003\n"
+            "Lifecycle decision: ADR-0006\n",
+            1,
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("INVALID_SPEC_LIFECYCLE_DECISION", finding_codes(root))
+
+    def test_terminal_specification_decision_binds_exact_revision_and_action(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace("Status: draft", "Status: superseded", 1).replace(
+            "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003\n",
+            "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003\n"
+            "Lifecycle decision: ADR-0005\nReplacement: SPEC-004@2\n",
+            1,
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("SPEC_LIFECYCLE_DECISION_MISMATCH", finding_codes(root))
+
+    def test_malformed_adr_lifecycle_transition_is_rejected(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace(
+            "- Specs: SPEC-000, SPEC-002\n",
+            "- Specs: SPEC-000, SPEC-002\n"
+            "- Lifecycle transition: SPEC-002@1 -> superseded -> SPEC-999@9\n",
+            1,
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("INVALID_ADR_LIFECYCLE_TRANSITION", finding_codes(root))
+
+    def test_lifecycle_transition_adr_has_one_exact_spec_scope(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/decisions/0006-validate-public-release-boundary.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace(
+            "- Specs: SPEC-000, SPEC-002\n",
+            "- Specs: SPEC-000, SPEC-002\n"
+            "- Lifecycle transition: SPEC-002@1 -> superseded -> SPEC-002@2\n",
+            1,
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn(
+            "INVALID_ADR_LIFECYCLE_TRANSITION_SCOPE",
+            finding_codes(root),
+        )
+
+    def test_dangling_specification_dependency_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace(
+            "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003",
+            "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-999",
+            1,
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("DANGLING_SPEC_DEPENDENCY", finding_codes(root))
+
+    def test_duplicate_specification_dependency_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-004-event-journal.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace(
+            "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003",
+            "Depends on: SPEC-000, SPEC-001, SPEC-002, SPEC-003, SPEC-003",
+            1,
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("DUPLICATE_SPEC_DEPENDENCY", finding_codes(root))
+
+    def test_specification_dependency_cycle_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/SPEC-000-program-constitution.md"
+        path.write_text(
+            path.read_text(encoding="utf-8").replace("Depends on: none", "Depends on: SPEC-004", 1),
+            encoding="utf-8",
+        )
+        codes = finding_codes(root)
+        self.assertIn("SPEC_DEPENDENCY_CYCLE", codes)
+        self.assertIn("INVALID_SPEC_WAVE", codes)
+
+    def test_missing_and_duplicate_specification_index_links_are_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8")
+        missing_link = "[SPEC-004](SPEC-004-event-journal.md)"
+        duplicate_row = (
+            "| [SPEC-005](SPEC-005-work-orders.md) | Work orders and recovery | "
+            "Queue, immutable attempts, leases, retries, checkpoints, and recovery |"
+        )
+        text = text.replace(missing_link, "SPEC-004", 1)
+        text = text.replace(duplicate_row, f"{duplicate_row}\n{duplicate_row}", 1)
+        path.write_text(text, encoding="utf-8")
+        codes = finding_codes(root)
+        self.assertIn("MISSING_SPEC_INDEX_LINK", codes)
+        self.assertIn("DUPLICATE_SPEC_INDEX_LINK", codes)
+
+    def test_comments_and_fenced_code_cannot_satisfy_spec_index_coverage(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8")
+        row = (
+            "| [SPEC-004](SPEC-004-event-journal.md) | Event journal and projections | "
+            "Append-only journal plus reproducible projectors |"
+        )
+        text = text.replace(row, "| SPEC-004 | Event journal | Missing visible link |", 1)
+        hidden_row = f"<!--\n{row}\n-->\n   ```markdown\n{row}\n   ```\n"
+        text = text.replace("## Critical path", f"{hidden_row}\n## Critical path", 1)
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("MISSING_SPEC_INDEX_LINK", finding_codes(root))
+
+    def test_unclosed_fence_invalidates_specification_index(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "## Critical path",
+            "   ```markdown\n## Critical path",
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("INVALID_SPEC_INDEX", finding_codes(root))
+
+    def test_unindexed_specification_file_is_reported(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        source = root / "docs/specs/SPEC-026-training-rl-lab.md"
+        extra = root / "docs/specs/SPEC-027-unindexed.md"
+        extra.write_text(
+            source.read_text(encoding="utf-8").replace("SPEC-026", "SPEC-027").replace("Wave: 6", "Wave: 6"),
+            encoding="utf-8",
+        )
+        self.assertIn("MISSING_SPEC_INDEX_LINK", finding_codes(root))
+
+    def test_specification_graph_must_include_every_declared_dependency(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8")
+        mutated = text.replace(
+            '    S000 --> S004["SPEC-004 Event Journal and State Projections"]\n',
+            "",
+            1,
+        )
+        self.assertNotEqual(text, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("MISSING_SPEC_GRAPH_EDGE", finding_codes(root))
+
+    def test_specification_graph_requires_one_flowchart_declaration_first(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8").replace("flowchart TD\n", "", 1)
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("INVALID_SPEC_GRAPH", finding_codes(root))
+
+    def test_commented_mermaid_block_cannot_supply_missing_dependency(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        edge = '    S000 --> S004["SPEC-004 Event Journal and State Projections"]\n'
+        original = path.read_text(encoding="utf-8")
+        without_edge = original.replace(edge, "", 1)
+        self.assertNotEqual(original, without_edge)
+        hidden = f"<!--\n```mermaid\nflowchart TD\n{edge}```\n-->\n"
+        mutated = without_edge.replace(
+            "The graph expresses", f"{hidden}\nThe graph expresses", 1
+        )
+        self.assertNotEqual(without_edge, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("MISSING_SPEC_GRAPH_EDGE", finding_codes(root))
+
+    def test_specification_graph_rejects_undeclared_and_duplicate_edges(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8")
+        text = text.replace(
+            "flowchart TD\n",
+            "flowchart TD\n    S026 --> S000\n    S003 --> S004\n",
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+        codes = finding_codes(root)
+        self.assertIn("EXTRA_SPEC_GRAPH_EDGE", codes)
+        self.assertIn("DUPLICATE_SPEC_GRAPH_EDGE", codes)
+
+    def test_specification_graph_labels_bind_exact_identity_and_title(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        original = path.read_text(encoding="utf-8")
+        mutated = original.replace(
+            'S000 --> S004["SPEC-004 Event Journal and State Projections"]',
+            'S000 --> S004["SPEC-999 Wrong contract"]',
+            1,
+        )
+        self.assertNotEqual(original, mutated)
+        path.write_text(mutated, encoding="utf-8")
+        self.assertIn("SPEC_GRAPH_LABEL_MISMATCH", finding_codes(root))
+
+    def test_specification_graph_rejects_standalone_label_override(self) -> None:
+        temporary, root = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        path = root / "docs/specs/README.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "flowchart TD\n",
+            'flowchart TD\n    S004["SPEC-999 Wrong contract"]\n',
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+        self.assertIn("INVALID_SPEC_GRAPH_LINE", finding_codes(root))
 
     def test_duplicate_mechanism_has_stable_reason_code(self) -> None:
         temporary, root = self.fixture()

@@ -1,6 +1,6 @@
 # ADR-0001: Machine-testable, deny-by-default authority
 
-- Status: accepted for proposal
+- Status: accepted
 - Date: 2026-08-10
 - Spec: SPEC-000
 
