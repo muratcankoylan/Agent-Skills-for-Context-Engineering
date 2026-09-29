@@ -66,6 +66,7 @@ export class LoadedRuntimeRegistry {
   private constructor(
     document: RegistryDocument,
     private readonly validatorsByKey: ReadonlyMap<string, ValidateFunction>,
+    private readonly idOriginsByKey: ReadonlyMap<string, ReadonlySet<string>>,
   ) {
     this.document = document;
     this.entries = document.entries;
@@ -82,7 +83,11 @@ export class LoadedRuntimeRegistry {
     registryPath?: string,
   ): LoadedRuntimeRegistry {
     const compiled = compileRegistry(repositoryRoot, registryPath);
-    const registry = new LoadedRuntimeRegistry(compiled.document, compiled.validatorsByKey);
+    const registry = new LoadedRuntimeRegistry(
+      compiled.document,
+      compiled.validatorsByKey,
+      compiled.idOriginsByKey,
+    );
     registry.validateRecord(compiled.document as unknown as Record<string, JsonValue>, {
       kind: "SchemaRegistry",
       version: "1.0.0",
@@ -151,6 +156,8 @@ export class LoadedRuntimeRegistry {
         String(record.artifact_kind),
         String(record.artifact_schema_version),
       );
+      const targetOrigin = String(record.artifact_id_origin);
+      this.assertTargetIdOrigin(target, targetOrigin, "artifact reference");
       if (target.id_prefix === undefined) {
         throw new ContractError(
           "ARTIFACT_TARGET_INVALID",
@@ -160,10 +167,80 @@ export class LoadedRuntimeRegistry {
       validateTypedId(
         String(record.artifact_id),
         target.id_prefix,
-        record.artifact_id_origin === "legacy_import" ? "legacy_import" : "native",
+        targetOrigin === "legacy_import" ? "legacy_import" : "native",
       );
+    } else if (entry.kind === "OrganizationEvent") {
+      this.validateOrganizationEvent(record);
     }
     return entry;
+  }
+
+  private validateOrganizationEvent(record: Record<string, JsonValue>): void {
+    const payloadValue = record.payload;
+    if (
+      payloadValue === null ||
+      Array.isArray(payloadValue) ||
+      typeof payloadValue !== "object"
+    ) {
+      throw new ContractError("EVENT_PAYLOAD_MISMATCH", "event payload is not an object");
+    }
+    this.validateRecord(payloadValue, {
+      kind: "ResearchRunTransition",
+      version: "1.0.0",
+    });
+    const detailValue = record.detail_ref;
+    if (detailValue === null) {
+      return;
+    }
+    if (Array.isArray(detailValue) || typeof detailValue !== "object") {
+      throw new ContractError(
+        "EVENT_DETAIL_REF_INVALID",
+        "event detail reference is invalid",
+      );
+    }
+    const target = this.resolveForRead(
+      String(detailValue.artifact_kind),
+      String(detailValue.artifact_schema_version),
+    );
+    if (target.kind === "OrganizationEvent") {
+      throw new ContractError(
+        "EVENT_DETAIL_REF_INVALID",
+        "an event detail reference cannot target an organization event",
+      );
+    }
+    if (target.id_prefix === undefined) {
+      throw new ContractError(
+        "ARTIFACT_TARGET_INVALID",
+        "event detail target has no typed identity",
+      );
+    }
+    const targetOrigin = String(detailValue.artifact_id_origin);
+    this.assertTargetIdOrigin(target, targetOrigin, "event detail");
+    validateTypedId(
+      String(detailValue.artifact_id),
+      target.id_prefix,
+      targetOrigin === "legacy_import" ? "legacy_import" : "native",
+    );
+    if (!target.classifications.includes(String(detailValue.classification))) {
+      throw new ContractError(
+        "CLASSIFICATION_MISMATCH",
+        "event detail classification is not permitted for its target",
+      );
+    }
+  }
+
+  private assertTargetIdOrigin(
+    target: RegistryEntry,
+    origin: string,
+    label: string,
+  ): void {
+    const origins = this.idOriginsByKey.get(entryKey(target.kind, target.version));
+    if (origins === undefined || !origins.has(origin)) {
+      throw new ContractError(
+        "ARTIFACT_TARGET_INVALID",
+        `${label} target does not support the declared ID origin`,
+      );
+    }
   }
 
   private validateArtifactEnvelope(record: Record<string, JsonValue>): void {
@@ -333,6 +410,7 @@ export function loadRuntimeRegistry(
 
 interface CompiledRegistry {
   readonly document: RegistryDocument;
+  readonly idOriginsByKey: ReadonlyMap<string, ReadonlySet<string>>;
   readonly validatorsByKey: ReadonlyMap<string, ValidateFunction>;
 }
 
@@ -355,6 +433,7 @@ function compileRegistry(repositoryRoot: string, registryPathOverride?: string):
   validateRegistrySemantics(document);
 
   const resourcesById = new Map<string, { readonly path: string; readonly digest: string }>();
+  const idOriginsBySchemaId = new Map<string, ReadonlySet<string>>();
   const validatorsById = new Map<string, ValidateFunction>();
   const entriesByKey = new Set<string>();
 
@@ -377,6 +456,7 @@ function compileRegistry(repositoryRoot: string, registryPathOverride?: string):
     if (schemaId(schema) !== entry.schema_id) {
       throw new ContractError("SCHEMA_ID_MISMATCH", "schema $id does not match registry");
     }
+    idOriginsBySchemaId.set(entry.schema_id, declaredIdOrigins(schema));
 
     const prior = resourcesById.get(entry.schema_id);
     if (prior !== undefined) {
@@ -401,14 +481,36 @@ function compileRegistry(repositoryRoot: string, registryPathOverride?: string):
   }
 
   const validatorsByKey = new Map<string, ValidateFunction>();
+  const idOriginsByKey = new Map<string, ReadonlySet<string>>();
   for (const entry of document.entries) {
-    validatorsByKey.set(
-      entryKey(entry.kind, entry.version),
-      validatorsById.get(entry.schema_id) as ValidateFunction,
-    );
+    const key = entryKey(entry.kind, entry.version);
+    validatorsByKey.set(key, validatorsById.get(entry.schema_id) as ValidateFunction);
+    idOriginsByKey.set(key, idOriginsBySchemaId.get(entry.schema_id) ?? new Set(["native"]));
   }
 
-  return { document, validatorsByKey };
+  return { document, idOriginsByKey, validatorsByKey };
+}
+
+function declaredIdOrigins(schema: AnySchema): ReadonlySet<string> {
+  if (schema === true || schema === false) {
+    return new Set(["native"]);
+  }
+  const properties = schema.properties;
+  if (properties === undefined || Array.isArray(properties) || typeof properties !== "object") {
+    return new Set(["native"]);
+  }
+  const value = (properties as Record<string, unknown>).id_origin;
+  if (value === null || Array.isArray(value) || typeof value !== "object") {
+    return new Set(["native"]);
+  }
+  const record = value as Record<string, unknown>;
+  if (Array.isArray(record.enum)) {
+    return new Set(record.enum.filter((item): item is string => typeof item === "string"));
+  }
+  if (typeof record.const === "string") {
+    return new Set([record.const]);
+  }
+  return new Set(["native"]);
 }
 
 function createAjv(): Ajv2020 {

@@ -123,10 +123,11 @@ class RegistryTests(ContractTestCase):
 
     def test_bootstrap_registry_is_reduced_and_digest_pinned(self) -> None:
         kinds = {entry.kind for entry in self.registry.entries}
-        self.assertEqual(len(self.registry.entries), 20)
+        self.assertEqual(len(self.registry.entries), 22)
         self.assertIn("ArtifactEnvelope", kinds)
         self.assertIn("CandidateArtifact", kinds)
-        self.assertNotIn("Event", kinds)
+        self.assertIn("OrganizationEvent", kinds)
+        self.assertIn("ResearchRunTransition", kinds)
         self.assertNotIn("WorkOrder", kinds)
         self.assertNotIn("EvaluationObservation", kinds)
         self.assertNotIn("ContextPackage", kinds)
@@ -216,7 +217,10 @@ class RegistryTests(ContractTestCase):
             (SCHEMAS / "fixtures/records/artifact-ref.json").read_text(encoding="utf-8")
         )
         artifact_ref["artifact_id_origin"] = "legacy_import"
-        self.assert_code("INVALID_ID", lambda: self.registry.validate(artifact_ref))
+        self.assert_code(
+            "ARTIFACT_TARGET_INVALID",
+            lambda: self.registry.validate(artifact_ref),
+        )
 
         artifact_ref = json.loads(
             (SCHEMAS / "fixtures/records/artifact-ref.json").read_text(encoding="utf-8")

@@ -7,6 +7,11 @@ description: "Debug and optimize AI agents by analyzing reasoning traces, contex
 
 Debug and optimize AI agents by analyzing their reasoning traces. This skill uses MiniMax M2.1's interleaved thinking to provide deep insight into agent decision-making and generate concrete improvements.
 
+> This example is non-production. Its shared in-process guard caps SDK attempts
+> and requested output-token capacity, not input tokens or dollars, and does not
+> persist an authoritative accounting ledger. Treat outputs as evidence only when
+> the provider returns complete token usage.
+
 ## When to Activate
 
 - Agent reasoning traces need debugging, analysis, or prompt optimization
@@ -125,6 +130,13 @@ skill_path = generator.generate(
 ## CLI Commands
 
 ```bash
+# Bound every paid command explicitly
+rto --max-api-attempts 4 --max-reserved-output-tokens 16000 \
+  capture "Search for Python tutorials"
+
+# Preflight without constructing a client or producing evidence (exit status 3)
+rto --dry-run optimize "Research AI papers"
+
 # Capture reasoning trace
 rto capture "Search for Python tutorials" -s "You are a helpful assistant."
 

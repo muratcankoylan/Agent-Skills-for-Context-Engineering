@@ -1,0 +1,190 @@
+{
+  "schema": "pr-publication-receipt/v1",
+  "observed_at_utc": "2026-09-29 13:42:18 UTC",
+  "repository": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+  "approved_scope": "Append the reviewed #134 repair and publish four attributed replacement drafts for #83, #80, #92 calculator, and #113; merge nothing.",
+  "default_branch": {
+    "name": "main",
+    "oid": "6dbe1a1d868eab51a3bc9011b0f55e2891513e40",
+    "unchanged": true
+  },
+  "inventory": {
+    "open_before": 36,
+    "draft_before": 12,
+    "open_after": 40,
+    "draft_after": 16,
+    "other_original_prs_unchanged": 35
+  },
+  "prepublication_package": "pr-updates-2026-09-29/manifest.json",
+  "publications": [
+    {
+      "number": 134,
+      "title": "feat(runtime): add bounded OpenAI Agents API transport",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/134",
+      "head_oid": "16a93c6181163eadfa8ac962124b8ca4736ee345",
+      "head_ref": "codex/openai-agents-api-transport",
+      "base_oid": "c6cd52017b247804373339e1c3c103d42554b0a1",
+      "base_ref": "codex/authority-semantic-hardening",
+      "draft": true,
+      "action": "append_commit",
+      "addresses_pr": 134,
+      "patch_file": "pr-134-transport.patch",
+      "patch_sha256": "d1f30929266b5d7bbedcf440a64b981edd7f218bf9fbfda16894d06194505813",
+      "file_count": 2,
+      "checks": [
+        {
+          "name": "offline-contracts (3.11)",
+          "conclusion": "SUCCESS",
+          "completed_at": "2026-09-29T13:39:07Z",
+          "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36576645569/job/109433869084"
+        },
+        {
+          "name": "validate",
+          "conclusion": "SUCCESS",
+          "completed_at": "2026-09-29T13:41:21Z",
+          "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36576645520/job/109433868890"
+        },
+        {
+          "name": "offline-contracts (3.12)",
+          "conclusion": "SUCCESS",
+          "completed_at": "2026-09-29T13:39:07Z",
+          "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36576645569/job/109433869481"
+        }
+      ]
+    },
+    {
+      "number": 135,
+      "title": "fix(loop): fail closed on unavailable process locking",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/135",
+      "head_oid": "fe0eb0c9418d050c48943f35df84b251dc0ee4b9",
+      "head_ref": "codex/fail-closed-loop-locking",
+      "base_oid": "6dbe1a1d868eab51a3bc9011b0f55e2891513e40",
+      "base_ref": "main",
+      "draft": true,
+      "action": "new_attributed_draft",
+      "addresses_pr": 113,
+      "patch_file": "pr-113-locking-replacement.patch",
+      "patch_sha256": "4b41d74221f2c2f8154f45d66f95b03d2cc81d76809bbcc9349e6890d15cadf0",
+      "file_count": 2,
+      "checks": [
+        {
+          "name": "validate",
+          "conclusion": "SUCCESS",
+          "completed_at": "2026-09-29T13:41:08Z",
+          "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36576833855/job/109434512499"
+        }
+      ]
+    },
+    {
+      "number": 136,
+      "title": "fix(installer): refuse overwrite and contain new installs",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/136",
+      "head_oid": "9d1ab95fbba8e3e0a4c29cfa5372b885b36a1bcb",
+      "head_ref": "codex/installer-no-overwrite",
+      "base_oid": "6dbe1a1d868eab51a3bc9011b0f55e2891513e40",
+      "base_ref": "main",
+      "draft": true,
+      "action": "new_attributed_draft",
+      "addresses_pr": 83,
+      "patch_file": "pr-83-installer-replacement.patch",
+      "patch_sha256": "10097ffede02d1a09eb781eb0b67c0ba2b4ce587e1d3fc66e59cb65b33370f2d",
+      "file_count": 2,
+      "checks": [
+        {
+          "name": "validate",
+          "conclusion": "SUCCESS",
+          "completed_at": "2026-09-29T13:41:14Z",
+          "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36576835822/job/109434523954"
+        }
+      ]
+    },
+    {
+      "number": 137,
+      "title": "fix(examples): validate judge agent frontmatter",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/137",
+      "head_oid": "3aab627222e8541c56a6fbd1808da46b6f7e1836",
+      "head_ref": "codex/judge-agent-frontmatter",
+      "base_oid": "6dbe1a1d868eab51a3bc9011b0f55e2891513e40",
+      "base_ref": "main",
+      "draft": true,
+      "action": "new_attributed_draft",
+      "addresses_pr": 80,
+      "patch_file": "pr-80-frontmatter-replacement.patch",
+      "patch_sha256": "b3108f1245d4e7fc84aafe1a5c175090698519cdbdad354a662d2739ee07d853",
+      "file_count": 5,
+      "checks": [
+        {
+          "name": "validate",
+          "conclusion": "SUCCESS",
+          "completed_at": "2026-09-29T13:41:22Z",
+          "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36576857279/job/109434590526"
+        }
+      ]
+    },
+    {
+      "number": 138,
+      "title": "fix(examples): bound calculator arithmetic without eval",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/138",
+      "head_oid": "b3f20c60975261a010d02e8487194078f9cce608",
+      "head_ref": "codex/bounded-example-calculator",
+      "base_oid": "6dbe1a1d868eab51a3bc9011b0f55e2891513e40",
+      "base_ref": "main",
+      "draft": true,
+      "action": "new_attributed_draft",
+      "addresses_pr": 92,
+      "patch_file": "pr-92-calculator-replacement.patch",
+      "patch_sha256": "f20307a46cb305d09e13afcf925847ecada54765d377eaa0717aef41e6f4587f",
+      "file_count": 4,
+      "checks": [
+        {
+          "name": "validate",
+          "conclusion": "SUCCESS",
+          "completed_at": "2026-09-29T13:41:43Z",
+          "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36576890383/job/109434702898"
+        }
+      ]
+    }
+  ],
+  "core_order": [
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    134
+  ],
+  "independent_maintenance_prs": [
+    135,
+    136,
+    137,
+    138
+  ],
+  "verification": {
+    "combined_candidate": "Original #134 head 9639dda3c5b2b6fb3ddfd88a3478c3dc90aa7c54 plus five exact patch files from preparation manifest",
+    "root_tests": {
+      "passed": 417,
+      "seconds": 104.316
+    },
+    "linux_arm64_focused": {
+      "passed": 97,
+      "seconds": 0.974,
+      "network": false,
+      "user": "10001:10001",
+      "read_only_root": true
+    },
+    "scope": "Deterministic correctness and interoperability; overlapping suites, not scientific effectiveness trials.",
+    "paid_provider_calls": 0
+  },
+  "merge_actions": [],
+  "closed_prs": [],
+  "force_pushes": [],
+  "contributor_branch_mutations": [],
+  "production_ready": false,
+  "remaining_release_work": "Independent acceptance and specified adoption sequence; SDK runtime caller/evaluation/recovery/deployment migration and production proof remain separate."
+}

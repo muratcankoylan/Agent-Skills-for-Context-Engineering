@@ -1,0 +1,1002 @@
+{
+  "observed_date": "2026-09-29",
+  "repository": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+  "scope": "read-only refresh; no remote mutation",
+  "pull_requests": [
+    {
+      "baseRefName": "codex/authority-semantic-hardening",
+      "baseRefOid": "c6cd52017b247804373339e1c3c103d42554b0a1",
+      "headRefName": "codex/openai-agents-api-transport",
+      "headRefOid": "9639dda3c5b2b6fb3ddfd88a3478c3dc90aa7c54",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 134,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-11T00:04:59Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/34544934850/job/103095407039",
+          "name": "offline-contracts (3.11)",
+          "startedAt": "2026-09-11T00:04:53Z",
+          "status": "COMPLETED",
+          "workflowName": "Agents API transport conformance"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-11T00:08:45Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/34544934795/job/103095406916",
+          "name": "validate",
+          "startedAt": "2026-09-11T00:04:53Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-11T00:05:00Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/34544934850/job/103095406899",
+          "name": "offline-contracts (3.12)",
+          "startedAt": "2026-09-11T00:04:53Z",
+          "status": "COMPLETED",
+          "workflowName": "Agents API transport conformance"
+        }
+      ],
+      "title": "feat(runtime): add bounded OpenAI Agents API transport",
+      "updatedAt": "2026-09-11T00:04:46Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/134"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "6dbe1a1d868eab51a3bc9011b0f55e2891513e40",
+      "headRefName": "codex/add-rendered-ui-finish-gate",
+      "headRefOid": "65f501cdf2148a01b19db6cc6ad569c723b7a7d2",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjQzNTAwNzUx",
+        "name": "Samuel Bushi",
+        "login": "samuelbushi"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 133,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Add rendered UI finish gate skill",
+      "updatedAt": "2026-08-20T10:57:10Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/133"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "6dbe1a1d868eab51a3bc9011b0f55e2891513e40",
+      "headRefName": "cursor/deliberative-writing-loop-3b12",
+      "headRefOid": "83b5ad0b6afd4eae094493877c58cddf95dcdc00",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "UNSTABLE",
+      "mergeable": "MERGEABLE",
+      "number": 132,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-19T01:55:32Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/32206656273/job/95931121150",
+          "name": "validate",
+          "startedAt": "2026-08-19T01:55:07Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "Add deliberative-writing-loop example: inference-time persona writing harness",
+      "updatedAt": "2026-08-19T01:55:20Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/132"
+    },
+    {
+      "baseRefName": "codex/authority-contract-boundary",
+      "baseRefOid": "54580840f75556290f32ffcbaa8342bb00ea9343",
+      "headRefName": "codex/authority-semantic-hardening",
+      "headRefOid": "c6cd52017b247804373339e1c3c103d42554b0a1",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 131,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-16T01:28:16Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31919471533/job/95096852806",
+          "name": "validate",
+          "startedAt": "2026-08-16T01:23:54Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-16T01:28:23Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31919480205/job/95096874902",
+          "name": "validate",
+          "startedAt": "2026-08-16T01:24:07Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-10T22:01:03Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/34534964993/job/103064329454",
+          "name": "validate",
+          "startedAt": "2026-09-10T21:57:47Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-11T00:13:54Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/34545330470/job/103096593142",
+          "name": "validate",
+          "startedAt": "2026-09-11T00:10:16Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "Harden offline authority vocabulary semantics",
+      "updatedAt": "2026-09-11T00:10:11Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/131"
+    },
+    {
+      "baseRefName": "codex/spec-revision-authority-gate",
+      "baseRefOid": "f5f1dda3e0f42d8e680f01917786f67fd60e3fa1",
+      "headRefName": "codex/authority-contract-boundary",
+      "headRefOid": "54580840f75556290f32ffcbaa8342bb00ea9343",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 130,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T23:46:10Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31915499305/job/95086594592",
+          "name": "validate",
+          "startedAt": "2026-08-15T23:44:22Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-10T21:59:24Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/34534960179/job/103064315240",
+          "name": "validate",
+          "startedAt": "2026-09-10T21:57:43Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-09-11T00:12:02Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/34545329961/job/103096591790",
+          "name": "validate",
+          "startedAt": "2026-09-11T00:10:17Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "Extract authority contract and bind evaluator provenance",
+      "updatedAt": "2026-09-11T00:10:11Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/130"
+    },
+    {
+      "baseRefName": "codex/spec-002-amendment-decision",
+      "baseRefOid": "d1fc8c2e3d7cbacd2c99f2d730ae6b92f91a06af",
+      "headRefName": "codex/spec-revision-authority-gate",
+      "headRefOid": "f5f1dda3e0f42d8e680f01917786f67fd60e3fa1",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 129,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T22:57:32Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31913409362/job/95081726060",
+          "name": "validate",
+          "startedAt": "2026-08-15T22:55:59Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "fix(governance): require promoted revision predecessors",
+      "updatedAt": "2026-08-15T22:55:53Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/129"
+    },
+    {
+      "baseRefName": "codex/spec-001-amendment-decision",
+      "baseRefOid": "ec6f25c609029474b7bfcbebba20d7792f3d01dd",
+      "headRefName": "codex/spec-002-amendment-decision",
+      "headRefOid": "d1fc8c2e3d7cbacd2c99f2d730ae6b92f91a06af",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 128,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T22:22:19Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31911893631/job/95078146604",
+          "name": "validate",
+          "startedAt": "2026-08-15T22:21:02Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "docs(spec-002): authorize projection-boundary amendment",
+      "updatedAt": "2026-08-15T22:20:57Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/128"
+    },
+    {
+      "baseRefName": "codex/router-manifest-resume",
+      "baseRefOid": "7c0c92d20244ab7fa03edcbe1fd5851b24e5445c",
+      "headRefName": "codex/spec-001-amendment-decision",
+      "headRefOid": "ec6f25c609029474b7bfcbebba20d7792f3d01dd",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 127,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T22:07:41Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31911249073/job/95076528536",
+          "name": "validate",
+          "startedAt": "2026-08-15T22:06:21Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "docs(spec-001): authorize snapshot identity amendment",
+      "updatedAt": "2026-08-15T22:06:16Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/127"
+    },
+    {
+      "baseRefName": "codex/cursor-sdk-security-upgrade",
+      "baseRefOid": "c50cc4cdbc0c5a07714ea6ef105affa12e6c4215",
+      "headRefName": "codex/router-manifest-resume",
+      "headRefOid": "7c0c92d20244ab7fa03edcbe1fd5851b24e5445c",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 126,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T21:59:27Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31910860440/job/95075561570",
+          "name": "validate",
+          "startedAt": "2026-08-15T21:57:49Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "test(benchmarks): add private manifest resume substrate",
+      "updatedAt": "2026-09-11T00:10:11Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/126"
+    },
+    {
+      "baseRefName": "codex/spec-000-amendment-decision",
+      "baseRefOid": "c91780589ed79e1fcfc034894d02e52981983ab0",
+      "headRefName": "codex/cursor-sdk-security-upgrade",
+      "headRefOid": "c50cc4cdbc0c5a07714ea6ef105affa12e6c4215",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 125,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T21:59:12Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31910854988/job/95075548078",
+          "name": "validate",
+          "startedAt": "2026-08-15T21:57:40Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "fix(benchmarks): contain Cursor SDK and harden evidence",
+      "updatedAt": "2026-09-11T00:10:11Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/125"
+    },
+    {
+      "baseRefName": "codex/spec-003-amendment-decision",
+      "baseRefOid": "48e17e8b7de61925a644ad5e62f5609525bcadc0",
+      "headRefName": "codex/spec-000-amendment-decision",
+      "headRefOid": "c91780589ed79e1fcfc034894d02e52981983ab0",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 124,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T19:19:10Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31903504588/job/95057742386",
+          "name": "validate",
+          "startedAt": "2026-08-15T19:17:41Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "docs(spec-000): authorize authority vocabulary amendment",
+      "updatedAt": "2026-08-15T19:17:36Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/124"
+    },
+    {
+      "baseRefName": "codex/long-horizon-organization-brief",
+      "baseRefOid": "0030fdbf8da082f8029972cbe04140c12ce508e7",
+      "headRefName": "codex/spec-003-amendment-decision",
+      "headRefOid": "48e17e8b7de61925a644ad5e62f5609525bcadc0",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 123,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T19:12:56Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31903223383/job/95057062679",
+          "name": "validate",
+          "startedAt": "2026-08-15T19:11:43Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "docs(spec-003): authorize classification invariant amendment",
+      "updatedAt": "2026-08-15T19:11:35Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/123"
+    },
+    {
+      "baseRefName": "codex/specification-program-roadmap",
+      "baseRefOid": "aed122474c31c7afd2b7e90d8f2efc4ef6305278",
+      "headRefName": "codex/long-horizon-organization-brief",
+      "headRefOid": "0030fdbf8da082f8029972cbe04140c12ce508e7",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": true,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 122,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T19:03:08Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31902757200/job/95055915649",
+          "name": "validate",
+          "startedAt": "2026-08-15T19:01:42Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        }
+      ],
+      "title": "feat(orchestration): add supervised long-horizon bootstrap briefs",
+      "updatedAt": "2026-09-11T00:10:11Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/122"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "6dbe1a1d868eab51a3bc9011b0f55e2891513e40",
+      "headRefName": "codex/specification-program-roadmap",
+      "headRefOid": "aed122474c31c7afd2b7e90d8f2efc4ef6305278",
+      "headRepositoryOwner": {
+        "id": "U_kgDOB96eBA",
+        "name": "Muratcan Koylan",
+        "login": "muratcankoylan"
+      },
+      "isCrossRepository": false,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 121,
+      "reviewDecision": "",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T18:39:30Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31901667421/job/95053281722",
+          "name": "build",
+          "startedAt": "2026-08-15T18:38:17Z",
+          "status": "COMPLETED",
+          "workflowName": "Deploy long-horizon prompt lab"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T18:39:44Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31901667405/job/95053281577",
+          "name": "validate",
+          "startedAt": "2026-08-15T18:38:20Z",
+          "status": "COMPLETED",
+          "workflowName": "Validate Researcher Operating System"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T18:39:30Z",
+          "conclusion": "SKIPPED",
+          "detailsUrl": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31901667421/job/95053416505",
+          "name": "deploy",
+          "startedAt": "2026-08-15T18:39:31Z",
+          "status": "COMPLETED",
+          "workflowName": "Deploy long-horizon prompt lab"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-15T18:40:53Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://cursor.com/docs/bugbot",
+          "name": "Cursor Bugbot",
+          "startedAt": "2026-08-15T18:38:19Z",
+          "status": "COMPLETED",
+          "workflowName": ""
+        }
+      ],
+      "title": "feat(governance): publish and enforce the specification program",
+      "updatedAt": "2026-09-11T00:10:10Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/121"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "c578e85e40fe2bda7c1fec91ff64cf5285434934",
+      "headRefName": "fix/cross-platform-loop-lock",
+      "headRefOid": "b789fd4d7e91cd6d55950980237421b065e17589",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjc0NDA1NjEx",
+        "name": "Mozzam Shahid",
+        "login": "MozzamShahid"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 113,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Fix Windows import crash in loop_common by making fcntl optional",
+      "updatedAt": "2026-07-14T08:44:19Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/113"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "c578e85e40fe2bda7c1fec91ff64cf5285434934",
+      "headRefName": "fix/api-cost-safeguards",
+      "headRefOid": "0b518ceb6810915faf90a3b32ab2ebde716ca5e5",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjc0NDA1NjEx",
+        "name": "Mozzam Shahid",
+        "login": "MozzamShahid"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 112,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Add cost, request, token, and rate-limit safeguards to API loops and judge examples",
+      "updatedAt": "2026-07-14T08:43:40Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/112"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "c578e85e40fe2bda7c1fec91ff64cf5285434934",
+      "headRefName": "fix/stale-baseline-numbers",
+      "headRefOid": "fb2262433d71da72ea115fc34c9750abbb688c89",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjc0NDA1NjEx",
+        "name": "Mozzam Shahid",
+        "login": "MozzamShahid"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "number": 111,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Fix stale researcher-OS baseline numbers in README, AGENTS, and plugin metadata",
+      "updatedAt": "2026-07-14T08:43:21Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/111"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "c578e85e40fe2bda7c1fec91ff64cf5285434934",
+      "headRefName": "fix/hosted-agents-secret-handling",
+      "headRefOid": "dd862b430bf1dda6d8ad84c19f239d2423fac0d6",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjc0NDA1NjEx",
+        "name": "Mozzam Shahid",
+        "login": "MozzamShahid"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 110,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Fix shell injection and unsafe secret handling in hosted agents image build example",
+      "updatedAt": "2026-07-14T08:43:03Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/110"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "c578e85e40fe2bda7c1fec91ff64cf5285434934",
+      "headRefName": "fix/pipeline-path-traversal",
+      "headRefOid": "8729b720f4a21fe48342eacc57291162d0dfeee2",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjc0NDA1NjEx",
+        "name": "Mozzam Shahid",
+        "login": "MozzamShahid"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 109,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Fix path traversal and arbitrary file deletion in pipeline_template.py",
+      "updatedAt": "2026-07-14T08:42:56Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/109"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "c2b9a19107d263f965def4e8f7d1cd0d0fee1a59",
+      "headRefName": "contextlab/codex-runner",
+      "headRefOid": "596c8f84eaa4ef89333fdfc4ee2ca042c0dcf540",
+      "headRepositoryOwner": {
+        "id": "U_kgDODD1GxQ",
+        "login": "Lyti4"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "number": 100,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Publish xhigh evidence and harden validation paths",
+      "updatedAt": "2026-07-10T21:03:57Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/100"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "25e1fa79a33f0985793bcab3c64dde8d020c5132",
+      "headRefName": "publish-linkedin-skills-linkedin-20260626134811",
+      "headRefOid": "f7eedc9104a929a937ebb5fb7aae88e1d4d2ee70",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjIyODYwNDgz",
+        "name": "Vlad Prudnikov",
+        "login": "vprudnikoff"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 95,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Add Linked API linkedin skill",
+      "updatedAt": "2026-06-26T13:48:20Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/95"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "25e1fa79a33f0985793bcab3c64dde8d020c5132",
+      "headRefName": "maintenance/routine-updates-rinz27",
+      "headRefOid": "1de8c919199c0f6baa8a5d02da43e1fb13d2e6ae",
+      "headRepositoryOwner": {
+        "id": "U_kgDODT7aHg",
+        "name": "Rin",
+        "login": "RinZ27"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 92,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Maintenance: Update dependencies and refine interleaved thinking example",
+      "updatedAt": "2026-06-15T12:22:15Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/92"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "25e1fa79a33f0985793bcab3c64dde8d020c5132",
+      "headRefName": "claude/inspiring-planck-sFyue",
+      "headRefOid": "b84d8fabe14d5f5c71a57207e3ae56d49a8c0775",
+      "headRepositoryOwner": {
+        "id": "U_kgDOEH4U2w",
+        "login": "crypto-noi"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 89,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Add internal repo-contributor skill as project knowledge base",
+      "updatedAt": "2026-06-02T12:02:25Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/89"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "61f38ffc0ff3ae83adcf2fe011f3b751105add6d",
+      "headRefName": "caio/context-receipts-skill",
+      "headRefOid": "ef6bb240008631ff5820b347c717bfa32a15ce83",
+      "headRepositoryOwner": {
+        "id": "U_kgDOD9_mYw",
+        "login": "caioribeiroclw-pixel"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "number": 88,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Add context receipts skill",
+      "updatedAt": "2026-05-27T11:05:35Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/88"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "7a95d94c364e25c869a86896a45791dfda6db8bf",
+      "headRefName": "fix/nlpm-sanitize-install-path",
+      "headRefOid": "325c5c2e0e166a75c91c60b2d0535035f6fb57ad",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjE1Mjk3MA==",
+        "name": "xiaolai",
+        "login": "xiaolai"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 83,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "fix: validate custom install path in install.sh to prevent path traversal",
+      "updatedAt": "2026-04-26T06:54:52Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/83"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "7a95d94c364e25c869a86896a45791dfda6db8bf",
+      "headRefName": "fix/nlpm-pin-dependencies",
+      "headRefOid": "d3185bf73dfca2366d388a1482bfa14f9595f334",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjE1Mjk3MA==",
+        "name": "xiaolai",
+        "login": "xiaolai"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 82,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "fix: tighten production dependency ranges from ^ to ~ in package.json",
+      "updatedAt": "2026-04-26T06:53:52Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/82"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "7a95d94c364e25c869a86896a45791dfda6db8bf",
+      "headRefName": "fix/nlpm-credential-in-url",
+      "headRefOid": "87a516eea95b1cd4e92246162dcfc28c84125ae2",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjE1Mjk3MA==",
+        "name": "xiaolai",
+        "login": "xiaolai"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 81,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "fix: remove GitHub token from git clone URL in sandbox_manager.py",
+      "updatedAt": "2026-04-26T06:52:49Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/81"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "7a95d94c364e25c869a86896a45791dfda6db8bf",
+      "headRefName": "fix/nlpm-missing-frontmatter",
+      "headRefOid": "e5fd0e3e4c3a689d3269ac951bc05c5075266717",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjE1Mjk3MA==",
+        "name": "xiaolai",
+        "login": "xiaolai"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 80,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "fix: add YAML frontmatter to llm-as-judge agent files",
+      "updatedAt": "2026-04-26T06:43:07Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/80"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "3ab8c948898908e4acc083c32f0390f0caafe3e4",
+      "headRefName": "feat/add-session-handoff-skill",
+      "headRefOid": "c5f5bdb2c2bfd72385a0ec9ab9e5c698562d3153",
+      "headRepositoryOwner": {
+        "id": "U_kgDOBmKpOg",
+        "name": "Elkidogz",
+        "login": "Elkidogz"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "number": 72,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Add session-handoff skill for cross-session task continuity",
+      "updatedAt": "2026-04-12T01:19:29Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/72"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "87529d9be4488d1d0ad4d02caf9695451e0d3732",
+      "headRefName": "improve-multi-agent-patterns",
+      "headRefOid": "25481be1fa99472f44f1938d32ef6d2a62b838a7",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjgzNDU4NzUx",
+        "name": "Bap",
+        "login": "fernandezbaptiste"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "number": 55,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Improve multi-agent-patterns skill and add skill review workflow",
+      "updatedAt": "2026-03-31T20:31:48Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/55"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "3ab8c948898908e4acc083c32f0390f0caafe3e4",
+      "headRefName": "feat/context-benchmarking-skill",
+      "headRefOid": "84439d0a3d6dbe2a622cbcf8bea8713efdf88925",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjc4ODEzMjg4",
+        "name": "Selma Khaddar",
+        "login": "Selma-kh"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "number": 52,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "feat: adding a context benchmarking-skill",
+      "updatedAt": "2026-03-23T08:16:39Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/52"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "da63847a41d49dcfe12ac1d9cc6f7c9596782fa9",
+      "headRefName": "main",
+      "headRefOid": "a9548805a44ae86fa1b229ce4587d18a1ce2be17",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjE0NTE5MA==",
+        "name": "Jamin Rubio",
+        "login": "jamon8888"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "number": 40,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Apply context engineering refactor to sales, copywriter, sentinel, solo-maker, and solo plugins",
+      "updatedAt": "2026-02-23T23:32:37Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/40"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "7942df36cfcac4f224d310b6be552e99715df5de",
+      "headRefName": "add-composio-automation-skills",
+      "headRefOid": "ee0de997f47ad83b812c317bc74c3e8a0d13e2c3",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjc5ODIxMDI=",
+        "name": "Soham",
+        "login": "sohamganatra"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 38,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "Add 78 Composio SaaS app automation skills via Rube MCP",
+      "updatedAt": "2026-02-06T03:24:22Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/38"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "1bda9bd46e28d344dc260f476258423e7c06ccf3",
+      "headRefName": "add-adal-cli",
+      "headRefOid": "ecec05aec7acc1fc97944d2e43f1ba95af022720",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjE0MzIyNjc3",
+        "name": "Li Yin",
+        "login": "liyin2015"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "number": 36,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "docs: add AdaL to compatible platforms list",
+      "updatedAt": "2026-02-02T01:48:46Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/36"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "9b350229f3da93e7db57d5f023dcfe7f0eb05007",
+      "headRefName": "feature/architecture-skill",
+      "headRefOid": "41eaad316b80307a51922f5fb7046ff581191807",
+      "headRepositoryOwner": {
+        "id": "MDEyOk9yZ2FuaXphdGlvbjY4NTk4Mjk2",
+        "login": "meaningfy-ws"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "number": 24,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "feat: Add Solution Architecture skill with comprehensive reference ma…",
+      "updatedAt": "2026-01-04T20:42:31Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/24"
+    },
+    {
+      "baseRefName": "main",
+      "baseRefOid": "9850a0f5c221f8f0f4faf1cc7e4e202ac1aaf4af",
+      "headRefName": "fix/marketplace-skill-discovery",
+      "headRefOid": "aaef0164e62b03aa29916cb9899a19a63c428eb2",
+      "headRepositoryOwner": {
+        "id": "MDQ6VXNlcjMxMTUzMTE=",
+        "name": "Christopher Tso",
+        "login": "christso"
+      },
+      "isCrossRepository": true,
+      "isDraft": false,
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "number": 17,
+      "reviewDecision": "",
+      "statusCheckRollup": [],
+      "title": "fix: expand marketplace to list individual skills for proper discovery",
+      "updatedAt": "2025-12-31T05:26:08Z",
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/17"
+    }
+  ]
+}

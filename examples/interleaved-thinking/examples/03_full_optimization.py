@@ -7,21 +7,21 @@ Demonstrates the complete optimization cycle with realistic tools:
 - File system operations (read, write, list)
 - Note-taking for tracking findings
 
-This example uses REAL URLs and realistic content to demonstrate
-how the Reasoning Trace Optimizer works in production scenarios.
+This example uses real-looking URLs and realistic content for a bounded local
+demonstration. It is not a production evidence, isolation, or billing system.
 """
 
 import json
 import os
-import random
 from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 from reasoning_trace_optimizer import (
-    OptimizationLoop,
     LoopConfig,
+    OptimizationLoop,
+    PaidAPIBudget,
     SkillGenerator,
 )
 from reasoning_trace_optimizer.calculator import CalculatorError, evaluate_expression
@@ -1004,6 +1004,10 @@ def main():
     # Reset state
     saved_notes = []
     written_files = {}
+    api_budget = PaidAPIBudget(
+        max_api_attempts=64,
+        max_reserved_output_tokens=300_000,
+    )
 
     # Configuration for optimization
     # Note: Complex research tasks typically plateau around 65-75 scores
@@ -1026,6 +1030,7 @@ def main():
         api_key=os.getenv("ANTHROPIC_API_KEY"),
         base_url="https://api.minimax.io/anthropic",
         model="MiniMax-M2.1",
+        api_budget=api_budget,
     )
 
     # Complex research task requiring multiple tools
@@ -1157,6 +1162,7 @@ The summary should include:
         api_key=os.getenv("ANTHROPIC_API_KEY"),
         base_url="https://api.minimax.io/anthropic",
         model="MiniMax-M2.1",
+        api_budget=api_budget,
     )
 
     skill_path = generator.generate(

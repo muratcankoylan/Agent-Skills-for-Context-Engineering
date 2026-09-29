@@ -19,7 +19,7 @@ No credential is required or consumed by the current planners. A later live-acti
 
 The SDK and lockfile are exact review inputs. Run `npm audit --omit=dev` during every dependency review and before any live benchmark activation. An audit finding is not silently rewritten with `npm audit fix`; update the SDK or its transport dependency only through a compatibility-tested pull request.
 
-At the 1.0.28 lock review, the upstream transport graph retained unresolved `undici` advisories for which npm reported no compatible fix. CI and routine validation execute typechecking, zero-call import/live-block tests, and bounded `--dry-run` plans; they make no `Agent.prompt` call. Do not describe the dependency tree as vulnerability-free.
+The September 7 local review found the upstream 1.0.28 transport graph still included vulnerable `undici` 5.x. The lock now applies a narrow temporary override to `@connectrpc/connect-node`'s `undici` at 6.28.1. This crosses the upstream declared major range and therefore remains a compatibility bridge, to be removed when the SDK adopts an audited transport graph. The Node 22 import tests, runner contract tests and typecheck pass with the override. `npm audit --omit=dev` reports zero findings at that observation and now runs in CI; future advisories can change that result. CI and routine validation make no `Agent.prompt` call.
 
 Live Stage 2 execution is hard-blocked and the former executor/resume path has been removed. The private prototype proves canonical integer-only JSON, full-digest plan identities, clean-source and exact-input capture, a concrete manifest-rebuilding pre-effect guard, exclusive append-only claims and outcomes, strict resume validation, cumulative conservative accounting, and crash behavior without importing or calling the SDK. An unmatched claim remains permanently blocking in this revision; there is no unauthenticated reset or reconciliation escape hatch. A separate human-merged activation must replace or adopt those private records under the accepted owner specifications, add the reviewed provider adapter and credential boundary, repeat the dependency audit and containment decision, and authorize one concurrency-1 canary. Do not run multiple benchmark processes against the same SDK state root until that canary is accepted.
 
@@ -48,7 +48,7 @@ Flags shared by both runners:
 
 ## Output
 
-The public commands in this revision write no live result, history, manifest, or resume state. Their dry runs print the validated plan and worst-case forecast to standard output. Unit tests exercise the private state prototype only in disposable temporary directories with an injected fake executor. Historical artifacts remain under:
+The public commands in this revision write no live result, history, manifest, or resume state. Their dry runs print the validated plan and worst-case forecast to standard output. Unit tests exercise the private state prototype only in disposable temporary directories with an injected fake executor. Historical artifacts remain under the following gitignored runtime paths:
 
 - `researcher/reports/router-history.jsonl` (Stage 2)
 - `researcher/reports/effectiveness-history.jsonl` (Stage 3)
@@ -58,7 +58,7 @@ Historical per-run raw outputs landed under:
 - `researcher/benchmarks/router/results/<timestamp>-<seed>/`
 - `researcher/benchmarks/effectiveness/results/<timestamp>-<seed>/`
 
-Both `results/` directories are gitignored. Curated released results live in release notes or a published-results file. They are historical evidence, not resumable inputs to this revision.
+All history files and both `results/` directories above are gitignored. Curated released results live in release notes or a published-results file. They are historical evidence, not resumable inputs to this revision.
 
 ## Cost gates
 

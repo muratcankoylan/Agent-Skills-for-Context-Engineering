@@ -14,7 +14,7 @@ Retrieval attempts, captured entity bytes, source captures, and extracted eviden
 
 ## Context and current repository touchpoints
 
-The current loop performs bounded standard-library HTTP retrieval with a 1.5 MB cap and a 30-second timeout. Those values remain the default policy while the system adds exact byte semantics, version manifests, extractor identity, location references, restricted-content handling, and reducer-owned state transitions.
+The legacy loop's network retrieval path has been removed. Initialized runs park until a human attaches evidence through the explicit research-run command, and the dormant launchd wrapper has no network-fetch option. This specification introduces retrieval only after exact byte semantics, explicit egress policy, version manifests, extractor identity, location references, restricted-content handling, and reducer-owned state transitions are implemented and verified.
 
 ## Goals
 
@@ -41,6 +41,9 @@ The current loop performs bounded standard-library HTTP retrieval with a 1.5 MB 
 6. Restricted content stays private or is represented by lawful metadata and a citation-only record.
 7. Reducers, not retrievers or extractors, apply capture or evidence-document state after validating schema, expected version, authority, work-order fencing, and every required input and output integrity receipt.
 8. External content is always treated as data. Instructions embedded in retrieved content cannot change tools, authority, system prompts, or extraction policy.
+9. Every network attempt uses an explicit egress policy. Schemes, ports, resolver, destination classes, redirect behavior, proxy use, and credential availability default-deny; loopback, private, link-local, multicast, reserved, unspecified, IPv4-mapped, configured address-translation or tunnel routes, and mixed public/non-public resolution sets are never eligible capture destinations.
+10. Address validation and connection are one operation: the connector pins a policy-approved resolved address without a second name lookup, preserves the original authority for HTTP host and TLS verification, and repeats resolution and validation for every redirect. A deployment that cannot prove this DNS-rebinding invariant cannot receive network authority.
+11. Missing, malformed, ambiguous, or non-textual media declarations fail before publication. Transfer, decoded, decompressed, header, redirect, request, retry, and total wall-time limits are explicit and independently enforced.
 
 ## Interfaces and data
 
@@ -71,9 +74,15 @@ Repository, PDF/OCR, archive, and other untrusted-parser record sketches are non
 
 ## Limits and isolation
 
-Request policies independently cap redirects, requests, transfer bytes, decoded entity bytes, decompression ratio, manifest assets, manifest bytes, extraction outputs, retries, and wall time. Exceeding any cap produces a terminal or explicitly partial proposal; no truncation is silently marked complete. Nested archives and recursive manifests are disabled unless a bounded policy enables them.
+Request policies independently cap name-resolution time, connection time, response-header bytes, redirects, requests, transfer bytes, decoded entity bytes, decompression ratio, manifest assets, manifest bytes, extraction outputs, retries, and total wall time. Exceeding any cap produces a terminal or explicitly partial proposal; no truncation is silently marked complete. Nested archives and recursive manifests are disabled unless a bounded policy enables them.
 
-The revision-1 standard-library HTTP and bounded deterministic text, HTML, and JSON extraction path may run as trusted deterministic work. Complex PDF/OCR tooling, repository hooks, archive expansion, or any untrusted parser is excluded from this revision and must later execute through the SPEC-014 ephemeral isolated environment. No extractor receives ambient credentials or network access unless its exact work order grants them.
+Redirects are new requests, not continuations of prior authority. Each target must pass scheme, authority, user-information, port, destination-class, DNS-answer-set, credential, and downgrade checks before connection. DNS validation is bound to the selected peer address so rebinding between policy evaluation and connect cannot redirect traffic. Ambient environment proxies, proxy auto-configuration, and inherited proxy credentials are ignored; a proxy requires its own typed adapter, destination policy, and work-order grant.
+
+The deployment egress attestation enumerates or disables IPv4-mapped IPv6, NAT64, 6to4, Teredo, and operator-configured translation or tunnel routes. Denying only well-known prefixes is insufficient because an operator-defined translator can use another routable prefix. If the effective routing and translation boundary cannot be proved, the connector receives no network grant.
+
+Revision 1 accepts only explicitly declared bounded textual representations. Missing or malformed `Content-Type`, binary media, undeclared compression, and media-type sniffing fail closed. Size and deadline enforcement covers every redirect and the full attempt, including resolution and connection, rather than restarting the budget per hop or read.
+
+The revision-1 direct HTTP connector and bounded deterministic text, HTML, and JSON extraction path may run as trusted deterministic work only after these policies and fixtures pass. Complex PDF/OCR tooling, repository hooks, archive expansion, or any untrusted parser is excluded from this revision and must later execute through the SPEC-014 ephemeral isolated environment. No extractor receives ambient credentials or network access unless its exact work order grants them.
 
 ## State and failure behavior
 
@@ -84,7 +93,7 @@ Partial captures can be used only by policies that explicitly accept their compl
 ## Implementation sequence
 
 1. Define fetch receipt, entity artifact, capture, manifest, evidence document, and integrity schemas.
-2. Wrap the existing bounded HTTP path and implement sanitization, byte-semantics, 304, decompression, pre-extraction integrity, and reducer-fencing tests.
+2. Implement a new default-deny direct HTTP connector with sanitization, peer-bound DNS policy, byte semantics, 304, decompression, pre-extraction integrity, and reducer-fencing tests.
 3. Add content-addressed storage plus metadata-only and citation-only restricted records.
 4. Add deterministic bounded text, HTML, and JSON extraction only; propose the isolated-extractor follow-on after SPEC-014 is active.
 5. Re-fetch a sampled corpus and compare completeness, anchors, and downstream review behavior against the legacy path.
@@ -103,6 +112,12 @@ Measure attempt and capture success separately; transfer and decoded bytes; deco
 - Encoded and decoded byte digests cannot be substituted for each other.
 - A 304 can reuse only an integrity-verified prior capture with matching validator evidence.
 - Redirects, errors, and provider metadata cannot leak secrets through receipts or logs.
+- Loopback, private, link-local, multicast, reserved, unspecified, mixed-address, non-default-policy port, and credential-bearing URL fixtures are denied before a request is sent.
+- DNS rebinding fixtures prove that the connected peer is one of the validated addresses, every redirect receives a fresh validation, and a redirect to any denied destination is rejected before connection.
+- IPv4-mapped IPv6, well-known and operator-defined NAT64, 6to4, Teredo, and configured tunnel fixtures prove that a syntactically public address cannot reach a denied IPv4 or internal destination through translation.
+- Ambient proxy variables and proxy credentials cannot affect the direct connector; an explicitly authorized proxy adapter is separately attributable.
+- Missing, malformed, binary, mismatched, and sniffed media types fail before artifact publication, while textual allowlist fixtures preserve exact bytes.
+- Redirect chains, slow responses, oversized headers, declared and streamed oversize bodies, compressed expansion, and retry sequences remain within one measured attempt deadline and every configured byte/count bound.
 - Truncated, decompression-limited, or asset-incomplete captures cannot be marked complete.
 - Text, HTML, and JSON evidence retains exact byte/object anchors and declared completeness after refetch.
 - Restricted fixtures export only approved metadata and citations.
@@ -116,6 +131,10 @@ Measure attempt and capture success separately; transfer and decoded bytes; deco
 - [ ] Reviews cite an integrity-verified capture, exact location, and extractor lineage.
 - [ ] Resolver probes and search snippets cannot satisfy evidence requirements.
 - [ ] Transfer, decoded, decompressed, manifest, request, retry, and time limits fail closed.
+- [ ] Egress is default-deny and mechanically rejects non-public destination classes, mixed DNS answers, IPv4-mapped and translated or tunnelled private destinations, unauthorized schemes or ports, credentials, unsafe redirects, and HTTPS downgrade.
+- [ ] DNS validation is peer-bound without a second lookup, redirect hops are independently authorized, and DNS-rebinding and redirect-to-private fixtures fail before request transmission.
+- [ ] Ambient proxies and credentials cannot influence direct retrieval; proxy routing exists only through an explicit typed adapter and grant.
+- [ ] Only explicitly declared textual media may be published; missing, malformed, binary, sniffed, compressed-without-policy, oversized, or over-deadline responses fail closed without a capture.
 - [ ] Secrets and unsafe provider metadata are excluded from portable records and structured logs.
 - [ ] Restricted, partial, failed, and unknown outcomes have typed usable reason codes.
 - [ ] Complex PDF/OCR, repository, archive, and untrusted-parser paths are unregistered and non-writable pending a post-SPEC-014 contract.

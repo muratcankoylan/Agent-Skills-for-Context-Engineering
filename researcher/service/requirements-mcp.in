@@ -1,0 +1,6 @@
+# Optional manually registered Streamable HTTP reads; never auto-installed.
+# SDK v1 protocol profile: 2025-11-25. Core service requirements are separate.
+# Both profiles are installed together. Shared packages must retain core pins.
+-c ../../requirements-dev.txt
+mcp==1.30.0
+httpx==0.28.1

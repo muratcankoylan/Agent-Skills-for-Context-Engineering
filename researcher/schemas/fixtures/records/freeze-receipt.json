@@ -19,7 +19,7 @@
   "kind": "FreezeReceipt",
   "root_production_epoch": "main@a1841d1",
   "schema_version": "1.0.0",
-  "schema_registry_digest": "sha256:2bf3242fd6b4cbf9e42ef2470bceff7787b870fdd08842fc1a4d90fadc9806e0",
+  "schema_registry_digest": "sha256:4dd1f2e66bd6302eecb4b1cb876b5e288f4a6a82b036c87f3bde8889a56b228f",
   "total_size_bytes": 256,
   "tree_digest": "sha256:b8e307cfcac5d7455c0e352c7b13e65aa997c023280b5fd90ac37454c00f3441"
 }

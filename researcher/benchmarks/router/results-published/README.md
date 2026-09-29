@@ -1,5 +1,10 @@
 # Published Router Benchmark Results
 
+> Historical result archive. The current SDK runner has no live executor, so
+> reproduction commands in dated reports are not executable in this revision.
+> A future live run requires a separate reviewed activation. Runtime history
+> and raw results remain gitignored.
+
 Each `<date>.md` file in this directory is a committed snapshot of a router benchmark sweep. Raw per-run JSON outputs live under `researcher/benchmarks/router/results/<date>-<seed>/` and are gitignored; only the curated summary published here is tracked in the repo.
 
 Every report includes:
@@ -11,6 +16,10 @@ Every report includes:
 - Hardest-prompts breakdown.
 - Reproduction command.
 
-When a benchmark exposes a routing failure, follow up by editing the activation description of the failing skill, rerunning the benchmark, and comparing the new report against the previous one to show the delta.
+The historical workflow followed a routing failure by editing the activation
+description, rerunning with the same fixture, and comparing the delta. Do not
+attempt that live step with the current zero-call runner.
 
-History across runs is also appended to `researcher/reports/router-history.jsonl` (gitignored) by the runner.
+The historical live runner appended cross-run summaries to
+`researcher/reports/router-history.jsonl` (gitignored). The current zero-call
+runner does not write history or live results.

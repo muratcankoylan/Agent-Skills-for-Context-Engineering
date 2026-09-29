@@ -4,25 +4,27 @@
 This is a generated view of canonical repository artifacts, not a second source of truth.
 
 - Schema: `1.0.0`
-- Source tree: `sha256:d13572e24993e44c60bf99b53c830845aa55e68778352904f28c837706fee16d`
+- Declared input digest: `sha256:94a49c0333babcfb274afdae9ad533008642a47410969ccfa94d1145cd80b47a`
+- Digest scope: exact byte snapshots consumed by InventoryBuilder only; not an exhaustive runtime-behavior digest, freeze/security boundary, or daily/status/validator result-reproduction guarantee.
 - Unresolved references: `0`
 
 | Artifact | Count |
 | --- | ---: |
 | Specifications | 27 |
 | Authority contracts | 1 |
-| Architecture decisions | 10 |
+| Architecture decisions | 11 |
 | Orchestration briefs | 7 |
 | Published skills | 17 |
 | Mechanism registry records | 22 |
 | Accepted-ledger events | 28 |
 | Rejected-ledger events | 1 |
-| Provenance-tracked claims | 26 |
+| Provenance-tracked claims | 34 |
 | Activation cases | 23 |
 | Router prompts | 56 |
-| Adversarial scenarios | 7 |
+| Adversarial scenario catalog entries | 7 |
 | Adversarial goldens | 7 |
 | Effectiveness tasks | 1 |
+| Supervised loop components | 7 |
 | Example projects | 7 |
 
 ## Compatibility
@@ -30,5 +32,10 @@ This is a generated view of canonical repository artifacts, not a second source 
 - Plugin version: `2.5.0`
 - Router runner: `dry_run_only`
 - Effectiveness runner: `scaffold_dry_run_only`
+- Legacy launchd installer: `disabled`
+- Legacy launchd wrappers: `dormant_inert`
+- Legacy direct execution: `supervised_only`
+- Legacy declared network retrieval: `removed`
+- Adversarial scenarios: `catalog_only`
 
 Historical reports retain the counts and measurements from their dated snapshot. Current documents should link here instead of copying live totals.

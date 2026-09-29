@@ -11,13 +11,13 @@ from typing import Any
 
 import anthropic
 
+from reasoning_trace_optimizer.api_budget import PaidAPIBudget
 from reasoning_trace_optimizer.models import (
     AnalysisResult,
     OptimizationResult,
     PromptDiff,
     ReasoningTrace,
 )
-
 
 OPTIMIZER_SYSTEM_PROMPT = """You are an expert prompt engineer specializing in AI agent optimization.
 
@@ -122,6 +122,7 @@ class PromptOptimizer:
         api_key: str | None = None,
         base_url: str = "https://api.minimax.io/anthropic",
         model: str = "MiniMax-M2.1",
+        api_budget: PaidAPIBudget | None = None,
     ):
         """
         Initialize PromptOptimizer with M2.1 configuration.
@@ -132,10 +133,14 @@ class PromptOptimizer:
             model: Model for optimization
         """
         self.model = model
-        self.client = anthropic.Anthropic(
-            api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"),
-            base_url=base_url,
-        )
+        self.api_budget = api_budget or PaidAPIBudget()
+        self._client = None
+        if not self.api_budget.dry_run:
+            self._client = anthropic.Anthropic(
+                api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"),
+                base_url=base_url,
+                max_retries=0,
+            )
 
     def optimize(
         self,
@@ -172,12 +177,16 @@ class PromptOptimizer:
         )
 
         # Call M2.1 for optimization
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=max_tokens,
-            system=OPTIMIZER_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        with self.api_budget.attempt("prompt_optimizer.optimize", max_tokens) as attempt:
+            if self._client is None:  # Dry-run raises before this branch.
+                raise RuntimeError("paid API client is unavailable")
+            response = self._client.messages.create(
+                model=self.model,
+                max_tokens=max_tokens,
+                system=OPTIMIZER_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            attempt.record_usage(response)
 
         # Extract thinking and response
         optimizer_thinking = ""
@@ -283,11 +292,18 @@ Suggest improved tool descriptions. Respond as JSON:
 }}
 ```"""
 
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=2048,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        with self.api_budget.attempt(
+            "prompt_optimizer.suggest_tool_improvements",
+            2048,
+        ) as attempt:
+            if self._client is None:  # Dry-run raises before this branch.
+                raise RuntimeError("paid API client is unavailable")
+            response = self._client.messages.create(
+                model=self.model,
+                max_tokens=2048,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            attempt.record_usage(response)
 
         for block in response.content:
             if block.type == "text":

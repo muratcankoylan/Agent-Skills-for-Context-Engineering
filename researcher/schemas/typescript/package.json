@@ -14,6 +14,11 @@
   "dependencies": {
     "ajv": "8.20.0"
   },
+  "overrides": {
+    "ajv@8.20.0": {
+      "fast-uri": "3.1.7"
+    }
+  },
   "devDependencies": {
     "@types/node": "24.10.1",
     "typescript": "5.9.3"

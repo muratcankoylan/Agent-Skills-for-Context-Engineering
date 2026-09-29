@@ -1,0 +1,51 @@
+{
+  "append": {
+    "duplicate_returned_original": true,
+    "duplicate_sequence": 1,
+    "entry_count": 1,
+    "first_sequence": 1,
+    "last_entry_hash": "sha256:cbfed2bcae676a2e0bb115e2e379c30e8438609e3311ababc3e77a260de9309a",
+    "subject_count": 1
+  },
+  "backup_restore": {
+    "backup_verified": true,
+    "restore_verified": true,
+    "restored_projection_digest": "sha256:4e36b56fe405d5eccbdfbb3c3439a894420b1756628ebc203f5555558394bfd4",
+    "restored_projection_sequence": 1,
+    "restored_projection_source_hash": "sha256:cbfed2bcae676a2e0bb115e2e379c30e8438609e3311ababc3e77a260de9309a",
+    "source_last_entry_hash": "sha256:cbfed2bcae676a2e0bb115e2e379c30e8438609e3311ababc3e77a260de9309a",
+    "source_last_sequence": 1
+  },
+  "contracts": {
+    "event_digest": "sha256:732ea16b4f432d2405d3993d5361c6573a0fe909c567ea18fc1fb3f3e98b7691",
+    "organization_event": "OrganizationEvent@1.0.0",
+    "research_run_transition": "ResearchRunTransition@1.0.0"
+  },
+  "migrations": {
+    "application_id": 1095388748,
+    "latest_version": 1,
+    "manifest_digest": "sha256:df0c1d164e84ea102cf933706b76dc18dc2473805241b94aa4406f3fa95ad0ce",
+    "migration_count": 1,
+    "migration_digests": [
+      "sha256:7930c0d426f8262f22199ec7097ca741a0f9581c60265f0a3b52111514c5b3a7"
+    ]
+  },
+  "projection": {
+    "projection_count": 1,
+    "projector": "research-run",
+    "projector_version": "1.0.0",
+    "quarantine_count": 0,
+    "replay_identical": true,
+    "state_digest": "sha256:4e36b56fe405d5eccbdfbb3c3439a894420b1756628ebc203f5555558394bfd4"
+  },
+  "result": "pass",
+  "schema_version": "1.0.0",
+  "verified_invariants": [
+    "canonical-event-bytes",
+    "exact-duplicate-idempotency",
+    "transactional-subject-version",
+    "contiguous-global-hash-chain",
+    "deterministic-projector-replay",
+    "verified-online-backup-and-fresh-restore"
+  ]
+}

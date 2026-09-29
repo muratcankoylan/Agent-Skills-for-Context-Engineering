@@ -39,7 +39,7 @@ The benchmark program already defines Stages 0 through 4, strict deterministic v
 6. Invalid, missing, timeout, and format-failure outcomes remain visible.
 7. Candidate proposers and search controllers cannot seal, activate, reopen, or replace an evaluation epoch.
 8. Task count is never accepted as a substitute for target-surface construct and coverage evidence.
-9. Hidden task bodies, labels, membership, counts, selection logic, scorer diagnostics, and per-task results never enter proposer, optimizer, candidate-author, router-training, or first-round reviewer context.
+9. Hidden task bodies, labels, membership, counts, selection logic, scorer diagnostics, and per-task results never enter proposer, optimizer, candidate-author, router-training, or proposer-facing proposal-reviewer context. Independently authorized evaluator-owned semantic judges are a distinct role under the evaluation boundary below, not an exception available to proposal reviewers.
 10. Repeated attempts, seeds, turns, and model calls are measurements within their declared experimental unit, not independent samples unless the epoch justifies that claim.
 11. Confirmatory hypotheses, analysis populations, exclusions, stopping rules, comparison families, effect thresholds, and missing-data handling are sealed before the first score-bearing run.
 12. The identity that authors a candidate or controls its search cannot be the identity that activates the hidden epoch, materializes hidden tasks, or issues the final evaluation decision.
@@ -47,6 +47,8 @@ The benchmark program already defines Stages 0 through 4, strict deterministic v
 14. An evaluator-owned exposure ledger counts every hidden execution and every externally observable decision across all experiments. A new experiment ID cannot reset an epoch or related-lineage look budget.
 
 ## Interfaces and data
+
+Score-bearing human or model semantic judges operate only inside the evaluator-owned boundary under separately authenticated principals, narrowly scoped input grants, and a sealed rubric. They may receive only the task and evidence required for their assigned judgment, with shuffled opaque condition identities; they cannot receive candidate-author identity, persuasive author rationale, search rank, claimed gains, other judges' initial labels, or unrelated hidden items. Judge assignments and every materialization are recorded in the private exposure ledger. A judge cannot concurrently act as proposer, search controller, candidate author, proposer-facing reviewer, or release attestor for that candidate lineage. Its labels and task-level diagnostics stay private; only the approved terminal projection can leave the boundary. Calling a participant an independent judge confers no grant, and this draft activates no human or model execution.
 
 Create `researcher/evaluations/registry.yaml`, `epochs/`, `tasks/`, `datasets/`, `rubrics/`, and private hidden-manifest counterparts. `EvaluationTask` includes stage, mechanism, real-world objective, input and output schema, oracle, metrics, fixtures, split group, negative controls, adversarial variants, budget, and minimum useful decision.
 
@@ -107,6 +109,7 @@ Report coverage by skill, mechanism, stage, task family, model, runtime, and fai
 - Hash changes create a new epoch.
 - Near-duplicate fixture groups cannot cross splits.
 - Candidate roles cannot read hidden manifests.
+- Proposer-facing reviewers are denied hidden material; an evaluator-owned semantic judge receives only its scoped assigned items. Wrong-principal, dual-role, unrelated-item, author-rationale, cross-judge-label and return-to-search fixtures fail without disclosure.
 - Candidate and search roles cannot infer hidden membership or outcomes through counts, timing, errors, selection receipts, logs, context exclusions, or repeated queries.
 - Two sequential experiments cannot use the same candidate lineage to extract two decisions from one hidden split; the second atomic exposure request is denied.
 - Sibling, new-root, rename-only, whitespace-only, and independently submitted semantic-equivalence fixtures converge to one evaluator-owned exposure family or conservatively deny another look.

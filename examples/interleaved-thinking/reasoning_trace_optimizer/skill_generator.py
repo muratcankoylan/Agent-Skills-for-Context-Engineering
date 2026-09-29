@@ -9,17 +9,15 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 import anthropic
 
+from reasoning_trace_optimizer.api_budget import PaidAPIBudget
 from reasoning_trace_optimizer.models import (
     AnalysisResult,
     LoopResult,
     Pattern,
-    PatternType,
 )
-
 
 SKILL_TEMPLATE = '''---
 name: {skill_name}
@@ -159,6 +157,7 @@ class SkillGenerator:
         api_key: str | None = None,
         base_url: str = "https://api.minimax.io/anthropic",
         model: str = "MiniMax-M2.1",
+        api_budget: PaidAPIBudget | None = None,
     ):
         """
         Initialize SkillGenerator.
@@ -169,10 +168,14 @@ class SkillGenerator:
             model: Model for skill generation
         """
         self.model = model
-        self.client = anthropic.Anthropic(
-            api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"),
-            base_url=base_url,
-        )
+        self.api_budget = api_budget or PaidAPIBudget()
+        self._client = None
+        if not self.api_budget.dry_run:
+            self._client = anthropic.Anthropic(
+                api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"),
+                base_url=base_url,
+                max_retries=0,
+            )
 
     def generate(
         self,
@@ -408,12 +411,16 @@ Generate skill content as JSON:
 }}
 ```"""
 
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=4096,
-            system=GENERATOR_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        with self.api_budget.attempt("skill_generator.generate", 4096) as attempt:
+            if self._client is None:  # Dry-run raises before this branch.
+                raise RuntimeError("paid API client is unavailable")
+            response = self._client.messages.create(
+                model=self.model,
+                max_tokens=4096,
+                system=GENERATOR_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            attempt.record_usage(response)
 
         # Parse response
         for block in response.content:

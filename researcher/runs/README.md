@@ -1,6 +1,9 @@
 # Researcher Runs
 
-Each run is one trip through the research-to-skill state machine. Run directories are runtime artifacts; only the seed run is committed as a worked example.
+Each run is one trip through the local research-to-skill state machine. Run
+directories are ignored runtime artifacts; only the seed run is committed as a
+worked example. A legacy run is supervised evidence, not an acceptance or
+production authority record.
 
 ## Layout
 
@@ -36,6 +39,7 @@ initialized -> retrieved -> evaluated -> proposed -> novelty_checked -> validate
 Use `researcher/scripts/research_loop.py` subcommands rather than editing `run-state.json` directly:
 
 ```bash
+python3 researcher/scripts/loop_status.py --initialize-runtime
 python3 researcher/scripts/research_loop.py init --title "..." --url "..."
 python3 researcher/scripts/research_loop.py retrieve --run-dir <run> --file <evidence>
 python3 researcher/scripts/research_loop.py evaluate --run-dir <run>
@@ -45,6 +49,13 @@ python3 researcher/scripts/research_loop.py validate-run --run-dir <run>
 python3 researcher/scripts/research_loop.py pr-ready --run-dir <run> --summary <text> --test-plan <text> --risks <text>
 python3 researcher/scripts/research_loop.py close --run-dir <run> --status reference-only --reason <text> --reviewed-by <handle>
 ```
+
+The first command explicitly creates any missing empty queue ledgers and
+validates the complete set. It does not repair existing malformed files.
+Evidence must be acquired through a reviewed process outside the legacy tools;
+`retrieve --file` only records a bounded local file and performs no network
+request. Writable close statuses are `rejected`, `reference-only`, and
+`abandoned`. `accepted` closure and mechanism promotion are disabled.
 
 ## What is committed
 

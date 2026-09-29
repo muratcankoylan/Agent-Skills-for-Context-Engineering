@@ -81,19 +81,37 @@ class AgentsClientTests(unittest.TestCase):
         self.assertNotIn(SECRET, repr(client))
         self.assertEqual(self.transport.call_count, 1)
 
-    def test_agent_id_reference_is_supported_without_model_override(self):
-        payload = {"environment": {"type": "none"}, "agent_id": "agent_saved", "input": "Research"}
-        self.client().create(payload)
-        self.assertEqual(json.loads(self.transport.call_args.args[3]), payload)
-
-    def test_create_accepts_http_201_once(self):
+    def test_create_accepts_documented_http_201_once(self):
         client = self.client(status=201)
         self.assertEqual(client.create(request()), session())
         self.assertEqual(self.transport.call_count, 1)
 
+    def test_traces_snapshot_has_documented_query_and_no_inference_post(self):
+        client = self.client(page({"id": "trace_fixture", "otlp": {"resourceSpans": []}}))
+        result = client.traces(SESSION, after="trace_prior")
+        self.assertEqual(result["last_id"], "trace_fixture")
+        method, url, headers, body, _ = self.transport.call_args.args
+        self.assertEqual(method, "GET")
+        self.assertEqual(url, BASE_URL + "/" + SESSION + "/traces?limit=20&order=asc&after=trace_prior")
+        self.assertIsNone(body)
+        self.assertEqual(headers["OpenAI-Beta"], "agents=v1")
+        self.assertEqual(self.transport.call_count, 1)
+
+    def test_traces_refuse_repeating_cursor_and_bad_identifiers(self):
+        client = self.client(page({"id": "trace_prior", "otlp": {}}, has_more=True))
+        self.assert_error("PAGINATION_NOT_ADVANCING",
+                          lambda: client.traces(SESSION, "trace_prior"), ambiguous=False)
+
     def test_http_201_is_not_success_for_retrieval_or_cancellation(self):
-        self.assert_error("HTTP_ERROR", lambda: self.client(status=201).retrieve(SESSION), ambiguous=False)
-        self.assert_error("HTTP_ERROR", lambda: self.client(status=201).cancel(SESSION, "op-1"))
+        client = self.client(status=201)
+        self.assert_error("HTTP_ERROR", lambda: client.retrieve(SESSION), ambiguous=False)
+        client = self.client(status=201)
+        self.assert_error("HTTP_ERROR", lambda: client.cancel(SESSION, "op-1"))
+
+    def test_agent_id_reference_is_supported_without_model_override(self):
+        payload = {"environment": {"type": "none"}, "agent_id": "agent_saved", "input": "Research"}
+        self.client().create(payload)
+        self.assertEqual(json.loads(self.transport.call_args.args[3]), payload)
 
     def test_retrieve_checks_identity_and_preserves_nullable_usage(self):
         self.assertIsNone(self.client().retrieve(SESSION)["usage"])
@@ -413,7 +431,6 @@ class IsolatedTransportTests(unittest.TestCase):
                     _native("GET", BASE_URL, {}, None, 3)
             self.assertEqual(caught.exception.code, code)
             connection.close.assert_called_once()
-
 
     def test_native_repeated_cors_headers_do_not_reject_created_or_read_session(self):
         for status in (200, 201):

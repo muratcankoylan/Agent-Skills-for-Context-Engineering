@@ -9,13 +9,28 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import stat
 import sys
 from dataclasses import dataclass, asdict
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
-from skill_frontmatter import parse_frontmatter as parse_skill_frontmatter
+if __package__:
+    from .skill_frontmatter import parse_frontmatter as parse_skill_frontmatter
+    from .validate_run import (
+        REQUIRED_SOURCE_EVAL_KEYS,
+        source_evaluation_shape_errors,
+        validate_state_document,
+    )
+else:  # Direct script execution.
+    from skill_frontmatter import parse_frontmatter as parse_skill_frontmatter
+    from validate_run import (
+        REQUIRED_SOURCE_EVAL_KEYS,
+        source_evaluation_shape_errors,
+        validate_state_document,
+    )
 
 
 REQUIRED_RESEARCHER_FILES = [
@@ -49,19 +64,35 @@ REQUIRED_RESEARCHER_FILES = [
     "scripts/check_activation_cases.py",
     "scripts/run_benchmarks.py",
     "fixtures/activation-cases.jsonl",
-    "reports/benchmark-history.jsonl",
 ]
 
-
-REQUIRED_SOURCE_EVAL_KEYS = {
-    "evaluation_id",
-    "timestamp",
-    "source",
-    "gatekeeper",
-    "scoring",
-    "decision",
-    "extraction",
-}
+REFERENCE_RUN_ID = "20260515-035228-executable-autonomous-research-frameworks"
+REFERENCE_RUN_FILES = frozenset(
+    {
+        "THREAD.md",
+        "proposals/mechanism-proposal.jsonl",
+        "proposals/skill-proposal.md",
+        "reports/closure.json",
+        "reports/validation-report.json",
+        "reports/validation-report.md",
+        "run-state.json",
+        "sources/evaluations/source-evaluation-draft.json",
+        "sources/evidence/deep-research-summary.md",
+        "sources/evidence/raw/autonomous-research-frameworks-executable.json",
+        "sources/evidence/raw/autonomous-research-harness-evolution.json",
+        "sources/queue.jsonl",
+    }
+)
+REFERENCE_RUN_DIRECTORIES = frozenset(
+    {
+        "proposals",
+        "reports",
+        "sources",
+        "sources/evaluations",
+        "sources/evidence",
+        "sources/evidence/raw",
+    }
+)
 
 
 @dataclass
@@ -75,6 +106,7 @@ class Validator:
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
         self.findings: list[Finding] = []
+        self._run_dirs_cache: list[Path] | None = None
 
     def error(self, path: Path | str, message: str) -> None:
         self.findings.append(Finding("error", self.rel(path), message))
@@ -353,14 +385,7 @@ class Validator:
         seen: set[str] = set()
         required = {"mechanism_id", "owning_skill", "status", "activation_scenario", "behavior_change", "evidence", "failure_modes"}
         valid_status = {"accepted", "candidate", "deprecated", "rejected"}
-        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-            if not line.strip():
-                continue
-            try:
-                entry = json.loads(line)
-            except json.JSONDecodeError as exc:
-                self.error(path, f"line {line_number} invalid JSON: {exc}")
-                continue
+        for line_number, entry in self.load_jsonl(path):
             missing = required - set(entry)
             if missing:
                 self.error(path, f"line {line_number} missing fields: {sorted(missing)}")
@@ -486,54 +511,194 @@ class Validator:
                     if not isinstance(entry.get(key), str) or not entry.get(key, "").strip():
                         self.error(path, f"line {line_number} {key} must be a non-empty string")
 
-    def validate_runs(self) -> None:
+    def real_run_dirs(self) -> list[Path]:
+        if self._run_dirs_cache is not None:
+            return self._run_dirs_cache
+        researcher_dir = self.root / "researcher"
         runs_dir = self.root / "researcher" / "runs"
-        if not runs_dir.exists():
-            return
-        for run_dir in sorted(p for p in runs_dir.iterdir() if p.is_dir()):
+        result: list[Path] = []
+        for path in (researcher_dir, runs_dir):
+            try:
+                info = os.lstat(path)
+            except OSError as exc:
+                self.error(path, f"cannot inspect managed runs root: {exc}")
+                self._run_dirs_cache = []
+                return []
+            if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+                self.error(path, "managed runs root must be a real directory")
+                self._run_dirs_cache = []
+                return []
+        if runs_dir.exists():
+            for path in sorted(runs_dir.iterdir()):
+                try:
+                    info = os.lstat(path)
+                except OSError as exc:
+                    self.error(path, f"cannot inspect run entry: {exc}")
+                    continue
+                if path.name == "README.md" and stat.S_ISREG(info.st_mode):
+                    if info.st_nlink != 1:
+                        self.error(path, "runs README must have exactly one hard link")
+                    continue
+                if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+                    self.error(path, "run entry must be a real directory")
+                    continue
+                result.append(path)
+        self._run_dirs_cache = result
+        return result
+
+    def scan_real_tree(self, root: Path) -> dict[str, str]:
+        """Inspect a managed tree without following symlinks.
+
+        The returned mapping includes every descendant so a closed fixture can
+        compare both its file and directory shape against an exact manifest.
+        Regular files with multiple hard links are rejected because their bytes
+        can be mutated through an untracked alias.
+        """
+
+        observed: dict[str, str] = {}
+        pending: list[tuple[Path, PurePosixPath]] = [(root, PurePosixPath())]
+        while pending:
+            directory, prefix = pending.pop()
+            try:
+                entries = sorted(os.scandir(directory), key=lambda entry: entry.name)
+            except OSError as exc:
+                self.error(directory, f"cannot inspect managed run tree: {exc}")
+                continue
+            for entry in entries:
+                relative = prefix / entry.name
+                relative_text = relative.as_posix()
+                path = directory / entry.name
+                try:
+                    info = entry.stat(follow_symlinks=False)
+                except OSError as exc:
+                    self.error(path, f"cannot inspect managed run artifact: {exc}")
+                    observed[relative_text] = "unsafe"
+                    continue
+                if stat.S_ISDIR(info.st_mode):
+                    observed[relative_text] = "directory"
+                    pending.append((path, relative))
+                elif stat.S_ISREG(info.st_mode):
+                    observed[relative_text] = "file"
+                    if info.st_nlink != 1:
+                        self.error(
+                            path,
+                            "managed run file must have exactly one hard link",
+                        )
+                else:
+                    observed[relative_text] = "unsafe"
+                    self.error(
+                        path,
+                        "managed run artifact must be a real directory or regular file",
+                    )
+        return observed
+
+    def validate_reference_run_manifest(
+        self,
+        run_dir: Path,
+        observed: dict[str, str],
+    ) -> None:
+        expected = {
+            **{path: "directory" for path in REFERENCE_RUN_DIRECTORIES},
+            **{path: "file" for path in REFERENCE_RUN_FILES},
+        }
+        missing = sorted(set(expected) - set(observed))
+        extra = sorted(set(observed) - set(expected))
+        mismatched = sorted(
+            path
+            for path in set(expected).intersection(observed)
+            if observed[path] != expected[path]
+        )
+        if missing:
+            self.error(
+                run_dir,
+                f"reference-run manifest is missing entries: {missing}",
+            )
+        if extra:
+            self.error(
+                run_dir,
+                f"reference-run manifest has unregistered entries: {extra}",
+            )
+        for relative in mismatched:
+            self.error(
+                run_dir / relative,
+                "reference-run entry has an unsafe filesystem identity "
+                f"({observed[relative]} != {expected[relative]})",
+            )
+
+    def validate_runs(self) -> None:
+        for run_dir in self.real_run_dirs():
+            observed = self.scan_real_tree(run_dir)
+            if run_dir.name == REFERENCE_RUN_ID:
+                self.validate_reference_run_manifest(run_dir, observed)
             required_paths = [
-                run_dir / "THREAD.md",
-                run_dir / "run-state.json",
-                run_dir / "sources" / "queue.jsonl",
-                run_dir / "sources" / "evaluations",
-                run_dir / "sources" / "evidence" / "raw",
-                run_dir / "proposals",
-                run_dir / "proposals" / "mechanism-proposal.jsonl",
+                (run_dir / "sources", stat.S_ISDIR),
+                (run_dir / "sources" / "evidence", stat.S_ISDIR),
+                (run_dir / "reports", stat.S_ISDIR),
+                (run_dir / "THREAD.md", stat.S_ISREG),
+                (run_dir / "run-state.json", stat.S_ISREG),
+                (run_dir / "sources" / "queue.jsonl", stat.S_ISREG),
+                (run_dir / "sources" / "evaluations", stat.S_ISDIR),
+                (run_dir / "sources" / "evidence" / "raw", stat.S_ISDIR),
+                (run_dir / "proposals", stat.S_ISDIR),
+                (run_dir / "proposals" / "mechanism-proposal.jsonl", stat.S_ISREG),
             ]
-            for path in required_paths:
-                if not path.exists():
+            safe_paths: set[Path] = set()
+            for path, expected_type in required_paths:
+                if path.parent != run_dir and path.parent not in safe_paths:
+                    self.error(path, "run artifact has an unsafe managed ancestor")
+                    continue
+                try:
+                    info = os.lstat(path)
+                except OSError:
                     self.error(path, "run artifact missing")
+                    continue
+                if stat.S_ISLNK(info.st_mode) or not expected_type(info.st_mode):
+                    self.error(path, "run artifact has an unsafe filesystem identity")
+                    continue
+                if stat.S_ISREG(info.st_mode) and info.st_nlink != 1:
+                    self.error(path, "run artifact must have exactly one hard link")
+                    continue
+                safe_paths.add(path)
             queue = run_dir / "sources" / "queue.jsonl"
-            if queue.exists():
-                for line_number, line in enumerate(queue.read_text(encoding="utf-8").splitlines(), start=1):
-                    if not line.strip():
-                        continue
-                    try:
-                        json.loads(line)
-                    except json.JSONDecodeError as exc:
-                        self.error(queue, f"line {line_number} invalid JSONL: {exc}")
+            if queue in safe_paths:
+                self.load_jsonl(queue)
             report = run_dir / "reports" / "validation-report.json"
-            if report.exists():
-                data = self.load_json(report)
-                if isinstance(data, dict) and data.get("ok") is not True:
-                    self.error(report, "run validation report is not passing")
+            if report.parent in safe_paths:
+                try:
+                    report_info = os.lstat(report)
+                except FileNotFoundError:
+                    pass
+                except OSError as exc:
+                    self.error(report, f"cannot inspect run validation report: {exc}")
+                else:
+                    if (
+                        not stat.S_ISREG(report_info.st_mode)
+                        or report_info.st_nlink != 1
+                    ):
+                        self.error(
+                            report,
+                            "run validation report has an unsafe filesystem identity",
+                        )
+                    else:
+                        data = self.load_json(report)
+                        if isinstance(data, dict) and data.get("ok") is not True:
+                            self.error(report, "run validation report is not passing")
             state = run_dir / "run-state.json"
-            if state.exists():
+            if state in safe_paths:
                 data = self.load_json(state)
                 if isinstance(data, dict):
-                    if data.get("current_state") not in {
-                        "initialized",
-                        "retrieved",
-                        "evaluated",
-                        "proposed",
-                        "novelty_checked",
-                        "validated",
-                        "pr_ready",
-                        "closed",
-                    }:
-                        self.error(state, "invalid current_state")
-                    if not isinstance(data.get("state_history"), list) or not data["state_history"]:
-                        self.error(state, "state_history must be a non-empty list")
+                    for message in validate_state_document(
+                        data, expected_run_id=run_dir.name
+                    ):
+                        self.error(state, message)
+                    if run_dir.name == REFERENCE_RUN_ID and (
+                        data.get("current_state") != "closed"
+                        or data.get("close_status") != "reference-only"
+                    ):
+                        self.error(
+                            state,
+                            "committed reference run must be closed as reference-only",
+                        )
 
     def validate_root_provenance(self) -> None:
         for path in self.root.glob("autonomous-research-*.json"):
@@ -543,109 +708,65 @@ class Validator:
             )
 
     def validate_source_evaluations(self) -> None:
-        candidates: list[Path] = []
-        for base in [self.root / "researcher" / "runs", self.root / "researcher" / "fixtures"]:
-            if base.exists():
-                candidates.extend(base.rglob("*.json"))
+        run_candidates: list[Path] = []
+        for run_dir in self.real_run_dirs():
+            evaluation_dir = run_dir / "sources" / "evaluations"
+            safe_ancestors = True
+            for directory in (run_dir / "sources", evaluation_dir):
+                try:
+                    info = os.lstat(directory)
+                except OSError:
+                    safe_ancestors = False
+                    break
+                if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+                    safe_ancestors = False
+                    break
+            if not safe_ancestors:
+                continue
+            try:
+                entries = sorted(
+                    os.scandir(evaluation_dir), key=lambda entry: entry.name
+                )
+            except OSError as exc:
+                self.error(evaluation_dir, f"cannot inspect evaluation directory: {exc}")
+                continue
+            for entry in entries:
+                if not entry.name.endswith(".json"):
+                    continue
+                path = evaluation_dir / entry.name
+                try:
+                    info = entry.stat(follow_symlinks=False)
+                except OSError as exc:
+                    self.error(path, f"cannot inspect source evaluation: {exc}")
+                    continue
+                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                    self.error(
+                        path,
+                        "source evaluation has an unsafe filesystem identity",
+                    )
+                    continue
+                run_candidates.append(path)
+        fixture_candidates: list[Path] = []
+        fixtures = self.root / "researcher" / "fixtures"
+        if fixtures.exists():
+            fixture_candidates.extend(fixtures.rglob("*.json"))
 
-        for path in candidates:
+        for path in run_candidates:
+            if "draft" in path.stem:
+                continue
             data = self.load_json(path)
             if not isinstance(data, dict):
                 continue
-            if REQUIRED_SOURCE_EVAL_KEYS.issubset(data.keys()):
-                if "draft" in path.stem:
-                    continue
+            self.validate_source_eval_shape(path, data)
+
+        for path in fixture_candidates:
+            data = self.load_json(path)
+            if isinstance(data, dict) and REQUIRED_SOURCE_EVAL_KEYS.intersection(data):
                 self.validate_source_eval_shape(path, data)
 
     def validate_source_eval_shape(self, path: Path, data: dict[str, Any]) -> None:
-        source = data.get("source", {})
-        if source.get("retrieval_status") == "failed":
-            decision = data.get("decision", {}).get("verdict")
-            if decision != "REJECT":
-                self.error(path, "failed retrieval must reject or reroute before evaluation")
-        if source.get("retrieval_status") != "retrieved" and data.get("decision", {}).get("verdict") == "APPROVE":
-            self.error(path, "only retrieved sources may receive APPROVE")
-
-        gatekeeper = data.get("gatekeeper", {})
-        gate_values = [
-            gatekeeper.get("G1_mechanism_specificity", {}).get("pass"),
-            gatekeeper.get("G2_implementable_artifacts", {}).get("pass"),
-            gatekeeper.get("G3_beyond_basics", {}).get("pass"),
-            gatekeeper.get("G4_source_verifiability", {}).get("pass"),
-        ]
-        if not all(isinstance(value, bool) for value in gate_values):
-            self.error(path, "all gate pass values must be booleans")
-            return
-        expected_gatekeeper = "PASS" if all(gate_values) else "REJECT"
-        if gatekeeper.get("verdict") != expected_gatekeeper:
-            self.error(path, f"gatekeeper verdict must be {expected_gatekeeper}")
-
-        scoring = data.get("scoring", {})
-        score_keys = [
-            "D1_technical_depth_actionability",
-            "D2_repo_relevance",
-            "D3_evidence_rigor",
-            "D4_novelty_insight",
-        ]
-        scores: dict[str, float] = {}
-        for key in score_keys:
-            score = scoring.get(key, {}).get("score")
-            if not isinstance(score, (int, float)) or score < 0 or score > 2:
-                self.error(path, f"{key}.score must be a number from 0 to 2")
-                return
-            scores[key] = float(score)
-
-        recomputed_total = (
-            scores["D1_technical_depth_actionability"] * 0.35
-            + scores["D2_repo_relevance"] * 0.30
-            + scores["D3_evidence_rigor"] * 0.20
-            + scores["D4_novelty_insight"] * 0.15
-        )
-        recorded_total = scoring.get("weighted_total")
-        if not isinstance(recorded_total, (int, float)):
-            self.error(path, "scoring.weighted_total must be numeric")
-            return
-        if abs(float(recorded_total) - recomputed_total) > 0.011:
-            self.error(
-                path,
-                f"weighted_total {recorded_total} does not match recomputed {recomputed_total:.3f}",
-            )
-
-        expected_decision = self.expected_content_decision(all(gate_values), scores, recomputed_total)
-        decision = data.get("decision", {})
-        if decision.get("verdict") != expected_decision["verdict"]:
-            self.error(
-                path,
-                f"decision verdict must be {expected_decision['verdict']} under content-curation rubric",
-            )
-        expected_override = expected_decision["override_triggered"]
-        actual_override = decision.get("override_triggered")
-        if actual_override == "null":
-            actual_override = None
-        if actual_override != expected_override:
-            self.error(path, f"override_triggered must be {expected_override or 'null'}")
-
-    def expected_content_decision(
-        self,
-        gates_pass: bool,
-        scores: dict[str, float],
-        total: float,
-    ) -> dict[str, str | None]:
-        if not gates_pass:
-            return {"verdict": "REJECT", "override_triggered": None}
-        if scores["D1_technical_depth_actionability"] == 0:
-            return {"verdict": "REJECT", "override_triggered": "O1"}
-        if scores["D2_repo_relevance"] == 0:
-            return {"verdict": "REJECT", "override_triggered": "O2"}
-        if scores["D3_evidence_rigor"] == 1 and total >= 1.4:
-            return {"verdict": "HUMAN_REVIEW", "override_triggered": "O3"}
-        if scores["D4_novelty_insight"] == 2 and total < 1.4:
-            return {"verdict": "HUMAN_REVIEW", "override_triggered": "O4"}
-        if total >= 1.4:
-            return {"verdict": "APPROVE", "override_triggered": None}
-        if total >= 0.9:
-            return {"verdict": "HUMAN_REVIEW", "override_triggered": None}
-        return {"verdict": "REJECT", "override_triggered": None}
+        for message in source_evaluation_shape_errors(data):
+            self.error(path, message)
 
     def load_json(self, path: Path) -> Any:
         if not path.exists():

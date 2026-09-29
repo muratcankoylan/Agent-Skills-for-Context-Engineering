@@ -1,0 +1,16 @@
+{
+  "schema": "research-discovery-brief/v1",
+  "question": "Which mechanisms help LLM agents retrieve useful episodic memory, and what evidence exposes their failure modes?",
+  "skills": ["memory-systems", "evaluation"],
+  "max_packet_bytes": 131072,
+  "compact": true,
+  "lanes": [
+    {"id": "original-relevance", "facet": "Original topic, relevance control", "source": "arxiv", "query": "episodic memory LLM agents", "match": "terms", "sort": "relevance"},
+    {"id": "original-recent", "facet": "Same topic, new submissions", "source": "arxiv", "query": "episodic memory LLM agents", "match": "terms", "sort": "submittedDate"},
+    {"id": "failure-facet", "facet": "Mechanism failure: memory interference", "source": "arxiv", "query": "memory interference language agents", "match": "terms", "sort": "relevance"},
+    {"id": "deepmind-window", "facet": "Industry lead discovery, not a topic search", "source": "deepmind", "query": "", "match": "terms", "sort": "submittedDate"},
+    {"id": "huggingface-window", "facet": "Open implementation lead discovery", "source": "huggingface", "query": "", "match": "terms", "sort": "submittedDate"},
+    {"id": "microsoft-window", "facet": "Research engineering lead discovery", "source": "microsoft_research", "query": "", "match": "terms", "sort": "submittedDate"}
+  ],
+  "x_queries": ["(\"agent memory\" OR \"episodic memory\") has:links -is:retweet"]
+}

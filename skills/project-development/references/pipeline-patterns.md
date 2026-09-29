@@ -10,15 +10,15 @@ acquire → prepare → process → parse → render
 
 ### Stage Characteristics
 
-| Stage | Deterministic | Expensive | Parallelizable | Idempotent |
+| Stage | Deterministic | Expensive | Parallelizable | Retry behavior |
 |-------|---------------|-----------|----------------|------------|
-| Acquire | Yes | Low | Yes | Yes |
-| Prepare | Yes | Low | Yes | Yes |
-| Process | No | High | Yes | Yes (with caching) |
-| Parse | Yes | Low | Yes | Yes |
-| Render | Yes | Low | Partially | Yes |
+| Acquire | Yes | Low | Yes | Atomic completed-file cache |
+| Prepare | Yes | Low | Yes | Atomic completed-file cache |
+| Process | No | High | Yes | Atomic nonempty-response cache |
+| Parse | Yes | Low | Yes | Atomic replacement |
+| Render | Yes | Low | Partially | Atomic replacement |
 
-The key insight: only the Process stage involves LLM calls. All other stages are deterministic transformations that can be debugged, tested, and iterated independently.
+The key insight: only the Process stage involves LLM calls. All other stages are deterministic transformations that can be debugged, tested, and iterated independently. A path's existence alone is never a completion receipt: publish complete bytes with a same-directory temp file, file `fsync`, atomic replacement, and directory `fsync` where the platform exposes it, then validate the cached file before skipping work. The process receipt binds the exact prompt digest, model, response digest, and byte count. On Windows the template performs file `fsync` plus `os.replace`, but Python does not portably expose directory `fsync`; power-loss durability of a newly replaced directory entry therefore requires a platform-specific storage adapter. This protects ordinary crash/retry behavior on the dedicated cooperative filesystem described below; it is not a hostile-filesystem transaction or a substitute for provider idempotency keys and durable paid-call accounting. A process crash after the provider succeeds but before the receipt commits can still require reconciliation or another charged call.
 
 ## File System State Management
 
@@ -32,6 +32,7 @@ project/
 │           ├── raw.json         # Acquire output
 │           ├── prompt.md        # Prepare output
 │           ├── response.md      # Process output
+│           ├── response.receipt.json # Prompt/model/response digest binding
 │           └── parsed.json      # Parse output
 ├── output/
 │   └── {batch_id}/
@@ -40,6 +41,18 @@ project/
     └── prompts/
         └── template.md          # Prompt templates
 ```
+
+Treat `batch_id` and `item_id` as identifiers, never as paths. Validate them at
+one path-resolution boundary and reject any resolved candidate outside its
+configured root. Reject configured roots and path segments that are symlinks so
+aliases cannot redirect later writes or deletes. The pipeline template's path
+helpers enforce this identifier-containment invariant before stage I/O, including
+portable rejection of Windows device names and trailing-dot aliases.
+
+This template sanitizes untrusted identifiers; it is not an adversarial-filesystem
+sandbox. Run it in a dedicated directory writable only by the pipeline identity.
+If another principal can replace directories, files, or hard links concurrently,
+use descriptor-relative no-follow I/O or an isolated worker filesystem instead.
 
 ### State Checking Pattern
 
@@ -54,7 +67,8 @@ def needs_processing(item_dir: Path, stage: str) -> bool:
     }
     
     for output_file in stage_outputs[stage]:
-        if not (item_dir / output_file).exists():
+        candidate = item_dir / output_file
+        if not is_valid_completed_stage_file(stage, candidate):
             return True
     return False
 ```
@@ -78,7 +92,18 @@ def clean_from_stage(item_dir: Path, stage: str):
             filepath = item_dir / output_file
             if filepath.exists():
                 filepath.unlink()
+
+    # Render output lives at the batch output root, not inside an item.
+    if "render" in stage_order[start_idx:]:
+        rendered = validated_output_file(batch_id, "index.html")
+        if rendered.exists():
+            rendered.unlink()
 ```
+
+Resolve and validate the complete data and output deletion set before unlinking
+the first path. Otherwise a late unsafe output path can leave a partially
+cleaned batch, and a downstream render can survive an upstream clean as stale
+user-visible output.
 
 ## Parallel Execution Patterns
 
@@ -493,10 +518,10 @@ def render_incremental(items: list, output_dir: Path):
     """Render each item as it completes, plus index."""
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    # Render individual item pages
-    for item in items:
+    # Use an internal name rather than an external item ID as a path segment.
+    for index, item in enumerate(items):
         item_html = render_item(item)
-        item_path = output_dir / f"{item.id}.html"
+        item_path = output_dir / f"item-{index:04d}.html"
         with open(item_path, "w") as f:
             f.write(item_html)
     
@@ -607,4 +632,3 @@ def test_pipeline_end_to_end():
         # Cleanup
         shutil.rmtree(test_dir, ignore_errors=True)
 ```
-

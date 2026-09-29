@@ -1,0 +1,177 @@
+{
+  "complete_catalog": true,
+  "deployment_activation": false,
+  "executed_tests": 318,
+  "hosted_github_execution": false,
+  "live_provider_execution": false,
+  "passed": true,
+  "planned_scenarios": 10,
+  "scenarios": [
+    {
+      "elapsed_ms": 4307,
+      "errors": [],
+      "executed": 85,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_agents_runtime": 43,
+        "test_openai_agents": 42
+      },
+      "passed": true,
+      "planned": 85,
+      "scenario": "managed-lifecycle",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 1904,
+      "errors": [],
+      "executed": 8,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_github_runner_recovery": 8
+      },
+      "passed": true,
+      "planned": 8,
+      "scenario": "runner-recovery",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 3379,
+      "errors": [],
+      "executed": 22,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_openai_campaign": 22
+      },
+      "passed": true,
+      "planned": 22,
+      "scenario": "budget-and-uncertainty",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 3229,
+      "errors": [],
+      "executed": 37,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_citation_spans": 11,
+        "test_primary_profile": 6,
+        "test_retrieval_handoff": 20
+      },
+      "passed": true,
+      "planned": 37,
+      "scenario": "capture-grounding",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 25182,
+      "errors": [],
+      "executed": 25,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_research_pipeline": 25
+      },
+      "passed": true,
+      "planned": 25,
+      "scenario": "pipeline-checkpoints",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 24599,
+      "errors": [],
+      "executed": 25,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_month_simulation": 2,
+        "test_organization": 23
+      },
+      "passed": true,
+      "planned": 25,
+      "scenario": "daily-restarts",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 3434,
+      "errors": [],
+      "executed": 25,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_recovery_bundle": 25
+      },
+      "passed": true,
+      "planned": 25,
+      "scenario": "artifact-recovery",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 2244,
+      "errors": [],
+      "executed": 26,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_candidate_review": 26
+      },
+      "passed": true,
+      "planned": 26,
+      "scenario": "frozen-candidates",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 121,
+      "errors": [],
+      "executed": 19,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_github": 19
+      },
+      "passed": true,
+      "planned": 19,
+      "scenario": "publication-boundary",
+      "skipped": [],
+      "unexpected_successes": []
+    },
+    {
+      "elapsed_ms": 808,
+      "errors": [],
+      "executed": 46,
+      "expected_failures": [],
+      "failures": [],
+      "modules": {
+        "test_api": 16,
+        "test_environment": 30
+      },
+      "passed": true,
+      "planned": 46,
+      "scenario": "operator-isolation",
+      "skipped": [],
+      "unexpected_successes": []
+    }
+  ],
+  "schema": "research-release-rehearsal/v1",
+  "scientific_effectiveness_measured": false,
+  "scope": "deterministic harness fault scenarios with injected providers",
+  "source": {
+    "commit": "c6cd52017b247804373339e1c3c103d42554b0a1",
+    "implementation_digest": "sha256:ae010c4c28e08ec0b9002e178c3758997d8e108a461af6f7283935d2ecf81cde",
+    "release_source_digest": "sha256:03934a8259f2810827651880be6eb33ac99c0d7373fe1539576ac12e5b7bff5c",
+    "release_source_files": 850,
+    "scenario_source_digest": "sha256:7707b70f5a32b8e4f84395e34cfddf55525bd750e28d3cc23a3e5d655d0df86e",
+    "scenario_source_files": 183
+  }
+}

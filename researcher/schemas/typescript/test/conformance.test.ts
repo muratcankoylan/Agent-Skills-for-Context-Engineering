@@ -18,8 +18,8 @@ function assertContractCode(source: () => unknown, code: string): void {
 
 test("matches every generated canonicalization result and registered golden count", () => {
   const result = runRepositoryConformance();
-  assert.equal(result.registeredSchemaCount, 20);
-  assert.equal(result.goldenRecordCount, 21);
+  assert.equal(result.registeredSchemaCount, 22);
+  assert.equal(result.goldenRecordCount, 23);
   assert.equal(result.canonicalizationCases.length, 12);
   assert.equal(
     result.suiteDigest,

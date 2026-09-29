@@ -68,8 +68,8 @@
       "result": "reject"
     }
   ],
-  "golden_record_count": 21,
-  "registered_schema_count": 20,
+  "golden_record_count": 23,
+  "registered_schema_count": 22,
   "result": "pass",
   "schema_version": "1.0.0",
   "suite_digest": "sha256:f85913b47745ef1e028a1f36988ce33419658bdcdb382402f76e316386244091"

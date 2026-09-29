@@ -208,19 +208,16 @@ class LockTests(unittest.TestCase):
         self.assertEqual(target.read_text(), "preserve")
 
     @unittest.skipUnless("fork" in multiprocessing.get_all_start_methods(), "requires fork")
-    def test_legacy_inode_lock_excludes_new_writer_and_hardlink_alias(self):
+    def test_legacy_inode_lock_excludes_new_writer(self):
         ctx = multiprocessing.get_context("fork")
-        for alias in (False, True):
-            with self.subTest(alias=alias):
-                target = self.root / f"events-{alias}.jsonl"
+        for trial in range(2):
+            with self.subTest(trial=trial):
+                target = self.root / f"events-{trial}.jsonl"
                 seed = b'{"seed":1}\n'
                 target.write_bytes(seed)
-                destination = self.root / "alias.jsonl" if alias else target
-                if alias:
-                    os.link(target, destination)
                 held, release, started, finished = (ctx.Event() for _ in range(4))
                 legacy = ctx.Process(target=old_writer, args=(str(target), held, release))
-                new = ctx.Process(target=new_writer, args=(str(subject.LOCK_DIR), str(destination),
+                new = ctx.Process(target=new_writer, args=(str(subject.LOCK_DIR), str(target),
                                   started, finished))
                 legacy.start()
                 try:
@@ -241,6 +238,46 @@ class LockTests(unittest.TestCase):
                                 process.join(5)
                 self.assertEqual([legacy.exitcode, new.exitcode], [0, 0])
                 self.assertEqual(len(target.read_text().splitlines()), 2)
+
+    def test_hardlinked_append_target_refused_without_rollback_or_mutation(self):
+        # The integrated path contract is stricter than the original PR: reject
+        # aliases outright instead of allowing them under a shared inode lock.
+        target = self.root / "events.jsonl"
+        seed = b'{"seed":1}\n'
+        target.write_bytes(seed)
+        alias = self.root / "alias.jsonl"
+        os.link(target, alias)
+        with patch.object(subject, "_rollback_failed_append") as rollback:
+            with self.assertRaises(ValueError):
+                subject.append_jsonl(alias, {"id": 1})
+        rollback.assert_not_called()
+        self.assertEqual(target.read_bytes(), seed)
+        self.assertEqual(alias.read_bytes(), seed)
+
+    def test_rollback_preserves_bytes_committed_before_target_lock_acquisition(self):
+        target = self.root / "events.jsonl"
+        seed = b'{"seed":1}\n'
+        prior = b'{"legacy":1}\n'
+        target.write_bytes(seed)
+        original_flock = subject.fcntl.flock
+        acquisitions = 0
+
+        def acquire_after_legacy_write(fd, operation):
+            nonlocal acquisitions
+            if operation == subject.fcntl.LOCK_EX:
+                acquisitions += 1
+                if acquisitions == 2:
+                    # Simulate a writer finishing between open() and flock().
+                    with target.open("ab") as legacy:
+                        legacy.write(prior)
+            original_flock(fd, operation)
+
+        with patch.object(subject.fcntl, "flock", side_effect=acquire_after_legacy_write):
+            with patch.object(subject.os, "write", side_effect=OSError("write failed")):
+                with self.assertRaises(OSError):
+                    subject.append_jsonl(target, {"id": 1})
+        self.assertEqual(acquisitions, 2)
+        self.assertEqual(target.read_bytes(), seed + prior)
 
     @unittest.skipUnless("fork" in multiprocessing.get_all_start_methods(), "requires fork")
     def test_real_process_contention(self):

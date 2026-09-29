@@ -1,0 +1,57 @@
+{
+  "schema": "synthetic-trace-canary/v1",
+  "observed_date": "2026-09-29",
+  "fixture": true,
+  "authority": "none",
+  "source_of_credentials": "explicit private environment file",
+  "credential_values_recorded": false,
+  "explicit_default_project_approved": true,
+  "initial_local_preflight": {
+    "outcome": "refused_without_default_project_opt_in",
+    "export_attempts": 0,
+    "http_requests": 0
+  },
+  "live_canary": {
+    "transport": "repo-native isolated OTLP/HTTP exporter",
+    "endpoint": "https://api.raindrop.ai/v1/traces",
+    "http_status": 200,
+    "http_status_evidence": "exported result requires HTTP 200 and validated OTLP acknowledgement",
+    "span_count": 2,
+    "payload_bytes": 1193,
+    "span_names": [
+      "workflow.execute",
+      "workflow.effect"
+    ],
+    "parent_child": true,
+    "metadata_only": true,
+    "model_calls": 0,
+    "source_requests": 0,
+    "export_attempts": 1,
+    "retry_attempts": 0,
+    "whole_cli_elapsed_ns": 472896166,
+    "result": {
+      "schema": "trace-export-result/v1",
+      "status": "exported",
+      "attempted": true,
+      "span_count": 2,
+      "rejected_spans": 0,
+      "warning": false,
+      "error_code": null
+    }
+  },
+  "post_export": {
+    "pending_export": 0,
+    "unacknowledged_spans": 0,
+    "unfinished_exports": 0,
+    "unknown_exports": 0,
+    "delivery_records": 1,
+    "second_export_status": "empty",
+    "second_export_attempted": false,
+    "second_export_network_guard": "injected transport raises if called"
+  },
+  "dashboard_retrieval_verified": false,
+  "query_key_used": false,
+  "installer_or_daemon_started": false,
+  "production_ready": false,
+  "proof_limit": "Ingress acknowledgement only; persistence, project dashboard visibility, end-to-end research traces and retention were not verified."
+}

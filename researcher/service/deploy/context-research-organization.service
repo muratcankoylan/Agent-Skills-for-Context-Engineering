@@ -1,0 +1,66 @@
+[Unit]
+Description=Bounded context research organization (explicit live activation)
+After=network-online.target
+Wants=network-online.target
+Conflicts=context-research.service
+ConditionPathIsDirectory=/srv/context-research/release/.git
+ConditionPathExists=/etc/context-research/retrieval.json
+ConditionPathExists=/etc/context-research/organization.json
+ConditionPathExists=/var/lib/context-research/authority/authority.json
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=context-research
+Group=context-research
+UMask=0077
+WorkingDirectory=/srv/context-research/release
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUTF8=1
+Environment=RESEARCH_RELEASE_DIR=/srv/context-research/release
+Environment=RESEARCH_DEPENDENCY_LOCK=/opt/context-research/requirements-dev.txt
+Environment=RESEARCH_CODEX_DEPENDENCY_LOCK=/opt/context-research/requirements-codex-linux.txt
+Environment=RESEARCH_CODEX_PYTHON=/opt/context-research/codex-venv/bin/python
+EnvironmentFile=/etc/context-research/release.env
+ExecStart=/opt/context-research/venv/bin/python -B /opt/context-research/launch.py organization serve --repo /srv/context-research/release --source-config /etc/context-research/retrieval.json --source-state /var/lib/context-research/retrieval --authority /var/lib/context-research/authority --policy /etc/context-research/organization.json --state /var/lib/context-research/organization --env-file /etc/context-research/provider-literals.env --live
+StateDirectory=context-research
+StateDirectoryMode=0700
+ReadOnlyPaths=/srv/context-research/release /opt/context-research /etc/context-research
+ReadWritePaths=/var/lib/context-research
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+NoNewPrivileges=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CPUQuota=200%
+MemoryHigh=1536M
+MemoryMax=2G
+MemorySwapMax=0
+# Matches the bounded real-SDK organization rehearsal, not unbounded process fanout.
+TasksMax=256
+LimitNOFILE=1024
+LimitCORE=0
+# Drain one atomic candidate phase (five <=90s validators), or one <=150s
+# SDK turn, plus bounded telemetry/receipt teardown. Never a whole eval sweep.
+TimeoutStopSec=600
+# Only the coordinator receives the initial TERM; SDK/validator children drain.
+# Remaining descendants are still killed when the parent exits or grace expires.
+KillMode=mixed
+Restart=on-failure
+RestartSec=15
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

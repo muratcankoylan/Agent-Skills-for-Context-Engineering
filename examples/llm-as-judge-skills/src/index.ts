@@ -1,5 +1,7 @@
 // Configuration
 export { config, validateConfig } from './config/index.js';
+export { LocalAttemptBudget } from './runtime/attempt-budget.js';
+export { JudgeRuntime, type JudgeRuntimeOptions } from './runtime/judge-runtime.js';
 
 // Tools
 export * from './tools/evaluation/index.js';
@@ -16,4 +18,3 @@ export type {
   GenerateRubricInput,
   GenerateRubricOutput
 } from './tools/evaluation/index.js';
-

@@ -5,7 +5,9 @@ description: "This skill should be used when designing hosted or background agen
 
 # Hosted Agent Infrastructure
 
-Hosted agents run in remote sandboxed environments rather than on local machines. When designed well, they provide unlimited concurrency, consistent execution environments, and multiplayer collaboration. The critical insight is that session speed should be limited only by model provider time-to-first-token, with all infrastructure setup completed before the user starts their session.
+Hosted agents run in remote sandboxed environments rather than on local machines. When designed well, they provide elastic but explicitly bounded concurrency, consistent execution environments, and multiplayer collaboration. Session speed should minimize infrastructure overhead without hiding authorization, synchronization, isolation, or readiness checks.
+
+Treat this skill and its bundled examples as preparatory architecture guidance, not production-ready infrastructure. Production use requires a provider-specific sandbox adapter, authenticated authorization boundary, credential broker, supervised task lifecycle, bounded failure handling, and adversarial verification.
 
 ## When to Activate
 
@@ -25,7 +27,7 @@ Do not activate this skill for adjacent work owned by other skills:
 
 ## Core Concepts
 
-Move agent execution to remote sandboxed environments to eliminate the fundamental limits of local execution: resource contention, environment inconsistency, and single-user constraints. Remote sandboxes unlock unlimited concurrency, reproducible environments, and collaborative workflows because each session gets its own isolated compute with a known-good environment image.
+Move agent execution to remote sandboxed environments when measured workload needs justify it. Remote sandboxes can provide bounded concurrency, reproducible environments, and collaborative workflows because each session gets isolated compute with an attested environment image. Set hard attempt, cost, and resource ceilings; elasticity is not infinite capacity.
 
 Design the architecture in three layers because each layer scales independently. Build sandbox infrastructure for isolated execution, an API layer for state management and client coordination, and client interfaces for user interaction across platforms. Keep these layers cleanly separated so sandbox changes do not ripple into clients.
 
@@ -41,7 +43,9 @@ Pre-build environment images on a regular cadence (every 30 minutes works well) 
 - Cloned repository at a known commit
 - All runtime dependencies installed
 - Initial setup and build commands completed
-- Cached files from running app and test suite once
+- Cache outputs from successful, terminating build and test commands
+
+Require a digest-pinned base image and validated integer CPU, memory, disk, process, and duration bounds before allocation. Close the clone lease before running repository-controlled build or test code, and execute that code in a child boundary with no ambient credentials, broker socket, cloud metadata access, or unmediated egress. Every verification step must succeed. Reap all processes and prove quiescence before finalizing a snapshot; do not snapshot a background cache-warming server.
 
 When starting a session, spin up a sandbox from the most recent image. The repository is at most 30 minutes out of date, making the remaining git sync fast.
 
@@ -51,17 +55,21 @@ Take filesystem snapshots at key points to enable instant restoration for follow
 - When agent finishes making changes (session snapshot)
 - Before sandbox exit for potential follow-up
 
+Route every image and session snapshot through one fail-closed finalization gate that reaps descendants and proves quiescence, closed credential helpers, and absence of credential material before snapshot creation. Treat a session snapshot reference as an untrusted opaque locator. Resolve its repository and principal through an authoritative snapshot-binding provider, require that binding to match the current authorization receipt, and independently verify the restored sandbox identity before exposure. Attest every new snapshot through the same provider before returning its locator.
+
 **Git Configuration for Background Agents**
 Configure git identity explicitly in every sandbox because background agents are not tied to a specific user during image builds:
-- Generate GitHub app installation tokens for repository access during clone
+- Request a new opaque, short-lived, repository- and operation-scoped lease from a credential broker for each clone, fetch, or push
+- Keep bearer credentials inside the broker; never return them to the sandbox manager, place them in a URL or command, or persist them in sessions, queues, logs, images, or snapshots
 - Set git config `user.name` and `user.email` when committing and pushing changes
 - Use the prompting user's identity for commits, not the app identity
 
 **Warm Pool Strategy**
 Maintain a pool of pre-warmed sandboxes for high-volume repositories because cold starts are the primary source of user frustration:
-- Keep sandboxes ready before users start sessions
-- Expire and recreate pool entries as new image builds complete
-- Start warming a sandbox as soon as a user begins typing (predictive warm-up)
+- Authorize the authenticated principal for the selected repository before warming or allocating any sandbox
+- Complete a bounded, credentialed fetch and reset before publishing a sandbox as ready; terminate and exclude it on any sync failure
+- Expire and terminate stale, unclaimed pool entries as new image builds complete
+- Serialize maintenance per repository so concurrent warm-up signals cannot overprovision the pool
 
 ### Agent Framework Selection
 
@@ -84,16 +92,10 @@ Require a plugin system that supports runtime interception because this enables 
 ### Speed Optimizations
 
 **Predictive Warm-Up**
-Start warming the sandbox as soon as a user begins typing their prompt, not when they submit it, because the typing interval (5-30 seconds) is enough to complete most setup:
-- Clone latest changes in parallel with user typing
-- Run initial setup before user hits enter
-- For fast spin-up, sandbox can be ready before user finishes typing
+After authenticating the user and authorizing repository membership, begin supervised warm-up while the user is typing. The API or supervisor must own and observe the task, its deadline, and its failure; do not drop an untracked background task. A sandbox becomes selectable only after its bounded sync succeeds.
 
-**Parallel File Reading**
-Allow the agent to start reading files immediately even if sync from latest base branch is not complete, because in large repositories incoming prompts rarely touch recently-changed files:
-- Agent can research immediately without waiting for git sync
-- Block file edits (not reads) until synchronization completes
-- This separation is safe because read-time data staleness of 30 minutes rarely matters for research
+**Readiness Before I/O**
+Do not expose a sandbox for reads or writes while repository synchronization is incomplete. Stale reads can misdirect an agent and create time-of-check/time-of-use inconsistencies even if writes are delayed. Complete sync within a fixed deadline or fail the allocation with a typed error; never poll indefinitely for readiness.
 
 **Maximize Build-Time Work**
 Move everything possible to the image build step because build-time duration is invisible to users:
@@ -123,7 +125,7 @@ Engineer prompts that guide when agents should spawn sub-sessions rather than do
 Isolate state per session (SQLite per session works well) because cross-session interference is a subtle and hard-to-debug failure mode:
 - Dedicated database per session
 - No session can impact another's performance
-- Architecture handles hundreds of concurrent sessions
+- Treat hundreds of concurrent sessions as an unmeasured capacity target until load, isolation, quota, and cost tests demonstrate it; enforce a lower explicit ceiling meanwhile
 
 **Real-Time Streaming**
 Stream all agent work in real-time because high-frequency feedback is critical for user trust:
@@ -139,7 +141,7 @@ Build a single state system that synchronizes across all clients (chat interface
 ### Multiplayer Support
 
 **Why Multiplayer Matters**
-Design for multiplayer from day one because it is nearly free to add with proper synchronization architecture, and it unlocks high-value workflows:
+Plan multiplayer boundaries early because identity, clearance, concurrent mutation, and audit semantics are expensive to retrofit. Implement it only when measured value justifies its additional authorization and coordination cost:
 - Teaching non-engineers to use AI effectively
 - Live QA sessions with multiple team members
 - Real-time PR review with immediate changes
@@ -154,15 +156,16 @@ Build the data model so sessions are not tied to single authors because multipla
 ### Authentication and Authorization
 
 **User-Based Commits**
-Use GitHub authentication to open PRs on behalf of the user (not the app) because this preserves the audit trail and prevents users from approving their own AI-generated changes:
-- Obtain user tokens for PR creation
-- PRs appear as authored by the human, not the bot
+Preserve human attribution without exposing credentials to application or sandbox code:
+- Resolve the authenticated principal to repository membership before a session can start
+- Use a destination- and operation-locked broker effect to push branches or create PRs
+- Record the initiating principal in durable audit metadata; do not claim GitHub authorship semantics that the selected App or delegated grant cannot provide
 
 **Sandbox-to-API Flow**
 Follow this sequence because it keeps sandbox permissions minimal while letting the API handle sensitive operations:
-1. Sandbox pushes changes (updating git user config)
+1. Sandbox requests a new brokered, repository-scoped push lease after policy approval
 2. Sandbox sends event to API with branch name and session ID
-3. API uses user's GitHub token to create PR
+3. API invokes a destination-locked GitHub effect for PR creation without receiving a bearer credential
 4. GitHub webhooks notify API of PR events
 
 ### Client Implementations
@@ -170,8 +173,9 @@ Follow this sequence because it keeps sandbox permissions minimal while letting 
 **Slack Integration**
 Prioritize Slack as the first distribution channel for internal adoption because it creates a virality loop as team members see others using it:
 - No syntax required, natural chat interface
-- Build a classifier (fast model with repo descriptions) to determine which repository to work in
-- Include hints for common repositories; allow "unknown" for ambiguous cases
+- Treat classifier output or a user-selected repository as an untrusted candidate, never an authorization decision
+- Verify the Slack request, map the Slack user to an authenticated principal, and require repository-membership authorization before warm-up or session creation
+- Fail closed with no repository disclosure when classification is ambiguous or access is denied
 
 **Web Interface**
 Build a web interface with these features because it serves as the primary power-user surface:
@@ -182,9 +186,9 @@ Build a web interface with these features because it serves as the primary power
 - Statistics page: sessions resulting in merged PRs (primary metric), usage over time, live "humans prompting" count
 
 **Chrome Extension**
-Build a Chrome extension for non-engineering users because DOM and React internals extraction gives higher precision than raw screenshots at lower token cost:
+Treat a Chrome extension for non-engineering users as a separately threat-modeled client. DOM or React extraction is an untrusted collection boundary, and any quality or token advantage over screenshots must be measured for the actual tasks:
 - Sidebar chat interface with screenshot tool
-- Extract DOM/React internals instead of raw images
+- Allow extraction only on an origin allowlist and after explicit user selection; use explicit selectors, bound traversal depth/node count/time/bytes, a closed schema, classification and redaction, and a user preview before release
 - Distribute via managed device policy (bypasses Chrome Web Store)
 
 ## Practical Guidance
@@ -195,11 +199,13 @@ Before building the system, decide these infrastructure properties explicitly:
 
 1. **Sandbox lifecycle**: how sessions start, snapshot, restore, time out, and terminate.
 2. **Image and warm-pool policy**: how often images rebuild, which caches are precomputed, and when warm sandboxes expire.
-3. **Read/write synchronization**: whether agents may read before repository sync completes, and which events unblock writes.
+3. **Repository readiness**: the deadline and typed failure used to ensure no sandbox is offered before credentialed synchronization succeeds.
 4. **Per-session state isolation**: what storage belongs to one session, what is shared, and how cross-session interference is prevented.
-5. **Auth and commit identity**: which operations use app tokens, which use user tokens, and how commits are attributed.
+5. **Auth and commit identity**: which authenticated principal and repository grant authorize each brokered Git or GitHub effect, and how commits are attributed.
 6. **Output extraction**: how branches, PRs, files, logs, screenshots, and session summaries leave the sandbox.
 7. **Budget and teardown**: maximum runtime, cost ceilings, idle policy, and forced cleanup behavior.
+
+Treat configured repository membership, the current authorization receipt, pinned image digest, resource bounds, and an authoritative snapshot actor/repository attestation as allocation preconditions rather than optional runtime checks.
 
 ### Follow-Up Message Handling
 
@@ -227,13 +233,14 @@ Drive internal adoption through visibility rather than mandates because forced u
 
 ```text
 user prompt
--> API allocates warm sandbox from current image
--> sandbox syncs latest branch delta
--> reads allowed immediately, writes blocked until sync completes
+-> API authenticates the user and authorizes repository membership
+-> pool builds a candidate from the current image
+-> sandbox acquires a new fetch lease and completes bounded sync
+-> pool publishes the sandbox as ready; reads and writes are now allowed
 -> agent edits and tests inside isolated workspace
--> sandbox snapshots final filesystem
--> branch is pushed
--> API creates PR using user token
+-> shared finalization gate reaps processes, proves quiescence and credential absence, then snapshots and attests the filesystem
+-> branch is pushed through a new scoped broker lease
+-> API creates PR through a destination-locked broker effect
 -> session summary, logs, and PR URL are returned to clients
 ```
 
@@ -246,23 +253,23 @@ If the task is "make the agent loop run for days with locked rubrics and PR appr
 ## Guidelines
 
 1. Pre-build environment images on regular cadence (30 minutes is a good default)
-2. Start warming sandboxes when users begin typing, not when they submit
-3. Allow file reads before git sync completes; block only writes
+2. Warm only after authenticated repository authorization, under a supervised task with a deadline
+3. Publish a sandbox only after credentialed synchronization completes; expose neither reads nor writes before readiness
 4. Structure agent framework as server-first with clients as thin wrappers
 5. Isolate state per session to prevent cross-session interference
 6. Attribute commits to the user who prompted, not the app
 7. Track merged PRs as primary success metric
-8. Build for multiplayer from the start; it is nearly free with proper sync architecture
+8. Design explicit multiplayer identity and concurrency boundaries, then enable them only after measured validation
 
 ## Gotchas
 
 1. **Cold start latency**: First sandbox spin-up takes 30-60s and users perceive this as broken. Use warm pools and predictive warm-up on keystroke to eliminate perceived wait time.
 2. **Image staleness**: Infrequent image rebuilds mean agents run with outdated dependencies or code. Set a 30-minute rebuild cadence and monitor image age; alert if builds fail silently.
 3. **Sandbox cost runaway**: Long-running agents without timeout or budget caps accumulate unexpected costs. Set hard timeout limits (default 4 hours) and per-session cost ceilings.
-4. **Auth token expiration mid-session**: Long tasks fail when GitHub tokens expire partway through. Implement token refresh logic and check token validity before sensitive operations like PR creation.
+4. **Credential lease expiry**: Never refresh or retain a bearer credential inside a session. Request a new short-lived broker lease or constrained effect immediately before each sensitive Git or GitHub operation; fail closed if the broker denies it.
 5. **Git config in sandboxes**: Missing `user.name` or `user.email` causes commit failures in background agents. Always set git identity explicitly during sandbox configuration, never assume it carries over from the image.
-6. **State loss on sandbox recycle**: Agents lose completed work if the sandbox is recycled or times out before results are extracted. Always snapshot before termination and extract artifacts (branches, PRs, files) before letting the sandbox die.
-7. **Oversubscribing warm pools**: Maintaining too many warm sandboxes wastes money during low-traffic periods. Scale pool size based on traffic patterns and time-of-day; use autoscaling rather than fixed pool sizes.
+6. **State loss on sandbox recycle**: Agents lose completed work if the sandbox is recycled or times out before results are extracted. Extract artifacts (branches, PRs, files), pass the shared finalization gate, then snapshot and attest before termination; fail closed rather than snapshotting live processes or credential state.
+7. **Oversubscribing warm pools**: Concurrent warm-up signals can race and exceed the target. Serialize maintenance per repository, terminate stale unclaimed entries, and then scale the target from measured traffic.
 8. **Missing output extraction**: Agents complete work inside the sandbox but results never get pulled out to the user. Build explicit extraction steps (push branch, create PR, return file contents) into the session teardown flow.
 
 ## Integration

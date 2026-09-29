@@ -1,0 +1,545 @@
+diff --git a/examples/interleaved-thinking/examples/03_full_optimization.py b/examples/interleaved-thinking/examples/03_full_optimization.py
+--- a/examples/interleaved-thinking/examples/03_full_optimization.py
++++ b/examples/interleaved-thinking/examples/03_full_optimization.py
+@@ -24,6 +24,7 @@
+     LoopConfig,
+     SkillGenerator,
+ )
++from reasoning_trace_optimizer.calculator import CalculatorError, evaluate_expression
+ 
+ # Load environment variables from the project root
+ env_path = Path(__file__).parent.parent / ".env"
+@@ -147,13 +148,13 @@
+     # Calculator Tool
+     {
+         "name": "calculator",
+-        "description": "Perform mathematical calculations. Supports basic arithmetic and common functions.",
++        "description": "Evaluate a bounded real-number expression. Supports +, -, *, /, //, %, **, unary signs, parentheses, sqrt, sin, cos, tan, log, log10, exp, pow, abs, round, pi, and e.",
+         "input_schema": {
+             "type": "object",
+             "properties": {
+                 "expression": {
+                     "type": "string",
+-                    "description": "Mathematical expression to evaluate (e.g., '2 + 2', 'sqrt(16)', '100 * 0.15')",
++                    "description": "Allowlisted mathematical expression (e.g., '2 + 2', 'sqrt(16)', '100 * 0.15'); Python objects, indexing, attributes, and arbitrary calls are rejected",
+                 },
+             },
+             "required": ["expression"],
+@@ -976,33 +977,17 @@
+     elif name == "calculator":
+         expression = input_data.get("expression", "")
+         try:
+-            # Safe evaluation of mathematical expressions
+-            import math
+-            allowed_names = {
+-                "sqrt": math.sqrt,
+-                "sin": math.sin,
+-                "cos": math.cos,
+-                "tan": math.tan,
+-                "log": math.log,
+-                "log10": math.log10,
+-                "exp": math.exp,
+-                "pow": pow,
+-                "abs": abs,
+-                "round": round,
+-                "pi": math.pi,
+-                "e": math.e,
+-            }
+-            result = eval(expression, {"__builtins__": {}}, allowed_names)
++            result = evaluate_expression(expression)
+             return json.dumps({
+                 "expression": expression,
+                 "result": result,
+                 "status": "success",
+             })
+-        except Exception as e:
++        except CalculatorError as exc:
+             return json.dumps({
+                 "expression": expression,
+                 "status": "error",
+-                "error": str(e),
++                "error": str(exc),
+             })
+ 
+     return json.dumps({"error": f"Unknown tool: {name}"})
+diff --git a/examples/interleaved-thinking/reasoning_trace_optimizer/calculator.py b/examples/interleaved-thinking/reasoning_trace_optimizer/calculator.py
+new file mode 100644
+--- /dev/null
++++ b/examples/interleaved-thinking/reasoning_trace_optimizer/calculator.py
+@@ -0,0 +1,204 @@
++"""Bounded arithmetic expression evaluation for the calculator example tool."""
++
++from __future__ import annotations
++
++import ast
++import math
++import operator
++from collections.abc import Callable
++from dataclasses import dataclass
++
++MAX_EXPRESSION_LENGTH = 512
++MAX_AST_NODES = 128
++MAX_AST_DEPTH = 32
++MAX_INTEGER_BITS = 1024
++MAX_ABS_EXPONENT = 100
++MAX_ABS_ROUND_DIGITS = 100
++
++
++class CalculatorError(ValueError):
++    """Raised when an expression is invalid, unsupported, or exceeds a bound."""
++
++
++RealNumber = int | float
++
++
++@dataclass(frozen=True)
++class FunctionSpec:
++    function: Callable[..., RealNumber]
++    minimum_arguments: int
++    maximum_arguments: int
++
++
++_BINARY_OPERATORS: dict[type[ast.operator], Callable[[RealNumber, RealNumber], RealNumber]] = {
++    ast.Add: operator.add,
++    ast.Sub: operator.sub,
++    ast.Mult: operator.mul,
++    ast.Div: operator.truediv,
++    ast.FloorDiv: operator.floordiv,
++    ast.Mod: operator.mod,
++}
++_UNARY_OPERATORS: dict[type[ast.unaryop], Callable[[RealNumber], RealNumber]] = {
++    ast.UAdd: operator.pos,
++    ast.USub: operator.neg,
++}
++_CONSTANTS: dict[str, float] = {
++    "e": math.e,
++    "pi": math.pi,
++}
++_FUNCTIONS: dict[str, FunctionSpec] = {
++    "abs": FunctionSpec(abs, 1, 1),
++    "cos": FunctionSpec(math.cos, 1, 1),
++    "exp": FunctionSpec(math.exp, 1, 1),
++    "log": FunctionSpec(math.log, 1, 2),
++    "log10": FunctionSpec(math.log10, 1, 1),
++    "pow": FunctionSpec(pow, 2, 2),
++    "round": FunctionSpec(round, 1, 2),
++    "sin": FunctionSpec(math.sin, 1, 1),
++    "sqrt": FunctionSpec(math.sqrt, 1, 1),
++    "tan": FunctionSpec(math.tan, 1, 1),
++}
++
++
++def _validate_number(value: object) -> RealNumber:
++    if isinstance(value, bool) or not isinstance(value, (int, float)):
++        raise CalculatorError("calculation must produce a real number")
++    if isinstance(value, int):
++        if value.bit_length() > MAX_INTEGER_BITS:
++            raise CalculatorError(
++                f"integer exceeds the {MAX_INTEGER_BITS}-bit calculation limit"
++            )
++        return value
++    if not math.isfinite(value):
++        raise CalculatorError("calculation must produce a finite result")
++    return value
++
++
++def _validate_exponent(value: RealNumber) -> None:
++    if abs(value) > MAX_ABS_EXPONENT:
++        raise CalculatorError(
++            f"exponent magnitude exceeds the limit of {MAX_ABS_EXPONENT}"
++        )
++
++
++def _validate_tree(tree: ast.AST) -> None:
++    node_count = 0
++    stack = [(tree, 1)]
++    while stack:
++        node, depth = stack.pop()
++        node_count += 1
++        if node_count > MAX_AST_NODES:
++            raise CalculatorError(f"expression exceeds the {MAX_AST_NODES}-node limit")
++        if depth > MAX_AST_DEPTH:
++            raise CalculatorError(f"expression exceeds the depth limit of {MAX_AST_DEPTH}")
++        stack.extend((child, depth + 1) for child in ast.iter_child_nodes(node))
++
++
++def _call_function(name: str, arguments: list[RealNumber]) -> RealNumber:
++    specification = _FUNCTIONS.get(name)
++    if specification is None:
++        raise CalculatorError(f"function is not allowed: {name}")
++
++    argument_count = len(arguments)
++    if not specification.minimum_arguments <= argument_count <= specification.maximum_arguments:
++        if specification.minimum_arguments == specification.maximum_arguments:
++            expected = str(specification.minimum_arguments)
++        else:
++            expected = (
++                f"{specification.minimum_arguments} or {specification.maximum_arguments}"
++            )
++        raise CalculatorError(f"{name} expects {expected} argument(s)")
++
++    if name == "pow":
++        _validate_exponent(arguments[1])
++    elif name == "round" and argument_count == 2:
++        digits = arguments[1]
++        if not isinstance(digits, int):
++            raise CalculatorError("round precision must be an integer")
++        if abs(digits) > MAX_ABS_ROUND_DIGITS:
++            raise CalculatorError(
++                f"round precision magnitude exceeds the limit of {MAX_ABS_ROUND_DIGITS}"
++            )
++
++    try:
++        return _validate_number(specification.function(*arguments))
++    except CalculatorError:
++        raise
++    except (ArithmeticError, TypeError, ValueError) as exc:
++        raise CalculatorError(f"calculation failed: {exc}") from None
++
++
++def _evaluate_node(node: ast.AST) -> RealNumber:
++    if isinstance(node, ast.Constant):
++        return _validate_number(node.value)
++
++    if isinstance(node, ast.Name):
++        try:
++            return _CONSTANTS[node.id]
++        except KeyError:
++            raise CalculatorError(f"name is not allowed: {node.id}") from None
++
++    if isinstance(node, ast.UnaryOp):
++        operation = _UNARY_OPERATORS.get(type(node.op))
++        if operation is None:
++            raise CalculatorError(f"operator is not allowed: {type(node.op).__name__}")
++        return _validate_number(operation(_evaluate_node(node.operand)))
++
++    if isinstance(node, ast.BinOp):
++        left = _evaluate_node(node.left)
++        right = _evaluate_node(node.right)
++        if isinstance(node.op, ast.Pow):
++            _validate_exponent(right)
++            operation = operator.pow
++        else:
++            operation = _BINARY_OPERATORS.get(type(node.op))
++            if operation is None:
++                raise CalculatorError(
++                    f"operator is not allowed: {type(node.op).__name__}"
++                )
++        try:
++            return _validate_number(operation(left, right))
++        except CalculatorError:
++            raise
++        except (ArithmeticError, TypeError, ValueError) as exc:
++            raise CalculatorError(f"calculation failed: {exc}") from None
++
++    if isinstance(node, ast.Call):
++        if not isinstance(node.func, ast.Name):
++            raise CalculatorError("only direct calls to allowed functions are supported")
++        if node.keywords:
++            raise CalculatorError("keyword arguments are not supported")
++        arguments = [_evaluate_node(argument) for argument in node.args]
++        return _call_function(node.func.id, arguments)
++
++    raise CalculatorError(f"unsupported syntax: {type(node).__name__}")
++
++
++def evaluate_expression(expression: str) -> RealNumber:
++    """Evaluate a small allowlisted real-number expression.
++
++    Supported syntax is numeric literals, parentheses, ``+``, ``-``, ``*``,
++    ``/``, ``//``, ``%``, ``**``, unary signs, constants ``pi`` and ``e``, and
++    the functions ``sqrt``, ``sin``, ``cos``, ``tan``, ``log``, ``log10``,
++    ``exp``, ``pow``, ``abs``, and ``round``.
++    """
++
++    if not isinstance(expression, str):
++        raise CalculatorError("expression must be a string")
++    if not expression.strip():
++        raise CalculatorError("expression must not be empty")
++    if len(expression) > MAX_EXPRESSION_LENGTH:
++        raise CalculatorError(
++            f"expression exceeds the {MAX_EXPRESSION_LENGTH}-character limit"
++        )
++
++    try:
++        tree = ast.parse(expression, mode="eval")
++    except (MemoryError, RecursionError, SyntaxError, ValueError):
++        raise CalculatorError("invalid expression syntax") from None
++
++    _validate_tree(tree)
++    try:
++        return _validate_number(_evaluate_node(tree.body))
++    except RecursionError:
++        raise CalculatorError("expression exceeds the evaluation depth limit") from None
+diff --git a/examples/interleaved-thinking/tests/test_calculator.py b/examples/interleaved-thinking/tests/test_calculator.py
+new file mode 100644
+--- /dev/null
++++ b/examples/interleaved-thinking/tests/test_calculator.py
+@@ -0,0 +1,226 @@
++"""Deterministic tests for the bounded example calculator."""
++
++from __future__ import annotations
++
++import ast
++import importlib.util
++import json
++import math
++import sys
++import unittest
++from pathlib import Path
++from types import ModuleType
++
++CALCULATOR_PATH = (
++    Path(__file__).resolve().parents[1]
++    / "reasoning_trace_optimizer/calculator.py"
++)
++
++
++def _load_calculator() -> ModuleType:
++    spec = importlib.util.spec_from_file_location(
++        "interleaved_thinking_calculator",
++        CALCULATOR_PATH,
++    )
++    if spec is None or spec.loader is None:
++        raise RuntimeError(f"could not load calculator at {CALCULATOR_PATH}")
++    module = importlib.util.module_from_spec(spec)
++    sys.modules[spec.name] = module
++    spec.loader.exec_module(module)
++    return module
++
++
++calculator = _load_calculator()
++MAX_EXPRESSION_LENGTH = calculator.MAX_EXPRESSION_LENGTH
++CalculatorError = calculator.CalculatorError
++evaluate_expression = calculator.evaluate_expression
++
++
++class CalculatorTests(unittest.TestCase):
++    def test_example_wires_the_bounded_evaluator_without_eval(self) -> None:
++        example = CALCULATOR_PATH.parent.parent / "examples/03_full_optimization.py"
++        tree = ast.parse(example.read_text(encoding="utf-8"))
++        imports = [node for node in tree.body if isinstance(node, ast.ImportFrom)
++                   and node.module == "reasoning_trace_optimizer.calculator"]
++        self.assertEqual(len(imports), 1)
++        self.assertEqual({name.name for name in imports[0].names},
++                         {"CalculatorError", "evaluate_expression"})
++        executor = next(node for node in tree.body
++                        if isinstance(node, ast.FunctionDef) and node.name == "execute_tool")
++        calls = {node.func.id for node in ast.walk(executor)
++                 if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)}
++        self.assertIn("evaluate_expression", calls)
++        self.assertNotIn("eval", calls)
++
++    def test_actual_example_calculator_branch_rejects_object_access(self) -> None:
++        # Compile only this reviewed function. Importing the full example would
++        # load .env and provider dependencies, neither needed for arithmetic.
++        example = CALCULATOR_PATH.parent.parent / "examples/03_full_optimization.py"
++        tree = ast.parse(example.read_text(encoding="utf-8"))
++        executor = next(node for node in tree.body
++                        if isinstance(node, ast.FunctionDef) and node.name == "execute_tool")
++        module = ast.Module(body=[executor], type_ignores=[])
++        namespace = {"json": json, "evaluate_expression": evaluate_expression,
++                     "CalculatorError": CalculatorError}
++        exec(compile(module, str(example), "exec"), namespace)
++        execute_tool = namespace["execute_tool"]
++        valid = json.loads(execute_tool("calculator", {"expression": "sqrt(16) + 2"}))
++        self.assertEqual(valid["status"], "success")
++        self.assertEqual(valid["result"], 6)
++        rejected = json.loads(execute_tool("calculator", {"expression": "().__class__.__name__"}))
++        self.assertEqual(rejected["status"], "error")
++        self.assertNotIn("result", rejected)
++
++    def test_arithmetic_precedence_and_numeric_operators(self) -> None:
++        self.assertEqual(evaluate_expression("2 + 3 * 4"), 14)
++        self.assertEqual(evaluate_expression("17 // 5 + 17 % 5"), 5)
++        self.assertEqual(evaluate_expression("-(2 ** 3) + +10"), 2)
++        self.assertAlmostEqual(evaluate_expression("7 / 2"), 3.5)
++
++    def test_json_representable_invalid_parser_strings_are_typed(self) -> None:
++        for document in ('"\\u0000"', '"\\ud800"'):
++            with self.subTest(document=document):
++                expression = json.loads(document)
++                with self.assertRaisesRegex(CalculatorError, "invalid expression syntax"):
++                    evaluate_expression(expression)
++
++    def test_actual_example_calculator_branch_handles_invalid_parser_strings(self) -> None:
++        # Only the reviewed tool function is compiled, never the provider setup.
++        example = CALCULATOR_PATH.parent.parent / "examples/03_full_optimization.py"
++        tree = ast.parse(example.read_text(encoding="utf-8"))
++        executor = next(node for node in tree.body
++                        if isinstance(node, ast.FunctionDef) and node.name == "execute_tool")
++        namespace = {"json": json, "evaluate_expression": evaluate_expression,
++                     "CalculatorError": CalculatorError}
++        exec(compile(ast.Module(body=[executor], type_ignores=[]), str(example), "exec"),
++             namespace)
++        for document in ('{"expression":"\\u0000"}', '{"expression":"\\ud800"}'):
++            with self.subTest(document=document):
++                response = namespace["execute_tool"]("calculator", json.loads(document))
++                result = json.loads(response)
++                self.assertEqual(result["status"], "error")
++                self.assertEqual(result["error"], "invalid expression syntax")
++                self.assertNotIn("result", result)
++
++    def test_documented_functions_and_constants(self) -> None:
++        expression = "round(sqrt(16) + sin(pi / 2) + log(8, 2), 2)"
++        self.assertEqual(evaluate_expression(expression), 8.0)
++        self.assertAlmostEqual(evaluate_expression("cos(0) + log10(100)"), 3.0)
++        self.assertAlmostEqual(evaluate_expression("tan(0) + abs(-e)"), math.e)
++        self.assertAlmostEqual(evaluate_expression("exp(1)"), math.e)
++        self.assertEqual(evaluate_expression("pow(2, 10)"), 1024)
++
++    def test_non_string_empty_and_invalid_syntax_are_rejected(self) -> None:
++        cases = [None, 4, True, [], {}]
++        for expression in cases:
++            with self.subTest(expression=expression):
++                with self.assertRaisesRegex(CalculatorError, "expression must be a string"):
++                    evaluate_expression(expression)  # type: ignore[arg-type]
++
++        for expression in ("", "   ", "2 +"):
++            with self.subTest(expression=expression):
++                with self.assertRaises(CalculatorError):
++                    evaluate_expression(expression)
++
++    def test_python_object_and_execution_escape_syntax_is_rejected(self) -> None:
++        attacks = [
++            "().__class__.__bases__",
++            "pi.__class__",
++            "[1][0]",
++            "[item for item in (1, 2)]",
++            "(item for item in (1, 2))",
++            "lambda: 1",
++            "__import__('os').system('id')",
++            "open('/etc/passwd').read()",
++            "sqrt.__call__(4)",
++            "(1 if True else 2)",
++            "(x := 1)",
++            "1 < 2",
++            "1 << 2",
++            "{'value': 1}",
++        ]
++        for expression in attacks:
++            with self.subTest(expression=expression):
++                with self.assertRaises(CalculatorError):
++                    evaluate_expression(expression)
++
++    def test_calls_are_direct_positional_and_allowlisted(self) -> None:
++        attacks = [
++            "min(1, 2)",
++            "math.sqrt(4)",
++            "round(number=1)",
++            "pow(2, 3, 5)",
++            "sqrt()",
++            "log(1, 2, 3)",
++        ]
++        for expression in attacks:
++            with self.subTest(expression=expression):
++                with self.assertRaises(CalculatorError):
++                    evaluate_expression(expression)
++
++    def test_booleans_complex_and_non_finite_values_are_rejected(self) -> None:
++        expressions = [
++            "True",
++            "False + 1",
++            "1j",
++            "1e309",
++            "1e308 * 1e308",
++            "pow(-1, 0.5)",
++            "sqrt(-1)",
++            "exp(1000)",
++        ]
++        for expression in expressions:
++            with self.subTest(expression=expression):
++                with self.assertRaises(CalculatorError):
++                    evaluate_expression(expression)
++
++    def test_size_depth_and_integer_growth_limits(self) -> None:
++        oversized = "1" * (MAX_EXPRESSION_LENGTH + 1)
++        too_deep = "+".join("1" for _ in range(40))
++        balanced_terms = ["1"] * 44
++        while len(balanced_terms) > 1:
++            balanced_terms = [
++                f"({balanced_terms[index]} + {balanced_terms[index + 1]})"
++                if index + 1 < len(balanced_terms)
++                else balanced_terms[index]
++                for index in range(0, len(balanced_terms), 2)
++            ]
++        too_many_nodes = balanced_terms[0]
++        huge_literal = "9" * 400
++        # Each operand is below the integer limit; only the product exceeds it.
++        huge_product = f"{'9' * 160} * {'9' * 160}"
++
++        for expression in (
++            oversized,
++            too_deep,
++            too_many_nodes,
++            huge_literal,
++            huge_product,
++        ):
++            with self.subTest(expression=expression[:40]):
++                with self.assertRaises(CalculatorError):
++                    evaluate_expression(expression)
++
++    def test_resource_exhaustion_exponents_are_rejected(self) -> None:
++        expressions = [
++            "10 ** 101",
++            "10 ** -101",
++            "pow(10, 101)",
++            "pow(10, -101)",
++            "round(1.25, 101)",
++            "round(1.25, -101)",
++        ]
++        for expression in expressions:
++            with self.subTest(expression=expression):
++                with self.assertRaises(CalculatorError):
++                    evaluate_expression(expression)
++
++    def test_arithmetic_failures_are_typed(self) -> None:
++        for expression in ("1 / 0", "0 ** -1", "log(0)"):
++            with self.subTest(expression=expression):
++                with self.assertRaisesRegex(CalculatorError, "calculation failed"):
++                    evaluate_expression(expression)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/researcher/scripts/tests/test_example_calculator.py b/researcher/scripts/tests/test_example_calculator.py
+new file mode 100644
+--- /dev/null
++++ b/researcher/scripts/tests/test_example_calculator.py
+@@ -0,0 +1,36 @@
++"""Expose the example calculator regression suite to the repository CI gate."""
++
++from __future__ import annotations
++
++import importlib.util
++import unittest
++from pathlib import Path
++from types import ModuleType
++
++REPO_ROOT = Path(__file__).resolve().parents[3]
++CALCULATOR_TEST_PATH = (
++    REPO_ROOT / "examples/interleaved-thinking/tests/test_calculator.py"
++)
++
++
++def _load_calculator_tests() -> ModuleType:
++    spec = importlib.util.spec_from_file_location(
++        "interleaved_thinking_calculator_tests",
++        CALCULATOR_TEST_PATH,
++    )
++    if spec is None or spec.loader is None:
++        raise RuntimeError(f"could not load calculator tests at {CALCULATOR_TEST_PATH}")
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++def load_tests(
++    loader: unittest.TestLoader,
++    tests: unittest.TestSuite,
++    pattern: str | None,
++) -> unittest.TestSuite:
++    """Load the canonical example tests during normal repository discovery."""
++
++    del tests, pattern
++    return loader.loadTestsFromModule(_load_calculator_tests())

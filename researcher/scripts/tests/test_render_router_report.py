@@ -2,20 +2,29 @@
 
 from __future__ import annotations
 
+import io
+import json
+import random
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
+from unittest.mock import patch
 
 from researcher.scripts.render_router_report import (
     build_confusion,
+    delta_section,
     expected_shuffle_seed,
+    fixture_digest,
     load_summary_metadata,
+    main,
     per_prompt_breakdown,
     render,
     load_run_records,
     stable_seed,
     summarize_per_model,
+    summarize_paired_deltas,
     validate_comparable_summaries,
     validate_comparable_record_sets,
     validate_records,
@@ -47,6 +56,267 @@ def record(
 
 
 class RouterReportAccountingTests(unittest.TestCase):
+    def test_cli_generates_cluster_and_paired_report_from_validated_records(
+        self,
+    ) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            fixture = root / "prompts.jsonl"
+            fixture.write_text(
+                "".join(
+                    json.dumps(
+                        {
+                            "prompt_id": prompt,
+                            "expected_primary_skill": "expected-skill",
+                        }
+                    )
+                    + "\n"
+                    for prompt in ("p1", "p2")
+                ),
+                encoding="utf-8",
+            )
+            summary = {
+                "models": ["test-model"],
+                "reps": 2,
+                "seed": 19,
+                "prompts": 2,
+                "total_runs": 4,
+                "fixture_sha": fixture_digest(fixture),
+            }
+            for condition in ("candidate", "baseline"):
+                results = root / condition
+                results.mkdir()
+                (results / "summary.json").write_text(
+                    json.dumps(summary), encoding="utf-8"
+                )
+                for prompt in ("p1", "p2"):
+                    for rep in range(2):
+                        (results / f"{prompt}-{rep}.json").write_text(
+                            json.dumps(
+                                self._valid_result(prompt, "test-model", rep, seed=19)
+                            ),
+                            encoding="utf-8",
+                        )
+            output = root / "report.md"
+            argv = [
+                "render_router_report.py",
+                "--results",
+                str(root / "candidate"),
+                "--baseline",
+                str(root / "baseline"),
+                "--fixture",
+                str(fixture),
+                "--output",
+                str(output),
+            ]
+            with patch("sys.argv", argv), redirect_stdout(io.StringIO()):
+                self.assertEqual(main(), 0)
+            report = output.read_text(encoding="utf-8")
+            self.assertIn("complete prompt clusters", report)
+            self.assertIn("| `test-model` | 2 / 2 | 0 | 0 | available |", report)
+            self.assertIn(
+                "| `test-model` | 4 | 2 | 0.000 | [0.000, 0.000] | 0.000 | [0.000, 0.000] |",
+                report,
+            )
+
+    def test_correlated_replications_do_not_create_more_prompt_units(self) -> None:
+        independent_prompts = [
+            record("finished", prompt_id="p1", top1_correct=False, top3_correct=False),
+            record("finished", prompt_id="p2", top1_correct=True, top3_correct=True),
+        ]
+        correlated_reps = [
+            {**item, "rep": rep} for item in independent_prompts for rep in range(20)
+        ]
+        original = summarize_per_model(independent_prompts)["test-model"]
+        repeated = summarize_per_model(correlated_reps)["test-model"]
+
+        self.assertEqual(original["top1_ci"], repeated["top1_ci"])
+        self.assertEqual(original["top3_ci"], repeated["top3_ci"])
+        self.assertEqual(repeated["usable_prompt_clusters"], 2)
+        self.assertEqual(repeated["top1_ci"], [0.0, 1.0])
+
+    def test_prompt_cluster_sampling_is_stable_under_record_order(self) -> None:
+        records = [
+            {
+                **record(
+                    "finished",
+                    prompt_id=f"p{prompt}",
+                    top1_correct=(prompt + rep) % 3 == 0,
+                    top3_correct=(prompt + rep) % 3 != 2,
+                ),
+                "rep": rep,
+            }
+            for prompt in range(7)
+            for rep in range(3)
+        ]
+        expected = summarize_per_model(records)
+        random.Random(731).shuffle(records)
+        self.assertEqual(summarize_per_model(records), expected)
+
+    def test_missingness_preserves_call_estimand_and_reports_prompt_coverage(
+        self,
+    ) -> None:
+        records = (
+            [
+                {
+                    **record(
+                        "finished", prompt_id="p1", top1_correct=True, top3_correct=True
+                    ),
+                    "rep": rep,
+                }
+                for rep in range(2)
+            ]
+            + [
+                {**record("error", prompt_id="p1"), "rep": 2},
+            ]
+            + [
+                {
+                    **record(
+                        "finished",
+                        prompt_id="p2",
+                        top1_correct=False,
+                        top3_correct=True,
+                    ),
+                    "rep": rep,
+                }
+                for rep in range(3)
+            ]
+            + [{**record("cancelled", prompt_id="p3"), "rep": rep} for rep in range(3)]
+        )
+        stats = summarize_per_model(records)["test-model"]
+        self.assertEqual(stats["top1_accuracy"], 0.4)
+        self.assertEqual(stats["top3_accuracy"], 1.0)
+        self.assertEqual(stats["total_prompt_clusters"], 3)
+        self.assertEqual(stats["usable_prompt_clusters"], 2)
+        self.assertEqual(stats["partially_usable_prompt_clusters"], 1)
+        self.assertEqual(stats["unusable_prompt_clusters"], 1)
+        self.assertEqual(stats["top1_missingness_bounds"], [0.2222, 0.6667])
+        self.assertEqual(stats["top3_missingness_bounds"], [0.5556, 1.0])
+        self.assertEqual(stats["top1_ci"], [0.0, 1.0])
+
+    def test_one_usable_prompt_cannot_produce_generalization_interval(self) -> None:
+        records = [
+            record("finished", top1_correct=True, top3_correct=True),
+            record("error", prompt_id="unscored"),
+        ]
+        stats = summarize_per_model(records)["test-model"]
+        self.assertEqual(stats["top1_accuracy"], 1.0)
+        self.assertIsNone(stats["top1_ci"])
+        self.assertIsNone(stats["top3_ci"])
+        self.assertEqual(stats["interval_status"], "insufficient_prompt_clusters")
+        self.assertEqual(stats["top1_missingness_bounds"], [0.5, 1.0])
+
+    def test_all_missing_prompts_have_unknown_quality_and_full_sensitivity_range(
+        self,
+    ) -> None:
+        stats = summarize_per_model(
+            [
+                record("error", prompt_id="p1"),
+                record("model_unavailable", prompt_id="p2"),
+            ]
+        )["test-model"]
+        self.assertIsNone(stats["top1_accuracy"])
+        self.assertIsNone(stats["top1_ci"])
+        self.assertEqual(stats["usable_prompt_clusters"], 0)
+        self.assertEqual(stats["unusable_prompt_clusters"], 2)
+        self.assertEqual(stats["top1_missingness_bounds"], [0.0, 1.0])
+
+    def test_paired_intervals_preserve_shared_outcomes_and_identity_alignment(
+        self,
+    ) -> None:
+        baseline = [
+            record("finished", prompt_id="p1", top1_correct=False, top3_correct=False),
+            record("finished", prompt_id="p2", top1_correct=True, top3_correct=True),
+        ]
+        candidate = [dict(item) for item in reversed(baseline)]
+        self.assertEqual(
+            summarize_per_model(baseline)["test-model"]["top1_ci"], [0.0, 1.0]
+        )
+        stats = summarize_paired_deltas(candidate, baseline)["test-model"]
+        self.assertEqual(stats["paired_records"], 2)
+        self.assertEqual(stats["paired_prompt_clusters"], 2)
+        self.assertEqual(stats["top1_delta"], 0.0)
+        self.assertEqual(stats["top1_delta_ci"], [0.0, 0.0])
+        self.assertEqual(stats["top3_delta_ci"], [0.0, 0.0])
+
+    def test_paired_correlated_reps_do_not_narrow_delta_interval(self) -> None:
+        baseline = [
+            record("finished", prompt_id="p1", top1_correct=False, top3_correct=False),
+            record("finished", prompt_id="p2", top1_correct=True, top3_correct=True),
+        ]
+        candidate = [
+            record("finished", prompt_id="p1", top1_correct=True, top3_correct=True),
+            record("finished", prompt_id="p2", top1_correct=False, top3_correct=False),
+        ]
+        expected = summarize_paired_deltas(candidate, baseline)["test-model"]
+        candidate_reps = [
+            {**item, "rep": rep} for item in candidate for rep in range(20)
+        ]
+        baseline_reps = [{**item, "rep": rep} for item in baseline for rep in range(20)]
+        random.Random(827).shuffle(candidate_reps)
+        stats = summarize_paired_deltas(candidate_reps, baseline_reps)["test-model"]
+        self.assertEqual(stats["paired_prompt_clusters"], 2)
+        self.assertEqual(stats["top1_delta_ci"], expected["top1_delta_ci"])
+        self.assertEqual(stats["top3_delta_ci"], [-1.0, 1.0])
+
+    def test_paired_missing_results_are_excluded_without_imputation(self) -> None:
+        baseline = [
+            record("finished", prompt_id="p1", top1_correct=False, top3_correct=True),
+            record("error", prompt_id="p2"),
+        ]
+        candidate = [
+            record("finished", prompt_id="p1", top1_correct=True, top3_correct=True),
+            record("cancelled", prompt_id="p2"),
+        ]
+        stats = summarize_paired_deltas(candidate, baseline)["test-model"]
+        self.assertEqual(stats["paired_records"], 1)
+        self.assertEqual(stats["top1_delta"], 1.0)
+        self.assertIsNone(stats["top1_delta_ci"])
+        with self.assertRaisesRegex(ValueError, "usable population is not comparable"):
+            summarize_paired_deltas(
+                candidate,
+                [
+                    baseline[0],
+                    record(
+                        "finished",
+                        prompt_id="p2",
+                        top1_correct=False,
+                        top3_correct=False,
+                    ),
+                ],
+            )
+
+    def test_paired_duplicate_identity_cannot_be_collapsed(self) -> None:
+        item = record("finished", top1_correct=True, top3_correct=True)
+        with self.assertRaisesRegex(ValueError, "duplicate router result identity"):
+            summarize_paired_deltas([item, dict(item)], [item, dict(item)])
+
+    def test_renderer_labels_cluster_uncertainty_and_descriptive_fallback(self) -> None:
+        records = [record("error")]
+        summary = summarize_per_model(records)
+        report = render(summary, {}, [], {"models": ["test-model"]})
+        self.assertIn("complete prompt clusters", report)
+        self.assertIn("not imputed scores or confidence intervals", report)
+        self.assertIn("insufficient_prompt_clusters", report)
+        descriptive = "\n".join(
+            delta_section(summary, {}, [], summary, {}, [], "baseline")
+        )
+        self.assertIn("Unpaired descriptive deltas", descriptive)
+        paired = "\n".join(
+            delta_section(
+                summary,
+                {},
+                [],
+                summary,
+                {},
+                [],
+                "baseline",
+                paired_summary=summarize_paired_deltas(records, records),
+            )
+        )
+        self.assertIn("Paired prompt-cluster uncertainty", paired)
+        self.assertIn("| `test-model` | 0 | 0 | - | - | - | - |", paired)
+
     def test_cancelled_record_does_not_reduce_accuracy(self) -> None:
         records = [
             record(
@@ -113,7 +383,9 @@ class RouterReportAccountingTests(unittest.TestCase):
         self.assertIsNone(stats["top3_accuracy"])
 
     def test_unknown_status_fails_closed(self) -> None:
-        with self.assertRaisesRegex(ValueError, "unknown router result status 'timed_out'"):
+        with self.assertRaisesRegex(
+            ValueError, "unknown router result status 'timed_out'"
+        ):
             summarize_per_model([record("timed_out")])
 
     def test_bootstrap_seed_is_process_independent(self) -> None:
@@ -127,7 +399,9 @@ class RouterReportAccountingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "invalid router result JSON"):
                 load_run_records(Path(directory))
 
-            path.write_text('{"status":"finished","status":"error"}\n', encoding="utf-8")
+            path.write_text(
+                '{"status":"finished","status":"error"}\n', encoding="utf-8"
+            )
             with self.assertRaisesRegex(ValueError, "duplicate JSON key 'status'"):
                 load_run_records(Path(directory))
 

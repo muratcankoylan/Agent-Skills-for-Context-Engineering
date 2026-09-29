@@ -1,5 +1,14 @@
 # How We Built v2.3.0
 
+> Historical, non-normative experiment and release narrative. Statements below
+> about unattended launchd execution, HTTP retrieval, retry/quarantine
+> automation, accepted closure, mechanism promotion, executed adversarial
+> scenarios, and live SDK benchmarks describe earlier revisions, not the current
+> repository boundary. Launchd entry points are inert; runtime ledgers require
+> explicit initialization; the legacy loop has no network path, acceptance, or
+> promotion authority; scenario records are catalog-only; the SDK runner is
+> zero-call. Use the supervised runbook for current operator guidance.
+
 A narrative companion to `auto-research-experiment.md`. That document captures the technical findings. This one captures the process: what we read, how we worked, what each session produced, what shipped, and how to talk about it without overselling.
 
 If you want the engineering rationale, read `auto-research-experiment.md`. If you want the project story or templates for sharing it, read this.

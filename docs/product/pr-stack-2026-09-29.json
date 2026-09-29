@@ -1,0 +1,514 @@
+{
+  "schema_version": 1,
+  "kind": "pr-stack-publication-observation",
+  "observed_at_utc": "2026-09-29 14:23:32 UTC",
+  "repository": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+  "scope": {
+    "open_pr_count": 40,
+    "own_related_pr_count": 17,
+    "untouched_other_author_pr_count": 23,
+    "author": "muratcankoylan"
+  },
+  "authority": {
+    "production_ready": false,
+    "merge_performed": false,
+    "cloud_deployment_performed": false,
+    "paid_provider_calls_performed": false,
+    "force_push_performed": false,
+    "protection_settings_changed": false
+  },
+  "main": {
+    "ref": "main",
+    "sha": "6dbe1a1d868eab51a3bc9011b0f55e2891513e40",
+    "unchanged": true
+  },
+  "order": [
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    134,
+    135,
+    136,
+    137,
+    138,
+    132
+  ],
+  "prs": [
+    {
+      "number": 121,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/121",
+      "title": "feat(governance): publish and enforce the specification program",
+      "author": "muratcankoylan",
+      "head_ref": "codex/specification-program-roadmap",
+      "head_sha": "aed122474c31c7afd2b7e90d8f2efc4ef6305278",
+      "base_ref": "main",
+      "base_sha": "6dbe1a1d868eab51a3bc9011b0f55e2891513e40",
+      "predecessor": null,
+      "draft": false,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31901667405/job/95053281577",
+        "started_at": "2026-08-15T18:38:20Z",
+        "completed_at": "2026-08-15T18:39:44Z"
+      }
+    },
+    {
+      "number": 122,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/122",
+      "title": "feat(orchestration): add supervised long-horizon bootstrap briefs",
+      "author": "muratcankoylan",
+      "head_ref": "codex/long-horizon-organization-brief",
+      "head_sha": "0030fdbf8da082f8029972cbe04140c12ce508e7",
+      "base_ref": "codex/specification-program-roadmap",
+      "base_sha": "aed122474c31c7afd2b7e90d8f2efc4ef6305278",
+      "predecessor": 121,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31902757200/job/95055915649",
+        "started_at": "2026-08-15T19:01:42Z",
+        "completed_at": "2026-08-15T19:03:08Z"
+      }
+    },
+    {
+      "number": 123,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/123",
+      "title": "docs(spec-003): authorize classification invariant amendment",
+      "author": "muratcankoylan",
+      "head_ref": "codex/spec-003-amendment-decision",
+      "head_sha": "48e17e8b7de61925a644ad5e62f5609525bcadc0",
+      "base_ref": "codex/long-horizon-organization-brief",
+      "base_sha": "0030fdbf8da082f8029972cbe04140c12ce508e7",
+      "predecessor": 122,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31903223383/job/95057062679",
+        "started_at": "2026-08-15T19:11:43Z",
+        "completed_at": "2026-08-15T19:12:56Z"
+      }
+    },
+    {
+      "number": 124,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/124",
+      "title": "docs(spec-000): authorize authority vocabulary amendment",
+      "author": "muratcankoylan",
+      "head_ref": "codex/spec-000-amendment-decision",
+      "head_sha": "c91780589ed79e1fcfc034894d02e52981983ab0",
+      "base_ref": "codex/spec-003-amendment-decision",
+      "base_sha": "48e17e8b7de61925a644ad5e62f5609525bcadc0",
+      "predecessor": 123,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31903504588/job/95057742386",
+        "started_at": "2026-08-15T19:17:41Z",
+        "completed_at": "2026-08-15T19:19:10Z"
+      }
+    },
+    {
+      "number": 125,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/125",
+      "title": "fix(benchmarks): contain Cursor SDK and harden evidence",
+      "author": "muratcankoylan",
+      "head_ref": "codex/cursor-sdk-security-upgrade",
+      "head_sha": "c50cc4cdbc0c5a07714ea6ef105affa12e6c4215",
+      "base_ref": "codex/spec-000-amendment-decision",
+      "base_sha": "c91780589ed79e1fcfc034894d02e52981983ab0",
+      "predecessor": 124,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31910854988/job/95075548078",
+        "started_at": "2026-08-15T21:57:40Z",
+        "completed_at": "2026-08-15T21:59:12Z"
+      }
+    },
+    {
+      "number": 126,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/126",
+      "title": "test(benchmarks): add private manifest resume substrate",
+      "author": "muratcankoylan",
+      "head_ref": "codex/router-manifest-resume",
+      "head_sha": "7c0c92d20244ab7fa03edcbe1fd5851b24e5445c",
+      "base_ref": "codex/cursor-sdk-security-upgrade",
+      "base_sha": "c50cc4cdbc0c5a07714ea6ef105affa12e6c4215",
+      "predecessor": 125,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31910860440/job/95075561570",
+        "started_at": "2026-08-15T21:57:49Z",
+        "completed_at": "2026-08-15T21:59:27Z"
+      }
+    },
+    {
+      "number": 127,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/127",
+      "title": "docs(spec-001): authorize snapshot identity amendment",
+      "author": "muratcankoylan",
+      "head_ref": "codex/spec-001-amendment-decision",
+      "head_sha": "ec6f25c609029474b7bfcbebba20d7792f3d01dd",
+      "base_ref": "codex/router-manifest-resume",
+      "base_sha": "7c0c92d20244ab7fa03edcbe1fd5851b24e5445c",
+      "predecessor": 126,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31911249073/job/95076528536",
+        "started_at": "2026-08-15T22:06:21Z",
+        "completed_at": "2026-08-15T22:07:41Z"
+      }
+    },
+    {
+      "number": 128,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/128",
+      "title": "docs(spec-002): authorize projection-boundary amendment",
+      "author": "muratcankoylan",
+      "head_ref": "codex/spec-002-amendment-decision",
+      "head_sha": "d1fc8c2e3d7cbacd2c99f2d730ae6b92f91a06af",
+      "base_ref": "codex/spec-001-amendment-decision",
+      "base_sha": "ec6f25c609029474b7bfcbebba20d7792f3d01dd",
+      "predecessor": 127,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31911893631/job/95078146604",
+        "started_at": "2026-08-15T22:21:02Z",
+        "completed_at": "2026-08-15T22:22:19Z"
+      }
+    },
+    {
+      "number": 129,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/129",
+      "title": "fix(governance): require promoted revision predecessors",
+      "author": "muratcankoylan",
+      "head_ref": "codex/spec-revision-authority-gate",
+      "head_sha": "f5f1dda3e0f42d8e680f01917786f67fd60e3fa1",
+      "base_ref": "codex/spec-002-amendment-decision",
+      "base_sha": "d1fc8c2e3d7cbacd2c99f2d730ae6b92f91a06af",
+      "predecessor": 128,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/31913409362/job/95081726060",
+        "started_at": "2026-08-15T22:55:59Z",
+        "completed_at": "2026-08-15T22:57:32Z"
+      }
+    },
+    {
+      "number": 130,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/130",
+      "title": "Extract authority contract and bind evaluator provenance",
+      "author": "muratcankoylan",
+      "head_ref": "codex/authority-contract-boundary",
+      "head_sha": "54580840f75556290f32ffcbaa8342bb00ea9343",
+      "base_ref": "codex/spec-revision-authority-gate",
+      "base_sha": "f5f1dda3e0f42d8e680f01917786f67fd60e3fa1",
+      "predecessor": 129,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/34545329961/job/103096591790",
+        "started_at": "2026-09-11T00:10:17Z",
+        "completed_at": "2026-09-11T00:12:02Z"
+      }
+    },
+    {
+      "number": 131,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/131",
+      "title": "Harden offline authority vocabulary semantics",
+      "author": "muratcankoylan",
+      "head_ref": "codex/authority-semantic-hardening",
+      "head_sha": "c6cd52017b247804373339e1c3c103d42554b0a1",
+      "base_ref": "codex/authority-contract-boundary",
+      "base_sha": "54580840f75556290f32ffcbaa8342bb00ea9343",
+      "predecessor": 130,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/34545330470/job/103096593142",
+        "started_at": "2026-09-11T00:10:16Z",
+        "completed_at": "2026-09-11T00:13:54Z"
+      }
+    },
+    {
+      "number": 134,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/134",
+      "title": "feat(runtime): add bounded OpenAI Agents API transport",
+      "author": "muratcankoylan",
+      "head_ref": "codex/openai-agents-api-transport",
+      "head_sha": "16a93c6181163eadfa8ac962124b8ca4736ee345",
+      "base_ref": "codex/authority-semantic-hardening",
+      "base_sha": "c6cd52017b247804373339e1c3c103d42554b0a1",
+      "predecessor": 131,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36576645520/job/109433868890",
+        "started_at": "2026-09-29T13:39:01Z",
+        "completed_at": "2026-09-29T13:41:21Z"
+      }
+    },
+    {
+      "number": 135,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/135",
+      "title": "fix(loop): fail closed on unavailable process locking",
+      "author": "muratcankoylan",
+      "head_ref": "codex/fail-closed-loop-locking",
+      "head_sha": "c2ed1c3fed2f0eaf2328506054b44ea348650b4d",
+      "base_ref": "codex/openai-agents-api-transport",
+      "base_sha": "16a93c6181163eadfa8ac962124b8ca4736ee345",
+      "predecessor": 134,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36578410369/job/109439917582",
+        "started_at": "2026-09-29T13:53:01Z",
+        "completed_at": "2026-09-29T13:57:13Z"
+      }
+    },
+    {
+      "number": 136,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/136",
+      "title": "fix(installer): refuse overwrite and contain new installs",
+      "author": "muratcankoylan",
+      "head_ref": "codex/installer-no-overwrite",
+      "head_sha": "cfb6d173464f4a69b863967fe029e3b1c3e06ffc",
+      "base_ref": "codex/fail-closed-loop-locking",
+      "base_sha": "c2ed1c3fed2f0eaf2328506054b44ea348650b4d",
+      "predecessor": 135,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36578478975/job/109440142847",
+        "started_at": "2026-09-29T13:53:31Z",
+        "completed_at": "2026-09-29T13:57:42Z"
+      }
+    },
+    {
+      "number": 137,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/137",
+      "title": "fix(examples): validate judge agent frontmatter",
+      "author": "muratcankoylan",
+      "head_ref": "codex/judge-agent-frontmatter",
+      "head_sha": "10e74324b9dd140eaa31538c65c6439ad9cccddf",
+      "base_ref": "codex/installer-no-overwrite",
+      "base_sha": "cfb6d173464f4a69b863967fe029e3b1c3e06ffc",
+      "predecessor": 136,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36578488987/job/109440174968",
+        "started_at": "2026-09-29T13:53:35Z",
+        "completed_at": "2026-09-29T13:56:34Z"
+      }
+    },
+    {
+      "number": 138,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/138",
+      "title": "fix(examples): bound calculator arithmetic without eval",
+      "author": "muratcankoylan",
+      "head_ref": "codex/bounded-example-calculator",
+      "head_sha": "c05ffbe135e3373c8d85cd09538ae99c674c273d",
+      "base_ref": "codex/judge-agent-frontmatter",
+      "base_sha": "10e74324b9dd140eaa31538c65c6439ad9cccddf",
+      "predecessor": 137,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36578498094/job/109440205346",
+        "started_at": "2026-09-29T13:53:40Z",
+        "completed_at": "2026-09-29T13:57:31Z"
+      }
+    },
+    {
+      "number": 132,
+      "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/132",
+      "title": "Add deliberative-writing-loop example: inference-time persona writing harness",
+      "author": "muratcankoylan",
+      "head_ref": "cursor/deliberative-writing-loop-3b12",
+      "head_sha": "e6f26058ee36c78bf704f3a67a9dba0cbff1fd15",
+      "base_ref": "codex/bounded-example-calculator",
+      "base_sha": "c05ffbe135e3373c8d85cd09538ae99c674c273d",
+      "predecessor": 138,
+      "draft": true,
+      "state": "OPEN",
+      "ancestry_verified": true,
+      "latest_observed_validation": {
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36581402783/job/109450220822",
+        "started_at": "2026-09-29T14:16:19Z",
+        "completed_at": "2026-09-29T14:20:17Z"
+      }
+    }
+  ],
+  "final_candidate": {
+    "pr": 132,
+    "head_sha": "e6f26058ee36c78bf704f3a67a9dba0cbff1fd15",
+    "tree_sha": "554da30e27562c59b6e3524c8404c25dc688e2c4",
+    "example_python_source_digest": "947e0c2cdeab8fb24ac0206b7194776a612f36ac91ba04400c42cc34eacbfb7c",
+    "clean_checkout_verified": true
+  },
+  "intermediate_candidates": [
+    {
+      "purpose": "reviewed maintenance stack",
+      "head_sha": "c05ffbe135e3373c8d85cd09538ae99c674c273d",
+      "tree_sha": "2c76510b8be5baeb2d07cb8357bb33fd62678357"
+    },
+    {
+      "purpose": "ancestry-preserving PR132 tail merge",
+      "head_sha": "c42490dc2137c76024ea4cd152a041a724461760",
+      "parents": [
+        "83b5ad0b6afd4eae094493877c58cddf95dcdc00",
+        "c05ffbe135e3373c8d85cd09538ae99c674c273d"
+      ]
+    },
+    {
+      "purpose": "offline writing runtime repair",
+      "head_sha": "2a3444ca5e013ce80665587444892b2a1a474770",
+      "tree_sha": "fd7d42a35214a1505ab73d0498895d0d22c76f13",
+      "source_digest": "8cfefaefd6a476c13e36a2bbaa26a4037d04a1fa289164163ec432559a71a9f0"
+    }
+  ],
+  "local_tests": [
+    {
+      "head": "c05ffbe135e3373c8d85cd09538ae99c674c273d",
+      "suite": "researcher/scripts/tests",
+      "count": 417,
+      "seconds": 103.39,
+      "result": "pass"
+    },
+    {
+      "head": "c05ffbe135e3373c8d85cd09538ae99c674c273d",
+      "suite": "transport and four maintenance modules",
+      "count": 97,
+      "seconds": 1.548,
+      "result": "pass"
+    },
+    {
+      "head": "2a3444ca5e013ce80665587444892b2a1a474770",
+      "suite": "researcher/scripts/tests",
+      "count": 425,
+      "seconds": 105.02,
+      "result": "pass"
+    },
+    {
+      "head": "e6f26058ee36c78bf704f3a67a9dba0cbff1fd15",
+      "suite": "writing example pytest",
+      "count": 75,
+      "seconds": 0.23,
+      "result": "pass"
+    },
+    {
+      "head": "e6f26058ee36c78bf704f3a67a9dba0cbff1fd15",
+      "suite": "eight writing safety scenarios plus committed-inventory matcher",
+      "count": 9,
+      "seconds": 0.596,
+      "result": "pass"
+    },
+    {
+      "head": "e6f26058ee36c78bf704f3a67a9dba0cbff1fd15",
+      "suite": "transport, four maintenance modules, eight writing safety scenarios",
+      "count": 105,
+      "seconds": 1.998,
+      "result": "pass"
+    }
+  ],
+  "hosted_final_head": {
+    "head": "e6f26058ee36c78bf704f3a67a9dba0cbff1fd15",
+    "runs": [
+      {
+        "id": 36581402783,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36581402783",
+        "completed_at": "2026-09-29T14:20:17Z"
+      },
+      {
+        "id": 36581387898,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/actions/runs/36581387898",
+        "completed_at": "2026-09-29T14:20:34Z"
+      }
+    ],
+    "inspected_log": {
+      "run": 36581402783,
+      "root_tests": 425,
+      "root_test_seconds": 196.935,
+      "inventory_records": 329,
+      "canonical_sources": 206,
+      "inventory_digest_prefix": "d13572e24993",
+      "skills": 17,
+      "install_layouts": 4,
+      "strict_errors": 0,
+      "strict_warnings": 0
+    }
+  },
+  "limitations": [
+    "Test sets overlap; counts must not be summed as unique evidence.",
+    "Existing foundation check results were freshly observed, not rerun separately for every original head.",
+    "The writing example is offline-only; all paid vendor and detector calls fail closed.",
+    "Published service code is a bounded Agents API transport, not the unpublished integrated cloud/Codex SDK runtime.",
+    "Draft stacking and green checks do not grant merge, paid execution, or deployment authority.",
+    "Keep PR121's initial governance adoption as a separate lifecycle transition."
+  ]
+}

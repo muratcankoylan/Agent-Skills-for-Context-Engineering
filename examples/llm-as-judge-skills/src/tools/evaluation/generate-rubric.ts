@@ -1,8 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { openai } from '@ai-sdk/openai';
-import { generateText } from 'ai';
-import { config } from '../../config/index.js';
+import { JudgeRuntime, requireJudgeRuntime } from '../../runtime/judge-runtime.js';
 
 export const GenerateRubricInputSchema = z.object({
   criterionName: z.string().describe('Name of the criterion'),
@@ -47,7 +45,8 @@ export const GenerateRubricOutputSchema = z.object({
 
 export type GenerateRubricOutput = z.infer<typeof GenerateRubricOutputSchema>;
 
-export async function executeGenerateRubric(input: GenerateRubricInput): Promise<GenerateRubricOutput> {
+export async function executeGenerateRubric(input: GenerateRubricInput, runtime?: JudgeRuntime): Promise<GenerateRubricOutput> {
+  input = GenerateRubricInputSchema.parse(input);
   const startTime = Date.now();
   const [minScore, maxScore] = input.scale.split('-').map(Number);
 
@@ -98,14 +97,23 @@ Respond with valid JSON:
 }`;
 
   try {
-    const result = await generateText({
-      model: openai(config.openai.model),
+    const result = await requireJudgeRuntime(runtime).generate({
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.4
     });
 
-    const parsed = JSON.parse(result.text);
+    const parsed = z.object({
+      levels: z.array(GenerateRubricOutputSchema.shape.levels.element.extend({
+        score: z.number().int().min(minScore).max(maxScore),
+        example: z.string().nullish().transform(value => value ?? undefined)
+      })).length(maxScore - minScore + 1),
+      scoringGuidelines: GenerateRubricOutputSchema.shape.scoringGuidelines,
+      edgeCases: GenerateRubricOutputSchema.shape.edgeCases
+    }).parse(JSON.parse(result.text));
+    if (new Set(parsed.levels.map(level => level.score)).size !== parsed.levels.length) {
+      throw new Error('Duplicate rubric levels.');
+    }
 
     return {
       success: true,
@@ -127,7 +135,7 @@ Respond with valid JSON:
         generationTimeMs: Date.now() - startTime
       }
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       criterion: {
@@ -156,6 +164,5 @@ export const generateRubricTool = tool({
 Creates detailed descriptions for each score level.
 Use to establish consistent evaluation standards.`,
   parameters: GenerateRubricInputSchema,
-  execute: executeGenerateRubric
+  execute: input => executeGenerateRubric(input)
 });
-

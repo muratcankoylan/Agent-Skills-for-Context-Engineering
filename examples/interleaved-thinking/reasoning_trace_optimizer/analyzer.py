@@ -7,10 +7,10 @@ detecting patterns like context degradation, tool confusion, and instruction dri
 
 import json
 import os
-from typing import Any
 
 import anthropic
 
+from reasoning_trace_optimizer.api_budget import PaidAPIBudget
 from reasoning_trace_optimizer.models import (
     AnalysisResult,
     Pattern,
@@ -18,7 +18,6 @@ from reasoning_trace_optimizer.models import (
     ReasoningTrace,
     Severity,
 )
-
 
 ANALYSIS_SYSTEM_PROMPT = """You are an expert AI agent debugger specializing in analyzing reasoning traces.
 
@@ -144,6 +143,7 @@ class TraceAnalyzer:
         api_key: str | None = None,
         base_url: str = "https://api.minimax.io/anthropic",
         model: str = "MiniMax-M2.1",
+        api_budget: PaidAPIBudget | None = None,
     ):
         """
         Initialize TraceAnalyzer with M2.1 configuration.
@@ -154,10 +154,14 @@ class TraceAnalyzer:
             model: Model for analysis (M2.1 recommended for best results)
         """
         self.model = model
-        self.client = anthropic.Anthropic(
-            api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"),
-            base_url=base_url,
-        )
+        self.api_budget = api_budget or PaidAPIBudget()
+        self._client = None
+        if not self.api_budget.dry_run:
+            self._client = anthropic.Anthropic(
+                api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"),
+                base_url=base_url,
+                max_retries=0,
+            )
 
     def analyze(
         self,
@@ -189,12 +193,16 @@ class TraceAnalyzer:
         )
 
         # Call M2.1 for analysis
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=max_tokens,
-            system=ANALYSIS_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        with self.api_budget.attempt("trace_analyzer.analyze", max_tokens) as attempt:
+            if self._client is None:  # Dry-run raises before this branch.
+                raise RuntimeError("paid API client is unavailable")
+            response = self._client.messages.create(
+                model=self.model,
+                max_tokens=max_tokens,
+                system=ANALYSIS_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            attempt.record_usage(response)
 
         # Extract thinking and text from response
         analyzer_thinking = ""
@@ -246,11 +254,15 @@ Thinking excerpts:
 
 Respond with ONLY a number from 0-100."""
 
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=100,
-            messages=[{"role": "user", "content": quick_prompt}],
-        )
+        with self.api_budget.attempt("trace_analyzer.quick_score", 100) as attempt:
+            if self._client is None:  # Dry-run raises before this branch.
+                raise RuntimeError("paid API client is unavailable")
+            response = self._client.messages.create(
+                model=self.model,
+                max_tokens=100,
+                messages=[{"role": "user", "content": quick_prompt}],
+            )
+            attempt.record_usage(response)
 
         # Extract score from response
         for block in response.content:

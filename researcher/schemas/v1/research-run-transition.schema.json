@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/research-run-transition.schema.json",
+  "title": "ResearchRunTransition 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "run_id",
+    "history_index",
+    "from_state",
+    "to_state",
+    "transition_source",
+    "reason",
+    "evidence",
+    "initialization",
+    "closure",
+    "classification"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "kind": {"const": "ResearchRunTransition"},
+    "run_id": {"$ref": "#/$defs/run_id"},
+    "history_index": {"type": "integer", "minimum": 0, "maximum": 9007199254740990},
+    "from_state": {
+      "oneOf": [
+        {"$ref": "#/$defs/run_state"},
+        {"type": "null"}
+      ]
+    },
+    "to_state": {"$ref": "#/$defs/run_state"},
+    "transition_source": {
+      "enum": ["file_state_history", "journal_native"]
+    },
+    "reason": {"type": "string", "minLength": 1, "maxLength": 4096},
+    "evidence": {"type": "string", "maxLength": 4096},
+    "initialization": {
+      "oneOf": [
+        {"$ref": "#/$defs/initialization"},
+        {"type": "null"}
+      ]
+    },
+    "closure": {
+      "oneOf": [
+        {"$ref": "#/$defs/closure"},
+        {"type": "null"}
+      ]
+    },
+    "classification": {"$ref": "#/$defs/classification"}
+  },
+  "$defs": {
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9]{8}-[0-9]{6}-[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 96
+    },
+    "run_state": {
+      "enum": [
+        "initialized",
+        "retrieved",
+        "evaluated",
+        "proposed",
+        "novelty_checked",
+        "validated",
+        "pr_ready",
+        "closed"
+      ]
+    },
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "classification": {
+      "enum": ["public", "public_derived", "private_operational", "private_human", "restricted_source"]
+    },
+    "surface_list": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 512}
+    },
+    "initialization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "source_url", "locked_surfaces", "editable_surfaces", "created_at"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1, "maxLength": 512},
+        "source_url": {"type": "string", "maxLength": 4096},
+        "locked_surfaces": {"$ref": "#/$defs/surface_list"},
+        "editable_surfaces": {"$ref": "#/$defs/surface_list"},
+        "created_at": {"type": "string", "format": "date-time", "pattern": "Z$"}
+      }
+    },
+    "closure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason", "closed_at"],
+      "properties": {
+        "status": {"enum": ["accepted", "rejected", "reference-only", "abandoned"]},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "closed_at": {"type": "string", "format": "date-time", "pattern": "Z$"}
+      }
+    }
+  }
+}

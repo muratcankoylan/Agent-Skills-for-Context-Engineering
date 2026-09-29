@@ -253,6 +253,49 @@
     },
     {
       "canonicalization_profile": "jcs-rfc8785-integer-v1",
+      "classifications": [
+        "public",
+        "public_derived",
+        "private_operational",
+        "private_human",
+        "restricted_source"
+      ],
+      "compatibility": "exact",
+      "golden_paths": [
+        "researcher/schemas/fixtures/records/organization-event.json"
+      ],
+      "id_prefix": "evt",
+      "kind": "OrganizationEvent",
+      "owner_spec": "SPEC-004",
+      "schema_digest": "sha256:7a8acdcf1f8e733fee26bafac54eef09fb2b93b8729ab006b7af8a9f78368e81",
+      "schema_id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/organization-event.schema.json",
+      "schema_path": "researcher/schemas/v1/organization-event.schema.json",
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "canonicalization_profile": "jcs-rfc8785-integer-v1",
+      "classifications": [
+        "public",
+        "public_derived",
+        "private_operational",
+        "private_human",
+        "restricted_source"
+      ],
+      "compatibility": "exact",
+      "golden_paths": [
+        "researcher/schemas/fixtures/records/research-run-transition.json"
+      ],
+      "kind": "ResearchRunTransition",
+      "owner_spec": "SPEC-004",
+      "schema_digest": "sha256:1595b6b0c07fcc6c8d2930ae1a1ac7bbd2061349b2635e11564aec0e381a2c5f",
+      "schema_id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/researcher/schemas/v1/research-run-transition.schema.json",
+      "schema_path": "researcher/schemas/v1/research-run-transition.schema.json",
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "canonicalization_profile": "jcs-rfc8785-integer-v1",
       "classifications": [],
       "compatibility": "exact",
       "golden_paths": ["researcher/schemas/fixtures/records/schema-registry.json"],
@@ -284,6 +327,7 @@
     "bind": "StorageBinding",
     "cand": "CandidateArtifact",
     "credref": "CredentialRef",
+    "evt": "OrganizationEvent",
     "freeze": "FreezeReceipt",
     "grant": "CapabilityGrantSpec",
     "rec": "ArtifactEnvelope"

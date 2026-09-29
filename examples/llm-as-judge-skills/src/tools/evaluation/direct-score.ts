@@ -1,8 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { openai } from '@ai-sdk/openai';
-import { generateText } from 'ai';
-import { config } from '../../config/index.js';
+import { JudgeRuntime, requireJudgeRuntime } from '../../runtime/judge-runtime.js';
 
 const CriterionSchema = z.object({
   name: z.string().describe('Name of the criterion'),
@@ -52,7 +50,11 @@ export const DirectScoreOutputSchema = z.object({
 
 export type DirectScoreOutput = z.infer<typeof DirectScoreOutputSchema>;
 
-export async function executeDirectScore(input: DirectScoreInput): Promise<DirectScoreOutput> {
+export async function executeDirectScore(input: DirectScoreInput, runtime?: JudgeRuntime): Promise<DirectScoreOutput> {
+  input = DirectScoreInputSchema.parse(input);
+  if (new Set(input.criteria.map(c => c.name)).size !== input.criteria.length || !input.criteria.some(c => c.weight > 0)) {
+    throw new Error('Criteria must have unique names and positive total weight.');
+  }
   const startTime = Date.now();
   const scale = input.rubric?.scale || '1-5';
   const maxScore = parseInt(scale.split('-')[1]);
@@ -98,20 +100,28 @@ Respond with valid JSON matching this structure:
 }`;
 
   try {
-    const result = await generateText({
-      model: openai(config.openai.model),
+    const result = await requireJudgeRuntime(runtime).generate({
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.3
     });
 
-    const parsed = JSON.parse(result.text);
+    const parsed = z.object({
+      scores: z.array(DirectScoreOutputSchema.shape.scores.element.omit({ maxScore: true }).extend({
+        score: z.number().min(1).max(maxScore)
+      })).length(input.criteria.length),
+      summary: DirectScoreOutputSchema.shape.summary
+    }).parse(JSON.parse(result.text));
+    if (new Set(parsed.scores.map(s => s.criterion)).size !== input.criteria.length ||
+        parsed.scores.some(s => !input.criteria.some(c => c.name === s.criterion))) {
+      throw new Error('Judge returned mismatched criteria.');
+    }
     
     // Calculate scores
     const totalWeight = input.criteria.reduce((sum, c) => sum + c.weight, 0);
     const weightedSum = parsed.scores.reduce((sum: number, s: { criterion: string; score: number }) => {
       const criterion = input.criteria.find(c => c.name === s.criterion);
-      return sum + (s.score * (criterion?.weight || 1));
+      return sum + (s.score * (criterion?.weight ?? 1));
     }, 0);
     
     const overallScore = parsed.scores.reduce((sum: number, s: { score: number }) => sum + s.score, 0) / parsed.scores.length;
@@ -129,25 +139,25 @@ Respond with valid JSON matching this structure:
       summary: parsed.summary,
       metadata: {
         evaluationTimeMs: Date.now() - startTime,
-        model: config.openai.model,
+        model: runtime?.modelId ?? 'unconfigured',
         criteriaCount: input.criteria.length
       }
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       scores: [],
       overallScore: 0,
       weightedScore: 0,
       summary: {
-        assessment: `Evaluation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        assessment: 'Evaluation unavailable or invalid. No automatic retry was attempted.',
         strengths: [],
         weaknesses: [],
         priorities: []
       },
       metadata: {
         evaluationTimeMs: Date.now() - startTime,
-        model: config.openai.model,
+        model: runtime?.modelId ?? 'unconfigured',
         criteriaCount: input.criteria.length
       }
     };
@@ -159,6 +169,5 @@ export const directScoreTool = tool({
 Use for objective evaluations like accuracy, completeness, clarity.
 Returns structured scores with justifications.`,
   parameters: DirectScoreInputSchema,
-  execute: executeDirectScore
+  execute: input => executeDirectScore(input)
 });
-

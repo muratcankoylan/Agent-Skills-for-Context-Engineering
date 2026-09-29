@@ -26,11 +26,6 @@ ENV/
 env/
 .venv
 
-# Local secrets: only .env.example templates are committed
-.env
-.env.*
-!.env.example
-
 # IDE
 .vscode/
 .idea/
@@ -60,6 +55,7 @@ researcher/reports/status.md
 researcher/reports/parked-review.md
 researcher/reports/skill-health.json
 researcher/reports/skill-health-history.jsonl
+researcher/reports/benchmark-history.jsonl
 
 # Benchmark runner runtime artifacts (do not commit)
 researcher/benchmarks/router/results/
@@ -77,11 +73,14 @@ researcher/exports/private/
 researcher/exports/staging/
 researcher/artifacts/private/
 researcher/schemas/reports/runtime/
+researcher/runtime/
 
 # Active research runs live under researcher/runs/; the seed run is kept as a
 # committed fixture, everything else is local runtime state.
 researcher/runs/*/
 !researcher/runs/20260515-035228-executable-autonomous-research-frameworks/
+researcher/runs/**/.run-state.lock
+researcher/.run-init-staging/
 
 # Temporary files
 *.tmp
@@ -95,6 +94,9 @@ Private/
 
 # Local user-facing deliverables and drafting outputs
 /outputs/
+/output/
+/tmp/
+/xcrun_db
 
 # Credential-bearing local files
 .env

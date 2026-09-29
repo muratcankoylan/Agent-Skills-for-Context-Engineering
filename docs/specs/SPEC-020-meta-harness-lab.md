@@ -101,7 +101,7 @@ Measure search success rate, trials to first useful candidate, improvement and n
 - Capability floor, target-surface effectiveness coverage, hidden calibration, and transfer gates are sealed before search.
 - A selected candidate has representative shadow evidence against its controls without a critical regression; this qualifies only that candidate.
 - Search-policy qualification uses a sealed multi-block outer benchmark with equal information, compute, model-call, cost, and declared human-time accounting, plus preregistered censoring, missingness, and multiplicity.
-- Removing raw traces reduces or does not improve search quality in an ablation.
+- A preregistered raw-trace-access ablation measures both improvement and degradation with identical non-ablated inputs and matched resource ceilings; trace exposure is the declared treatment. The result is reported with uncertainty and missingness regardless of direction; better performance without trace access is a valid simplification finding, not a failed experiment. This ablates search access only: mandatory audit-trace retention, evaluator isolation, and production guards remain enabled in every arm.
 - A production change mid-search triggers close or bridge, not silent rebase.
 - Repeated hidden queries, search adaptation from hidden outcomes, and unreserved candidate fan-out are denied.
 - Concurrent search attempts cannot oversubscribe any sealed budget, and restart reconciles reservations before new dispatch.
@@ -114,6 +114,7 @@ Measure search success rate, trials to first useful candidate, improvement and n
 - [ ] Search-space size, statistical and selection units, adaptive rules, stopping, multiplicity, evaluator looks, and worst-case reservations are sealed before search.
 - [ ] Raw trace, candidate, evaluation, and decision lineage is complete.
 - [ ] Human and best-of-N baselines exist.
+- [ ] The trace-access ablation is preregistered and direction-neutral, retains required audit evidence, and reports negative, null, and simplifying results without changing the selection rule after observation.
 - [ ] No candidate can promote itself.
 - [ ] Promotion-eligible searches pass capability-floor, coverage, hidden, environment, equal-budget, integrity, cost, and transfer entry gates.
 - [ ] A selected candidate has representative shadow evidence, not only development-set gain, while optimizer-level claims require the separate outer method evaluation.

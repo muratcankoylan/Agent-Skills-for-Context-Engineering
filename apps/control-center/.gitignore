@@ -1,0 +1,11 @@
+.next/
+node_modules/
+*.tsbuildinfo
+.env*
+!.env.example
+npm-debug.log*
+
+# The repository root ignores Python build directories named `lib/`. This app's
+# TypeScript library is source and must remain visible to packaging and Git.
+!lib/
+!lib/*.ts

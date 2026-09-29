@@ -12,20 +12,30 @@ from pathlib import Path
 from rich.console import Console
 
 from reasoning_trace_optimizer.analyzer import TraceAnalyzer, format_analysis_report
+from reasoning_trace_optimizer.api_budget import PaidAPIBudget, PaidAPIDryRunError
 from reasoning_trace_optimizer.capture import TraceCapture, format_trace_for_display
-from reasoning_trace_optimizer.loop import OptimizationLoop, LoopConfig
+from reasoning_trace_optimizer.loop import LoopConfig, OptimizationLoop
 from reasoning_trace_optimizer.skill_generator import SkillGenerator
-
 
 console = Console()
 
 
+def _paid_api_budget(args: argparse.Namespace) -> PaidAPIBudget:
+    return PaidAPIBudget(
+        max_api_attempts=args.max_api_attempts,
+        max_reserved_output_tokens=args.max_reserved_output_tokens,
+        dry_run=args.dry_run,
+    )
+
+
 def cmd_capture(args: argparse.Namespace) -> None:
     """Run a task and capture reasoning trace."""
+    api_budget = _paid_api_budget(args)
     capture = TraceCapture(
         api_key=args.api_key,
         base_url=args.base_url,
         model=args.model,
+        api_budget=api_budget,
     )
 
     console.print(f"[cyan]Capturing trace for task: {args.task}[/cyan]")
@@ -50,15 +60,18 @@ def cmd_analyze(args: argparse.Namespace) -> None:
     # For now, run capture + analyze together
     # In future, could load trace from file
 
+    api_budget = _paid_api_budget(args)
     capture = TraceCapture(
         api_key=args.api_key,
         base_url=args.base_url,
         model=args.model,
+        api_budget=api_budget,
     )
     analyzer = TraceAnalyzer(
         api_key=args.api_key,
         base_url=args.base_url,
         model=args.model,
+        api_budget=api_budget,
     )
 
     console.print(f"[cyan]Capturing and analyzing: {args.task}[/cyan]")
@@ -81,6 +94,7 @@ def cmd_analyze(args: argparse.Namespace) -> None:
 
 def cmd_optimize(args: argparse.Namespace) -> None:
     """Run full optimization loop."""
+    api_budget = _paid_api_budget(args)
     config = LoopConfig(
         max_iterations=args.max_iterations,
         convergence_threshold=args.convergence_threshold,
@@ -95,6 +109,7 @@ def cmd_optimize(args: argparse.Namespace) -> None:
         api_key=args.api_key,
         base_url=args.base_url,
         model=args.model,
+        api_budget=api_budget,
     )
 
     console.print(f"[cyan]Starting optimization for: {args.task}[/cyan]")
@@ -115,6 +130,7 @@ def cmd_optimize(args: argparse.Namespace) -> None:
             api_key=args.api_key,
             base_url=args.base_url,
             model=args.model,
+            api_budget=api_budget,
         )
         skill_path = generator.generate(
             result=result,
@@ -138,7 +154,7 @@ def cmd_generate_skill(args: argparse.Namespace) -> None:
         summary = json.load(f)
 
     # Create minimal loop result from summary
-    from reasoning_trace_optimizer.models import LoopResult, LoopIteration, ReasoningTrace, AnalysisResult
+    from reasoning_trace_optimizer.models import LoopResult
 
     # Load final prompt
     final_prompt_path = artifacts_dir / "final_prompt.txt"
@@ -154,10 +170,12 @@ def cmd_generate_skill(args: argparse.Namespace) -> None:
         converged=summary.get("converged", False),
     )
 
+    api_budget = _paid_api_budget(args)
     generator = SkillGenerator(
         api_key=args.api_key,
         base_url=args.base_url,
         model=args.model,
+        api_budget=api_budget,
     )
 
     skill_path = generator.generate(
@@ -191,6 +209,23 @@ def main() -> None:
         default="MiniMax-M2.1",
         choices=["MiniMax-M2.1", "MiniMax-M2.1-lightning", "MiniMax-M2"],
         help="Model to use",
+    )
+    parser.add_argument(
+        "--max-api-attempts",
+        type=int,
+        default=64,
+        help="Cumulative SDK-attempt cap for this command (default: 64)",
+    )
+    parser.add_argument(
+        "--max-reserved-output-tokens",
+        type=int,
+        default=300_000,
+        help="Cumulative pre-call output-token reservation cap (default: 300000)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Block before the first paid call and produce no evaluation evidence",
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -264,7 +299,21 @@ def main() -> None:
     skill_parser.set_defaults(func=cmd_generate_skill)
 
     args = parser.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+    except PaidAPIDryRunError as exc:
+        console.print_json(
+            json.dumps(
+                {
+                    "dry_run": True,
+                    "evidence": False,
+                    "first_blocked_operation": exc.operation,
+                    "max_api_attempts": args.max_api_attempts,
+                    "max_reserved_output_tokens": args.max_reserved_output_tokens,
+                }
+            )
+        )
+        raise SystemExit(3) from None
 
 
 if __name__ == "__main__":

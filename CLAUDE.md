@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Agent Skills for Context Engineering is an open collection of Agent Skills teaching context engineering and harness engineering principles for production AI agent systems. Skills are platform-agnostic (Claude Code, Cursor, Codex/OpenAI Agent Skills, GitHub Copilot, any Open Plugins-conformant tool). v2.5.0 adds the long-horizon-prompting skill (pseudo-formal task briefs for long-running autonomous agents and parallel orchestrations) on top of the self-improvement-loops skill (v2.4.0) and the file-based researcher operating system with deterministic gates, cross-platform Agent Skills validation, and a continuous loop. Use the [generated live inventory](researcher/generated/corpus-summary.md) for current corpus counts.
+Agent Skills for Context Engineering is an open collection of Agent Skills teaching context engineering and harness engineering principles for production AI agent systems. Skills are platform-agnostic (Claude Code, Cursor, Codex/OpenAI Agent Skills, GitHub Copilot, any Open Plugins-conformant tool). v2.5.0 adds the long-horizon-prompting skill (pseudo-formal task briefs for long-running autonomous agents and parallel orchestrations) on top of the self-improvement-loops skill (v2.4.0) and the file-based researcher operating system with deterministic gates, cross-platform Agent Skills validation, and a supervised legacy loop. Use the [generated live inventory](researcher/generated/corpus-summary.md) for current corpus counts.
 
 Context engineering is the discipline of curating everything that enters a model's context window (system prompts, tool definitions, retrieved documents, message history, tool outputs) to maximize signal within limited attention budget.
 
@@ -13,7 +13,7 @@ Context engineering is the discipline of curating everything that enters a model
 - `skills/` - published skill directories, each containing a `SKILL.md` with YAML frontmatter (`name`, `description`) and optional `references/` and `scripts/` subdirectories
 - `examples/` - complete demonstration projects; the generated inventory is the count authority
 - `docs/` - Research materials and reference documentation
-- `researcher/` - File-based research-to-skill operating system: rubrics, mechanism registry, claim provenance, corpus index, run state machine, adversarial benchmarks, continuous loop, launchd service definitions
+- `researcher/` - File-based research-to-skill operating system: rubrics, mechanism registry, claim provenance, corpus index, run state machine, adversarial scenario catalog, supervised legacy loop, and dormant launchd definitions
 - `template/SKILL.md` - Canonical skill template (use when creating new skills)
 - `SKILL.md` (root) - Collection-level metadata and skill map
 - `.claude-plugin/marketplace.json` - Claude Code marketplace manifest (single bundled plugin, v2.5.0)
@@ -33,7 +33,7 @@ python3 researcher/scripts/validate_spec_lifecycle.py --base-ref origin/main --p
 python3 researcher/scripts/validate_platform_compat.py --require-reference-validator # Agent Skills reference validator + Cursor/Claude/Codex install-layout simulation
 python3 researcher/scripts/validate_repo.py --strict       # corpus structure, manifests, rubric math, mechanism registry, claims, corpus index, activation cases, benchmark scenarios, run artifacts
 python3 researcher/scripts/skill_health.py --strict --no-history  # deterministic skill-body quality gate
-python3 researcher/scripts/run_benchmarks.py               # adversarial benchmark harness + repo + activation gates
+python3 researcher/scripts/run_benchmarks.py               # repo + activation gates + scenario-catalog consistency
 python3 researcher/scripts/check_activation_cases.py       # skill-boundary regression fixtures
 ```
 
@@ -43,15 +43,16 @@ python3 researcher/scripts/check_activation_cases.py       # skill-boundary regr
 python3 researcher/scripts/validate_run.py --run-dir researcher/runs/<run-id>
 ```
 
-### Continuous loop (manual or launchd)
+### Supervised legacy loop (manual only)
 
 ```
+python3 researcher/scripts/loop_status.py --initialize-runtime
 python3 researcher/scripts/loop_discover.py
-python3 researcher/scripts/loop_step.py --allow-fetch
+python3 researcher/scripts/loop_step.py
 python3 researcher/scripts/loop_daily.py
 python3 researcher/scripts/loop_status.py
 
-researcher/orchestration/launchd/install.sh    # macOS daemon
+researcher/orchestration/launchd/install.sh    # fails closed; activation disabled
 researcher/orchestration/launchd/uninstall.sh
 ```
 
@@ -108,12 +109,13 @@ When creating or editing skills:
 
 When working through the researcher operating system:
 
-1. **Initialize runs via `research_loop.py init`**: it creates `run-state.json`, queue entry, thread log, source evaluation scaffold, and mechanism proposal template
-2. **Advance state explicitly**: use `retrieve`, `evaluate`, `propose`, `novelty`, `validate-run`, `pr-ready`, `close` subcommands; do not edit `run-state.json` by hand
-3. **Promote mechanisms only after run readiness**: `research_loop.py promote-mechanisms` requires `--reviewed-by` and a passing run-readiness check
-4. **Add claim provenance** to `researcher/claims/index.jsonl` for any numeric, benchmark, or volatile claim added to a skill
-5. **Never invoke paid LLMs from the continuous loop**: HTTP retrieval is stdlib-only, judge adapters are explicitly out of scope until budget-gated
-6. **Never commit runtime queue/report files**: `.gitignore` covers `researcher/queue/*.jsonl`, `researcher/reports/{logs,snapshots,loop-events.jsonl,loop-failures.jsonl,status.md,parked-review.md}`, and `researcher/runs/*/` except the seed run
+1. **Initialize runtime ledgers explicitly for supervisors**: run `loop_status.py --initialize-runtime` before `loop_discover.py`, `loop_step.py`, `loop_daily.py`, or `loop_status.py`; those queue supervisors fail closed on missing or malformed ledgers and do not repair them implicitly. Per-run `research_loop.py` commands validate their managed run state independently.
+2. **Initialize runs via `research_loop.py init`**: it creates `run-state.json`, queue entry, thread log, source evaluation scaffold, and mechanism proposal template
+3. **Advance state explicitly**: use `retrieve`, `evaluate`, `propose`, `novelty`, `validate-run`, `pr-ready`, `close` subcommands; do not edit `run-state.json` by hand
+4. **Keep registry authority outside the legacy workflow**: `research_loop.py promote-mechanisms` always fails closed, and legacy runs cannot close as `accepted`; writable terminal statuses are `rejected`, `reference-only`, and `abandoned`
+5. **Add claim provenance** to `researcher/claims/index.jsonl` for any numeric, benchmark, or volatile claim added to a skill
+6. **Keep external effects disabled**: the legacy commands write local runtime files, but paid LLMs, network retrieval, and launchd activation remain disabled until their owning specifications and authority gates are implemented
+7. **Never commit runtime queue/report files**: `.gitignore` covers `researcher/queue/*.jsonl`, `researcher/reports/{benchmark-history.jsonl,logs,snapshots,loop-events.jsonl,loop-failures.jsonl,status.md,parked-review.md}`, and `researcher/runs/*/` except the seed run
 
 ## Plugin Architecture
 

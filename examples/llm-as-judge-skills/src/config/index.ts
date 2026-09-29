@@ -1,18 +1,7 @@
-import 'dotenv/config';
+/** No dotenv loading, credential lookup, or ambient provider construction. */
+export const config = { openai: { model: 'unconfigured' } } as const;
 
-export const config = {
-  openai: {
-    apiKey: process.env.OPENAI_API_KEY || '',
-    model: process.env.OPENAI_MODEL || 'gpt-4o'
-  },
-  anthropic: {
-    apiKey: process.env.ANTHROPIC_API_KEY || ''
-  }
-} as const;
-
+/** @deprecated Construct and inject a bounded JudgeRuntime explicitly. */
 export function validateConfig(): void {
-  if (!config.openai.apiKey) {
-    throw new Error('OPENAI_API_KEY is required. Create a .env file with your API key.');
-  }
+  throw new Error('Automatic live execution is disabled. See README for explicit bounded runtime setup.');
 }
-

@@ -1,0 +1,16 @@
+{
+  "schema": "engineering-research-claim-ledger/v1",
+  "reviewed_at": "2026-09-07",
+  "authority": "none",
+  "accepted_corpus_change": false,
+  "claims": [
+    {"id": "sourcing-litsearch-conditional-expansion", "kind": "reported_result", "claim": "Citation expansion benefits depend on retriever and query construction; the paper does not establish universal benefit.", "url": "https://arxiv.org/html/2407.18940v2", "location": "Tables 3 and 6, limitations", "access": "primary_full_text", "confidence": "high_for_reported_result_not_transfer"},
+    {"id": "sourcing-facet-relevance", "kind": "reported_method", "claim": "Method, background and result relevance are separately annotated and differ from topical similarity.", "url": "https://arxiv.org/html/2103.12906v3", "location": "annotation protocol and appendices", "access": "primary_full_text", "confidence": "high"},
+    {"id": "sourcing-expansion-drift", "kind": "reported_result", "claim": "Query2doc has mixed cross-domain effects and preserving original-query information matters.", "url": "https://arxiv.org/html/2303.07678v2", "location": "Tables 2 and 4, limitations", "access": "primary_full_text", "confidence": "high_for_reported_result_not_transfer"},
+    {"id": "sourcing-arxiv-policy", "kind": "volatile_provider_contract", "claim": "Legacy APIs require a single connection and no more than one request every three seconds; manual recommends caching identical daily queries.", "urls": ["https://info.arxiv.org/help/api/tou.html", "https://info.arxiv.org/help/api/user-manual.html"], "confidence": "high_at_review_date"},
+    {"id": "sourcing-x-dialect-conflict", "kind": "observed_documentation_conflict", "claim": "Official endpoint and dictionary use different post/tweet field naming; live compatibility is unresolved.", "urls": ["https://docs.x.com/x-api/posts/search-recent-posts", "https://docs.x.com/x-api/fundamentals/data-dictionary"], "confidence": "high_for_document_conflict_unverified_wire"},
+    {"id": "sourcing-explicit-lanes", "kind": "engineering_judgment", "claim": "Explicit facet lanes and bounded identity pooling are the smallest useful next experiment before a new semantic index or generated expansion.", "based_on": ["sourcing-litsearch-conditional-expansion", "sourcing-facet-relevance", "sourcing-expansion-drift"], "confidence": "medium_pending_blinded_relevance_evaluation"},
+    {"id": "sourcing-live-sept7", "kind": "local_measurement", "claim": "Seven discovery attempts produced six complete captures and 59 raw leads; one lane reached its time limit. This is not a semantic-quality or uptime measurement.", "evidence": "researcher/runtime/sourcing-upgrade-20260907/verification-receipt.json", "report": "results-2026-09-07.md", "confidence": "verified_retained_observations_only"},
+    {"id": "sourcing-compact-sept7", "kind": "local_measurement", "claim": "For the frozen 56-work pool, compact packets selected 15 versus 2 works at 64 KiB and 42 versus 29 at 128 KiB, preserving selected text and reconstructable provenance. This does not establish improved semantic ranking.", "evidence": "researcher/runtime/sourcing-upgrade-20260907/verification-receipt.json", "report": "results-2026-09-07.md", "confidence": "verified_finite_sample_only"}
+  ]
+}

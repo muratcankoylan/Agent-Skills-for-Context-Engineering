@@ -1,0 +1,529 @@
+diff --git a/examples/digital-brain-skill/scripts/install.sh b/examples/digital-brain-skill/scripts/install.sh
+index 5dcfc48..a12760d 100644
+--- a/examples/digital-brain-skill/scripts/install.sh
++++ b/examples/digital-brain-skill/scripts/install.sh
+@@ -1,79 +1,208 @@
+ #!/bin/bash
+-# Digital Brain Installation Script
+-# Installs Digital Brain as a Claude Code skill
+-
+-set -e
+-
+-SKILL_NAME="digital-brain"
+-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+-BRAIN_DIR="$(dirname "$SCRIPT_DIR")"
+-
+-# Colors
+-GREEN='\033[0;32m'
+-BLUE='\033[0;34m'
+-NC='\033[0m' # No Color
+-
+-echo -e "${BLUE}Digital Brain Installer${NC}"
+-echo "========================"
+-echo ""
+-
+-# Detect installation type
+-echo "Where would you like to install Digital Brain?"
+-echo ""
+-echo "1) User-wide (recommended) - ~/.claude/skills/"
+-echo "2) Current project only   - ./.claude/skills/"
+-echo "3) Custom location"
+-echo ""
+-read -p "Enter choice [1-3]: " choice
+-
+-case $choice in
+-    1)
+-        TARGET_DIR="$HOME/.claude/skills/$SKILL_NAME"
+-        ;;
+-    2)
+-        TARGET_DIR="./.claude/skills/$SKILL_NAME"
+-        ;;
+-    3)
+-        read -p "Enter custom path: " custom_path
+-        TARGET_DIR="$custom_path/$SKILL_NAME"
+-        ;;
+-    *)
+-        echo "Invalid choice. Exiting."
+-        exit 1
+-        ;;
+-esac
++# Digital Brain installer, macOS/Linux with Python 3. No GNU realpath dependency.
++# Policy: new destinations only; never overwrite or remove an existing entry.
++# Custom parents must exist. User/project modes may create .claude/skills only.
++# Symlinks, source overlap, traversal and broad targets fail before copying.
++set -euo pipefail
+ 
+-# Create target directory
+-mkdir -p "$(dirname "$TARGET_DIR")"
+-
+-# Check if already exists
+-if [ -d "$TARGET_DIR" ]; then
+-    read -p "Directory exists. Overwrite? [y/N]: " overwrite
+-    if [ "$overwrite" != "y" ] && [ "$overwrite" != "Y" ]; then
+-        echo "Installation cancelled."
+-        exit 0
+-    fi
+-    rm -rf "$TARGET_DIR"
++if ! command -v python3 >/dev/null 2>&1; then
++    printf '%s\n' 'Python 3 is required for safe, portable installation.' >&2
++    exit 1
+ fi
++BRAIN_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
++
++printf '%s\n' 'Digital Brain Installer' 'New destinations only. Existing installations are never overwritten.' '' \
++    '1) User-wide      - ~/.claude/skills/' \
++    '2) Current project - ./.claude/skills/' \
++    '3) Custom existing parent directory'
++IFS= read -r -p 'Enter choice [1-3]: ' choice
++custom_path=''
++case "$choice" in
++    1|2) ;;
++    3) IFS= read -r -p 'Enter custom parent path (literal, no ~ expansion): ' custom_path ;;
++    *) printf '%s\n' 'Invalid choice.' >&2; exit 1 ;;
++esac
++
++# Directory-fd operations avoid following destination aliases between checks and
++# writes. This protects ordinary local use, not hostile same-UID source mutation.
++python3 - "$choice" "$custom_path" "$BRAIN_DIR" "$(pwd -P)" "${HOME:-}" <<'PY'
++import os
++import stat
++import sys
++
++NAME = "digital-brain"
++DIRECTORY = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
++MAX_ENTRIES = 2048
++MAX_BYTES = 16 * 1024 * 1024
++
++
++class UnsafeInstall(Exception):
++    pass
++
++
++def absolute(value, base=None):
++    if not value or len(value) > 4096 or any(ord(c) < 32 or ord(c) == 127 for c in value):
++        raise UnsafeInstall("INVALID_PATH")
++    if ".." in value.split("/"):
++        raise UnsafeInstall("PATH_TRAVERSAL")
++    if not os.path.isabs(value):
++        if base is None:
++            raise UnsafeInstall("ABSOLUTE_ANCHOR_REQUIRED")
++        value = os.path.join(base, value)
++    # POSIX permits special treatment of exactly two leading slashes. This
++    # local-only installer treats all leading slash spellings as one root.
++    return "/" + os.path.normpath(value).lstrip("/")
++
++
++def descend(start, components):
++    current = os.dup(start)
++    try:
++        for component in components:
++            child = os.open(component, DIRECTORY, dir_fd=current)
++            os.close(current)
++            current = child
++        return current
++    except BaseException:
++        os.close(current)
++        raise
++
++
++def open_directory(path):
++    anchor = os.open("/", DIRECTORY)
++    try:
++        return descend(anchor, [part for part in path.split("/") if part])
++    finally:
++        os.close(anchor)
++
++
++def snapshot(source):
++    entries = []
++    total = 0
++
++    def visit(directory, prefix):
++        nonlocal total
++        if len(prefix) > 32:
++            raise UnsafeInstall("SOURCE_TOO_LARGE")
++        for name in sorted(os.listdir(directory)):
++            relative = prefix + (name,)
++            if relative == ("scripts", "install.sh"):
++                continue
++            if any(ord(c) < 32 or ord(c) == 127 for c in name):
++                raise UnsafeInstall("UNSAFE_SOURCE_ENTRY")
++            info = os.stat(name, dir_fd=directory, follow_symlinks=False)
++            is_directory = stat.S_ISDIR(info.st_mode)
++            if not is_directory and (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1):
++                raise UnsafeInstall("UNSAFE_SOURCE_ENTRY")
++            total += 0 if is_directory else info.st_size
++            if len(entries) >= MAX_ENTRIES or total > MAX_BYTES:
++                raise UnsafeInstall("SOURCE_TOO_LARGE")
++            identity = (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_mode)
++            entries.append((relative, is_directory, identity))
++            if is_directory:
++                child = os.open(name, DIRECTORY, dir_fd=directory)
++                try:
++                    visit(child, relative)
++                finally:
++                    os.close(child)
++
++    visit(source, ())
++    if not any(parts == ("SKILL.md",) and not directory for parts, directory, _ in entries):
++        raise UnsafeInstall("SOURCE_SKILL_MISSING")
++    return entries
++
++
++def install():
++    mode, custom, source_path, project, home = sys.argv[1:]
++    source_path, project = absolute(source_path), absolute(project)
++    home = absolute(home) if home else None
++    anchor = home if mode == "1" else project
++    if mode == "1" and home is None:
++        raise UnsafeInstall("HOME_REQUIRED")
++    if mode != "3" and anchor == "/":
++        raise UnsafeInstall("BROAD_TARGET")
++    parent = absolute(custom, project) if mode == "3" else os.path.join(anchor, ".claude", "skills")
++    target = os.path.join(parent, NAME)
++    if parent == "/" or target in (home, project):
++        raise UnsafeInstall("BROAD_TARGET")
++    if os.path.commonpath((target, source_path)) in (target, source_path):
++        raise UnsafeInstall("SOURCE_TARGET_OVERLAP")
++
++    source = open_directory(source_path)
++    parent_fd = None
++    created = False
++    try:
++        entries = snapshot(source)  # Reject unsafe source entries before any writes.
++        if mode == "3":
++            parent_fd = open_directory(parent)
++        else:
++            parent_fd = open_directory(anchor)
++            for component in (".claude", "skills"):
++                try:
++                    os.mkdir(component, mode=0o700, dir_fd=parent_fd)
++                except FileExistsError:
++                    pass
++                child = os.open(component, DIRECTORY, dir_fd=parent_fd)
++                os.close(parent_fd)
++                parent_fd = child
++        # Exclusive mkdir refuses directories, files and dangling symlinks alike.
++        try:
++            os.mkdir(NAME, mode=0o700, dir_fd=parent_fd)
++        except FileExistsError:
++            raise UnsafeInstall("DESTINATION_EXISTS_NO_OVERWRITE") from None
++        created = True
++        destination = os.open(NAME, DIRECTORY, dir_fd=parent_fd)
++        try:
++            for parts, is_directory, identity in entries:
++                target_parent = descend(destination, parts[:-1])
++                try:
++                    if is_directory:
++                        os.mkdir(parts[-1], mode=0o700, dir_fd=target_parent)
++                        continue
++                    source_parent = descend(source, parts[:-1])
++                    try:
++                        reader = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW, dir_fd=source_parent)
++                    finally:
++                        os.close(source_parent)
++                    with os.fdopen(reader, "rb") as incoming:
++                        info = os.fstat(incoming.fileno())
++                        if (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_mode) != identity:
++                            raise UnsafeInstall("SOURCE_CHANGED")
++                        writer = os.open(parts[-1], os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
++                                         0o700 if info.st_mode & 0o100 else 0o600, dir_fd=target_parent)
++                        with os.fdopen(writer, "wb") as outgoing:
++                            remaining = info.st_size
++                            while remaining:
++                                chunk = incoming.read(min(65536, remaining))
++                                if not chunk:
++                                    raise UnsafeInstall("SOURCE_CHANGED")
++                                outgoing.write(chunk)
++                                remaining -= len(chunk)
++                            if incoming.read(1):
++                                raise UnsafeInstall("SOURCE_CHANGED")
++                finally:
++                    os.close(target_parent)
++            if snapshot(source) != entries:
++                raise UnsafeInstall("SOURCE_CHANGED")
++        finally:
++            os.close(destination)
++    except BaseException:
++        if created:
++            print("Installation failed; the new partial destination was retained. No existing entry was removed.", file=sys.stderr)
++        raise
++    finally:
++        os.close(source)
++        if parent_fd is not None:
++            os.close(parent_fd)
++    print("Installation complete: " + target)
++    print("Start with identity/voice.md and identity/brand.md in the installed copy.")
++
+ 
+-# Copy files
+-echo ""
+-echo "Installing to: $TARGET_DIR"
+-cp -r "$BRAIN_DIR" "$TARGET_DIR"
+-
+-# Remove install script from target (not needed there)
+-rm -f "$TARGET_DIR/scripts/install.sh"
+-
+-echo ""
+-echo -e "${GREEN}Installation complete!${NC}"
+-echo ""
+-echo "Next steps:"
+-echo "1. Navigate to your Digital Brain: cd $TARGET_DIR"
+-echo "2. Start with identity/voice.md - define your voice"
+-echo "3. Fill out identity/brand.md - your positioning"
+-echo "4. Add contacts to network/contacts.jsonl"
+-echo "5. Capture ideas in content/ideas.jsonl"
+-echo ""
+-echo "Claude Code will automatically discover the skill."
+-echo "Try: 'Help me write a post in my voice'"
+-echo ""
++try:
++    install()
++except UnsafeInstall as error:
++    print("Installation refused: " + str(error), file=sys.stderr)
++    sys.exit(1)
++except OSError:
++    print("Installation refused: path missing, unsafe, inaccessible, or an I/O operation failed.", file=sys.stderr)
++    sys.exit(1)
++PY
+diff --git a/researcher/scripts/tests/test_install_safety.py b/researcher/scripts/tests/test_install_safety.py
+new file mode 100644
+index 0000000..5ba916f
+--- /dev/null
++++ b/researcher/scripts/tests/test_install_safety.py
+@@ -0,0 +1,235 @@
++"""Installer effects are confined to disposable fixture trees, never user data."""
++import os
++from concurrent.futures import ThreadPoolExecutor
++from pathlib import Path
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++
++
++ROOT = Path(__file__).resolve().parents[3]
++INSTALLER = ROOT / "examples/digital-brain-skill/scripts/install.sh"
++
++
++class InstallSafetyTests(unittest.TestCase):
++    def setUp(self):
++        self.temporary = tempfile.TemporaryDirectory(prefix="install-safety-")
++        self.addCleanup(self.temporary.cleanup)
++        self.root = Path(self.temporary.name).resolve()
++        self.brain = self.root / "source" / "digital-brain"
++        (self.brain / "scripts").mkdir(parents=True)
++        shutil.copyfile(INSTALLER, self.brain / "scripts/install.sh")
++        (self.brain / "SKILL.md").write_text("# Fixture skill\n", encoding="utf-8")
++        (self.brain / "notes").mkdir()
++        (self.brain / "notes/my note.md").write_text("preserve literal bytes\n", encoding="utf-8")
++        (self.brain / ".example").write_text("included\n", encoding="utf-8")
++        self.home = self.root / "home"
++        self.project = self.root / "project"
++        self.home.mkdir()
++        self.project.mkdir()
++
++    def run_install(self, choice="3", parent=None, *, home=None, project=None, extra="", path=None):
++        answers = choice + "\n"
++        if choice == "3":
++            answers += str(parent) + "\n"
++        environment = {
++            "PATH": os.pathsep.join((str(Path(sys.executable).parent), os.defpath)),
++            "HOME": str(home or self.home), "LC_ALL": "C", "PYTHONDONTWRITEBYTECODE": "1",
++        }
++        if path is not None:
++            environment["PATH"] = str(path)
++        return subprocess.run(["/bin/bash", str(self.brain / "scripts/install.sh")],
++                              input=answers + extra, text=True, capture_output=True,
++                              cwd=project or self.project, env=environment, timeout=15)
++
++    def assert_installed(self, parent):
++        target = parent / "digital-brain"
++        self.assertEqual((target / "SKILL.md").read_bytes(), (self.brain / "SKILL.md").read_bytes())
++        self.assertEqual((target / "notes/my note.md").read_text(), "preserve literal bytes\n")
++        self.assertEqual((target / ".example").read_text(), "included\n")
++        self.assertFalse((target / "scripts/install.sh").exists())
++
++    def test_existing_directory_and_user_data_are_never_overwritten_even_with_yes(self):
++        parent = self.root / "installed"
++        target = parent / "digital-brain"
++        target.mkdir(parents=True)
++        marker = target / "my-private-notes.txt"
++        marker.write_text("do not remove")
++        result = self.run_install(parent=parent, extra="y\n")
++        self.assertNotEqual(result.returncode, 0)
++        self.assertEqual(marker.read_text(), "do not remove")
++        self.assertEqual(list(target.iterdir()), [marker])
++
++    def test_symlink_parent_is_rejected_without_writing_through_it(self):
++        outside = self.root / "outside"
++        outside.mkdir()
++        alias = self.root / "alias"
++        alias.symlink_to(outside, target_is_directory=True)
++        result = self.run_install(parent=alias)
++        self.assertNotEqual(result.returncode, 0)
++        self.assertEqual(list(outside.iterdir()), [])
++        self.assertTrue(alias.is_symlink())
++
++    def test_source_descendant_rejected_before_partial_copy(self):
++        parent = self.brain / "nested"
++        parent.mkdir()
++        result = self.run_install(parent=parent)
++        self.assertNotEqual(result.returncode, 0)
++        self.assertEqual(list(parent.iterdir()), [])
++
++    def test_absolute_spaces_unicode_and_literal_backslash_supported(self):
++        parent = self.root / "Install Here Ω \\ literal"
++        parent.mkdir()
++        result = self.run_install(parent=parent)
++        self.assertEqual(result.returncode, 0, result.stderr)
++        self.assert_installed(parent)
++
++    def test_relative_custom_parent_is_literal_and_preserves_source(self):
++        parent = self.project / "folder with spaces"
++        parent.mkdir()
++        before = (self.brain / "scripts/install.sh").read_bytes()
++        result = self.run_install(parent="./folder with spaces")
++        self.assertEqual(result.returncode, 0, result.stderr)
++        self.assert_installed(parent)
++        self.assertEqual((self.brain / "scripts/install.sh").read_bytes(), before)
++
++    def test_user_and_project_modes_create_only_skill_parent_directories(self):
++        for choice, anchor in (("1", self.home), ("2", self.project)):
++            with self.subTest(choice=choice):
++                result = self.run_install(choice=choice)
++                self.assertEqual(result.returncode, 0, result.stderr)
++                self.assert_installed(anchor / ".claude/skills")
++
++    def test_existing_regular_file_is_preserved(self):
++        parent = self.root / "parent"
++        parent.mkdir()
++        target = parent / "digital-brain"
++        target.write_bytes(b"existing data")
++        result = self.run_install(parent=parent)
++        self.assertNotEqual(result.returncode, 0)
++        self.assertEqual(target.read_bytes(), b"existing data")
++
++    def test_existing_and_dangling_target_symlinks_are_preserved(self):
++        for name, existing in (("existing", True), ("dangling", False)):
++            with self.subTest(name=name):
++                parent = self.root / name
++                parent.mkdir()
++                outside = self.root / (name + "-outside")
++                if existing:
++                    outside.mkdir()
++                target = parent / "digital-brain"
++                target.symlink_to(outside, target_is_directory=True)
++                result = self.run_install(parent=parent, extra="y\n")
++                self.assertNotEqual(result.returncode, 0)
++                self.assertTrue(target.is_symlink())
++                if existing:
++                    self.assertEqual(list(outside.iterdir()), [])
++
++    def test_symlink_user_skills_ancestor_rejected(self):
++        outside = self.root / "outside"
++        outside.mkdir()
++        (self.home / ".claude").symlink_to(outside, target_is_directory=True)
++        result = self.run_install(choice="1")
++        self.assertNotEqual(result.returncode, 0)
++        self.assertEqual(list(outside.iterdir()), [])
++
++    def test_custom_parent_must_exist_and_may_not_traverse(self):
++        for parent in (self.root / "missing/child", self.project / "../home", ""):
++            with self.subTest(parent=str(parent)):
++                result = self.run_install(parent=parent)
++                self.assertNotEqual(result.returncode, 0)
++        self.assertFalse((self.root / "missing").exists())
++        self.assertEqual(list(self.home.iterdir()), [])
++
++    def test_source_root_target_rejected_without_deleting_source(self):
++        before = (self.brain / "SKILL.md").read_bytes()
++        result = self.run_install(parent=self.brain.parent, extra="y\n")
++        self.assertNotEqual(result.returncode, 0)
++        self.assertEqual((self.brain / "SKILL.md").read_bytes(), before)
++
++    def test_broad_target_home_project_and_filesystem_root_rejected(self):
++        # / is tested only after the installer has a fail-closed target policy.
++        for kind in ("home", "project"):
++            parent = self.root / kind / "broad"
++            target = parent / "digital-brain"
++            target.mkdir(parents=True)
++            marker = target / "keep"
++            marker.write_text("keep")
++            options = {kind: target}
++            result = self.run_install(parent=parent, extra="y\n", **options)
++            self.assertNotEqual(result.returncode, 0)
++            self.assertEqual(marker.read_text(), "keep")
++        for parent in ("/", "//", "///"):
++            result = self.run_install(parent=parent)
++            self.assertNotEqual(result.returncode, 0)
++        self.assertNotEqual(self.run_install(choice="1", home=Path("/")).returncode, 0)
++        self.assertNotEqual(self.run_install(choice="2", project=Path("/")).returncode, 0)
++
++    def test_source_symlink_and_special_file_rejected_before_target_creation(self):
++        parent = self.root / "parent"
++        parent.mkdir()
++        linked = self.brain / "linked"
++        linked.symlink_to(self.brain / "SKILL.md")
++        result = self.run_install(parent=parent)
++        self.assertNotEqual(result.returncode, 0)
++        self.assertFalse((parent / "digital-brain").exists())
++        linked.unlink()
++        os.mkfifo(linked)
++        result = self.run_install(parent=parent)
++        self.assertNotEqual(result.returncode, 0)
++        self.assertFalse((parent / "digital-brain").exists())
++
++    def test_invalid_choice_eof_and_control_characters_do_not_install(self):
++        for choice, parent in (("9", None), ("", None), ("3", "bad\tpath")):
++            with self.subTest(choice=choice, parent=parent):
++                result = self.run_install(choice=choice, parent=parent)
++                self.assertNotEqual(result.returncode, 0)
++        self.assertEqual(list(self.home.iterdir()), [])
++        self.assertEqual(list(self.project.iterdir()), [])
++
++    def test_concurrent_installs_have_one_exclusive_winner(self):
++        parent = self.root / "parent"
++        parent.mkdir()
++        with ThreadPoolExecutor(max_workers=2) as executor:
++            results = list(executor.map(lambda _: self.run_install(parent=parent), range(2)))
++        self.assertEqual(sorted(result.returncode for result in results), [0, 1])
++        self.assert_installed(parent)
++
++    def test_new_personal_data_is_private_and_parent_permissions_preserved(self):
++        parent = self.root / "parent"
++        parent.mkdir(mode=0o755)
++        before = parent.stat().st_mode
++        result = self.run_install(parent=parent)
++        self.assertEqual(result.returncode, 0, result.stderr)
++        self.assertEqual(parent.stat().st_mode, before)
++        self.assertEqual((parent / "digital-brain").stat().st_mode & 0o777, 0o700)
++        self.assertEqual((parent / "digital-brain/SKILL.md").stat().st_mode & 0o777, 0o600)
++
++    def test_missing_python_dependency_fails_before_effects(self):
++        empty_bin = self.root / "empty-bin"
++        empty_bin.mkdir()
++        result = self.run_install(choice="1", path=empty_bin)
++        self.assertNotEqual(result.returncode, 0)
++        self.assertIn("Python 3 is required", result.stderr)
++        self.assertEqual(list(self.home.iterdir()), [])
++
++    def test_bounded_source_and_hardlinked_files_are_rejected_before_copy(self):
++        parent = self.root / "parent"
++        parent.mkdir()
++        large = self.brain / "too-large"
++        with large.open("wb") as stream:
++            stream.truncate(16 * 1024 * 1024 + 1)
++        result = self.run_install(parent=parent)
++        self.assertNotEqual(result.returncode, 0)
++        self.assertIn("SOURCE_TOO_LARGE", result.stderr)
++        self.assertEqual(list(parent.iterdir()), [])
++        large.unlink()
++        os.link(self.brain / "SKILL.md", self.brain / "hardlink")
++        self.assertNotEqual(self.run_install(parent=parent).returncode, 0)
++        self.assertEqual(list(parent.iterdir()), [])
++
++
++if __name__ == "__main__":
++    unittest.main()

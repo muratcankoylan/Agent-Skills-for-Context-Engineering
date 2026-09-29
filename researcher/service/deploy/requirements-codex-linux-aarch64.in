@@ -1,0 +1,4 @@
+# Deployment prerequisite only, not the application dependency lock.
+# Compile/review a separate closure for another architecture or Python ABI.
+openai-codex==0.159.0
+openai-codex-cli-bin==0.159.0

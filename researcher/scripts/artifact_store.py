@@ -1027,6 +1027,7 @@ class CandidateFreezer:
         *,
         editable_surface_policy: EditableSurfacePolicy,
         registry: SchemaRegistry | None = None,
+        initialize: bool = True,
     ):
         self.store = store
         self.registry = registry or SchemaRegistry.load()
@@ -1038,7 +1039,11 @@ class CandidateFreezer:
             }
         )
         self.receipts = self.store.root / "freeze-receipts"
-        _secure_directory(self.receipts)
+        if initialize:
+            _secure_directory(self.receipts)
+        elif (not self.receipts.is_dir() or self.receipts.resolve() != self.receipts
+              or stat.S_IMODE(self.receipts.stat().st_mode) != 0o700):
+            raise ContractError("STORE_PATH_INVALID", "existing freeze receipts are missing or not private")
 
     def _receipt_path(self, candidate_id: str) -> Path:
         key = sha256_bytes(candidate_id.encode("utf-8")).removeprefix("sha256:")

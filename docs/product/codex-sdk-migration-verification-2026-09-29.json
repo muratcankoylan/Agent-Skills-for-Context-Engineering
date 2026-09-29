@@ -1,0 +1,187 @@
+{
+  "schema": "sdk-migration-verification/v1",
+  "authority": "none",
+  "date": "2026-09-29",
+  "production_ready": false,
+  "published": false,
+  "cloud_activated": false,
+  "live_provider_calls": 0,
+  "scientific_effectiveness_measured": false,
+  "source": {
+    "commit": "c6cd52017b247804373339e1c3c103d42554b0a1",
+    "implementation_digest": "sha256:9704a56a69f241a76e7b0d93f9a70b868045f7e940f6b71af081cce444a143d3",
+    "release_source_digest": "sha256:bf14dd06b83e757f51319f0add3e34ac60d07c4ddaa2d8fa9a72846bf2dd5e91",
+    "release_source_files": 916,
+    "scenario_source_digest": "sha256:bf5b24b0bd50badd820d4407f9f90171045814bde3ba71ffa32752accd7bca49",
+    "scenario_source_files": 214
+  },
+  "source_scope": "Frozen integration before addition of this verification report and documentation links; not a clean published commit.",
+  "tests": {
+    "full_service": {
+      "executed": 997,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_ms": 181015
+    },
+    "release_scenarios": {
+      "groups": 11,
+      "executed": 450,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "deployment": {
+      "executed": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "focused_sdk": {
+      "executed": 119,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_ms": 31875
+    },
+    "overlapping_suites": true
+  },
+  "linux": {
+    "arm64": {
+      "image": "sha256:cca85eb9853e38a3007394a004e8fdbf95036c5630d3fb2787a46abb5f70e748",
+      "mcp_dependency_profile": false,
+      "receipt": {
+        "authority": "none",
+        "dependency_versions_match": true,
+        "failure_code": null,
+        "preflight": {
+          "authority": "none",
+          "checks": {
+            "app_server": "passed",
+            "dependencies": "passed",
+            "native_noop": "not_run",
+            "read_only_denies_write": "not_run",
+            "runtime_identity": "passed",
+            "workspace_denies_sibling": "not_run",
+            "workspace_write_allows_write": "not_run"
+          },
+          "failure_code": null,
+          "fixture": true,
+          "host_file_containment_verified": false,
+          "native_tool_execution_verified": false,
+          "platform": "linux",
+          "production_ready": false,
+          "profile": "tool_free",
+          "provider_calls": 0,
+          "runtime_version": "0.159.0",
+          "schema": "codex-runtime-preflight/v1",
+          "sdk_version": "0.159.0",
+          "status": "passed",
+          "tool_free_message_execution_verified": false
+        },
+        "production_ready": false,
+        "provider_calls": 0,
+        "schema": "codex-linux-prerequisite/v2",
+        "source_sha256": {
+          "codex_preflight.py": "024a8023ef7e365e0216fe117ccca735eb45fd9c6f69fb0eb1543e36f3563fec",
+          "codex_worker.py": "354b47d9c4be5f78d80f68803e171a5e6126379c3af5e768b2817b509e0b047a"
+        },
+        "status": "passed",
+        "target": "linux-aarch64-or-x86_64-cpython312",
+        "tool_free_tests": {
+          "errors": 0,
+          "executed": 22,
+          "expected_failures": 0,
+          "failures": 0,
+          "groups": {
+            "test_codex_campaign": 17,
+            "test_codex_organization.SDKOrganizationTests": 3,
+            "test_codex_pipeline.SDKPipelineTests": 2
+          },
+          "passed": true,
+          "planned": 22,
+          "skipped": 0,
+          "source_digest": "sha256:bf14dd06b83e757f51319f0add3e34ac60d07c4ddaa2d8fa9a72846bf2dd5e91",
+          "source_unchanged": true,
+          "unexpected_successes": 0
+        }
+      }
+    },
+    "amd64": {
+      "image": "sha256:7ca2e8b944ab8d9fcf18b97df713f7be5dd4497d970acb3738a674bf6bd8e545",
+      "mcp_dependency_profile": true,
+      "emulated_on_arm64": true,
+      "receipt": {
+        "authority": "none",
+        "dependency_versions_match": true,
+        "failure_code": null,
+        "preflight": {
+          "authority": "none",
+          "checks": {
+            "app_server": "passed",
+            "dependencies": "passed",
+            "native_noop": "not_run",
+            "read_only_denies_write": "not_run",
+            "runtime_identity": "passed",
+            "workspace_denies_sibling": "not_run",
+            "workspace_write_allows_write": "not_run"
+          },
+          "failure_code": null,
+          "fixture": true,
+          "host_file_containment_verified": false,
+          "native_tool_execution_verified": false,
+          "platform": "linux",
+          "production_ready": false,
+          "profile": "tool_free",
+          "provider_calls": 0,
+          "runtime_version": "0.159.0",
+          "schema": "codex-runtime-preflight/v1",
+          "sdk_version": "0.159.0",
+          "status": "passed",
+          "tool_free_message_execution_verified": false
+        },
+        "production_ready": false,
+        "provider_calls": 0,
+        "schema": "codex-linux-prerequisite/v2",
+        "source_sha256": {
+          "codex_preflight.py": "024a8023ef7e365e0216fe117ccca735eb45fd9c6f69fb0eb1543e36f3563fec",
+          "codex_worker.py": "354b47d9c4be5f78d80f68803e171a5e6126379c3af5e768b2817b509e0b047a"
+        },
+        "status": "passed",
+        "target": "linux-aarch64-or-x86_64-cpython312",
+        "tool_free_tests": {
+          "errors": 0,
+          "executed": 22,
+          "expected_failures": 0,
+          "failures": 0,
+          "groups": {
+            "test_codex_campaign": 17,
+            "test_codex_organization.SDKOrganizationTests": 3,
+            "test_codex_pipeline.SDKPipelineTests": 2
+          },
+          "passed": true,
+          "planned": 22,
+          "skipped": 0,
+          "source_digest": "sha256:bf14dd06b83e757f51319f0add3e34ac60d07c4ddaa2d8fa9a72846bf2dd5e91",
+          "source_unchanged": true,
+          "unexpected_successes": 0
+        }
+      }
+    },
+    "constraints": {
+      "network": "none",
+      "root_filesystem": "read_only",
+      "capabilities": "all_dropped",
+      "no_new_privileges": true,
+      "pids_limit": 256,
+      "memory_bytes": 2147483648,
+      "cpu_limit": 2,
+      "native_tools_verified": false
+    }
+  },
+  "public_index": {
+    "passed": false,
+    "findings": 4,
+    "scope": "Pre-existing dirty-index findings; SDK iteration did not stage or revert unrelated deletions."
+  }
+}

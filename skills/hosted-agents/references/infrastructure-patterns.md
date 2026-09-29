@@ -1,694 +1,248 @@
 # Infrastructure Patterns for Hosted Agents
 
-This reference provides detailed implementation patterns for building hosted agent infrastructure. These patterns are derived from production systems at scale.
+This reference provides preparatory pseudocode for hosted-agent infrastructure. It is not a production implementation or a claim that the illustrated provider adapters exist. Before deployment, replace every adapter with a tested implementation and complete the threat model, authentication, authorization, supervision, resource limits, redaction, recovery, and provider-isolation work.
 
 ## Sandbox Architecture
 
 ### Modal Integration Pattern
 
-Modal provides the sandbox infrastructure with near-instant startup and filesystem snapshots.
+Treat every provider SDK as an untrusted adapter surface until its behavior is
+verified. The application accepts only canonical configured repositories,
+authenticated principals, current repository authorization receipts, and
+digest-pinned images with bounded resources. It never restores a caller's raw
+snapshot locator. A trusted snapshot-binding provider must resolve the locator
+to authoritative repository/principal metadata before restore; the restored
+sandbox must then independently report the expected repository.
 
-```python
-import modal
-
-# Define the base image with all dependencies
-image = modal.Image.debian_slim().pip_install([
-    "opencode",
-    "gitpython",
-    "psycopg2-binary",
-])
-
-# Create the app
-app = modal.App("coding-agent")
-
-# Sandbox class with snapshot support
-@app.cls(image=image, timeout=3600)
-class AgentSandbox:
-    def __init__(self, repo_url: str, snapshot_id: str = None):
-        self.repo_url = repo_url
-        self.snapshot_id = snapshot_id
-    
-    @modal.enter()
-    def setup(self):
-        if self.snapshot_id:
-            # Restore from snapshot
-            modal.Sandbox.restore(self.snapshot_id)
-        else:
-            # Fresh setup from image
-            self._clone_and_setup()
-    
-    def _clone_and_setup(self):
-        """Clone repo and run initial setup."""
-        token = self._get_github_app_token()
-        os.system(f"git clone https://x-access-token:{token}@github.com/{self.repo_url}")
-        os.system("npm install")
-        os.system("npm run build")
-    
-    @modal.method()
-    def execute_prompt(self, prompt: str, user_identity: dict) -> dict:
-        """Execute a prompt in the sandbox."""
-        # Update git config for this user
-        os.system(f'git config user.name "{user_identity["name"]}"')
-        os.system(f'git config user.email "{user_identity["email"]}"')
-        
-        # Run the agent
-        result = self.agent.run(prompt)
-        
-        return {
-            "result": result,
-            "snapshot_id": modal.Sandbox.snapshot()
-        }
-```
+All process execution uses validated argument vectors, never a shell. For Git,
+a private broker resolves one opaque, repository- and operation-scoped lease
+inside a trusted `GIT_ASKPASS` boundary. The bearer value never enters argv,
+URLs, application memory, logs, metadata, artifacts, or snapshots, and the
+lease is revoked when the single Git operation ends.
 
 ### Image Build Pipeline
 
-Build images on a schedule to keep them fresh:
+The build orchestrator must enforce these gates; failure of any gate prevents
+image publication:
 
-```python
-import schedule
-import time
-from datetime import datetime
-
-class ImageBuilder:
-    def __init__(self, repositories: list[str]):
-        self.repositories = repositories
-        self.images = {}
-    
-    def build_all_images(self):
-        """Build images for all repositories."""
-        for repo in self.repositories:
-            try:
-                image = self._build_image(repo)
-                self.images[repo] = {
-                    "image": image,
-                    "built_at": datetime.utcnow(),
-                    "commit": self._get_latest_commit(repo)
-                }
-            except Exception as e:
-                # Log but continue with other repos
-                log.error(f"Failed to build image for {repo}: {e}")
-    
-    def _build_image(self, repo: str) -> str:
-        """Build a single repository image."""
-        sandbox = modal.Sandbox.create()
-        
-        # Clone with app token
-        token = get_app_installation_token(repo)
-        sandbox.exec(f"git clone https://x-access-token:{token}@github.com/{repo} /workspace")
-        
-        # Install dependencies
-        sandbox.exec("cd /workspace && npm install")
-        
-        # Run build
-        sandbox.exec("cd /workspace && npm run build")
-        
-        # Warm caches
-        sandbox.exec("cd /workspace && npm run dev &")
-        time.sleep(5)  # Let dev server start
-        sandbox.exec("cd /workspace && npm test -- --run")
-        
-        # Create snapshot
-        return sandbox.snapshot()
-    
-    def get_latest_image(self, repo: str) -> str:
-        """Get the most recent image for a repository."""
-        if repo not in self.images:
-            raise ValueError(f"No image available for {repo}")
-        return self.images[repo]["image"]
-
-# Schedule builds every 30 minutes
-builder = ImageBuilder(["org/frontend", "org/backend", "org/shared"])
-schedule.every(30).minutes.do(builder.build_all_images)
-```
+1. Start from a digest-pinned base image with validated CPU, memory, disk,
+   process-count, wall-time, and egress ceilings.
+2. Clone through one opaque `clone` lease and close it before repository code
+   runs. The credential-free remote is derived from the canonical repository.
+3. `assert_untrusted_build_boundary` proves the build child has no ambient
+   credentials, broker/control socket, cloud metadata access, or unmediated
+   egress. Dependency resolution uses a lockfile and immutable dependency
+   policy; do not introduce unpinned package installation in the base image.
+4. Every install, build, and test command must terminate successfully. No
+   ignored exit status and no development or cache-warming daemon is allowed.
+5. `stop_and_reap_all` removes every descendant and credential helper, then
+   `assert_quiescent` proves the process table, writable secret state, and
+   broker channels are clean before snapshot finalization.
+6. Publish an immutable image record bound to its repository, commit digest,
+   base-image digest, policy version, and verification receipt. Application
+   code cannot mutate this record after publication.
 
 ### Warm Pool Management
 
-Maintain pre-warmed sandboxes for instant session starts:
+Serialize maintenance per canonical repository so concurrent calls cannot
+overprovision. Remove expired, unsynchronized, or wrong-image entries and
+terminate each unclaimed sandbox before replacement. A claimed sandbox belongs
+to its session and is removed from pool ownership.
 
-```python
-from collections import defaultdict
-from dataclasses import dataclass
-from datetime import datetime, timedelta
+Create a candidate privately. Acquire a new opaque `fetch` lease, complete
+fetch/reset inside a fixed deadline, and publish the candidate only after sync
+succeeds. On timeout, cancellation, or typed sync failure, terminate the
+candidate and return a stable failure. Never use a detached task plus polling;
+an unsynchronized candidate is never offered.
 
-@dataclass
-class WarmSandbox:
-    sandbox_id: str
-    repo: str
-    created_at: datetime
-    image_version: str
-    is_claimed: bool = False
-
-class WarmPoolManager:
-    def __init__(self, target_pool_size: int = 3):
-        self.target_size = target_pool_size
-        self.pools = defaultdict(list)  # repo -> [WarmSandbox]
-        self.max_age = timedelta(minutes=25)  # Expire before next image build
-    
-    def get_warm_sandbox(self, repo: str) -> WarmSandbox | None:
-        """Get a pre-warmed sandbox if available."""
-        pool = self.pools[repo]
-        
-        for sandbox in pool:
-            if not sandbox.is_claimed and self._is_valid(sandbox):
-                sandbox.is_claimed = True
-                return sandbox
-        
-        return None
-    
-    def _is_valid(self, sandbox: WarmSandbox) -> bool:
-        """Check if sandbox is still valid."""
-        age = datetime.utcnow() - sandbox.created_at
-        current_image = self.image_builder.get_latest_image(sandbox.repo)
-        
-        return (
-            age < self.max_age and
-            sandbox.image_version == current_image
-        )
-    
-    def maintain_pool(self, repo: str):
-        """Ensure pool has target number of warm sandboxes."""
-        # Remove expired sandboxes
-        self.pools[repo] = [s for s in self.pools[repo] if self._is_valid(s)]
-        
-        # Add new sandboxes to reach target
-        current_count = len([s for s in self.pools[repo] if not s.is_claimed])
-        needed = self.target_size - current_count
-        
-        for _ in range(needed):
-            sandbox = self._create_warm_sandbox(repo)
-            self.pools[repo].append(sandbox)
-    
-    def _create_warm_sandbox(self, repo: str) -> WarmSandbox:
-        """Create a new warm sandbox from latest image."""
-        image = self.image_builder.get_latest_image(repo)
-        sandbox_id = modal.Sandbox.create(image=image)
-        
-        # Sync to latest (runs in background)
-        self._sync_to_latest(sandbox_id, repo)
-        
-        return WarmSandbox(
-            sandbox_id=sandbox_id,
-            repo=repo,
-            created_at=datetime.utcnow(),
-            image_version=image
-        )
-```
+Session allocation accepts only configured repositories and a current
+authorization receipt bound to the authenticated principal, canonical
+repository, and `session:start` action. A snapshot reference is an untrusted
+locator: resolve it through the authoritative snapshot-binding provider and
+require its repository/principal attestation to match the current request
+before restore. Independently verify the restored sandbox repository. Unknown,
+cross-repository, cross-actor, expired, missing, or mismatched inputs all return
+the same non-enumerating denial. If identity configuration fails after any
+sandbox is acquired, terminate that sandbox before returning the error. Every
+session snapshot crosses the same fail-closed finalization hook as an image:
+reap descendants, revoke and close credential helpers, prove quiescence and
+credential absence, then create and authoritatively attest the snapshot. A
+failed hook creates and attests no snapshot.
 
 ## API Layer Patterns
 
 ### Cloudflare Durable Objects for Session State
 
-Each session gets its own Durable Object with isolated SQLite:
+Each session may use an isolated Durable Object, but this reference deliberately does not provide a copyable handler. A production adapter must prove the following fail-closed contract:
 
-```typescript
-// Session Durable Object
-export class SessionDO implements DurableObject {
-  private storage: DurableObjectStorage;
-  private sql: SqlStorage;
-  private connections: Map<string, WebSocket> = new Map();
+#### Browser HTTP and WebSocket ingress
 
-  constructor(ctx: DurableObjectState) {
-    this.storage = ctx.storage;
-    this.sql = ctx.storage.sql;
-    this.initializeSchema();
-  }
+- `authenticateRequest` verifies issuer, audience, expiry, signature, and subject before routing.
+- `authorizeSessionAccess` proves current session membership and returns a classification ceiling. Missing and denied sessions use the same non-enumerating response.
+- `allowedOrigins`, exact methods, content type, and `MAX_MESSAGE_BYTES` are checked before bounded parsing.
+- `validateMessagePayload` accepts a versioned closed schema, rejects unknown fields, binds the author to the authenticated principal, and requires an `idempotencyKey`.
+- WebSocket upgrades require a single-use handshake nonce. `consumeReplayNonce` is durable and atomic. Each connection stores its principal, current membership version, and clearance; revocation closes it.
+- Broadcast is per connection. Re-authorize when the membership version changes, then classify and redact for that connection's clearance. Never broadcast one pre-serialized payload to every participant.
 
-  private initializeSchema() {
-    this.sql.exec(`
-      CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY,
-        role TEXT NOT NULL,
-        content TEXT NOT NULL,
-        author_id TEXT,
-        author_name TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      );
-      
-      CREATE TABLE IF NOT EXISTS artifacts (
-        id INTEGER PRIMARY KEY,
-        type TEXT NOT NULL,
-        path TEXT,
-        content TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      );
-      
-      CREATE TABLE IF NOT EXISTS events (
-        id INTEGER PRIMARY KEY,
-        type TEXT NOT NULL,
-        data TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-  }
+#### Durable command and idempotency state
 
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-
-    if (request.headers.get("Upgrade") === "websocket") {
-      return this.handleWebSocket(request);
-    }
-
-    switch (url.pathname) {
-      case "/message":
-        return this.handleMessage(request);
-      case "/status":
-        return this.getStatus();
-      default:
-        return new Response("Not found", { status: 404 });
-    }
-  }
-
-  private handleWebSocket(request: Request): Response {
-    const pair = new WebSocketPair();
-    const [client, server] = Object.values(pair);
-
-    const connectionId = crypto.randomUUID();
-    this.connections.set(connectionId, server);
-
-    server.accept();
-    server.addEventListener("close", () => {
-      this.connections.delete(connectionId);
-    });
-
-    return new Response(null, { status: 101, webSocket: client });
-  }
-
-  private broadcast(message: object) {
-    const data = JSON.stringify(message);
-    for (const ws of this.connections.values()) {
-      ws.send(data);
-    }
-  }
-
-  async handleMessage(request: Request): Promise<Response> {
-    const { content, author } = await request.json();
-
-    // Store message
-    this.sql.exec(
-      `INSERT INTO messages (role, content, author_id, author_name) VALUES (?, ?, ?, ?)`,
-      ["user", content, author.id, author.name]
-    );
-
-    // Broadcast to all connected clients
-    this.broadcast({
-      type: "message",
-      role: "user",
-      content,
-      author,
-    });
-
-    // Forward to sandbox for processing
-    const result = await this.forwardToSandbox(content, author);
-
-    return Response.json(result);
-  }
-}
-```
+Use one transaction to claim `(principalId, idempotencyKey)`, record the canonical request digest, and persist a pending intent plus outbox record. The same key and digest returns the existing receipt; the same key with a different digest is an idempotency collision and performs no effect. A supervised dispatcher processes the outbox, records the typed result, and marks the intent complete atomically. Recovery resumes pending intents without forwarding a command twice. Do not broadcast or acknowledge success before the durable result exists.
 
 ### Real-Time Event Streaming
 
-Stream events from sandbox to all connected clients:
-
-```typescript
-class EventStream {
-  private sessionDO: DurableObjectStub;
-
-  async streamFromSandbox(sandboxId: string, sessionId: string) {
-    const sandbox = await modal.Sandbox.get(sandboxId);
-
-    // Subscribe to sandbox events
-    for await (const event of sandbox.events()) {
-      // Forward to Durable Object for broadcast
-      await this.sessionDO.fetch(
-        new Request(`https://internal/event`, {
-          method: "POST",
-          body: JSON.stringify({
-            type: event.type,
-            data: event.data,
-          }),
-        })
-      );
-    }
-  }
-}
-```
+Browser ingress and sandbox-event ingress are different routes and trust policies. Define `POST /internal/event` explicitly. It rejects browser requests and instead requires an authenticated service identity, an attested sandbox-to-session binding, exact method and content type, `MAX_EVENT_BYTES`, a closed event schema, and a monotonically consumed producer sequence. Before persistence or fan-out, `classifyAndRedactEvent` converts the event to a typed projection at the session classification ceiling. Raw sandbox payloads never cross into client storage or WebSocket frames. Sequence replay, gaps, malformed data, or classification uncertainty fail closed and emit only redacted audit metadata.
 
 ## Client Integration Patterns
 
 ### Slack Bot with Repository Classification
 
+Repository classification is routing assistance, not authority. The Slack connector keeps its service credential inside the connector boundary and passes the application a verified event:
+
 ```python
-from slack_bolt import App
-from slack_bolt.adapter.socket_mode import SocketModeHandler
-
-app = App(token=os.environ["SLACK_BOT_TOKEN"])
-
-# Repository descriptions for classification
-REPO_DESCRIPTIONS = [
-    {
-        "name": "frontend-monorepo",
-        "description": "React frontend application with dashboard, user portal, and admin interfaces",
-        "hints": ["dashboard", "UI", "component", "page", "frontend"]
-    },
-    {
-        "name": "backend-services",
-        "description": "Node.js API services including auth, payments, and core business logic",
-        "hints": ["API", "endpoint", "service", "backend", "database"]
-    },
-    {
-        "name": "mobile-app",
-        "description": "React Native mobile application for iOS and Android",
-        "hints": ["mobile", "app", "iOS", "Android", "native"]
-    }
-]
-
-async def classify_repository(message: str, channel: str, thread: list[str]) -> str:
-    """Use fast model to classify which repo the message refers to."""
-    prompt = f"""Classify which repository this message is about.
-
-Message: {message}
-Channel: #{channel}
-Thread context: {' | '.join(thread[-3:])}
-
-Repositories:
-{json.dumps(REPO_DESCRIPTIONS, indent=2)}
-
-Return ONLY the repository name, or "unknown" if unclear."""
-
-    response = await openai.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=50
-    )
-    
-    return response.choices[0].message.content.strip()
-
-@app.event("app_mention")
-async def handle_mention(event, say, client):
-    """Handle @mentions of the bot."""
-    channel = event["channel"]
-    message = event["text"]
-    thread_ts = event.get("thread_ts", event["ts"])
-    
-    # Get thread context if in a thread
-    thread_messages = []
-    if "thread_ts" in event:
-        result = await client.conversations_replies(
-            channel=channel,
-            ts=thread_ts
-        )
-        thread_messages = [m["text"] for m in result["messages"]]
-    
-    # Get channel info for context
-    channel_info = await client.conversations_info(channel=channel)
-    channel_name = channel_info["channel"]["name"]
-    
-    # Classify repository
-    repo = await classify_repository(message, channel_name, thread_messages)
-    
-    if repo == "unknown":
-        await say(
-            text="I'm not sure which repository you're referring to. Could you specify?",
-            thread_ts=thread_ts
-        )
+async def handle_verified_mention(event, say):
+    principal = await authenticate_slack_user(event)
+    candidate_repository = await classify_or_read_selected_repository(event)
+    if candidate_repository == "unknown":
+        await say("Specify a repository you are permitted to access.")
         return
-    
-    # Start session and process
-    session = await start_session(repo, event["user"])
-    
-    await say(
-        text=f":robot_face: Starting work in `{repo}`...",
-        thread_ts=thread_ts
+
+    repository = normalize_github_repository(candidate_repository)
+    access = await authorize_repository_access(
+        principal=principal,
+        repository=repository,
+        action="session:start",
     )
-    
-    result = await session.process(message)
-    
-    # Post result with Block Kit formatting
-    await say(
-        blocks=format_result_blocks(result),
-        thread_ts=thread_ts
+    if not access.allowed:
+        # Do not reveal whether the repository exists or why access failed.
+        await say("Unable to start that repository session.")
+        return
+
+    session = await start_session(
+        repository,
+        principal=principal,
+        authorization=access.receipt,
     )
+    await say("Authorized session started.")
+    await session.process(validate_prompt(event))
 ```
+
+`authenticate_slack_user` requires a verified Slack transport event and maps the workspace/user pair to an internal principal. `authorize_repository_access` evaluates current repository membership and policy after normalization. The same decision is mandatory for a repository typed by the user, selected in a UI, or proposed by a model. Do not warm a repository, disclose its metadata, or call `start_session` before the allow decision.
 
 ### Chrome Extension DOM Extraction
 
-Extract DOM structure instead of sending screenshots:
+Do not copy arbitrary page DOM or framework internals into an agent context. A production extractor must enforce these boundaries:
 
-```typescript
-// content-script.ts
-interface ElementInfo {
-  tag: string;
-  classes: string[];
-  id?: string;
-  text?: string;
-  rect: DOMRect;
-  reactComponent?: string;
-}
-
-function extractDOMInfo(element: Element): ElementInfo {
-  // Get React component name if available
-  let reactComponent: string | undefined;
-  const fiberKey = Object.keys(element).find((key) =>
-    key.startsWith("__reactFiber")
-  );
-  if (fiberKey) {
-    const fiber = (element as any)[fiberKey];
-    reactComponent = fiber?.type?.name || fiber?.type?.displayName;
-  }
-
-  return {
-    tag: element.tagName.toLowerCase(),
-    classes: Array.from(element.classList),
-    id: element.id || undefined,
-    text: element.textContent?.slice(0, 100),
-    rect: element.getBoundingClientRect(),
-    reactComponent,
-  };
-}
-
-function extractSelectedArea(selection: DOMRect): ElementInfo[] {
-  const elements: ElementInfo[] = [];
-
-  // Find all elements within selection bounds
-  document.querySelectorAll("*").forEach((el) => {
-    const rect = el.getBoundingClientRect();
-    if (
-      rect.top >= selection.top &&
-      rect.left >= selection.left &&
-      rect.bottom <= selection.bottom &&
-      rect.right <= selection.right
-    ) {
-      elements.push(extractDOMInfo(el));
-    }
-  });
-
-  return elements;
-}
-
-// Message handler for sidebar
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === "EXTRACT_SELECTION") {
-    const elements = extractSelectedArea(request.selection);
-    sendResponse({ elements });
-  }
-});
-```
+- Authenticate the extension and authorize the principal for the target session and repository before capture.
+- Require an explicit user selection and an allowlisted origin. Exclude credential fields, hidden elements, cross-origin frames, extension pages, and browser-managed surfaces.
+- Bound traversal by node count, depth, elapsed time, and encoded bytes. Abort rather than truncate into an ambiguous schema.
+- Emit a versioned closed schema. Classify and redact text, attributes, URLs, and framework metadata before they leave the browser; never send a raw DOM object or unbounded `textContent`.
+- Bind the extraction to a nonce, session, origin, tab, timestamp, and content digest so replay or cross-session reuse fails closed.
+- Render a user-visible preview of the released projection and retain only redacted audit metadata.
 
 ## Multiplayer Implementation
 
-### Authorship Tracking
+### Authorship and Concurrent Effects
 
-Track which user made each change:
+Do not trust `PromptContext.author` or any client-supplied identity. Bind each prompt to a server-attested principal, current session-membership decision, repository authorization receipt, classification ceiling, and idempotency key before it enters a queue.
 
-```python
-@dataclass
-class PromptContext:
-    content: str
-    author: Author
-    session_id: str
-    timestamp: datetime
+A shared workspace has one mutation owner at a time. Serialize commit-producing operations or use isolated branches/worktrees with explicit merge arbitration. Do not mutate shared `git config` concurrently; pass validated author identity to the single commit operation or use an isolated repository config per attempt.
 
-@dataclass
-class Author:
-    id: str
-    name: str
-    email: str
-    github_token: str  # For PR creation
-
-class MultiplayerSession:
-    def __init__(self, session_id: str):
-        self.session_id = session_id
-        self.participants: dict[str, Author] = {}
-        self.prompt_queue: list[PromptContext] = []
-    
-    def add_participant(self, author: Author):
-        """Add a participant to the session."""
-        self.participants[author.id] = author
-        self.broadcast_event("participant_joined", author)
-    
-    async def process_prompt(self, prompt: PromptContext):
-        """Process prompt with author attribution."""
-        # Update git config for this author
-        await self.sandbox.exec(
-            f'git config user.name "{prompt.author.name}"'
-        )
-        await self.sandbox.exec(
-            f'git config user.email "{prompt.author.email}"'
-        )
-        
-        # Run agent
-        result = await self.agent.run(prompt.content)
-        
-        # If changes were made, create PR with author's token
-        if result.has_changes:
-            await self.create_pr(
-                branch=result.branch,
-                author=prompt.author
-            )
-        
-        return result
-    
-    async def create_pr(self, branch: str, author: Author):
-        """Create PR using the author's GitHub token."""
-        async with aiohttp.ClientSession() as session:
-            headers = {
-                "Authorization": f"Bearer {author.github_token}",
-                "Accept": "application/vnd.github.v3+json"
-            }
-            
-            await session.post(
-                f"https://api.github.com/repos/{self.repo}/pulls",
-                headers=headers,
-                json={
-                    "title": self.generate_pr_title(),
-                    "body": self.generate_pr_body(),
-                    "head": branch,
-                    "base": "main"
-                }
-            )
-```
+PR creation is a destination-locked broker effect bound to the authorized repository, exact branch and commit, initiating principal, base branch policy, and idempotency key. Persist a pending intent and outbox entry before the effect, reject key/digest collisions, and record one typed result before broadcasting. A participant record never carries a bearer credential, and one participant's clearance never authorizes data release to another.
 
 ## Metrics and Monitoring
 
 ### Key Metrics to Track
 
-```python
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-
-@dataclass
-class SessionMetrics:
-    session_id: str
-    started_at: datetime
-    first_token_at: datetime | None
-    completed_at: datetime | None
-    pr_created: bool
-    pr_merged: bool
-    prompts_count: int
-    participants_count: int
-    
-    @property
-    def time_to_first_token(self) -> timedelta | None:
-        if self.first_token_at:
-            return self.first_token_at - self.started_at
-        return None
-
-class MetricsAggregator:
-    def get_adoption_metrics(self, period: timedelta) -> dict:
-        """Get adoption metrics for a time period."""
-        sessions = self.get_sessions_in_period(period)
-        
-        total_prs = sum(1 for s in sessions if s.pr_created)
-        merged_prs = sum(1 for s in sessions if s.pr_merged)
-        
-        return {
-            "total_sessions": len(sessions),
-            "prs_created": total_prs,
-            "prs_merged": merged_prs,
-            "merge_rate": merged_prs / total_prs if total_prs > 0 else 0,
-            "avg_time_to_first_token": self._avg_ttft(sessions),
-            "unique_users": len(set(s.author_id for s in sessions)),
-            "multiplayer_sessions": sum(
-                1 for s in sessions if s.participants_count > 1
-            )
-        }
-    
-    def get_repository_metrics(self) -> dict[str, dict]:
-        """Get metrics broken down by repository."""
-        metrics = {}
-        
-        for repo in self.repositories:
-            repo_sessions = self.get_sessions_for_repo(repo)
-            total_prs = self.get_total_prs(repo)
-            agent_prs = sum(1 for s in repo_sessions if s.pr_merged)
-            
-            metrics[repo] = {
-                "agent_pr_percentage": agent_prs / total_prs * 100,
-                "session_count": len(repo_sessions),
-                "avg_prompts_per_session": sum(
-                    s.prompts_count for s in repo_sessions
-                ) / len(repo_sessions)
-            }
-        
-        return metrics
-```
+Define a versioned event schema before choosing an aggregator. Derive metrics
+only from durable typed events with a declared window, clock semantics,
+deduplication key, repository/principal privacy policy, and completeness lag.
+Publish the numerator, denominator, sample size, and missing-data count for
+every rate. Empty windows return an explicit `no_data` state, never a fabricated
+zero or a division-by-zero path. At minimum, measure authorization denials,
+warm-sync latency/failure, build-gate failure, cleanup/quiescence failure,
+session start latency, first useful result, task outcome, human review outcome,
+resource consumption, and cost per accepted outcome.
 
 ## Security Considerations
 
 ### Sandbox Isolation
 
-```python
-class SandboxSecurityConfig:
-    """Security configuration for sandboxes."""
-    
-    # Network restrictions
-    allowed_hosts = [
-        "github.com",
-        "api.github.com",
-        "registry.npmjs.org",
-        "pypi.org",
-    ]
-    
-    # Resource limits
-    max_memory_mb = 4096
-    max_cpu_cores = 2
-    max_disk_gb = 10
-    max_runtime_hours = 4
-    
-    # Secrets handling
-    secrets_to_inject = [
-        "GITHUB_APP_TOKEN",
-        "NPM_TOKEN",
-    ]
-    
-    # Blocked operations
-    blocked_commands = [
-        "curl",  # Use fetch tools instead
-        "wget",
-        "ssh",
-    ]
-```
+Treat command and network policy as positive capabilities, not a command denylist. A shell, alternate binary, language runtime, or renamed executable trivially bypasses string matching.
 
-### Token Handling
+- Start from no ambient credentials and no direct network. Grant a typed command/effect capability for one operation and revoke it at completion.
+- Route permitted egress through an enforcing proxy bound to exact scheme, destination, port, repository, operation, and resolved-address policy. Hostname strings alone are not an egress boundary.
+- Validate integer CPU, memory, disk, process, and duration limits before provider allocation. Require an immutable digest-pinned base image.
+- Execute untrusted repository build and test code in a child isolation boundary with no broker lease, cloud metadata access, control-plane socket, or inherited secret.
+- Require every build and test to succeed. Stop and reap all child processes, verify no writable secret/helper state remains, then finalize the snapshot. Never snapshot a cache-warming daemon.
+- Exclude memory-backed broker channels and helpers from snapshots, traces, process metadata, and artifact collection.
+
+### Ephemeral Credential Brokerage
 
 ```python
-class TokenManager:
-    """Manage tokens for GitHub operations."""
-    
-    def get_app_installation_token(self, repo: str) -> str:
-        """Get short-lived token for repo access."""
-        # Token expires in 1 hour
-        return github_app.create_installation_token(
-            installation_id=self.get_installation_id(repo),
-            permissions={"contents": "write", "pull_requests": "write"}
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from datetime import datetime
+from typing import AsyncIterator, Literal
+
+GitOperation = Literal["clone", "fetch", "push"]
+
+@dataclass(frozen=True, slots=True, repr=False)
+class GitCredentialLease:
+    """Opaque capability metadata; contains no bearer credential."""
+
+    repository: str
+    operation: GitOperation
+    expires_at: datetime
+    _capability: object  # Unforgeable in-process reference, never serialized.
+
+    def __repr__(self) -> str:
+        return "<GitCredentialLease redacted>"
+
+class GitHubCredentialBroker:
+    """Own GitHub credentials and expose only constrained operations."""
+
+    @asynccontextmanager
+    async def git_lease(
+        self,
+        *,
+        repository: str,
+        operation: GitOperation,
+    ) -> AsyncIterator[GitCredentialLease]:
+        repository = normalize_github_repository(repository)
+        capability = await self.private_broker.issue_git_capability(
+            repository=repository,
+            operation=operation,
+            ttl_seconds=60,
         )
-    
-    def get_user_token(self, user_id: str) -> str:
-        """Get user's OAuth token for PR creation."""
-        # Stored encrypted, decrypted at runtime
-        encrypted = self.storage.get(f"user_token:{user_id}")
-        return self.decrypt(encrypted)
+        lease = GitCredentialLease(
+            repository=repository,
+            operation=operation,
+            expires_at=capability.expires_at,
+            _capability=capability.reference,
+        )
+        try:
+            yield lease
+        finally:
+            await self.private_broker.revoke(capability.reference)
+
+    def github_effect(
+        self,
+        *,
+        principal_id: str,
+        repository: str,
+        operation: Literal["pull_request:create"],
+    ):
+        """Return a destination-locked client, never a raw credential."""
+        return self.private_broker.scoped_github_client(
+            principal_id=normalize_identity_id(principal_id),
+            repository=normalize_github_repository(repository),
+            operation=operation,
+        )
 ```
+
+Prefer GitHub App installation grants with the minimum repository permissions. Mint short-lived credentials only inside the private broker at effect time. Do not return them to application code or store them in users, sessions, queues, databases, caches, images, or snapshots. If user delegation is required, keep the refresh grant in an external secrets service and expose the same constrained effect API; application workers still never decrypt or receive it.
+
+The execution adapter must use direct process spawning (`execve` or an SDK equivalent), pass every untrusted value as exactly one argv element, and reject shell-string APIs and shell interpreter dispatch. Validate repository, principal, display-name, email, branch, and working-directory fields at their ingress boundaries. Logs should contain canonical identifiers, operation names, stable error codes, and exception types only. Never log rejected raw input or exception text from credential providers.
 
 ## References
 

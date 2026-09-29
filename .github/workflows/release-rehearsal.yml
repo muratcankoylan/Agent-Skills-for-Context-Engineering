@@ -1,0 +1,86 @@
+name: Research release rehearsal
+
+# Secret-free candidate validation, not the scheduled production worker.
+# Never replace this with pull_request_target or add provider credentials here.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-rehearsal-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scenarios:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout candidate without retained credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+      - name: Install the combined verified dependency closure
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: -r requirements-dev.txt -r researcher/service/requirements-mcp.txt
+          python -m pip check
+      - name: Execute bounded release scenarios
+        run: |
+          python researcher/scripts/build_inventory.py --check
+          python -m unittest researcher.service.tests.test_release_scenarios
+          python -m unittest discover -s researcher/service/deploy -p 'test_*.py'
+          python -m researcher.service.release_scenarios --output release-rehearsal.json
+      - name: Retain aggregate results, never private runtime state
+        if: ${{ always() && hashFiles('release-rehearsal.json') != '' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-rehearsal-${{ github.run_id }}-${{ github.run_attempt }}
+          path: release-rehearsal.json
+          if-no-files-found: error
+          retention-days: 14
+
+  runtime-image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout build inputs without retained credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Build the MCP-enabled dependency image
+        # This is the reviewed multi-platform index, not the ARM64-only child.
+        run: >-
+          docker build -f researcher/service/deploy/Dockerfile
+          --build-arg BASE_IMAGE=python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+          --build-arg INSTALL_MCP=1
+          --tag context-research-runtime:release-candidate .
+      - name: Exercise isolated runtime imports
+        run: |
+          docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --memory 256m --cpus 1 --pids-limit 64 --entrypoint python context-research-runtime:release-candidate -c 'import importlib.metadata as m, os; assert os.getuid() == 10001; assert os.getgid() == 10001; import mcp, httpx, yaml, jsonschema; assert m.version("mcp") == "1.30.0"; assert m.version("httpx") == "0.28.1"; print("nonroot, offline MCP runtime imports passed")'
+          docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --memory 256m --cpus 1 --pids-limit 64 --entrypoint python context-research-runtime:release-candidate -m pip check
+      - name: Require real SDK tool-free organization proof with no skipped tests
+        # Reviewed checkout only. No runner credentials or provider keys enter the image.
+        # Native sandbox tool support is a separate gate, not bypassed by this profile.
+        run: >-
+          docker run --rm --network none --read-only --cap-drop ALL
+          --security-opt no-new-privileges --memory 2g --cpus 2 --pids-limit 256
+          --mount "type=bind,source=${GITHUB_WORKSPACE},target=/repo,readonly"
+          --tmpfs /tmp:rw,nosuid,nodev,exec,size=1024m,mode=1777
+          --tmpfs /state:rw,nosuid,nodev,exec,size=512m,uid=10001,gid=10001,mode=0700
+          --entrypoint /opt/context-research/codex-venv/bin/python
+          context-research-runtime:release-candidate -I -B
+          /repo/researcher/service/deploy/verify_codex_runtime.py
+          --workspace-parent /state --profile tool_free
+          --service-python /opt/context-research/venv/bin/python
