@@ -8,41 +8,26 @@ because evasion and quality are independent axes (you can evade while writing
 garbage). The loop optimizes persona fidelity and slop reduction; whether that
 moves detector scores is an experimental *finding*, not a target.
 
-Endpoint and response shape follow Pangram's public text API; both are
-configurable because vendor APIs move. Requires PANGRAM_API_KEY.
+The detector is currently disabled. Explicit opt-in and credentials do not
+authorize it: an admitted, budgeted connector must be implemented first.
 """
 
 from __future__ import annotations
 
 import os
 
-import httpx
-
-_API_URL = os.environ.get("DWL_PANGRAM_URL", "https://text.api.pangramlabs.com")
+from .base import LiveExecutionDisabled
 
 
 class PangramClient:
-    def __init__(self, timeout: float = 60.0) -> None:
-        self._client = httpx.Client(timeout=timeout)
+    def __init__(self, timeout: float = 60.0, *, enabled: bool = False) -> None:
+        self.enabled = enabled
+        self.endpoint = os.environ.get("DWL_PANGRAM_URL", "https://text.api.pangramlabs.com")
 
     @property
     def available(self) -> bool:
-        return bool(os.environ.get("PANGRAM_API_KEY"))
+        return False  # Credentials and opt-in alone never grant paid authority.
 
     def score(self, text: str) -> dict:
-        """Returns {"ai_likelihood": float, "raw": dict} or {"error": str}."""
-        key = os.environ.get("PANGRAM_API_KEY", "")
-        if not key:
-            return {"error": "PANGRAM_API_KEY not set; detector column skipped"}
-        try:
-            response = self._client.post(
-                _API_URL,
-                headers={"x-api-key": key, "content-type": "application/json"},
-                json={"text": text},
-            )
-            response.raise_for_status()
-            data = response.json()
-        except httpx.HTTPError as exc:
-            return {"error": f"pangram request failed: {exc}"}
-        likelihood = data.get("ai_likelihood", data.get("likelihood"))
-        return {"ai_likelihood": likelihood, "raw": data}
+        """Refuse until admitted accounting and response contracts exist."""
+        raise LiveExecutionDisabled("detector disabled pending admitted budgeted connector")

@@ -16,7 +16,8 @@ training-free harness policy):
    every later draft prompt. The document run improves as it proceeds; this is
    the self-improvement loop scoped to a single artifact.
 
-Everything is JSON-serializable so a run can resume from disk mid-document.
+Everything is JSON-serializable for inspection. Mid-document automatic replay is
+not implemented; a started operation receipt blocks ambiguous resumption.
 """
 
 from __future__ import annotations

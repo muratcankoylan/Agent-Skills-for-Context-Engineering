@@ -7,30 +7,31 @@ Design constraints carried over from this repository's benchmark discipline:
   favor their own outputs (Panickssery 2024; PNAS 2025). Same-provider
   preferences are reported but marked self-judged;
 - detector scores (Pangram) are a diagnostic column, never a target;
-- resume by default: items with existing result files are skipped;
+- resume only matching completed source/input/config-bound receipts;
 - budget gates are mandatory arguments of the run, not optional flags.
 
 Conditions:
 - oneshot: single call, persona rules + brief in the prompt. The strongest
   honest baseline: same model, same information, no loop.
 - selfrefine: oneshot then two whole-document refine rounds (Self-Refine
-  style), same call count ceiling as DWL's repair budget.
+  style), not compute-matched to DWL.
 - dwl: the full deliberative loop.
 """
 
 from __future__ import annotations
 
-import json
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from .adapters.base import Budget, LLMAdapter
+from .adapters.base import LLMAdapter
 from .adapters.pangram import PangramClient
 from .harness import RunConfig, WritingRun
 from .persona import Persona, _parse_json_object
 from .sloplex import SlopProfiler
 from .stylometry import compute_profile, style_distance
+from .state import input_identity, run_once
 
 _ONESHOT_SYSTEM = (
     "You are ghostwriting as a specific author, following their craft rules exactly. "
@@ -199,24 +200,24 @@ def run_item(
 ) -> dict:
     """Generate one (brief, persona, condition, provider) cell and score it."""
     out_path = results_dir / f"{item.brief_id}__{item.persona_name}__{item.condition}__{item.provider}.json"
-    if out_path.exists():
-        return json.loads(out_path.read_text(encoding="utf-8"))
-    started = time.time()
-    if item.condition == "dwl":
-        text = generate_dwl(
-            adapter, persona, item.brief, target_words, results_dir / "dwl-runs"
-        )
-    else:
-        text = _GENERATORS[item.condition](adapter, persona, item.brief, target_words)
-    result = {
-        "item": item.__dict__,
-        "text": text,
-        "metrics": deterministic_metrics(text, persona),
-        "elapsed_s": round(time.time() - started, 1),
-        "budget": getattr(adapter, "budget", Budget()).summary(),
-    }
-    if pangram is not None and pangram.available:
-        result["pangram"] = pangram.score(text)
-    results_dir.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
-    return result
+    if (any(not isinstance(v, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", v)
+            for v in (item.brief_id, item.persona_name, item.condition, item.provider))
+            or item.condition not in ("dwl", "oneshot", "selfrefine") or item.provider != adapter.provider
+            or type(target_words) is not int or not 1 <= target_words <= 20000):
+        raise ValueError("invalid benchmark item")
+    if pangram is not None:
+        # Detector accounting has no admitted contract. Refuse BEFORE generation,
+        # even when a key or an arbitrary injected detector object is present.
+        from .adapters.base import LiveExecutionDisabled
+        raise LiveExecutionDisabled("detector disabled pending admitted budgeted connector")
+    identity = input_identity(adapter, persona, item.brief,
+                              {"item": item.__dict__, "target_words": target_words, "detector": "none"})
+    def execute():
+        started = time.time()
+        if item.condition == "dwl":
+            text = generate_dwl(adapter, persona, item.brief, target_words, results_dir / "dwl-runs")
+        else:
+            text = _GENERATORS[item.condition](adapter, persona, item.brief, target_words)
+        return {"item": item.__dict__, "text": text, "metrics": deterministic_metrics(text, persona),
+                "elapsed_s": round(time.time() - started, 1), "budget": adapter.budget.summary()}
+    return run_once(out_path, identity, execute)

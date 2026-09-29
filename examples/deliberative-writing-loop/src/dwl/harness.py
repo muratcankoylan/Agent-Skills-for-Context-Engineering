@@ -1,4 +1,6 @@
-"""The loop controller. Every artifact lands on disk; every run is resumable.
+"""The loop controller. Completed runs can be read again by exact identity.
+
+Partial runs are not automatically resumable: a started receipt blocks replay.
 
 State machine per document:
     PLAN -> [for each paragraph: DRAFT -> CRITIQUE -> (REPAIR -> CRITIQUE)*k -> COMMIT] -> FINAL
@@ -30,6 +32,7 @@ from .persona import Persona
 from .planner import Plan, make_plan
 from .sloplex import SlopProfiler
 from .stylometry import compute_profile, style_distance
+from .state import input_identity, run_once
 
 
 @dataclass
@@ -79,6 +82,20 @@ class WritingRun:
     # ----- stages -----
 
     def run(self) -> str:
+        if (type(self.config.target_words) is not int or not 1 <= self.config.target_words <= 20000
+                or type(self.config.max_repairs_per_paragraph) is not int
+                or not 0 <= self.config.max_repairs_per_paragraph <= 10
+                or not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", self.run_id)):
+            raise ValueError("invalid writing run configuration")
+        receipt = self.run_dir / "run-receipt.json"
+        if self.run_dir.exists() and not receipt.exists() and any(self.run_dir.iterdir()):
+            raise ValueError("legacy run has no bound receipt; use a new run directory")
+        identity = input_identity(self.adapter, self.persona, self.brief,
+            {"target_words": self.config.target_words,
+             "max_repairs_per_paragraph": self.config.max_repairs_per_paragraph})
+        return run_once(receipt, identity, self._execute)
+
+    def _execute(self) -> str:
         self._write("brief.md", self.brief)
         self._write("persona-snapshot.json", {
             "name": self.persona.name,

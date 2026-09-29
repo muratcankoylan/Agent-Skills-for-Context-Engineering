@@ -3,9 +3,7 @@ name = "deliberative-writing-loop"
 version = "0.1.0"
 description = "Inference-time writing harness: persona compilation, hierarchical planning, sentence-level critique loops, and trace compaction. No fine-tuning."
 requires-python = ">=3.10"
-dependencies = [
-    "httpx>=0.27",
-]
+dependencies = []
 
 [project.optional-dependencies]
 dev = [
