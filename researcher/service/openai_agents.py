@@ -235,11 +235,14 @@ def _native(method: str, url: str, headers: Mapping[str, str], body: bytes | Non
         connection.request(method, target.path + ("?" + target.query if target.query else ""), body, dict(headers))
         response = connection.getresponse()
         pairs = response.getheaders()
-        for name in ("content-type", "content-length", "content-encoding", "transfer-encoding"):
+        framing_headers = {"content-type", "content-length", "content-encoding", "transfer-encoding"}
+        for name in framing_headers:
             if sum(key.lower() == name for key, _ in pairs) > 1:
                 _fail("MALFORMED_TRANSPORT")
+        # Uninterpreted list-valued headers may repeat; retain only framing.
+        response_headers = {key: value for key, value in pairs if key.lower() in framing_headers}
         if response.status not in (200, 201, 202, 204):
-            return response.status, dict(pairs), b""
+            return response.status, response_headers, b""
         chunks, size = [], 0
         while size <= MAX_BYTES:
             remaining = deadline - time.monotonic()
@@ -254,7 +257,7 @@ def _native(method: str, url: str, headers: Mapping[str, str], body: bytes | Non
             size += len(chunk)
         if size > MAX_BYTES:
             _fail("RESPONSE_TOO_LARGE")
-        return response.status, dict(pairs), b"".join(chunks)
+        return response.status, response_headers, b"".join(chunks)
     finally:
         connection.close()
 
@@ -337,7 +340,10 @@ class AgentsClient:
                 _fail("AUTH_ERROR")
             if status == 429:
                 _fail("RATE_OR_SPEND_LIMIT")
-            if status not in ((200, 202, 204) if operation_key is not None else (200,)):
+            success_statuses = (200, 202, 204) if operation_key is not None else (200,)
+            if method == "POST" and path == "" and operation_key is None:
+                success_statuses = (200, 201)
+            if status not in success_statuses:
                 _fail("HTTP_ERROR")
             if normalized.get("content-encoding", "identity").lower() != "identity":
                 _fail("UNEXPECTED_ENCODING")
