@@ -167,6 +167,16 @@ change the tested executable files. Hosted checks on the published PR head remai
 separate evidence. The benchmark catalog check is three checks over seven entries,
 not seven executed research scenarios or a model-quality result.
 
+The first hosted transport-conformance job failed during module import, before
+executing transport cases: its older workflow installed no dependencies, while
+the integrated tracing layer imports the existing JSON Schema contract. Python
+3.12 reported missing `jsonschema`; the 3.11 matrix leg was cancelled. The
+append-only CI repair installs the existing hash-locked requirements and checks
+their consistency, without changing package versions or runtime behavior. Two
+workflow regressions cover installation order and dependency-change triggers.
+This hosted failure is distinct from the passing local suites above; the repaired
+hosted result must be observed on the new head before claiming hosted success.
+
 The first full service pass exposed outdated single-request telemetry mocks and a
 generic stop mock. Their replacements assert Event-before-OTLP order, known root
 IDs and a real stop event. The first scripts invocation used a temporary wrapper
@@ -189,14 +199,15 @@ Only Muratcan-authored project PRs are in this release. The existing chain is:
 ```text
 main -> #121 -> #122 -> #123 -> #124 -> #125 -> #126 -> #127 -> #128
      -> #129 -> #130 -> #131 -> #134 -> #135 -> #136 -> #137 -> #138
-     -> #132 -> dependency-closed SDK/service follow-on
+     -> #132 -> #139
 ```
 
-The follow-on is prepared from the exact #132 tip, retaining published files absent
-from the older integration worktree. It does not rewrite the 17 existing heads.
-Generated inventory is reconciled on the combined tree. Review the stack from
-bottom to top and run Cursor Bugbot on the new follow-on; no Bugbot run, merge or
-cloud deployment is authorized by this report.
+The SDK/service follow-on is published as draft [#139](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/pull/139)
+above the exact #132 tip, retaining published files absent from the older integration
+worktree. It does not rewrite the 17 existing heads. Generated inventory is
+reconciled on the combined tree. Review the stack from bottom to top and run
+Cursor Bugbot on #139; no Bugbot run, merge or cloud deployment is authorized by
+this report. Draft publication is not production activation.
 
 The deployment target is the repository's persistent Linux coordinator profile,
 using API credentials and the pinned SDK independently of Codex desktop. GitHub

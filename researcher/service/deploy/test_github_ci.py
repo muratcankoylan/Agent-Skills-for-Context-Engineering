@@ -167,5 +167,40 @@ class GithubLifecycleWorkflowTests(unittest.TestCase):
         self.assertEqual((values, calls), ({}, []))
 
 
+class AgentsTransportWorkflowTests(unittest.TestCase):
+    def setUp(self):
+        self.workflow = yaml.load(
+            (ROOT / ".github/workflows/agents-api.yml").read_text(), Loader=yaml.BaseLoader)
+        self.job = self.workflow["jobs"]["offline-contracts"]
+
+    def test_transport_import_closure_is_installed_before_contract_execution(self):
+        steps = self.job["steps"]
+        commands = [(index, step.get("run", "")) for index, step in enumerate(steps)]
+        installations = [(index, command) for index, command in commands
+                         if "pip install" in command]
+        self.assertEqual(len(installations), 1)
+        index, install = installations[0]
+        self.assertEqual(install.splitlines(), [
+            "python -m pip install --require-hashes --only-binary=:all: -r requirements-dev.txt",
+            "python -m pip check",
+        ])
+        tests = [(index, command) for index, command in commands if "test_openai_agents.py" in command]
+        self.assertEqual(len(tests), 1)
+        self.assertLess(index, tests[0][0])
+        self.assertEqual(tests[0][1],
+            "python -m unittest discover -s researcher/service/tests -p test_openai_agents.py -v")
+        self.assertEqual(self.job["strategy"]["matrix"]["python"], ["3.11", "3.12"])
+        self.assertNotIn("stdlib-only", " ".join(step.get("name", "") for step in steps))
+        self.assertEqual(self.workflow["permissions"], {"contents": "read"})
+        self.assertEqual(steps[0]["with"]["persist-credentials"], "false")
+
+    def test_dependency_and_shared_schema_changes_trigger_both_transport_gates(self):
+        for event in ("pull_request", "push"):
+            with self.subTest(event=event):
+                self.assertTrue({"requirements-dev.in", "requirements-dev.txt",
+                    "researcher/scripts/schema_contract.py", "researcher/service/**",
+                    ".github/workflows/agents-api.yml"}.issubset(self.workflow["on"][event]["paths"]))
+
+
 if __name__ == "__main__":
     unittest.main()

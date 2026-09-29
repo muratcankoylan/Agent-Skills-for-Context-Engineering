@@ -4,10 +4,12 @@ This is the first independently reviewable implementation slice for the
 OpenAI Agents API migration. It is not a complete research service, a Codex
 desktop automation, an SDK wrapper, or production activation.
 
-The stdlib-only adapter exposes `AgentsClient.create`, `retrieve`, `turns`,
+The adapter uses the Python standard library for HTTP and exposes `AgentsClient.create`, `retrieve`, `turns`,
 `items`, and `cancel`. The caller must provide the credential explicitly and
 own authorization, durable submission intent, spending controls, observation,
 and remote reconciliation. Importing this module performs no network calls.
+Its integrated tracing/schema imports require the existing hash-locked
+`requirements-dev.txt` dependency closure; the complete module is not stdlib-only.
 
 The fixed endpoint is `https://api.openai.com/v1/agents/sessions`; the beta header
 is `OpenAI-Beta: agents=v1`. Each call makes at most one HTTP request. Redirects,
