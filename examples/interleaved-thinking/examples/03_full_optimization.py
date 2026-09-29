@@ -24,6 +24,7 @@ from reasoning_trace_optimizer import (
     LoopConfig,
     SkillGenerator,
 )
+from reasoning_trace_optimizer.calculator import CalculatorError, evaluate_expression
 
 # Load environment variables from the project root
 env_path = Path(__file__).parent.parent / ".env"
@@ -147,13 +148,13 @@ TOOLS = [
     # Calculator Tool
     {
         "name": "calculator",
-        "description": "Perform mathematical calculations. Supports basic arithmetic and common functions.",
+        "description": "Evaluate a bounded real-number expression. Supports +, -, *, /, //, %, **, unary signs, parentheses, sqrt, sin, cos, tan, log, log10, exp, pow, abs, round, pi, and e.",
         "input_schema": {
             "type": "object",
             "properties": {
                 "expression": {
                     "type": "string",
-                    "description": "Mathematical expression to evaluate (e.g., '2 + 2', 'sqrt(16)', '100 * 0.15')",
+                    "description": "Allowlisted mathematical expression (e.g., '2 + 2', 'sqrt(16)', '100 * 0.15'); Python objects, indexing, attributes, and arbitrary calls are rejected",
                 },
             },
             "required": ["expression"],
@@ -976,33 +977,17 @@ def execute_tool(name: str, input_data: dict) -> str:
     elif name == "calculator":
         expression = input_data.get("expression", "")
         try:
-            # Safe evaluation of mathematical expressions
-            import math
-            allowed_names = {
-                "sqrt": math.sqrt,
-                "sin": math.sin,
-                "cos": math.cos,
-                "tan": math.tan,
-                "log": math.log,
-                "log10": math.log10,
-                "exp": math.exp,
-                "pow": pow,
-                "abs": abs,
-                "round": round,
-                "pi": math.pi,
-                "e": math.e,
-            }
-            result = eval(expression, {"__builtins__": {}}, allowed_names)
+            result = evaluate_expression(expression)
             return json.dumps({
                 "expression": expression,
                 "result": result,
                 "status": "success",
             })
-        except Exception as e:
+        except CalculatorError as exc:
             return json.dumps({
                 "expression": expression,
                 "status": "error",
-                "error": str(e),
+                "error": str(exc),
             })
 
     return json.dumps({"error": f"Unknown tool: {name}"})
