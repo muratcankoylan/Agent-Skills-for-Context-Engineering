@@ -240,39 +240,337 @@
         }
       ]
     },
+    "architecture_decisions": {
+      "count": 10,
+      "lifecycle": [
+        "accepted",
+        "deprecated",
+        "proposed",
+        "superseded"
+      ],
+      "owner": "docs/decisions/",
+      "records": [
+        {
+          "date": "2026-08-10",
+          "digest": "sha256:2e945f5a92bb3d59597f1b2a2c5d0bf623151079f59533ae2685f5a08156fff0",
+          "id": "ADR-0001",
+          "path": "docs/decisions/0001-machine-testable-constitution.md",
+          "spec_scope": "SPEC-000",
+          "specifications": [
+            "SPEC-000"
+          ],
+          "status": "accepted",
+          "title": "Machine-testable, deny-by-default authority"
+        },
+        {
+          "date": "2026-08-10",
+          "digest": "sha256:63c60388530af01a72453eff95135916a8805a08c66897abde966d2f2e3bbb58",
+          "id": "ADR-0002",
+          "path": "docs/decisions/0002-derived-corpus-inventory.md",
+          "spec_scope": "SPEC-001",
+          "specifications": [
+            "SPEC-001"
+          ],
+          "status": "accepted",
+          "title": "Treat the corpus inventory as a checked derived view"
+        },
+        {
+          "date": "2026-08-10",
+          "digest": "sha256:6e65e2358f537c62e7eb4aed4cac56b5c2cb9d2ad22f666485f9aa0f07429b59",
+          "id": "ADR-0003",
+          "path": "docs/decisions/0003-allowlisted-public-projections.md",
+          "spec_scope": "SPEC-002",
+          "specifications": [
+            "SPEC-002"
+          ],
+          "status": "accepted",
+          "title": "Publish allowlisted projections, not redacted private records"
+        },
+        {
+          "date": "2026-08-10",
+          "digest": "sha256:0c3dce073f8dcaf3b0da9c9de03a6ec90403ddc52b1e9ea5557ffefbb57134a9",
+          "id": "ADR-0004",
+          "path": "docs/decisions/0004-runtime-neutral-artifact-contracts.md",
+          "spec_scope": "SPEC-003",
+          "specifications": [
+            "SPEC-003"
+          ],
+          "status": "accepted",
+          "title": "Make schemas, identity, and frozen bytes runtime-neutral"
+        },
+        {
+          "date": "2026-08-10",
+          "digest": "sha256:8d72698f0374d9f471c1f2aba5b4b6865f52fc79a680a3318f3012cce8047e1f",
+          "id": "ADR-0005",
+          "path": "docs/decisions/0005-canonical-specification-program.md",
+          "spec_scope": "SPEC-000 through SPEC-026",
+          "specifications": [
+            "SPEC-000",
+            "SPEC-001",
+            "SPEC-002",
+            "SPEC-003",
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-006",
+            "SPEC-007",
+            "SPEC-008",
+            "SPEC-009",
+            "SPEC-010",
+            "SPEC-011",
+            "SPEC-012",
+            "SPEC-013",
+            "SPEC-014",
+            "SPEC-015",
+            "SPEC-016",
+            "SPEC-017",
+            "SPEC-018",
+            "SPEC-019",
+            "SPEC-020",
+            "SPEC-021",
+            "SPEC-022",
+            "SPEC-023",
+            "SPEC-024",
+            "SPEC-025",
+            "SPEC-026"
+          ],
+          "status": "accepted",
+          "title": "Publish one machine-checked specification program"
+        },
+        {
+          "date": "2026-08-10",
+          "digest": "sha256:ab990f1f8a6f307015cb5fd8c421b610da05eab66603f244b9d6344f066d4c57",
+          "id": "ADR-0006",
+          "path": "docs/decisions/0006-validate-public-release-boundary.md",
+          "spec_scope": "SPEC-000, SPEC-002",
+          "specifications": [
+            "SPEC-000",
+            "SPEC-002"
+          ],
+          "status": "accepted",
+          "title": "Validate the complete public release boundary"
+        },
+        {
+          "date": "2026-08-15",
+          "digest": "sha256:c18b5ec24e8745bd5267bbce48e3510e3223dbeb48d9ac59bf2d0b8644338cc9",
+          "id": "ADR-0007",
+          "lifecycle_transition": "SPEC-003@1 -> amended -> SPEC-003@2",
+          "path": "docs/decisions/0007-amend-spec-003-classification-and-reference-invariants.md",
+          "spec_scope": "SPEC-003",
+          "specifications": [
+            "SPEC-003"
+          ],
+          "status": "accepted",
+          "title": "Amend SPEC-003 classification and reference invariants"
+        },
+        {
+          "date": "2026-08-15",
+          "digest": "sha256:7cd0c1bb5bcc706f684ff94c2cdf5f9f75bb2cf7780e478d566189d85b161e79",
+          "id": "ADR-0008",
+          "lifecycle_transition": "SPEC-000@1 -> amended -> SPEC-000@2",
+          "path": "docs/decisions/0008-amend-spec-000-for-a-closed-authority-vocabulary.md",
+          "spec_scope": "SPEC-000",
+          "specifications": [
+            "SPEC-000"
+          ],
+          "status": "accepted",
+          "title": "Amend SPEC-000 for a closed authority vocabulary"
+        },
+        {
+          "date": "2026-08-15",
+          "digest": "sha256:eb7ebbffb816d5ee9a55b6a7a9e122673ea41e832291d12e37a867f4c249f13f",
+          "id": "ADR-0009",
+          "lifecycle_transition": "SPEC-001@1 -> amended -> SPEC-001@2",
+          "path": "docs/decisions/0009-amend-spec-001-for-exact-repository-snapshot-identity.md",
+          "spec_scope": "SPEC-001",
+          "specifications": [
+            "SPEC-001"
+          ],
+          "status": "accepted",
+          "title": "Amend SPEC-001 for exact repository snapshot identity"
+        },
+        {
+          "date": "2026-08-15",
+          "digest": "sha256:9c74bc784683a57cfd0bbd38b3487e5fca0c4b0e01072ecc0de6c3a76e8c1e40",
+          "id": "ADR-0010",
+          "lifecycle_transition": "SPEC-002@1 -> amended -> SPEC-002@2",
+          "path": "docs/decisions/0010-amend-spec-002-for-authoritative-source-binding-and-bounded-public-projections.md",
+          "spec_scope": "SPEC-002",
+          "specifications": [
+            "SPEC-002"
+          ],
+          "status": "accepted",
+          "title": "Amend SPEC-002 for authoritative source binding and bounded public projections"
+        }
+      ]
+    },
+    "authority_contracts": {
+      "count": 1,
+      "owner": "SPEC-000",
+      "records": [
+        {
+          "binding_state": "dormant_unbound",
+          "digest": "sha256:b4143e94a4beee184af8a22bbadcfd366fe8d9b4efd690e9d8e9b94a5fac76d9",
+          "id": "authority-vocabulary-schema@2.0.0",
+          "kind": "AuthorityVocabularySchema",
+          "path": "governance/authority-vocabulary.schema.json",
+          "schema_id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/governance/authority-vocabulary.schema.json",
+          "version": "2.0.0"
+        }
+      ]
+    },
     "benchmark_runners": {
-      "count": 6,
+      "count": 26,
       "owner": "researcher/benchmarks/sdk-runner",
       "records": [
         {
-          "digest": "sha256:1569152d710eb397858ae501c0e3b95e2ebf07a6e1783e2e68ca487edebeb56a",
+          "digest": "sha256:362b5b34ac35c3c69020246e760b3ddcae1b66aee71097462d78b8a7ca1ced43",
+          "id": "README.md",
+          "path": "researcher/benchmarks/sdk-runner/README.md",
+          "size_bytes": 5395
+        },
+        {
+          "digest": "sha256:759bf12d0754177e7a4baec01cee4361864eb44aba2651c306b96fcbf2e0aac7",
+          "id": "methodology:PLAN.md",
+          "path": "researcher/benchmarks/PLAN.md",
+          "size_bytes": 24130
+        },
+        {
+          "digest": "sha256:c3790bea49d4701acb54ad41d5bccc2fed83dfe93ef425baec3949ee0e9bfe47",
+          "id": "methodology:effectiveness:README.md",
+          "path": "researcher/benchmarks/effectiveness/README.md",
+          "size_bytes": 4829
+        },
+        {
+          "digest": "sha256:ff46c45fd38c53381221c2f1abf49a4f77f1424eadfe8b5ae8a166894e5d0c95",
+          "id": "methodology:router:README.md",
+          "path": "researcher/benchmarks/router/README.md",
+          "size_bytes": 3512
+        },
+        {
+          "digest": "sha256:09ba1569584f4d7feced9f2fd28de8956bdbfe25262a410c15be24c3c7c3062d",
           "id": "package-lock.json",
           "path": "researcher/benchmarks/sdk-runner/package-lock.json",
-          "size_bytes": 60243
+          "size_bytes": 8435
         },
         {
-          "digest": "sha256:4849f4e325c6c6de51b35d698c2402556f2a0673757f676d252536ed8388b553",
+          "digest": "sha256:81884c7989fb570a578a6aab7e8a1c872185e226f2fae6b5b9ebe55139f35d1f",
           "id": "package.json",
           "path": "researcher/benchmarks/sdk-runner/package.json",
-          "size_bytes": 831
+          "size_bytes": 1283
         },
         {
-          "digest": "sha256:44d472169cf8cc08a4da8c84bff3db907dc5a7f68a79848d931139c8a8750fb9",
+          "digest": "sha256:53a3c706867b139eca036d3242d309c21414d98e9306b8bb4f9310949eafbcb4",
           "id": "src:common.ts",
           "path": "researcher/benchmarks/sdk-runner/src/common.ts",
-          "size_bytes": 10638
+          "size_bytes": 9707
         },
         {
-          "digest": "sha256:d623d5a156a57d07bc1a91cfbe1fc4336f46ef413209395d2894fb3173a9b452",
+          "digest": "sha256:6c112b7d9420edd9bbd4e877679fe8d14ea126339315fc53cbbfcb8af0246638",
+          "id": "src:durableFs.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/durableFs.test.ts",
+          "size_bytes": 11478
+        },
+        {
+          "digest": "sha256:528e1d90acefb0539b7fe225df8f2b286d6e867a39bada20e59311e0d604de11",
+          "id": "src:durableFs.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/durableFs.ts",
+          "size_bytes": 17899
+        },
+        {
+          "digest": "sha256:10fe6fbf6be6fe748a4682de5bffc2976a1dfb87832f90aeb5ff9f33229f7586",
+          "id": "src:durableJson.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/durableJson.test.ts",
+          "size_bytes": 4222
+        },
+        {
+          "digest": "sha256:479e4248f0a4b09cb867a8fd661631300734be04251b0597cc06b3091e61630d",
+          "id": "src:durableJson.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/durableJson.ts",
+          "size_bytes": 15977
+        },
+        {
+          "digest": "sha256:94dedb1e64c41451469f907bb5e7b2afafb79429f1f1b7ddbc2bb1b9489d4691",
+          "id": "src:liveBlock.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/liveBlock.test.ts",
+          "size_bytes": 3928
+        },
+        {
+          "digest": "sha256:837414afe22ab5e841f6a8b8d966f726976f4ee93de1b8bd8af3860d30630227",
+          "id": "src:routerEngine.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerEngine.test.ts",
+          "size_bytes": 25502
+        },
+        {
+          "digest": "sha256:adfd95350f28845adc12801ff71e25d88a250b1ce5d7c8a120ca591f81962240",
+          "id": "src:routerEngine.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerEngine.ts",
+          "size_bytes": 16140
+        },
+        {
+          "digest": "sha256:892a29bae296c860148866856a533369058aac4165009838d7e1ed1b0884b4b7",
+          "id": "src:routerManifest.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerManifest.test.ts",
+          "size_bytes": 21437
+        },
+        {
+          "digest": "sha256:e7a1dd0e3ea8445d0fc2f763beadde2ad2bfb7271e34e11ed2d1f205ca8aa3f7",
+          "id": "src:routerManifest.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerManifest.ts",
+          "size_bytes": 39876
+        },
+        {
+          "digest": "sha256:3071af5f3143a75916b800280a483417ea511312d1cb8c71e75694ad61ebb59f",
+          "id": "src:routerRunStore.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.test.ts",
+          "size_bytes": 30526
+        },
+        {
+          "digest": "sha256:d2cdb28dfa5629d4b614cfdd68b46af8ebd631a2e0b93a50e2ed678fa0914664",
+          "id": "src:routerRunStore.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.ts",
+          "size_bytes": 46985
+        },
+        {
+          "digest": "sha256:a0830792a32742d2c5fea11842055765e127139bc7b77b689fd82c5da2861da2",
           "id": "src:runEffectiveness.ts",
           "path": "researcher/benchmarks/sdk-runner/src/runEffectiveness.ts",
-          "size_bytes": 4368
+          "size_bytes": 7718
         },
         {
-          "digest": "sha256:ee40169ffccd9be901bb592a03d1eb9911ecb6e7e76ca06f13c5ff8d8baccc0e",
+          "digest": "sha256:467ae886890f2dba429948fb00ad8d8949fcfa4c9df0ca74106d47098bea3f86",
           "id": "src:runRouter.ts",
           "path": "researcher/benchmarks/sdk-runner/src/runRouter.ts",
-          "size_bytes": 12576
+          "size_bytes": 6754
+        },
+        {
+          "digest": "sha256:52dc6f351160ec324c16f899ef005affc60bc070a323304fcb6e85fc1f0ba1bc",
+          "id": "src:sdkImport.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/sdkImport.test.ts",
+          "size_bytes": 306
+        },
+        {
+          "digest": "sha256:f853d70bf00db0f46ca281c8924dafa9b42ff15707794f4712a06570e3d9cd18",
+          "id": "src:sourceFreeze.test.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/sourceFreeze.test.ts",
+          "size_bytes": 10569
+        },
+        {
+          "digest": "sha256:83e2423b1574447b9a55c699e5b372f8a1244539a736b3b68e4ab59956475bc7",
+          "id": "src:sourceFreeze.ts",
+          "path": "researcher/benchmarks/sdk-runner/src/sourceFreeze.ts",
+          "size_bytes": 20357
+        },
+        {
+          "digest": "sha256:3f80842b2e9fc1f06ddbf44b8e8f2a9bb1eca10db91db12c1966438a99774ee4",
+          "id": "test:denyCursorSdkLoader.mjs",
+          "path": "researcher/benchmarks/sdk-runner/test/denyCursorSdkLoader.mjs",
+          "size_bytes": 250
+        },
+        {
+          "digest": "sha256:17e1116ab6813d69dd22c986bf238e1c4bcd890cedef24b0f6de883cd593373b",
+          "id": "test:registerDenyCursorSdk.mjs",
+          "path": "researcher/benchmarks/sdk-runner/test/registerDenyCursorSdk.mjs",
+          "size_bytes": 97
         },
         {
           "digest": "sha256:1bf42fa8545bc307e5371c58ffd5a1ac818a07b31da7038cbdb3b95f072a5ab1",
@@ -282,8 +580,8 @@
         }
       ],
       "status": {
-        "effectiveness": "scaffold",
-        "router": "operational"
+        "effectiveness": "scaffold_dry_run_only",
+        "router": "dry_run_only"
       }
     },
     "claims": {
@@ -849,7 +1147,7 @@
           "path": "examples/book-sft-pipeline"
         },
         {
-          "digest": "sha256:4b8ceb390b738a3ba93dff0c98a1e7b41bf7b977a3f6b49f00ee0b5a9c711d48",
+          "digest": "sha256:a04e602b1a9d13b62bac37b78874e9a34b782c822e9b12e5e49d12996cdf90af",
           "id": "deliberative-writing-loop",
           "path": "examples/deliberative-writing-loop"
         },
@@ -864,7 +1162,7 @@
           "path": "examples/interleaved-thinking"
         },
         {
-          "digest": "sha256:518fa7b815ecb40b05bb4240086ba9d388d7899b3d0ba24babe55b2af4e6dad1",
+          "digest": "sha256:12aa11315b5310762c90faef09f34c80f1099205978c36476b622c4e5de76e70",
           "id": "llm-as-judge-skills",
           "path": "examples/llm-as-judge-skills"
         },
@@ -1399,6 +1697,77 @@
           "line": 6,
           "owning_skill": "bdi-mental-states",
           "status": "accepted"
+        }
+      ]
+    },
+    "orchestration_briefs": {
+      "activation_ceiling": "supervised_proposal",
+      "attempt_manifest_instance_classification": "private",
+      "attempt_separation": "builder_and_verifier_distinct",
+      "authority": "none",
+      "checkpoint_contract": "SPEC-005 CheckpointEnvelope with SPEC-012 ContextCheckpointPayload",
+      "closed_prompt_namespace": true,
+      "count": 7,
+      "enforcement_boundary": "external_harness",
+      "model_visible_launch": "allowlisted_new_identity_projection_only",
+      "owner": "SPEC-005, SPEC-012, SPEC-013, and SPEC-014 bootstrap proposal",
+      "public_projection": "allowlisted_new_identity_projection_only",
+      "records": [
+        {
+          "digest": "sha256:9d903133d4523f42aebdaacad1d825b4e364d608102bc68af2245637db632746",
+          "id": "docs/reviews/2026-08-15-autonomous-organization-readiness.md",
+          "path": "docs/reviews/2026-08-15-autonomous-organization-readiness.md",
+          "role": "readiness_review",
+          "size_bytes": 20265,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:96f5aac54e9ea3e56fd5af9a977f1467ab6232dcdb5b99b0b029083f29bdfd23",
+          "id": "researcher/orchestration/prompts/README.md",
+          "path": "researcher/orchestration/prompts/README.md",
+          "role": "bundle_contract",
+          "size_bytes": 8899,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:6e29b41a41f9e89f1e7ba252a701aaaf89a256cb6d40dd3990614daa5c830ca5",
+          "id": "researcher/orchestration/prompts/attempt-manifest.template.md",
+          "path": "researcher/orchestration/prompts/attempt-manifest.template.md",
+          "role": "attempt_manifest_template",
+          "size_bytes": 27477,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:e588339b7293a0e7d22f3bd49f045c6dee83be312f8d3ba6b2f2cf31c96414e7",
+          "id": "researcher/orchestration/prompts/fresh-verifier-brief.md",
+          "path": "researcher/orchestration/prompts/fresh-verifier-brief.md",
+          "role": "verifier_brief",
+          "size_bytes": 18269,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:2e632078b9eb43f5794075952eb6669f178b2255c8ac82b6304a6d68419a5bad",
+          "id": "researcher/orchestration/prompts/organization-root-brief.md",
+          "path": "researcher/orchestration/prompts/organization-root-brief.md",
+          "role": "root_brief",
+          "size_bytes": 24997,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:8b774f0d34cf4aa0ae36854d6bb9cb97781a3a8430d741dc4f13378c930d05af",
+          "id": "researcher/orchestration/prompts/resume-brief.template.md",
+          "path": "researcher/orchestration/prompts/resume-brief.template.md",
+          "role": "resume_template",
+          "size_bytes": 15674,
+          "status": "bootstrap_proposal"
+        },
+        {
+          "digest": "sha256:150e6c0c2260170a3b731fc438adb9bc537b8c2658545e2ee9a528c71fcfd3dc",
+          "id": "researcher/orchestration/prompts/spec-work-brief.template.md",
+          "path": "researcher/orchestration/prompts/spec-work-brief.template.md",
+          "role": "work_brief_template",
+          "size_bytes": 18802,
+          "status": "bootstrap_proposal"
         }
       ]
     },
@@ -2075,30 +2444,702 @@
         }
       ]
     },
+    "specifications": {
+      "count": 27,
+      "lifecycle": [
+        "accepted",
+        "amended",
+        "architecture_reviewed",
+        "draft",
+        "implemented",
+        "operational",
+        "retired",
+        "superseded",
+        "verified"
+      ],
+      "owner": "docs/specs/",
+      "records": [
+        {
+          "adoption_decision": "ADR-0005",
+          "classification": "public",
+          "dependencies": [],
+          "dependency_revisions": "none",
+          "digest": "sha256:80fd43dd017a100a23c758e7ae6a22e9b266a19ba3c39573545eddffcb80f784",
+          "id": "SPEC-000",
+          "lifecycle_decision": "ADR-0008",
+          "owners": [
+            "human maintainer",
+            "governance agent"
+          ],
+          "path": "docs/specs/SPEC-000-program-constitution.md",
+          "replacement": "SPEC-000@2",
+          "revises": "none",
+          "revision": 1,
+          "status": "amended",
+          "title": "Program constitution and authority model",
+          "wave": 0
+        },
+        {
+          "adoption_decision": "ADR-0005",
+          "classification": "public",
+          "dependencies": [
+            "SPEC-000"
+          ],
+          "dependency_revisions": "SPEC-000@1",
+          "digest": "sha256:cd27da25b87b3e8ee6e03a1febe0be4a3fd9688972fbb8edc02161518090320f",
+          "id": "SPEC-001",
+          "lifecycle_decision": "ADR-0009",
+          "owners": [
+            "corpus steward agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-001-repository-reconciliation.md",
+          "replacement": "SPEC-001@2",
+          "revises": "none",
+          "revision": 1,
+          "status": "amended",
+          "title": "Repository reconciliation and generated corpus inventory",
+          "wave": 0
+        },
+        {
+          "adoption_decision": "ADR-0005",
+          "classification": "split",
+          "dependencies": [
+            "SPEC-000"
+          ],
+          "dependency_revisions": "SPEC-000@1",
+          "digest": "sha256:b7c716de275b706b919c55e3b51901c8a928056a263a456cafb1b44547e50828",
+          "id": "SPEC-002",
+          "lifecycle_decision": "ADR-0010",
+          "owners": [
+            "human maintainer",
+            "export steward agent"
+          ],
+          "path": "docs/specs/SPEC-002-public-private-boundary.md",
+          "replacement": "SPEC-002@2",
+          "revises": "none",
+          "revision": 1,
+          "status": "amended",
+          "title": "Public and private boundary",
+          "wave": 0
+        },
+        {
+          "adoption_decision": "ADR-0005",
+          "classification": "split",
+          "dependencies": [
+            "SPEC-001",
+            "SPEC-002"
+          ],
+          "dependency_revisions": "SPEC-001@1, SPEC-002@1",
+          "digest": "sha256:8850f070fcf92d644da30d606cb2f11eb63ed7e9ae2c22b73aab5a185ba01f7f",
+          "id": "SPEC-003",
+          "lifecycle_decision": "ADR-0007",
+          "owners": [
+            "platform steward agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-003-schema-registry.md",
+          "replacement": "SPEC-003@2",
+          "revises": "none",
+          "revision": 1,
+          "status": "amended",
+          "title": "Schema registry and artifact identity",
+          "wave": 0
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-000",
+            "SPEC-001",
+            "SPEC-002",
+            "SPEC-003"
+          ],
+          "digest": "sha256:d5c4f86026b617ed94d79b702d3f88cf6c0f53da316677156dd5deda6009eac5",
+          "id": "SPEC-004",
+          "owners": [
+            "orchestration steward agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-004-event-journal.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Event Journal and State Projections",
+          "wave": 1
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-000",
+            "SPEC-003",
+            "SPEC-004"
+          ],
+          "digest": "sha256:1f4011039a622d208efc8c53e01bfbabddb5e196de5a9ad21adf77e4312a7604",
+          "id": "SPEC-005",
+          "owners": [
+            "orchestration steward agent",
+            "runtime operator"
+          ],
+          "path": "docs/specs/SPEC-005-work-orders.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Work Orders, Scheduling, Leases, and Recovery",
+          "wave": 1
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-000",
+            "SPEC-002",
+            "SPEC-003",
+            "SPEC-004",
+            "SPEC-005"
+          ],
+          "digest": "sha256:1e078f3508538e6754e2908be902e98f1eebb6a5d1c0682f900bb4491a989340",
+          "id": "SPEC-006",
+          "owners": [
+            "governance agent",
+            "orchestration steward agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-006-command-feedback.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Command Bus and Human Feedback Ledger",
+          "wave": 1
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-000",
+            "SPEC-002",
+            "SPEC-003",
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-006"
+          ],
+          "digest": "sha256:1c0b5ddd8d5cadf50317e6b78e80c5b2e76ceb2bc579082cb1405e00c2c4a324",
+          "id": "SPEC-007",
+          "owners": [
+            "release steward agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-007-github-pr-lifecycle.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "GitHub App and Pull-Request Lifecycle",
+          "wave": 1
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-000",
+            "SPEC-002",
+            "SPEC-003",
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-006",
+            "SPEC-007"
+          ],
+          "digest": "sha256:a3a3effb912c1752d655411b11dddbae084c7b183cd3cb6ad9d0265c29fa4883",
+          "id": "SPEC-008",
+          "owners": [
+            "operations steward agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-008-status-observability.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Status, Observability, and Cost Accounting",
+          "wave": 1
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-003",
+            "SPEC-005",
+            "SPEC-008"
+          ],
+          "digest": "sha256:85273030026e204db41ea84bdc914e204e343d8e4a5521ebe6bb260ec0bad01b",
+          "id": "SPEC-009",
+          "owners": [
+            "research director agent",
+            "source steward agent"
+          ],
+          "path": "docs/specs/SPEC-009-source-registry.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Source Registry and Feed Policy",
+          "wave": 2
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-003",
+            "SPEC-005",
+            "SPEC-009"
+          ],
+          "digest": "sha256:348be779dcf0a9b9c9f18bbe34cca096e3ea04a797c353ee5b660a6e17f87c27",
+          "id": "SPEC-010",
+          "owners": [
+            "retrieval agent",
+            "evidence steward agent"
+          ],
+          "path": "docs/specs/SPEC-010-retrieval-evidence.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Retrieval and Immutable Evidence Capture",
+          "wave": 2
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-002",
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-006",
+            "SPEC-007",
+            "SPEC-010"
+          ],
+          "digest": "sha256:47d81911a0286a80419b4e912fc6beba324658af1ee72055e499d076d5218f04",
+          "id": "SPEC-011",
+          "owners": [
+            "evidence steward agent",
+            "mechanism curator agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-011-evidence-graph.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Evidence Graph, Claims, Mechanisms, and Decisions",
+          "wave": 2
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-003",
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-006",
+            "SPEC-008",
+            "SPEC-010",
+            "SPEC-011"
+          ],
+          "digest": "sha256:dcb6fb77fcd394e029668582a3fa68710b8b97195ce8bc87f24577767374b9fa",
+          "id": "SPEC-012",
+          "owners": [
+            "context engineer agent",
+            "evaluation steward agent"
+          ],
+          "path": "docs/specs/SPEC-012-context-compiler.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Context Compiler and Memory Planes",
+          "wave": 2
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-000",
+            "SPEC-005",
+            "SPEC-006",
+            "SPEC-012"
+          ],
+          "digest": "sha256:ccd5ae26e92a021bce0873ad0d3def4782779f5f38f5476571bd212ba730dd78",
+          "id": "SPEC-013",
+          "owners": [
+            "organization designer agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-013-agent-role-contracts.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Agent Roles, Prompts, Skills, and Capability Contracts",
+          "wave": 2
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-003",
+            "SPEC-005",
+            "SPEC-006",
+            "SPEC-008",
+            "SPEC-012",
+            "SPEC-013"
+          ],
+          "digest": "sha256:6c07224ebb831ba8ecc671047512b184c167069b328a85bf4466b4e08c5881f3",
+          "id": "SPEC-014",
+          "owners": [
+            "runtime integration agent",
+            "operations steward agent"
+          ],
+          "path": "docs/specs/SPEC-014-runtime-hermes.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Execution Environment, Executor Protocol, and Hermes Integration",
+          "wave": 2
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-002",
+            "SPEC-003",
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-006",
+            "SPEC-007",
+            "SPEC-008",
+            "SPEC-011",
+            "SPEC-013",
+            "SPEC-014"
+          ],
+          "digest": "sha256:2a99c17c429ec0fa9fed2fde5a07001f319457354c46f113104a7a76805e861d",
+          "id": "SPEC-015",
+          "owners": [
+            "community editor agent",
+            "operations steward agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-015-notifications-content.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Notification Outbox, Review Packets, and Content Drafts",
+          "wave": 2
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-006",
+            "SPEC-011",
+            "SPEC-012",
+            "SPEC-013"
+          ],
+          "digest": "sha256:4f73875e4bbda8483264e8d410b7e5fd1b76be8365587864384178f0fcbca362",
+          "id": "SPEC-016",
+          "owners": [
+            "evaluation designer agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-016-evaluation-registry.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Evaluation Registry, Rubric Epochs, and Fixtures",
+          "wave": 3
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-003",
+            "SPEC-005",
+            "SPEC-008",
+            "SPEC-013",
+            "SPEC-014",
+            "SPEC-016"
+          ],
+          "digest": "sha256:a07e59487db50d1e6846abebc46bbb80d24613a451c5c92357c406fe5d92870c",
+          "id": "SPEC-017",
+          "owners": [
+            "evaluation runner agent",
+            "independent evaluator agent"
+          ],
+          "path": "docs/specs/SPEC-017-evaluation-runner.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Multi-Model Evaluation Runner and Statistical Gates",
+          "wave": 3
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-003",
+            "SPEC-012",
+            "SPEC-016",
+            "SPEC-017"
+          ],
+          "digest": "sha256:eeed13e853bd89f298d7832604cfcb46339e89596c41fa5606d4be397b20ae34",
+          "id": "SPEC-018",
+          "owners": [
+            "meta-harness archivist agent",
+            "evaluation steward agent"
+          ],
+          "path": "docs/specs/SPEC-018-candidate-archive.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Candidate Archive, Failure Memory, and Lineage",
+          "wave": 3
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-006",
+            "SPEC-007",
+            "SPEC-008",
+            "SPEC-016",
+            "SPEC-017",
+            "SPEC-018"
+          ],
+          "digest": "sha256:dfad1c0da659a59ea2c1f3724f4ff67410bbe328f4b4985f37f6bc6a8faaa81d",
+          "id": "SPEC-019",
+          "owners": [
+            "release attestor agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-019-promotion-release.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Pull-Request Quality Gate, Promotion, and Release",
+          "wave": 3
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-005",
+            "SPEC-008",
+            "SPEC-014",
+            "SPEC-016",
+            "SPEC-017",
+            "SPEC-018",
+            "SPEC-019"
+          ],
+          "digest": "sha256:e4acac8ebaeb2f53330b6448499dabcf79470a9701417705c01c554c53ea00cb",
+          "id": "SPEC-020",
+          "owners": [
+            "meta-harness scientist agent",
+            "independent evaluator agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-020-meta-harness-lab.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Meta-Harness Experiment Laboratory",
+          "wave": 4
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-008",
+            "SPEC-012",
+            "SPEC-016",
+            "SPEC-017",
+            "SPEC-019",
+            "SPEC-020"
+          ],
+          "digest": "sha256:1302081b6e12779338c8afc2552e39748be65049549e8fa8c498eb827b29c8ef",
+          "id": "SPEC-021",
+          "owners": [
+            "harness routing scientist agent",
+            "evaluation designer agent"
+          ],
+          "path": "docs/specs/SPEC-021-adaptive-routing.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Adaptive Harness Routing and Cross-Model Transfer",
+          "wave": 4
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-002",
+            "SPEC-005",
+            "SPEC-006",
+            "SPEC-014",
+            "SPEC-016",
+            "SPEC-018",
+            "SPEC-019",
+            "SPEC-021"
+          ],
+          "digest": "sha256:e6f79962e2151f6b63519529835215cfbda4c2cc7b856338eb9390f8f2cf381e",
+          "id": "SPEC-022",
+          "owners": [
+            "community research steward agent",
+            "independent evaluator agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-022-collaborative-evolution.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Collaborative Evolution and Community Contribution Packets",
+          "wave": 4
+        },
+        {
+          "classification": "public",
+          "dependencies": [
+            "SPEC-006",
+            "SPEC-007",
+            "SPEC-015",
+            "SPEC-019",
+            "SPEC-022"
+          ],
+          "digest": "sha256:9a626734ed92110f041b923bd98326b765ff96106e661bbaa2b715c10659dc7c",
+          "id": "SPEC-023",
+          "owners": [
+            "human maintainer",
+            "community steward agent"
+          ],
+          "path": "docs/specs/SPEC-023-open-source-governance.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Open-Source Governance and Project Growth",
+          "wave": 5
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-002",
+            "SPEC-003",
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-006",
+            "SPEC-007",
+            "SPEC-008",
+            "SPEC-009",
+            "SPEC-014",
+            "SPEC-015",
+            "SPEC-016",
+            "SPEC-017",
+            "SPEC-019"
+          ],
+          "digest": "sha256:08e7dc98718913c7318821cb233bcff71ff689c2c475d92fd73232f535188094",
+          "id": "SPEC-024",
+          "owners": [
+            "human maintainer",
+            "operations steward agent"
+          ],
+          "path": "docs/specs/SPEC-024-private-control-plane.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Private Control Plane, Identities, and Key Management",
+          "wave": 5
+        },
+        {
+          "classification": "split",
+          "dependencies": [
+            "SPEC-004",
+            "SPEC-005",
+            "SPEC-008",
+            "SPEC-014",
+            "SPEC-015",
+            "SPEC-019",
+            "SPEC-024"
+          ],
+          "digest": "sha256:a46fd281d53bf3f8aba6ea0c421052b298fb63bb050630c7c78e4f5a9cf4715f",
+          "id": "SPEC-025",
+          "owners": [
+            "operations steward agent",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-025-deployment-durable-workflows.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Deployment, Recovery, and Durable Workflow Migration",
+          "wave": 5
+        },
+        {
+          "activation": "deferred",
+          "classification": "split",
+          "dependencies": [
+            "SPEC-016",
+            "SPEC-017",
+            "SPEC-018",
+            "SPEC-019",
+            "SPEC-020",
+            "SPEC-022",
+            "SPEC-025"
+          ],
+          "digest": "sha256:de3b88eaf66b7a08acabcc38cfe05cead66f4954a6428a4ed4f23a6bcb835014",
+          "id": "SPEC-026",
+          "owners": [
+            "training research lead",
+            "independent evaluator",
+            "human maintainer"
+          ],
+          "path": "docs/specs/SPEC-026-training-rl-lab.md",
+          "revises": "none",
+          "revision": 1,
+          "status": "draft",
+          "title": "Future Training and Reinforcement-Learning Laboratory",
+          "wave": 6
+        }
+      ]
+    },
     "validators": {
-      "count": 9,
+      "count": 14,
       "owner": "declared validator ownership",
       "records": [
         {
-          "digest": "sha256:7f189e876bc7cba64683a187d1f4f0699864602802cb73cccb30084eaa5d8c08",
+          "digest": "sha256:b59e33e0f5772cb38ece82824082ab98d268c0a1677d0ae1ec8ee79bb38c51d8",
           "id": "governance-policy",
           "owns": [
-            "authority vocabulary",
             "constitutional invariants",
-            "generated authority view"
+            "generated authority view",
+            "authority conformance orchestration"
           ],
           "path": "researcher/scripts/validate_governance.py"
         },
         {
-          "digest": "sha256:5ea42cd39cf030d35c44075e76b1be615bd1c6b717e67ff3a7e161e518876388",
+          "digest": "sha256:b406c35c4304bc3789bf0eb1f93a94269b7f583ba7b5bfd1a45d83db33975245",
+          "id": "authority-policy-evaluator",
+          "owns": [
+            "Constitution decision evaluation",
+            "fail-closed policy rule matching"
+          ],
+          "path": "researcher/scripts/governance_policy.py"
+        },
+        {
+          "digest": "sha256:e61a84800e4bfe35ebf155ca3add3c05e25315249dde0a9e5921d037bd8bbf9b",
+          "id": "authority-catalog-contract",
+          "owns": [
+            "standalone authority schema, registry, fixture, and semantic profile validation",
+            "structural authority-policy closure",
+            "authority evaluator-bundle identity",
+            "authority conformance receipt validation"
+          ],
+          "path": "researcher/scripts/validate_authority_contract.py"
+        },
+        {
+          "digest": "sha256:e85e62d1ab1e7730ffbc9c909e1fffb96f41dd99442958d27fc95a7c2386ff18",
           "id": "repository-inventory",
           "owns": [
             "identifier uniqueness",
             "cross-artifact references",
+            "specification graph",
+            "authority artifact parity and source binding",
             "live counts",
             "generated inventory"
           ],
           "path": "researcher/scripts/build_inventory.py"
+        },
+        {
+          "digest": "sha256:78ad969d91af2fd56716d5b1a21d6665b490c3ac42ebc90e1e86a92033087c30",
+          "id": "specification-lifecycle",
+          "owns": [
+            "base-aware specification status transitions",
+            "accepted contract revision identity",
+            "promoted revision predecessor authority",
+            "terminal specification decisions"
+          ],
+          "path": "researcher/scripts/validate_spec_lifecycle.py"
         },
         {
           "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
@@ -2109,6 +3150,17 @@
             "staged export closure"
           ],
           "path": "researcher/scripts/validate_export.py"
+        },
+        {
+          "digest": "sha256:4eaea8d85f9723d65cc660e4487518f65c76eedde51584b3e9bbc6f038f08b0a",
+          "id": "public-repository-boundary",
+          "owns": [
+            "tracked local paths",
+            "private runtime roots",
+            "credential filenames",
+            "private-key material"
+          ],
+          "path": "researcher/scripts/validate_public_repo.py"
         },
         {
           "digest": "sha256:ba09b1c3ff4ad79de01c5d2bb308edbdc9658ba07114d1e3e0165b0bddb0e65a",
@@ -2166,15 +3218,48 @@
             "adversarial scenario execution"
           ],
           "path": "researcher/scripts/run_benchmarks.py"
+        },
+        {
+          "digest": "sha256:49bfaa485f5c06d14b57790f3442cb2889e7812e675178be087665d02b1c58ca",
+          "id": "router-report",
+          "owns": [
+            "router outcome taxonomy",
+            "accuracy denominators",
+            "deterministic confidence intervals",
+            "published router report rendering"
+          ],
+          "path": "researcher/scripts/render_router_report.py"
+        }
+      ],
+      "support_files": [
+        {
+          "digest": "sha256:c8d5bd5d897afac94f843740a49632410aa4994f0777d1f8956f26853afe81d4",
+          "path": ".github/workflows/validate.yml",
+          "size_bytes": 10055
+        },
+        {
+          "digest": "sha256:fa38b9156fba7c5204e93923875cf1997dfb85b1ded2ebd3e96014d96e0dd78f",
+          "path": "requirements-dev.in",
+          "size_bytes": 244
+        },
+        {
+          "digest": "sha256:d8396edce3a7f1ef78a7580f65b920fc23ffe5298cfd46d021a0be7242af2d12",
+          "path": "requirements-dev.txt",
+          "size_bytes": 18625
+        },
+        {
+          "digest": "sha256:cc1949045f4ce5de6fab3425c2d351a48221936b104024e1baba5cc75b0cac77",
+          "path": "researcher/scripts/tests/test_render_router_report.py",
+          "size_bytes": 13885
         }
       ]
     }
   },
   "compatibility": {
     "benchmark_runner": {
-      "effectiveness": "scaffold",
+      "effectiveness": "scaffold_dry_run_only",
       "paid_results": "runtime_or_published_only",
-      "router": "operational"
+      "router": "dry_run_only"
     },
     "historical_reports_are_snapshots": true,
     "manifest_skill_sets": {
@@ -2557,17 +3642,22 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:9c30d9a443a23bfcbb75c7234516bcf6064e57a670beb36a976b5d416e86e9b3",
+    "digest": "sha256:6638c934a3f03f6ac2e33efd49c8d7bfabc5248d96e82feb89ebc7d8006a6236",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:9c30d9a443a23bfcbb75c7234516bcf6064e57a670beb36a976b5d416e86e9b3",
+  "source_tree_digest": "sha256:6638c934a3f03f6ac2e33efd49c8d7bfabc5248d96e82feb89ebc7d8006a6236",
   "sources": [
     {
       "digest": "sha256:2aebace36e5bbdd8ad93bc9c7563a0c673787838eb0f4f62a5376132d43ce616",
       "path": ".claude-plugin/marketplace.json",
       "size_bytes": 1911
+    },
+    {
+      "digest": "sha256:c8d5bd5d897afac94f843740a49632410aa4994f0777d1f8956f26853afe81d4",
+      "path": ".github/workflows/validate.yml",
+      "size_bytes": 10055
     },
     {
       "digest": "sha256:d4827b154512a79ca4635f716d9d0a7d93f3c0b0f29355f67de9e004d968dc9c",
@@ -2580,14 +3670,219 @@
       "size_bytes": 10436
     },
     {
+      "digest": "sha256:2e945f5a92bb3d59597f1b2a2c5d0bf623151079f59533ae2685f5a08156fff0",
+      "path": "docs/decisions/0001-machine-testable-constitution.md",
+      "size_bytes": 2582
+    },
+    {
+      "digest": "sha256:63c60388530af01a72453eff95135916a8805a08c66897abde966d2f2e3bbb58",
+      "path": "docs/decisions/0002-derived-corpus-inventory.md",
+      "size_bytes": 2901
+    },
+    {
+      "digest": "sha256:6e65e2358f537c62e7eb4aed4cac56b5c2cb9d2ad22f666485f9aa0f07429b59",
+      "path": "docs/decisions/0003-allowlisted-public-projections.md",
+      "size_bytes": 3302
+    },
+    {
+      "digest": "sha256:0c3dce073f8dcaf3b0da9c9de03a6ec90403ddc52b1e9ea5557ffefbb57134a9",
+      "path": "docs/decisions/0004-runtime-neutral-artifact-contracts.md",
+      "size_bytes": 5943
+    },
+    {
+      "digest": "sha256:8d72698f0374d9f471c1f2aba5b4b6865f52fc79a680a3318f3012cce8047e1f",
+      "path": "docs/decisions/0005-canonical-specification-program.md",
+      "size_bytes": 5104
+    },
+    {
+      "digest": "sha256:ab990f1f8a6f307015cb5fd8c421b610da05eab66603f244b9d6344f066d4c57",
+      "path": "docs/decisions/0006-validate-public-release-boundary.md",
+      "size_bytes": 3850
+    },
+    {
+      "digest": "sha256:c18b5ec24e8745bd5267bbce48e3510e3223dbeb48d9ac59bf2d0b8644338cc9",
+      "path": "docs/decisions/0007-amend-spec-003-classification-and-reference-invariants.md",
+      "size_bytes": 4166
+    },
+    {
+      "digest": "sha256:7cd0c1bb5bcc706f684ff94c2cdf5f9f75bb2cf7780e478d566189d85b161e79",
+      "path": "docs/decisions/0008-amend-spec-000-for-a-closed-authority-vocabulary.md",
+      "size_bytes": 5065
+    },
+    {
+      "digest": "sha256:eb7ebbffb816d5ee9a55b6a7a9e122673ea41e832291d12e37a867f4c249f13f",
+      "path": "docs/decisions/0009-amend-spec-001-for-exact-repository-snapshot-identity.md",
+      "size_bytes": 4576
+    },
+    {
+      "digest": "sha256:9c74bc784683a57cfd0bbd38b3487e5fca0c4b0e01072ecc0de6c3a76e8c1e40",
+      "path": "docs/decisions/0010-amend-spec-002-for-authoritative-source-binding-and-bounded-public-projections.md",
+      "size_bytes": 6820
+    },
+    {
+      "digest": "sha256:7186ef5cbf663377c8ddde5f4a6746a6c9a493009f7fd57133327e1404da41d8",
+      "path": "docs/decisions/README.md",
+      "size_bytes": 2616
+    },
+    {
+      "digest": "sha256:9d903133d4523f42aebdaacad1d825b4e364d608102bc68af2245637db632746",
+      "path": "docs/reviews/2026-08-15-autonomous-organization-readiness.md",
+      "size_bytes": 20265
+    },
+    {
+      "digest": "sha256:9ad3e068d65f91bd7bd9811f069d67837723d43fb210529183b5d88c5a2c3f1d",
+      "path": "docs/specs/README.md",
+      "size_bytes": 38943
+    },
+    {
+      "digest": "sha256:80fd43dd017a100a23c758e7ae6a22e9b266a19ba3c39573545eddffcb80f784",
+      "path": "docs/specs/SPEC-000-program-constitution.md",
+      "size_bytes": 2852
+    },
+    {
+      "digest": "sha256:cd27da25b87b3e8ee6e03a1febe0be4a3fd9688972fbb8edc02161518090320f",
+      "path": "docs/specs/SPEC-001-repository-reconciliation.md",
+      "size_bytes": 3157
+    },
+    {
+      "digest": "sha256:b7c716de275b706b919c55e3b51901c8a928056a263a456cafb1b44547e50828",
+      "path": "docs/specs/SPEC-002-public-private-boundary.md",
+      "size_bytes": 3649
+    },
+    {
+      "digest": "sha256:8850f070fcf92d644da30d606cb2f11eb63ed7e9ae2c22b73aab5a185ba01f7f",
+      "path": "docs/specs/SPEC-003-schema-registry.md",
+      "size_bytes": 7238
+    },
+    {
+      "digest": "sha256:d5c4f86026b617ed94d79b702d3f88cf6c0f53da316677156dd5deda6009eac5",
+      "path": "docs/specs/SPEC-004-event-journal.md",
+      "size_bytes": 25291
+    },
+    {
+      "digest": "sha256:1f4011039a622d208efc8c53e01bfbabddb5e196de5a9ad21adf77e4312a7604",
+      "path": "docs/specs/SPEC-005-work-orders.md",
+      "size_bytes": 28637
+    },
+    {
+      "digest": "sha256:1e078f3508538e6754e2908be902e98f1eebb6a5d1c0682f900bb4491a989340",
+      "path": "docs/specs/SPEC-006-command-feedback.md",
+      "size_bytes": 17895
+    },
+    {
+      "digest": "sha256:1c0b5ddd8d5cadf50317e6b78e80c5b2e76ceb2bc579082cb1405e00c2c4a324",
+      "path": "docs/specs/SPEC-007-github-pr-lifecycle.md",
+      "size_bytes": 20100
+    },
+    {
+      "digest": "sha256:a3a3effb912c1752d655411b11dddbae084c7b183cd3cb6ad9d0265c29fa4883",
+      "path": "docs/specs/SPEC-008-status-observability.md",
+      "size_bytes": 19388
+    },
+    {
+      "digest": "sha256:85273030026e204db41ea84bdc914e204e343d8e4a5521ebe6bb260ec0bad01b",
+      "path": "docs/specs/SPEC-009-source-registry.md",
+      "size_bytes": 10873
+    },
+    {
+      "digest": "sha256:348be779dcf0a9b9c9f18bbe34cca096e3ea04a797c353ee5b660a6e17f87c27",
+      "path": "docs/specs/SPEC-010-retrieval-evidence.md",
+      "size_bytes": 12022
+    },
+    {
+      "digest": "sha256:47d81911a0286a80419b4e912fc6beba324658af1ee72055e499d076d5218f04",
+      "path": "docs/specs/SPEC-011-evidence-graph.md",
+      "size_bytes": 14699
+    },
+    {
+      "digest": "sha256:dcb6fb77fcd394e029668582a3fa68710b8b97195ce8bc87f24577767374b9fa",
+      "path": "docs/specs/SPEC-012-context-compiler.md",
+      "size_bytes": 19486
+    },
+    {
+      "digest": "sha256:ccd5ae26e92a021bce0873ad0d3def4782779f5f38f5476571bd212ba730dd78",
+      "path": "docs/specs/SPEC-013-agent-role-contracts.md",
+      "size_bytes": 12703
+    },
+    {
+      "digest": "sha256:6c07224ebb831ba8ecc671047512b184c167069b328a85bf4466b4e08c5881f3",
+      "path": "docs/specs/SPEC-014-runtime-hermes.md",
+      "size_bytes": 19358
+    },
+    {
+      "digest": "sha256:2a99c17c429ec0fa9fed2fde5a07001f319457354c46f113104a7a76805e861d",
+      "path": "docs/specs/SPEC-015-notifications-content.md",
+      "size_bytes": 19408
+    },
+    {
+      "digest": "sha256:4f73875e4bbda8483264e8d410b7e5fd1b76be8365587864384178f0fcbca362",
+      "path": "docs/specs/SPEC-016-evaluation-registry.md",
+      "size_bytes": 16720
+    },
+    {
+      "digest": "sha256:a07e59487db50d1e6846abebc46bbb80d24613a451c5c92357c406fe5d92870c",
+      "path": "docs/specs/SPEC-017-evaluation-runner.md",
+      "size_bytes": 9427
+    },
+    {
+      "digest": "sha256:eeed13e853bd89f298d7832604cfcb46339e89596c41fa5606d4be397b20ae34",
+      "path": "docs/specs/SPEC-018-candidate-archive.md",
+      "size_bytes": 9278
+    },
+    {
+      "digest": "sha256:dfad1c0da659a59ea2c1f3724f4ff67410bbe328f4b4985f37f6bc6a8faaa81d",
+      "path": "docs/specs/SPEC-019-promotion-release.md",
+      "size_bytes": 21367
+    },
+    {
+      "digest": "sha256:e4acac8ebaeb2f53330b6448499dabcf79470a9701417705c01c554c53ea00cb",
+      "path": "docs/specs/SPEC-020-meta-harness-lab.md",
+      "size_bytes": 11991
+    },
+    {
+      "digest": "sha256:1302081b6e12779338c8afc2552e39748be65049549e8fa8c498eb827b29c8ef",
+      "path": "docs/specs/SPEC-021-adaptive-routing.md",
+      "size_bytes": 10348
+    },
+    {
+      "digest": "sha256:e6f79962e2151f6b63519529835215cfbda4c2cc7b856338eb9390f8f2cf381e",
+      "path": "docs/specs/SPEC-022-collaborative-evolution.md",
+      "size_bytes": 9305
+    },
+    {
+      "digest": "sha256:9a626734ed92110f041b923bd98326b765ff96106e661bbaa2b715c10659dc7c",
+      "path": "docs/specs/SPEC-023-open-source-governance.md",
+      "size_bytes": 10229
+    },
+    {
+      "digest": "sha256:08e7dc98718913c7318821cb233bcff71ff689c2c475d92fd73232f535188094",
+      "path": "docs/specs/SPEC-024-private-control-plane.md",
+      "size_bytes": 15525
+    },
+    {
+      "digest": "sha256:a46fd281d53bf3f8aba6ea0c421052b298fb63bb050630c7c78e4f5a9cf4715f",
+      "path": "docs/specs/SPEC-025-deployment-durable-workflows.md",
+      "size_bytes": 22002
+    },
+    {
+      "digest": "sha256:de3b88eaf66b7a08acabcc38cfe05cead66f4954a6428a4ed4f23a6bcb835014",
+      "path": "docs/specs/SPEC-026-training-rl-lab.md",
+      "size_bytes": 14656
+    },
+    {
+      "digest": "sha256:17c792d8a9c27942233018b64069eb95b1346bf87da64d54fb3b62bc3389e384",
+      "path": "docs/specs/SPEC-TEMPLATE.md",
+      "size_bytes": 3721
+    },
+    {
       "digest": "sha256:e80dc5fe7391c3a5745c574814a1502d24ba9acea91fcbb5dc7ec7d38eb43545",
       "path": "examples/book-sft-pipeline/README.md",
       "size_bytes": 2795
     },
     {
-      "digest": "sha256:4b8ceb390b738a3ba93dff0c98a1e7b41bf7b977a3f6b49f00ee0b5a9c711d48",
+      "digest": "sha256:a04e602b1a9d13b62bac37b78874e9a34b782c822e9b12e5e49d12996cdf90af",
       "path": "examples/deliberative-writing-loop/README.md",
-      "size_bytes": 6801
+      "size_bytes": 7798
     },
     {
       "digest": "sha256:4ac5d0f82bfa76166bad86e703f4e84c3f50d5d9592d356d46db5a6aa2f19855",
@@ -2600,9 +3895,9 @@
       "size_bytes": 20169
     },
     {
-      "digest": "sha256:518fa7b815ecb40b05bb4240086ba9d388d7899b3d0ba24babe55b2af4e6dad1",
+      "digest": "sha256:12aa11315b5310762c90faef09f34c80f1099205978c36476b622c4e5de76e70",
       "path": "examples/llm-as-judge-skills/README.md",
-      "size_bytes": 23890
+      "size_bytes": 23870
     },
     {
       "digest": "sha256:fbfb940a5866244f2bb10457f5876fd162e552d964b3ad000b03514a2d63cd94",
@@ -2615,6 +3910,11 @@
       "size_bytes": 10108
     },
     {
+      "digest": "sha256:b4143e94a4beee184af8a22bbadcfd366fe8d9b4efd690e9d8e9b94a5fac76d9",
+      "path": "governance/authority-vocabulary.schema.json",
+      "size_bytes": 15502
+    },
+    {
       "digest": "sha256:500c1d138249a135e462e2fcbdbab0874e6ef841c7ca005560106bb727359722",
       "path": "governance/export-policy.schema.json",
       "size_bytes": 1982
@@ -2625,9 +3925,29 @@
       "size_bytes": 3091
     },
     {
+      "digest": "sha256:fa38b9156fba7c5204e93923875cf1997dfb85b1ded2ebd3e96014d96e0dd78f",
+      "path": "requirements-dev.in",
+      "size_bytes": 244
+    },
+    {
+      "digest": "sha256:d8396edce3a7f1ef78a7580f65b920fc23ffe5298cfd46d021a0be7242af2d12",
+      "path": "requirements-dev.txt",
+      "size_bytes": 18625
+    },
+    {
       "digest": "sha256:6b8795d5245c17235d45c433b0a32d7b1bf85a89f744cb5108963c86579dc847",
       "path": "researcher/artifacts/README.md",
       "size_bytes": 1970
+    },
+    {
+      "digest": "sha256:759bf12d0754177e7a4baec01cee4361864eb44aba2651c306b96fcbf2e0aac7",
+      "path": "researcher/benchmarks/PLAN.md",
+      "size_bytes": 24130
+    },
+    {
+      "digest": "sha256:c3790bea49d4701acb54ad41d5bccc2fed83dfe93ef425baec3949ee0e9bfe47",
+      "path": "researcher/benchmarks/effectiveness/README.md",
+      "size_bytes": 4829
     },
     {
       "digest": "sha256:4ae1af9564863e50508b70e39965c31ddc034fef59dc887e8655736435f52dd6",
@@ -2665,6 +3985,11 @@
       "size_bytes": 591
     },
     {
+      "digest": "sha256:ff46c45fd38c53381221c2f1abf49a4f77f1424eadfe8b5ae8a166894e5d0c95",
+      "path": "researcher/benchmarks/router/README.md",
+      "size_bytes": 3512
+    },
+    {
       "digest": "sha256:489d9670c58b3b84c63577e14ad434adf23d8d54da1d72c9d92d1b891da0f7a5",
       "path": "researcher/benchmarks/router/prompts.jsonl",
       "size_bytes": 22506
@@ -2675,29 +4000,114 @@
       "size_bytes": 1898
     },
     {
-      "digest": "sha256:1569152d710eb397858ae501c0e3b95e2ebf07a6e1783e2e68ca487edebeb56a",
+      "digest": "sha256:362b5b34ac35c3c69020246e760b3ddcae1b66aee71097462d78b8a7ca1ced43",
+      "path": "researcher/benchmarks/sdk-runner/README.md",
+      "size_bytes": 5395
+    },
+    {
+      "digest": "sha256:09ba1569584f4d7feced9f2fd28de8956bdbfe25262a410c15be24c3c7c3062d",
       "path": "researcher/benchmarks/sdk-runner/package-lock.json",
-      "size_bytes": 60243
+      "size_bytes": 8435
     },
     {
-      "digest": "sha256:4849f4e325c6c6de51b35d698c2402556f2a0673757f676d252536ed8388b553",
+      "digest": "sha256:81884c7989fb570a578a6aab7e8a1c872185e226f2fae6b5b9ebe55139f35d1f",
       "path": "researcher/benchmarks/sdk-runner/package.json",
-      "size_bytes": 831
+      "size_bytes": 1283
     },
     {
-      "digest": "sha256:44d472169cf8cc08a4da8c84bff3db907dc5a7f68a79848d931139c8a8750fb9",
+      "digest": "sha256:53a3c706867b139eca036d3242d309c21414d98e9306b8bb4f9310949eafbcb4",
       "path": "researcher/benchmarks/sdk-runner/src/common.ts",
-      "size_bytes": 10638
+      "size_bytes": 9707
     },
     {
-      "digest": "sha256:d623d5a156a57d07bc1a91cfbe1fc4336f46ef413209395d2894fb3173a9b452",
+      "digest": "sha256:6c112b7d9420edd9bbd4e877679fe8d14ea126339315fc53cbbfcb8af0246638",
+      "path": "researcher/benchmarks/sdk-runner/src/durableFs.test.ts",
+      "size_bytes": 11478
+    },
+    {
+      "digest": "sha256:528e1d90acefb0539b7fe225df8f2b286d6e867a39bada20e59311e0d604de11",
+      "path": "researcher/benchmarks/sdk-runner/src/durableFs.ts",
+      "size_bytes": 17899
+    },
+    {
+      "digest": "sha256:10fe6fbf6be6fe748a4682de5bffc2976a1dfb87832f90aeb5ff9f33229f7586",
+      "path": "researcher/benchmarks/sdk-runner/src/durableJson.test.ts",
+      "size_bytes": 4222
+    },
+    {
+      "digest": "sha256:479e4248f0a4b09cb867a8fd661631300734be04251b0597cc06b3091e61630d",
+      "path": "researcher/benchmarks/sdk-runner/src/durableJson.ts",
+      "size_bytes": 15977
+    },
+    {
+      "digest": "sha256:94dedb1e64c41451469f907bb5e7b2afafb79429f1f1b7ddbc2bb1b9489d4691",
+      "path": "researcher/benchmarks/sdk-runner/src/liveBlock.test.ts",
+      "size_bytes": 3928
+    },
+    {
+      "digest": "sha256:837414afe22ab5e841f6a8b8d966f726976f4ee93de1b8bd8af3860d30630227",
+      "path": "researcher/benchmarks/sdk-runner/src/routerEngine.test.ts",
+      "size_bytes": 25502
+    },
+    {
+      "digest": "sha256:adfd95350f28845adc12801ff71e25d88a250b1ce5d7c8a120ca591f81962240",
+      "path": "researcher/benchmarks/sdk-runner/src/routerEngine.ts",
+      "size_bytes": 16140
+    },
+    {
+      "digest": "sha256:892a29bae296c860148866856a533369058aac4165009838d7e1ed1b0884b4b7",
+      "path": "researcher/benchmarks/sdk-runner/src/routerManifest.test.ts",
+      "size_bytes": 21437
+    },
+    {
+      "digest": "sha256:e7a1dd0e3ea8445d0fc2f763beadde2ad2bfb7271e34e11ed2d1f205ca8aa3f7",
+      "path": "researcher/benchmarks/sdk-runner/src/routerManifest.ts",
+      "size_bytes": 39876
+    },
+    {
+      "digest": "sha256:3071af5f3143a75916b800280a483417ea511312d1cb8c71e75694ad61ebb59f",
+      "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.test.ts",
+      "size_bytes": 30526
+    },
+    {
+      "digest": "sha256:d2cdb28dfa5629d4b614cfdd68b46af8ebd631a2e0b93a50e2ed678fa0914664",
+      "path": "researcher/benchmarks/sdk-runner/src/routerRunStore.ts",
+      "size_bytes": 46985
+    },
+    {
+      "digest": "sha256:a0830792a32742d2c5fea11842055765e127139bc7b77b689fd82c5da2861da2",
       "path": "researcher/benchmarks/sdk-runner/src/runEffectiveness.ts",
-      "size_bytes": 4368
+      "size_bytes": 7718
     },
     {
-      "digest": "sha256:ee40169ffccd9be901bb592a03d1eb9911ecb6e7e76ca06f13c5ff8d8baccc0e",
+      "digest": "sha256:467ae886890f2dba429948fb00ad8d8949fcfa4c9df0ca74106d47098bea3f86",
       "path": "researcher/benchmarks/sdk-runner/src/runRouter.ts",
-      "size_bytes": 12576
+      "size_bytes": 6754
+    },
+    {
+      "digest": "sha256:52dc6f351160ec324c16f899ef005affc60bc070a323304fcb6e85fc1f0ba1bc",
+      "path": "researcher/benchmarks/sdk-runner/src/sdkImport.test.ts",
+      "size_bytes": 306
+    },
+    {
+      "digest": "sha256:f853d70bf00db0f46ca281c8924dafa9b42ff15707794f4712a06570e3d9cd18",
+      "path": "researcher/benchmarks/sdk-runner/src/sourceFreeze.test.ts",
+      "size_bytes": 10569
+    },
+    {
+      "digest": "sha256:83e2423b1574447b9a55c699e5b372f8a1244539a736b3b68e4ab59956475bc7",
+      "path": "researcher/benchmarks/sdk-runner/src/sourceFreeze.ts",
+      "size_bytes": 20357
+    },
+    {
+      "digest": "sha256:3f80842b2e9fc1f06ddbf44b8e8f2a9bb1eca10db91db12c1966438a99774ee4",
+      "path": "researcher/benchmarks/sdk-runner/test/denyCursorSdkLoader.mjs",
+      "size_bytes": 250
+    },
+    {
+      "digest": "sha256:17e1116ab6813d69dd22c986bf238e1c4bcd890cedef24b0f6de883cd593373b",
+      "path": "researcher/benchmarks/sdk-runner/test/registerDenyCursorSdk.mjs",
+      "size_bytes": 97
     },
     {
       "digest": "sha256:1bf42fa8545bc307e5371c58ffd5a1ac818a07b31da7038cbdb3b95f072a5ab1",
@@ -2763,6 +4173,36 @@
       "digest": "sha256:4fdfcfd93ee023ed6085e1b99ec3438b68bc46c6de5200dab4e6cfbdef76305e",
       "path": "researcher/mechanisms/registry.jsonl",
       "size_bytes": 14630
+    },
+    {
+      "digest": "sha256:96f5aac54e9ea3e56fd5af9a977f1467ab6232dcdb5b99b0b029083f29bdfd23",
+      "path": "researcher/orchestration/prompts/README.md",
+      "size_bytes": 8899
+    },
+    {
+      "digest": "sha256:6e29b41a41f9e89f1e7ba252a701aaaf89a256cb6d40dd3990614daa5c830ca5",
+      "path": "researcher/orchestration/prompts/attempt-manifest.template.md",
+      "size_bytes": 27477
+    },
+    {
+      "digest": "sha256:e588339b7293a0e7d22f3bd49f045c6dee83be312f8d3ba6b2f2cf31c96414e7",
+      "path": "researcher/orchestration/prompts/fresh-verifier-brief.md",
+      "size_bytes": 18269
+    },
+    {
+      "digest": "sha256:2e632078b9eb43f5794075952eb6669f178b2255c8ac82b6304a6d68419a5bad",
+      "path": "researcher/orchestration/prompts/organization-root-brief.md",
+      "size_bytes": 24997
+    },
+    {
+      "digest": "sha256:8b774f0d34cf4aa0ae36854d6bb9cb97781a3a8430d741dc4f13378c930d05af",
+      "path": "researcher/orchestration/prompts/resume-brief.template.md",
+      "size_bytes": 15674
+    },
+    {
+      "digest": "sha256:150e6c0c2260170a3b731fc438adb9bc537b8c2658545e2ee9a528c71fcfd3dc",
+      "path": "researcher/orchestration/prompts/spec-work-brief.template.md",
+      "size_bytes": 18802
     },
     {
       "digest": "sha256:0ac5456af9a440308082b4f730cb69f5a4bbfc9cb32928db1f8d4c656243e7ba",
@@ -3050,9 +4490,9 @@
       "size_bytes": 54898
     },
     {
-      "digest": "sha256:5ea42cd39cf030d35c44075e76b1be615bd1c6b717e67ff3a7e161e518876388",
+      "digest": "sha256:e85e62d1ab1e7730ffbc9c909e1fffb96f41dd99442958d27fc95a7c2386ff18",
       "path": "researcher/scripts/build_inventory.py",
-      "size_bytes": 56436
+      "size_bytes": 137683
     },
     {
       "digest": "sha256:91d32d5ebcdbaf8d5a417ed29f43ace7ce126bf427ef6c64176b67612d24987b",
@@ -3065,9 +4505,19 @@
       "size_bytes": 40910
     },
     {
+      "digest": "sha256:b406c35c4304bc3789bf0eb1f93a94269b7f583ba7b5bfd1a45d83db33975245",
+      "path": "researcher/scripts/governance_policy.py",
+      "size_bytes": 40048
+    },
+    {
       "digest": "sha256:bdd1f338ed58ebd43edfa805190cf16c2eb92c6e62a1efcd7479edfafa50c904",
       "path": "researcher/scripts/migrate_legacy.py",
       "size_bytes": 17446
+    },
+    {
+      "digest": "sha256:49bfaa485f5c06d14b57790f3442cb2889e7812e675178be087665d02b1c58ca",
+      "path": "researcher/scripts/render_router_report.py",
+      "size_bytes": 33217
     },
     {
       "digest": "sha256:ef6cb1f2f03ebd77c6ba56b2adc7dc0f6d0ba3e260272ea7620d744de0f01f3a",
@@ -3090,9 +4540,24 @@
       "size_bytes": 36042
     },
     {
+      "digest": "sha256:cc1949045f4ce5de6fab3425c2d351a48221936b104024e1baba5cc75b0cac77",
+      "path": "researcher/scripts/tests/test_render_router_report.py",
+      "size_bytes": 13885
+    },
+    {
       "digest": "sha256:7e7bc28b04098d2d07b9f344c2e5923cef99a28ce64570bef7820380c3b2ff69",
       "path": "researcher/scripts/tests/test_schema_contract.py",
       "size_bytes": 24900
+    },
+    {
+      "digest": "sha256:6235476ffd8d0ed3ca03740cc400bbac3cc1020795fed77a08743d6ff403d7c8",
+      "path": "researcher/scripts/tests/test_spec_lifecycle.py",
+      "size_bytes": 125915
+    },
+    {
+      "digest": "sha256:e61a84800e4bfe35ebf155ca3add3c05e25315249dde0a9e5921d037bd8bbf9b",
+      "path": "researcher/scripts/validate_authority_contract.py",
+      "size_bytes": 130350
     },
     {
       "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
@@ -3100,14 +4565,19 @@
       "size_bytes": 5382
     },
     {
-      "digest": "sha256:7f189e876bc7cba64683a187d1f4f0699864602802cb73cccb30084eaa5d8c08",
+      "digest": "sha256:b59e33e0f5772cb38ece82824082ab98d268c0a1677d0ae1ec8ee79bb38c51d8",
       "path": "researcher/scripts/validate_governance.py",
-      "size_bytes": 10034
+      "size_bytes": 21905
     },
     {
       "digest": "sha256:facebf497d771a018adff8c0bbbbcbb1b28cf38a797c82d48e47fcc9c46fd81f",
       "path": "researcher/scripts/validate_platform_compat.py",
       "size_bytes": 8654
+    },
+    {
+      "digest": "sha256:4eaea8d85f9723d65cc660e4487518f65c76eedde51584b3e9bbc6f038f08b0a",
+      "path": "researcher/scripts/validate_public_repo.py",
+      "size_bytes": 9616
     },
     {
       "digest": "sha256:578c88644d0839ba8e9846108f48c6e36d56e1bbda4b733d760cc2865834bdb7",
@@ -3118,6 +4588,11 @@
       "digest": "sha256:ba09b1c3ff4ad79de01c5d2bb308edbdc9658ba07114d1e3e0165b0bddb0e65a",
       "path": "researcher/scripts/validate_schemas.py",
       "size_bytes": 9310
+    },
+    {
+      "digest": "sha256:78ad969d91af2fd56716d5b1a21d6665b490c3ac42ebc90e1e86a92033087c30",
+      "path": "researcher/scripts/validate_spec_lifecycle.py",
+      "size_bytes": 51475
     },
     {
       "digest": "sha256:8b9e3d9de07a0505ae2b42df2e15dd75bab5f2486e336194481c558e0648ded0",
@@ -3208,25 +4683,58 @@
   "unresolved_references": [],
   "validator_ownership": [
     {
-      "digest": "sha256:7f189e876bc7cba64683a187d1f4f0699864602802cb73cccb30084eaa5d8c08",
+      "digest": "sha256:b59e33e0f5772cb38ece82824082ab98d268c0a1677d0ae1ec8ee79bb38c51d8",
       "id": "governance-policy",
       "owns": [
-        "authority vocabulary",
         "constitutional invariants",
-        "generated authority view"
+        "generated authority view",
+        "authority conformance orchestration"
       ],
       "path": "researcher/scripts/validate_governance.py"
     },
     {
-      "digest": "sha256:5ea42cd39cf030d35c44075e76b1be615bd1c6b717e67ff3a7e161e518876388",
+      "digest": "sha256:b406c35c4304bc3789bf0eb1f93a94269b7f583ba7b5bfd1a45d83db33975245",
+      "id": "authority-policy-evaluator",
+      "owns": [
+        "Constitution decision evaluation",
+        "fail-closed policy rule matching"
+      ],
+      "path": "researcher/scripts/governance_policy.py"
+    },
+    {
+      "digest": "sha256:e61a84800e4bfe35ebf155ca3add3c05e25315249dde0a9e5921d037bd8bbf9b",
+      "id": "authority-catalog-contract",
+      "owns": [
+        "standalone authority schema, registry, fixture, and semantic profile validation",
+        "structural authority-policy closure",
+        "authority evaluator-bundle identity",
+        "authority conformance receipt validation"
+      ],
+      "path": "researcher/scripts/validate_authority_contract.py"
+    },
+    {
+      "digest": "sha256:e85e62d1ab1e7730ffbc9c909e1fffb96f41dd99442958d27fc95a7c2386ff18",
       "id": "repository-inventory",
       "owns": [
         "identifier uniqueness",
         "cross-artifact references",
+        "specification graph",
+        "authority artifact parity and source binding",
         "live counts",
         "generated inventory"
       ],
       "path": "researcher/scripts/build_inventory.py"
+    },
+    {
+      "digest": "sha256:78ad969d91af2fd56716d5b1a21d6665b490c3ac42ebc90e1e86a92033087c30",
+      "id": "specification-lifecycle",
+      "owns": [
+        "base-aware specification status transitions",
+        "accepted contract revision identity",
+        "promoted revision predecessor authority",
+        "terminal specification decisions"
+      ],
+      "path": "researcher/scripts/validate_spec_lifecycle.py"
     },
     {
       "digest": "sha256:9bc56b6f2602a1efec29f40e3cb40cd906e79f1b7fd5dd3d5872da4ef69ea9da",
@@ -3237,6 +4745,17 @@
         "staged export closure"
       ],
       "path": "researcher/scripts/validate_export.py"
+    },
+    {
+      "digest": "sha256:4eaea8d85f9723d65cc660e4487518f65c76eedde51584b3e9bbc6f038f08b0a",
+      "id": "public-repository-boundary",
+      "owns": [
+        "tracked local paths",
+        "private runtime roots",
+        "credential filenames",
+        "private-key material"
+      ],
+      "path": "researcher/scripts/validate_public_repo.py"
     },
     {
       "digest": "sha256:ba09b1c3ff4ad79de01c5d2bb308edbdc9658ba07114d1e3e0165b0bddb0e65a",
@@ -3294,6 +4813,17 @@
         "adversarial scenario execution"
       ],
       "path": "researcher/scripts/run_benchmarks.py"
+    },
+    {
+      "digest": "sha256:49bfaa485f5c06d14b57790f3442cb2889e7812e675178be087665d02b1c58ca",
+      "id": "router-report",
+      "owns": [
+        "router outcome taxonomy",
+        "accuracy denominators",
+        "deterministic confidence intervals",
+        "published router report rendering"
+      ],
+      "path": "researcher/scripts/render_router_report.py"
     }
   ]
 }

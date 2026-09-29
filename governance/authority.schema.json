@@ -1,81 +1,378 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/governance/authority.schema.json",
-  "title": "Program constitution and authority policy",
-  "type": "object",
-  "required": [
-    "schema_version",
-    "constitution_version",
-    "lifecycle_state",
-    "effective_commit",
-    "default_effect",
-    "promotion_event",
-    "actor_classes",
-    "actions",
-    "resource_classes",
-    "protected_surfaces",
-    "rules",
-    "emergency_controls",
-    "amendment_procedure"
+  "title": "Program constitution and offline class-policy oracle",
+  "oneOf": [
+    {"$ref": "#/$defs/schemaV1"},
+    {"$ref": "#/$defs/schemaV2"}
   ],
-  "additionalProperties": false,
-  "properties": {
-    "schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
-    "constitution_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
-    "lifecycle_state": {"enum": ["draft", "reviewed", "merged", "effective", "superseded"]},
-    "effective_commit": {"type": "string", "minLength": 1},
-    "default_effect": {"const": "deny"},
-    "promotion_event": {"const": "human_merged_commit"},
-    "identity_bindings": {"type": "object"},
-    "actor_classes": {
+  "$defs": {
+    "boundedString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^(?!\\s)(?!.*\\s$)[^\\u0000-\\u001f\\u007f-\\u009f]+$"
+    },
+    "token": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "ruleId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "reasonCode": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]+$"
+    },
+    "v2RuleId": {
+      "allOf": [
+        {"$ref": "#/$defs/ruleId"},
+        {"maxLength": 128}
+      ]
+    },
+    "v2ReasonCode": {
+      "allOf": [
+        {"$ref": "#/$defs/reasonCode"},
+        {"maxLength": 128}
+      ]
+    },
+    "principal": {
+      "type": "string",
+      "$comment": "Schema-2 identity bindings are synthetic offline labels only. Provider identities require a later authenticated resolver.",
+      "pattern": "^synthetic:[a-z][a-z0-9_]{0,127}$"
+    },
+    "portableInteger": {
+      "$comment": "The Python loader additionally rejects floating-point instances such as 1.0; JSON Schema's numeric data model cannot distinguish them from integral numbers.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sha256Digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "utcDatetime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:(?!0000)[0-9]{4})-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12][0-9]|3[01])|(?:0[469]|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z$"
+    },
+    "legacyCondition": {
       "type": "object",
-      "minProperties": 1,
-      "additionalProperties": {
-        "type": "object",
-        "required": ["automated", "conflicts_with"],
-        "additionalProperties": false,
-        "properties": {
-          "automated": {"type": "boolean"},
-          "conflicts_with": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      "required": ["key", "operator"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {"type": "string"},
+        "operator": {"enum": ["equals", "not_equals", "in", "not_in", "present"]},
+        "value": {}
+      }
+    },
+    "typedEqualsBoolean": {
+      "type": "object",
+      "required": ["key", "operator", "value_type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {"$ref": "#/$defs/token"},
+        "operator": {"const": "equals"},
+        "value_type": {"const": "boolean"},
+        "value": {"type": "boolean"}
+      }
+    },
+    "typedEqualsInteger": {
+      "type": "object",
+      "required": ["key", "operator", "value_type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {"$ref": "#/$defs/token"},
+        "operator": {"const": "equals"},
+        "value_type": {"const": "integer"},
+        "value": {"$ref": "#/$defs/portableInteger"}
+      }
+    },
+    "typedEqualsString": {
+      "type": "object",
+      "required": ["key", "operator", "value_type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {"$ref": "#/$defs/token"},
+        "operator": {"const": "equals"},
+        "value_type": {"const": "string"},
+        "value": {"$ref": "#/$defs/boundedString"}
+      }
+    },
+    "typedEqualsSha256": {
+      "type": "object",
+      "required": ["key", "operator", "value_type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {"$ref": "#/$defs/token"},
+        "operator": {"const": "equals"},
+        "value_type": {"const": "sha256_digest"},
+        "value": {"$ref": "#/$defs/sha256Digest"}
+      }
+    },
+    "typedEqualsUtcDatetime": {
+      "type": "object",
+      "required": ["key", "operator", "value_type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {"$ref": "#/$defs/token"},
+        "operator": {"const": "equals"},
+        "value_type": {"const": "utc_datetime"},
+        "value": {"$ref": "#/$defs/utcDatetime"}
+      }
+    },
+    "typedPresent": {
+      "type": "object",
+      "required": ["key", "operator", "value_type"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {"$ref": "#/$defs/token"},
+        "operator": {"const": "present"},
+        "value_type": {
+          "enum": ["integer", "string", "sha256_digest", "utc_datetime"]
         }
       }
     },
-    "actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
-    "resource_classes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
-    "protected_surfaces": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
-    "separation_of_duty": {"type": "array", "items": {"type": "object"}},
-    "rules": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": ["rule_id", "effect", "actors", "actions", "resources", "reason_code"],
-        "additionalProperties": false,
-        "properties": {
-          "rule_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
-          "effect": {"enum": ["allow", "deny"]},
-          "actors": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
-          "actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
-          "resources": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
-          "conditions": {
+    "typedLessThanOrEqual": {
+      "type": "object",
+      "required": ["key", "operator", "value_type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {"$ref": "#/$defs/token"},
+        "operator": {"const": "less_than_or_equal"},
+        "value_type": {"const": "integer"},
+        "value": {"$ref": "#/$defs/portableInteger"}
+      }
+    },
+    "typedPredicate": {
+      "oneOf": [
+        {"$ref": "#/$defs/typedEqualsBoolean"},
+        {"$ref": "#/$defs/typedEqualsInteger"},
+        {"$ref": "#/$defs/typedEqualsString"},
+        {"$ref": "#/$defs/typedEqualsSha256"},
+        {"$ref": "#/$defs/typedEqualsUtcDatetime"},
+        {"$ref": "#/$defs/typedPresent"},
+        {"$ref": "#/$defs/typedLessThanOrEqual"}
+      ]
+    },
+    "schemaV1Actor": {
+      "type": "object",
+      "required": ["automated", "conflicts_with"],
+      "additionalProperties": false,
+      "properties": {
+        "automated": {"type": "boolean"},
+        "conflicts_with": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "schemaV2Actor": {
+      "type": "object",
+      "required": ["automated"],
+      "additionalProperties": false,
+      "properties": {
+        "automated": {"type": "boolean"}
+      }
+    },
+    "schemaV1Rule": {
+      "type": "object",
+      "required": ["rule_id", "effect", "actors", "actions", "resources", "reason_code"],
+      "additionalProperties": false,
+      "properties": {
+        "rule_id": {"$ref": "#/$defs/ruleId"},
+        "effect": {"enum": ["allow", "deny"]},
+        "actors": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "resources": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "conditions": {"type": "array", "items": {"$ref": "#/$defs/legacyCondition"}},
+        "reason_code": {"$ref": "#/$defs/reasonCode"}
+      }
+    },
+    "schemaV2Rule": {
+      "type": "object",
+      "required": ["rule_id", "effect", "actors", "actions", "resources", "reason_code"],
+      "additionalProperties": false,
+      "properties": {
+        "rule_id": {"$ref": "#/$defs/v2RuleId"},
+        "effect": {"enum": ["allow", "deny"]},
+        "actors": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/token"}},
+        "actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/token"}},
+        "resources": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/token"}},
+        "conditions": {"type": "array", "items": {"$ref": "#/$defs/typedPredicate"}},
+        "reason_code": {"$ref": "#/$defs/v2ReasonCode"}
+      }
+    },
+    "separationGroup": {
+      "type": "object",
+      "required": ["duty", "actor_classes"],
+      "additionalProperties": false,
+      "properties": {
+        "duty": {"$ref": "#/$defs/token"},
+        "actor_classes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/token"}
+        }
+      }
+    },
+    "separationRule": {
+      "type": "object",
+      "required": ["rule_id", "scope", "constraint", "groups"],
+      "additionalProperties": false,
+      "properties": {
+        "rule_id": {"$ref": "#/$defs/v2RuleId"},
+        "scope": {"$ref": "#/$defs/token"},
+        "constraint": {"const": "distinct_authenticated_principal_across_groups"},
+        "groups": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/separationGroup"}
+        }
+      }
+    },
+    "emergencyControls": {
+      "type": "object",
+      "required": [
+        "disable_changes_authority",
+        "disable_mutates_history",
+        "disable_stops_new_work"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "disable_changes_authority": {"const": false},
+        "disable_mutates_history": {"const": false},
+        "disable_stops_new_work": {"const": true}
+      }
+    },
+    "amendmentProcedure": {
+      "type": "object",
+      "required": [
+        "prior_versions_retained",
+        "required_actor",
+        "required_state_sequence",
+        "required_transport"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "prior_versions_retained": {"const": true},
+        "required_actor": {"const": "human_maintainer"},
+        "required_state_sequence": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "prefixItems": [
+            {"const": "draft"},
+            {"const": "reviewed"},
+            {"const": "merged"},
+            {"const": "effective"}
+          ],
+          "items": false
+        },
+        "required_transport": {"const": "pull_request"}
+      }
+    },
+    "schemaV1": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "constitution_version",
+        "lifecycle_state",
+        "effective_commit",
+        "default_effect",
+        "promotion_event",
+        "actor_classes",
+        "actions",
+        "resource_classes",
+        "protected_surfaces",
+        "rules",
+        "emergency_controls",
+        "amendment_procedure"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {"type": "string", "pattern": "^1\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+        "constitution_version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+        "lifecycle_state": {"enum": ["draft", "reviewed", "merged", "effective", "superseded"]},
+        "effective_commit": {"type": "string", "minLength": 1},
+        "default_effect": {"const": "deny"},
+        "promotion_event": {"const": "human_merged_commit"},
+        "identity_bindings": {"type": "object"},
+        "actor_classes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/schemaV1Actor"}
+        },
+        "actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "resource_classes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "protected_surfaces": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "separation_of_duty": {"type": "array", "items": {"type": "object"}},
+        "rules": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/schemaV1Rule"}},
+        "emergency_controls": {"type": "object"},
+        "amendment_procedure": {"type": "object"},
+        "non_constitutional_guidance": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "schemaV2": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "constitution_version",
+        "lifecycle_state",
+        "effective_commit",
+        "default_effect",
+        "promotion_event",
+        "identity_bindings",
+        "actor_classes",
+        "actions",
+        "resource_classes",
+        "protected_surfaces",
+        "separation_of_duty",
+        "rules",
+        "emergency_controls",
+        "amendment_procedure"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {"type": "string", "pattern": "^2\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+        "constitution_version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+        "lifecycle_state": {"enum": ["draft", "reviewed", "merged", "effective", "superseded"]},
+        "effective_commit": {"$ref": "#/$defs/boundedString"},
+        "default_effect": {"const": "deny"},
+        "promotion_event": {"const": "human_merged_commit"},
+        "identity_bindings": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {"$ref": "#/$defs/token"},
+          "additionalProperties": {
             "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["key", "operator"],
-              "additionalProperties": false,
-              "properties": {
-                "key": {"type": "string"},
-                "operator": {"enum": ["equals", "not_equals", "in", "not_in", "present"]},
-                "value": {}
-              }
-            }
-          },
-          "reason_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]+$"}
+            "uniqueItems": true,
+            "items": {"$ref": "#/$defs/principal"}
+          }
+        },
+        "actor_classes": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {"$ref": "#/$defs/token"},
+          "additionalProperties": {"$ref": "#/$defs/schemaV2Actor"}
+        },
+        "actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/token"}},
+        "resource_classes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/token"}},
+        "protected_surfaces": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/boundedString"}},
+        "separation_of_duty": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/separationRule"}},
+        "rules": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/schemaV2Rule"}},
+        "emergency_controls": {"$ref": "#/$defs/emergencyControls"},
+        "amendment_procedure": {"$ref": "#/$defs/amendmentProcedure"},
+        "non_constitutional_guidance": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/boundedString"}
         }
       }
-    },
-    "emergency_controls": {"type": "object"},
-    "amendment_procedure": {"type": "object"},
-    "non_constitutional_guidance": {"type": "array", "items": {"type": "string"}}
+    }
   }
 }

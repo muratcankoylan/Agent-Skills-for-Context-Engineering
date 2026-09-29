@@ -22,6 +22,8 @@ For substantive changes, please:
 5. Add references or scripts as appropriate
 6. Submit a pull request with a clear description of changes
 
+Changes to the autonomous-organization harness should begin with the dependency and authority contracts in [`docs/specs/README.md`](docs/specs/README.md). Publishing a draft specification does not accept it. An accepted contract, constitutional change, or lifecycle transition requires an explicit human-merged pull request.
+
 ### Adding New Skills
 
 When adding new skills:
@@ -35,9 +37,10 @@ When adding new skills:
 7. Add at least one entry to `researcher/fixtures/activation-cases.jsonl`; include rejected or adjacent skills when the boundary is easy to confuse
 8. Ensure content is platform-agnostic (works across Cursor, Claude Code, etc.)
 9. Run the unit tests and deterministic gates before opening a PR:
-   - `python3 -m pip install -r requirements-dev.txt`
+   - `python3 -m pip install --require-hashes -r requirements-dev.txt`
    - `python3 -m unittest researcher.scripts.tests.test_skill_frontmatter`
    - `python3 researcher/scripts/validate_platform_compat.py --require-reference-validator`
+   - `python3 researcher/scripts/validate_public_repo.py`
    - `python3 researcher/scripts/validate_repo.py --strict`
    - `python3 researcher/scripts/skill_health.py --strict --no-history`
    - `python3 researcher/scripts/check_activation_cases.py`
@@ -131,4 +134,3 @@ This project follows a professional, technical collaboration model. Be respectfu
 ## Questions
 
 For questions about contributing, please open an issue for discussion.
-

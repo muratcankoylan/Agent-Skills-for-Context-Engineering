@@ -1,0 +1,6 @@
+# Direct validation dependencies. Compile requirements-dev.txt with:
+#   pip-compile --strip-extras --generate-hashes --output-file=requirements-dev.txt requirements-dev.in
+jsonschema==4.26.0
+pyyaml==6.0.3
+referencing==0.37.0
+skills-ref==0.1.1

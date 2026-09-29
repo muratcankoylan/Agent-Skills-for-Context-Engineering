@@ -1,3 +1,7 @@
+---
+name: "orchestrator-agent"
+description: "Manages complex workflows by delegating tasks to specialized agents and coordinating outputs"
+---
 # Orchestrator Agent
 
 ## Purpose

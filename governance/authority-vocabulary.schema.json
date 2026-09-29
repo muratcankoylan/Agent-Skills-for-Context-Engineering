@@ -1,0 +1,696 @@
+{
+  "$defs": {
+    "actorBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "actor_class": {
+          "$ref": "#/$defs/token"
+        },
+        "predicates": {
+          "items": {
+            "$ref": "#/$defs/predicate"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "actor_class",
+        "predicates"
+      ],
+      "type": "object"
+    },
+    "catalogBoundaryCase": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/token"
+        },
+        "actor_class": {
+          "$ref": "#/$defs/token"
+        },
+        "case": {
+          "$ref": "#/$defs/token"
+        },
+        "context": {
+          "additionalProperties": {
+            "$ref": "#/$defs/nativeScalar"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/token"
+          },
+          "type": "object"
+        },
+        "dependencies": {
+          "items": {
+            "$ref": "#/$defs/dependencyEvidence"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "effect": {
+          "$ref": "#/$defs/effect"
+        },
+        "evidence_kind": {
+          "const": "synthetic_offline"
+        },
+        "expected_decision": {
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "expected_policy_decision": {
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "expected_registry_decision": {
+          "enum": [
+            "allow",
+            "deny",
+            "non_event"
+          ]
+        },
+        "grant": {
+          "$ref": "#/$defs/grant"
+        },
+        "resource": {
+          "$ref": "#/$defs/token"
+        }
+      },
+      "required": [
+        "action",
+        "actor_class",
+        "case",
+        "context",
+        "dependencies",
+        "effect",
+        "evidence_kind",
+        "expected_decision",
+        "expected_policy_decision",
+        "expected_registry_decision",
+        "grant",
+        "resource"
+      ],
+      "type": "object"
+    },
+    "dependencyEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "revision": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "runtime_stage": {
+          "enum": [
+            "accepted",
+            "amended",
+            "architecture_reviewed",
+            "draft",
+            "implemented",
+            "operational",
+            "retired",
+            "superseded",
+            "verified"
+          ]
+        },
+        "spec_id": {
+          "$ref": "#/$defs/specId"
+        }
+      },
+      "required": [
+        "revision",
+        "runtime_stage",
+        "spec_id"
+      ],
+      "type": "object"
+    },
+    "dependencyRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum_runtime_stage": {
+          "enum": [
+            "implemented",
+            "operational",
+            "verified"
+          ]
+        },
+        "revision": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "spec_id": {
+          "$ref": "#/$defs/specId"
+        }
+      },
+      "required": [
+        "minimum_runtime_stage",
+        "revision",
+        "spec_id"
+      ],
+      "type": "object"
+    },
+    "effect": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/token"
+        },
+        "max_state_transitions": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "max_targets": {
+          "$ref": "#/$defs/safeInteger"
+        }
+      },
+      "required": [
+        "code",
+        "max_state_transitions",
+        "max_targets"
+      ],
+      "type": "object"
+    },
+    "equalsBooleanPredicate": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/token"
+        },
+        "operator": {
+          "const": "equals"
+        },
+        "value": {
+          "type": "boolean"
+        },
+        "value_type": {
+          "const": "boolean"
+        }
+      },
+      "required": [
+        "key",
+        "operator",
+        "value",
+        "value_type"
+      ],
+      "type": "object"
+    },
+    "equalsDigestPredicate": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/token"
+        },
+        "operator": {
+          "const": "equals"
+        },
+        "value": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "value_type": {
+          "const": "sha256_digest"
+        }
+      },
+      "required": [
+        "key",
+        "operator",
+        "value",
+        "value_type"
+      ],
+      "type": "object"
+    },
+    "equalsIntegerPredicate": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/token"
+        },
+        "operator": {
+          "const": "equals"
+        },
+        "value": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "value_type": {
+          "const": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "operator",
+        "value",
+        "value_type"
+      ],
+      "type": "object"
+    },
+    "equalsStringPredicate": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/token"
+        },
+        "operator": {
+          "const": "equals"
+        },
+        "value": {
+          "$ref": "#/$defs/string"
+        },
+        "value_type": {
+          "const": "string"
+        }
+      },
+      "required": [
+        "key",
+        "operator",
+        "value",
+        "value_type"
+      ],
+      "type": "object"
+    },
+    "equalsUtcDatetimePredicate": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/token"
+        },
+        "operator": {
+          "const": "equals"
+        },
+        "value": {
+          "$ref": "#/$defs/utcDatetime"
+        },
+        "value_type": {
+          "const": "utc_datetime"
+        }
+      },
+      "required": [
+        "key",
+        "operator",
+        "value",
+        "value_type"
+      ],
+      "type": "object"
+    },
+    "fixtureCase": {
+      "additionalProperties": false,
+      "properties": {
+        "actor_class": {
+          "$ref": "#/$defs/token"
+        },
+        "case": {
+          "$ref": "#/$defs/token"
+        },
+        "context": {
+          "additionalProperties": {
+            "$ref": "#/$defs/nativeScalar"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/token"
+          },
+          "type": "object"
+        },
+        "dependencies": {
+          "items": {
+            "$ref": "#/$defs/dependencyEvidence"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "effect": {
+          "$ref": "#/$defs/effect"
+        },
+        "evidence_kind": {
+          "const": "synthetic_offline"
+        },
+        "expected_decision": {
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "expected_policy_decision": {
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "expected_registry_decision": {
+          "enum": [
+            "allow",
+            "deny",
+            "non_event"
+          ]
+        },
+        "grant": {
+          "$ref": "#/$defs/grant"
+        }
+      },
+      "required": [
+        "actor_class",
+        "case",
+        "context",
+        "dependencies",
+        "effect",
+        "evidence_kind",
+        "expected_decision",
+        "expected_policy_decision",
+        "expected_registry_decision",
+        "grant"
+      ],
+      "type": "object"
+    },
+    "fixtureEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/token"
+        },
+        "cases": {
+          "items": {
+            "$ref": "#/$defs/fixtureCase"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "resource": {
+          "$ref": "#/$defs/token"
+        }
+      },
+      "required": [
+        "action",
+        "cases",
+        "resource"
+      ],
+      "type": "object"
+    },
+    "fixtureManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "catalog_boundary_cases": {
+          "items": {
+            "$ref": "#/$defs/catalogBoundaryCase"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "constitution_revision": {
+          "maximum": 9007199254740991,
+          "minimum": 2,
+          "type": "integer"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/fixtureEntry"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "kind": {
+          "const": "AuthorityVocabularyFixtureManifest"
+        },
+        "registry_version": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "schema_version": {
+          "const": "2.0.0"
+        }
+      },
+      "required": [
+        "catalog_boundary_cases",
+        "constitution_revision",
+        "entries",
+        "kind",
+        "registry_version",
+        "schema_version"
+      ],
+      "type": "object"
+    },
+    "fixturePointer": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "path": {
+          "const": "governance/fixtures/authority-vocabulary.json"
+        },
+        "version": {
+          "$ref": "#/$defs/positiveInteger"
+        }
+      },
+      "required": [
+        "digest",
+        "path",
+        "version"
+      ],
+      "type": "object"
+    },
+    "grant": {
+      "additionalProperties": false,
+      "properties": {
+        "effect": {
+          "$ref": "#/$defs/effect"
+        },
+        "operation": {
+          "$ref": "#/$defs/token"
+        }
+      },
+      "required": [
+        "effect",
+        "operation"
+      ],
+      "type": "object"
+    },
+    "lessThanOrEqualPredicate": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/token"
+        },
+        "operator": {
+          "const": "less_than_or_equal"
+        },
+        "value": {
+          "$ref": "#/$defs/safeInteger"
+        },
+        "value_type": {
+          "const": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "operator",
+        "value",
+        "value_type"
+      ],
+      "type": "object"
+    },
+    "nativeScalar": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/$defs/safeInteger"
+        },
+        {
+          "$ref": "#/$defs/rawContextString"
+        }
+      ]
+    },
+    "positiveInteger": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "predicate": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/equalsBooleanPredicate"
+        },
+        {
+          "$ref": "#/$defs/equalsDigestPredicate"
+        },
+        {
+          "$ref": "#/$defs/equalsIntegerPredicate"
+        },
+        {
+          "$ref": "#/$defs/equalsStringPredicate"
+        },
+        {
+          "$ref": "#/$defs/equalsUtcDatetimePredicate"
+        },
+        {
+          "$ref": "#/$defs/lessThanOrEqualPredicate"
+        },
+        {
+          "$ref": "#/$defs/presentPredicate"
+        }
+      ]
+    },
+    "presentPredicate": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/token"
+        },
+        "operator": {
+          "const": "present"
+        },
+        "value_type": {
+          "enum": [
+            "integer",
+            "sha256_digest",
+            "string",
+            "utc_datetime"
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "operator",
+        "value_type"
+      ],
+      "type": "object"
+    },
+    "rawContextString": {
+      "oneOf": [
+        {
+          "const": ""
+        },
+        {
+          "$ref": "#/$defs/string"
+        }
+      ]
+    },
+    "registry": {
+      "additionalProperties": false,
+      "properties": {
+        "constitution_revision": {
+          "maximum": 9007199254740991,
+          "minimum": 2,
+          "type": "integer"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/registryEntry"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "fixture_manifest": {
+          "$ref": "#/$defs/fixturePointer"
+        },
+        "kind": {
+          "const": "AuthorityVocabularyRegistry"
+        },
+        "owner_spec": {
+          "const": "SPEC-000"
+        },
+        "registry_version": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "schema_version": {
+          "const": "2.0.0"
+        }
+      },
+      "required": [
+        "constitution_revision",
+        "entries",
+        "fixture_manifest",
+        "kind",
+        "owner_spec",
+        "registry_version",
+        "schema_version"
+      ],
+      "type": "object"
+    },
+    "registryEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/token"
+        },
+        "actor_bindings": {
+          "items": {
+            "$ref": "#/$defs/actorBinding"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "dependency_requirements": {
+          "items": {
+            "$ref": "#/$defs/dependencyRequirement"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "grant_operation": {
+          "$ref": "#/$defs/token"
+        },
+        "max_effect": {
+          "$ref": "#/$defs/effect"
+        },
+        "owner_spec": {
+          "$ref": "#/$defs/specId"
+        },
+        "resource": {
+          "$ref": "#/$defs/token"
+        }
+      },
+      "required": [
+        "action",
+        "actor_bindings",
+        "dependency_requirements",
+        "grant_operation",
+        "max_effect",
+        "owner_spec",
+        "resource"
+      ],
+      "type": "object"
+    },
+    "safeInteger": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "sha256Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "specId": {
+      "pattern": "^SPEC-[0-9]{3}$",
+      "type": "string"
+    },
+    "string": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "pattern": "^(?!\\s)(?!.*\\s$)[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+      "type": "string"
+    },
+    "token": {
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "type": "string"
+    },
+    "utcDatetime": {
+      "format": "date-time",
+      "pattern": "^(?:(?:(?!0000)[0-9]{4})-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12][0-9]|3[01])|(?:0[469]|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z$",
+      "type": "string"
+    }
+  },
+  "$id": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/governance/authority-vocabulary.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/fixtureManifest"
+    },
+    {
+      "$ref": "#/$defs/registry"
+    }
+  ],
+  "title": "Authority vocabulary registry and synthetic offline fixtures 2.0.0",
+  "x-authority-schema-version": "2.0.0"
+}

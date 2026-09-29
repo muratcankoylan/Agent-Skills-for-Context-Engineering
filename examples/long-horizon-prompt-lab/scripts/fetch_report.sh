@@ -26,6 +26,12 @@ out = Path(sys.argv[1])
 for name in ("cdc_prompt", "cdc_proof"):
     reader = PdfReader(str(out / f"{name}.pdf"))
     text = "\n".join(page.extract_text() for page in reader.pages)
+    text = "".join(
+        character
+        if character in "\t\n\r\f" or 32 <= ord(character) < 127 or ord(character) >= 160
+        else "\N{REPLACEMENT CHARACTER}"
+        for character in text
+    )
     (out / f"{name}.txt").write_text(text, encoding="utf-8")
     print(f"  {name}: {len(reader.pages)} pages -> {name}.txt")
 PY

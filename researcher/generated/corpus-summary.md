@@ -4,11 +4,15 @@
 This is a generated view of canonical repository artifacts, not a second source of truth.
 
 - Schema: `1.0.0`
-- Source tree: `sha256:9c30d9a443a23bfcbb75c7234516bcf6064e57a670beb36a976b5d416e86e9b3`
+- Source tree: `sha256:6638c934a3f03f6ac2e33efd49c8d7bfabc5248d96e82feb89ebc7d8006a6236`
 - Unresolved references: `0`
 
 | Artifact | Count |
 | --- | ---: |
+| Specifications | 27 |
+| Authority contracts | 1 |
+| Architecture decisions | 10 |
+| Orchestration briefs | 7 |
 | Published skills | 17 |
 | Mechanism registry records | 22 |
 | Accepted-ledger events | 28 |
@@ -24,7 +28,7 @@ This is a generated view of canonical repository artifacts, not a second source 
 ## Compatibility
 
 - Plugin version: `2.5.0`
-- Router runner: `operational`
-- Effectiveness runner: `scaffold`
+- Router runner: `dry_run_only`
+- Effectiveness runner: `scaffold_dry_run_only`
 
 Historical reports retain the counts and measurements from their dated snapshot. Current documents should link here instead of copying live totals.

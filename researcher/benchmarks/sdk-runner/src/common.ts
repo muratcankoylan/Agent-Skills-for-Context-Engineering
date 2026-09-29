@@ -6,8 +6,7 @@
  */
 
 import { createHash } from "node:crypto";
-import { execSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync, existsSync, appendFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,9 +25,6 @@ export interface ResolvedConfig {
   seed: number;
   fixturePath: string;
   dryRun: boolean;
-  unsafeNoCostCap: boolean;
-  concurrency: number;
-  noResume: boolean;
 }
 
 export interface RunPlanItem {
@@ -46,26 +42,19 @@ export interface CliFlags {
   seed?: number;
   fixture?: string;
   dryRun: boolean;
-  unsafeNoCostCap: boolean;
-  concurrency?: number;
-  noResume: boolean;
 }
 
 const DEFAULT_MODELS = ["composer-2"];
+export const MAX_PLANNER_ITEMS = 100_000;
+const MAX_JSONL_BYTES = 8 * 1024 * 1024;
 
 export function parseCliFlags(argv: string[]): CliFlags {
-  const flags: CliFlags = { dryRun: false, unsafeNoCostCap: false, noResume: false };
+  const flags: CliFlags = { dryRun: false };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     switch (arg) {
       case "--dry-run":
         flags.dryRun = true;
-        break;
-      case "--unsafe-no-cost-cap":
-        flags.unsafeNoCostCap = true;
-        break;
-      case "--no-resume":
-        flags.noResume = true;
         break;
       case "--models":
         flags.models = (argv[++i] ?? "").split(",").map((value) => value.trim()).filter(Boolean);
@@ -85,9 +74,6 @@ export function parseCliFlags(argv: string[]): CliFlags {
       case "--fixture":
         flags.fixture = argv[++i] ?? "";
         break;
-      case "--concurrency":
-        flags.concurrency = Number(argv[++i]);
-        break;
       default:
         if (arg?.startsWith("--")) {
           throw new Error(`Unknown flag: ${arg}`);
@@ -101,64 +87,58 @@ export function resolveConfig(
   flags: CliFlags,
   defaultFixturePath: string,
 ): ResolvedConfig {
-  if (!flags.unsafeNoCostCap && !flags.maxRuns && !flags.maxBudgetUsd && !flags.dryRun) {
+  if (flags.models !== undefined) {
+    if (flags.models.length === 0) {
+      throw new Error("--models must contain at least one model id.");
+    }
+    if (new Set(flags.models).size !== flags.models.length) {
+      throw new Error("--models must contain unique model ids.");
+    }
+  }
+  if (flags.reps !== undefined && (!Number.isSafeInteger(flags.reps) || flags.reps <= 0)) {
+    throw new Error("--reps must be a positive safe integer.");
+  }
+  if (flags.maxRuns !== undefined && (!Number.isSafeInteger(flags.maxRuns) || flags.maxRuns <= 0)) {
+    throw new Error("--max-runs must be a positive safe integer.");
+  }
+  if (
+    flags.maxBudgetUsd !== undefined &&
+    (!Number.isFinite(flags.maxBudgetUsd) || flags.maxBudgetUsd <= 0)
+  ) {
+    throw new Error("--max-budget-usd must be a positive finite number.");
+  }
+  if (flags.seed !== undefined && !Number.isSafeInteger(flags.seed)) {
+    throw new Error("--seed must be a safe integer.");
+  }
+  if (flags.fixture !== undefined && !flags.fixture.trim()) {
+    throw new Error("--fixture must be a non-empty path.");
+  }
+  if (!flags.maxRuns && !flags.maxBudgetUsd && !flags.dryRun) {
     throw new Error(
-      "Refusing to run without a cost cap. Pass --max-runs or --max-budget-usd or --unsafe-no-cost-cap. " +
+      "Refusing to run without a cost cap. Pass --max-runs or --max-budget-usd. " +
         "Use --dry-run to see the plan without any agent calls.",
     );
   }
   return {
     models: flags.models?.length ? flags.models : DEFAULT_MODELS,
-    reps: flags.reps && flags.reps > 0 ? flags.reps : 3,
+    reps: flags.reps ?? 3,
     maxRuns: flags.maxRuns ?? Number.MAX_SAFE_INTEGER,
     maxBudgetUsd: flags.maxBudgetUsd ?? Number.MAX_SAFE_INTEGER,
     seed: flags.seed ?? 1,
     fixturePath: flags.fixture ?? defaultFixturePath,
     dryRun: flags.dryRun,
-    unsafeNoCostCap: flags.unsafeNoCostCap,
-    concurrency: flags.concurrency && flags.concurrency > 0 ? flags.concurrency : 1,
-    noResume: flags.noResume,
   };
-}
-
-/**
- * Bounded-concurrency executor. Runs `worker(item, index)` for every input,
- * keeping at most `limit` workers active at any time. Preserves output order.
- * Failures inside a worker bubble up; callers are expected to wrap workers in
- * their own try/catch when partial failure is acceptable.
- */
-export async function runConcurrently<T, R>(
-  items: T[],
-  limit: number,
-  worker: (item: T, index: number) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  const concurrency = Math.max(1, Math.min(limit, items.length));
-  let next = 0;
-  async function run(): Promise<void> {
-    while (true) {
-      const index = next++;
-      if (index >= items.length) return;
-      results[index] = await worker(items[index] as T, index);
-    }
-  }
-  const workers = Array.from({ length: concurrency }, () => run());
-  await Promise.all(workers);
-  return results;
-}
-
-/**
- * Pure-function key derivation for a per-run result file. Used both by the
- * runner (when writing) and the resume scan (when checking). Keeping this in
- * one place prevents the two from drifting.
- */
-export function resultFileName(promptId: string, modelId: string, rep: number): string {
-  return `${promptId}-${modelId}-${rep}.json`;
 }
 
 export function loadJsonl<T>(path: string): T[] {
   if (!existsSync(path)) {
     throw new Error(`Fixture missing: ${path}`);
+  }
+  const metadata = statSync(path);
+  if (!metadata.isFile() || metadata.size > MAX_JSONL_BYTES) {
+    throw new Error(
+      `Fixture must be a regular file no larger than ${MAX_JSONL_BYTES} bytes: ${path}`,
+    );
   }
   const lines = readFileSync(path, "utf-8").split("\n");
   const records: T[] = [];
@@ -174,44 +154,6 @@ export function loadJsonl<T>(path: string): T[] {
   return records;
 }
 
-export function appendHistoryEntry(historyPath: string, entry: Record<string, unknown>): void {
-  mkdirSync(dirname(historyPath), { recursive: true });
-  appendFileSync(historyPath, JSON.stringify(entry) + "\n");
-}
-
-export function writeJson(path: string, data: unknown): void {
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
-}
-
-export function utcNow(): string {
-  return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
-}
-
-export function todayUtc(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-export function repoCommitSha(): string | null {
-  try {
-    return execSync("git rev-parse HEAD", { cwd: REPO_ROOT, encoding: "utf-8" }).trim();
-  } catch {
-    return null;
-  }
-}
-
-export function fixtureSha(path: string): string {
-  const content = readFileSync(path, "utf-8");
-  return createHash("sha256").update(content).digest("hex").slice(0, 16);
-}
-
-export function apiKeyFingerprint(): string {
-  const key = process.env.CURSOR_API_KEY;
-  if (!key || key.length < 8) {
-    return "unset";
-  }
-  return `***${key.slice(-4)}`;
-}
 
 /**
  * Deterministic Fisher-Yates shuffle using a seeded mulberry32 PRNG so the
@@ -240,6 +182,7 @@ export function buildRunPlan(
   reps: number,
   baseSeed: number,
 ): RunPlanItem[] {
+  checkedRunCardinality(promptIds.length, models.length, reps);
   const plan: RunPlanItem[] = [];
   for (const promptId of promptIds) {
     for (const modelId of models) {
@@ -254,6 +197,30 @@ export function buildRunPlan(
     }
   }
   return plan;
+}
+
+export function checkedRunCardinality(
+  promptCount: number,
+  modelCount: number,
+  reps: number,
+): number {
+  for (const [name, value] of [
+    ["prompt count", promptCount],
+    ["model count", modelCount],
+    ["replication count", reps],
+  ] as const) {
+    if (!Number.isSafeInteger(value) || value < 0) {
+      throw new Error(`${name} must be a non-negative safe integer.`);
+    }
+  }
+  if (promptCount === 0 || modelCount === 0 || reps === 0) return 0;
+  const total = BigInt(promptCount) * BigInt(modelCount) * BigInt(reps);
+  if (total > BigInt(MAX_PLANNER_ITEMS)) {
+    throw new Error(
+      `Plan cardinality ${total} exceeds the in-memory planner ceiling ${MAX_PLANNER_ITEMS}.`,
+    );
+  }
+  return Number(total);
 }
 
 export function hash32(text: string): number {

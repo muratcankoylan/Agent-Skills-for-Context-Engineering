@@ -4,20 +4,77 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
-try:
-    from governance_policy import Constitution, ConstitutionError, DEFAULT_CONSTITUTION
-except ModuleNotFoundError:  # Imported as researcher.scripts.validate_governance.
+if __package__:
     from researcher.scripts.governance_policy import (
         Constitution,
         ConstitutionError,
-        DEFAULT_CONSTITUTION,
+    )
+    from researcher.scripts.validate_authority_contract import (
+        AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+        AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
+        AUTHORITY_CONFORMANCE_SCOPE,
+        AUTHORITY_CONSTITUTION_POLICY_PATH,
+        AUTHORITY_EVALUATOR_COMPONENT_PATHS,
+        AUTHORITY_FIXTURE_MANIFEST_PATH,
+        AUTHORITY_IMPLEMENTED_STATUSES,
+        AUTHORITY_PREIMPLEMENTATION_STATUSES,
+        AUTHORITY_RUNTIME_AUTHORITY,
+        AUTHORITY_SPEC_METADATA_KEYS,
+        AUTHORITY_VOCABULARY_MIN_REVISION,
+        AUTHORITY_VOCABULARY_PATH,
+        AUTHORITY_VOCABULARY_SCHEMA_PATH,
+        AUTHORITY_VOCABULARY_SCHEMA_VERSION,
+        AuthorityVocabularyBinding,
+        authority_policy_case_results,
+        build_authority_evaluator_bundle,
+        canonical_repository_output_path,
+        parse_authority_policy_conformance,
+        parse_authority_vocabulary,
+        load_authority_vocabulary_schema,
+        read_canonical_repository_file,
+    )
+    from researcher.scripts.validate_spec_lifecycle import (
+        load_candidate,
+        load_candidate_authority_vocabulary,
+    )
+else:  # Direct script execution resolves siblings from this script's directory.
+    from governance_policy import Constitution, ConstitutionError
+    from validate_authority_contract import (
+        AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+        AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
+        AUTHORITY_CONFORMANCE_SCOPE,
+        AUTHORITY_CONSTITUTION_POLICY_PATH,
+        AUTHORITY_EVALUATOR_COMPONENT_PATHS,
+        AUTHORITY_FIXTURE_MANIFEST_PATH,
+        AUTHORITY_IMPLEMENTED_STATUSES,
+        AUTHORITY_PREIMPLEMENTATION_STATUSES,
+        AUTHORITY_RUNTIME_AUTHORITY,
+        AUTHORITY_SPEC_METADATA_KEYS,
+        AUTHORITY_VOCABULARY_MIN_REVISION,
+        AUTHORITY_VOCABULARY_PATH,
+        AUTHORITY_VOCABULARY_SCHEMA_PATH,
+        AUTHORITY_VOCABULARY_SCHEMA_VERSION,
+        AuthorityVocabularyBinding,
+        authority_policy_case_results,
+        build_authority_evaluator_bundle,
+        canonical_repository_output_path,
+        parse_authority_policy_conformance,
+        parse_authority_vocabulary,
+        load_authority_vocabulary_schema,
+        read_canonical_repository_file,
+    )
+    from validate_spec_lifecycle import (
+        load_candidate,
+        load_candidate_authority_vocabulary,
     )
 
 
@@ -177,15 +234,251 @@ def atomic_write(path: Path, text: str) -> None:
     temporary.replace(path)
 
 
+def canonical_json_text(value: Any) -> str:
+    """Serialize governance projections using the authority contract's exact bytes."""
+
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        indent=2,
+        allow_nan=False,
+    ) + "\n"
+
+
+def render_authority_conformance(
+    registry: AuthorityVocabularyBinding,
+    constitution: Constitution,
+    evaluator_component_bytes: tuple[tuple[str, bytes], ...],
+) -> str:
+    """Render a receipt that the independent authority parser can reproduce."""
+
+    results = list(authority_policy_case_results(registry, constitution))
+    validator_bundle = build_authority_evaluator_bundle(evaluator_component_bytes)
+    document = {
+        "kind": "AuthorityVocabularyConformanceReceipt",
+        "schema_version": AUTHORITY_CONFORMANCE_RECEIPT_SCHEMA_VERSION,
+        "scope": AUTHORITY_CONFORMANCE_SCOPE,
+        "runtime_authority": AUTHORITY_RUNTIME_AUTHORITY,
+        "constitution_revision": registry.constitution_revision,
+        "registry_version": registry.registry_version,
+        "constitution_policy": {
+            "path": AUTHORITY_CONSTITUTION_POLICY_PATH,
+            "digest": f"sha256:{constitution.digest}",
+            "version": constitution.version,
+        },
+        "registry_digest": registry.digest,
+        "fixture_manifest_digest": registry.fixture_manifest_digest,
+        "validator_bundle": validator_bundle.to_receipt_value(),
+        "case_count": len(results),
+        "skipped_case_count": 0,
+        "result": "pass",
+        "cases": results,
+    }
+    return canonical_json_text(document)
+
+
+def _load_authority_evaluator_component_bytes(
+    root: Path,
+) -> tuple[tuple[str, bytes], ...]:
+    """Read the exact canonical evaluator sources bound by a receipt."""
+
+    components: list[tuple[str, bytes]] = []
+    for relative in AUTHORITY_EVALUATOR_COMPONENT_PATHS:
+        components.append(
+            (
+                relative,
+                read_canonical_repository_file(
+                    root,
+                    relative,
+                    label="authority evaluator bundle component",
+                ),
+            )
+        )
+    return tuple(components)
+
+
+def _load_authority_design(root: Path, authority_spec: Any) -> AuthorityVocabularyBinding:
+    """Load registry and fixtures while deliberately ignoring a stale derived receipt."""
+
+    metadata = authority_spec.metadata
+    present_metadata = AUTHORITY_SPEC_METADATA_KEYS.intersection(metadata)
+    if present_metadata != AUTHORITY_SPEC_METADATA_KEYS:
+        raise ValueError(
+            "authority design requires the atomic six-key SPEC-000 metadata set"
+        )
+    schema_path_value = metadata.get("Authority vocabulary schema")
+    schema_digest = metadata.get("Authority vocabulary schema digest")
+    schema_version = metadata.get("Authority vocabulary schema version")
+    if schema_path_value != AUTHORITY_VOCABULARY_SCHEMA_PATH:
+        raise ValueError(
+            "Authority vocabulary schema must be the canonical path "
+            f"{AUTHORITY_VOCABULARY_SCHEMA_PATH}"
+        )
+    if not isinstance(schema_digest, str) or re.fullmatch(
+        r"sha256:[0-9a-f]{64}", schema_digest
+    ) is None:
+        raise ValueError(
+            "Authority vocabulary schema digest must be sha256:<64 lowercase hex>"
+        )
+    if schema_version != AUTHORITY_VOCABULARY_SCHEMA_VERSION:
+        raise ValueError(
+            "Authority vocabulary schema version must be "
+            f"{AUTHORITY_VOCABULARY_SCHEMA_VERSION}"
+        )
+    schema_binding = load_authority_vocabulary_schema(
+        root,
+        expected_digest=schema_digest,
+        expected_version=schema_version,
+    )
+    path_value = metadata.get("Authority vocabulary")
+    digest = metadata.get("Authority vocabulary digest")
+    version_value = metadata.get("Authority vocabulary version")
+    if path_value != AUTHORITY_VOCABULARY_PATH:
+        raise ValueError(
+            f"Authority vocabulary must be the canonical path {AUTHORITY_VOCABULARY_PATH}"
+        )
+    if not isinstance(digest, str) or re.fullmatch(
+        r"sha256:[0-9a-f]{64}", digest
+    ) is None:
+        raise ValueError("Authority vocabulary digest must be sha256:<64 lowercase hex>")
+    if not isinstance(version_value, str) or re.fullmatch(
+        r"[1-9][0-9]*", version_value
+    ) is None:
+        raise ValueError("Authority vocabulary version must be a canonical positive integer")
+    registry_bytes = read_canonical_repository_file(
+        root,
+        AUTHORITY_VOCABULARY_PATH,
+        label="authority vocabulary",
+    )
+    fixture_bytes = read_canonical_repository_file(
+        root,
+        AUTHORITY_FIXTURE_MANIFEST_PATH,
+        label="authority fixture manifest",
+    )
+    return parse_authority_vocabulary(
+        registry_bytes,
+        schema_binding=schema_binding,
+        expected_digest=digest,
+        expected_constitution_revision=authority_spec.revision,
+        expected_registry_version=int(version_value),
+        fixture_manifest_bytes=fixture_bytes,
+    )
+
+
+def validate_authority_conformance(
+    root: Path,
+    constitution: Constitution,
+    *,
+    write: bool,
+) -> list[str]:
+    """Validate or atomically materialize the revision-bound authority receipt."""
+
+    root = root.resolve()
+    candidate_specs = load_candidate(root)
+    authority_spec = candidate_specs.get("SPEC-000")
+    if authority_spec is None or authority_spec.revision < AUTHORITY_VOCABULARY_MIN_REVISION:
+        # The shared loader still rejects detached rev2 artifacts in a rev1 tree.
+        canonical_artifacts = (
+            root / AUTHORITY_VOCABULARY_PATH,
+            root / AUTHORITY_FIXTURE_MANIFEST_PATH,
+            root / AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+        )
+        if any(path.is_symlink() for path in canonical_artifacts):
+            raise ValueError(
+                "pre-registry SPEC-000 forbids canonical authority artifact symlinks"
+            )
+        load_candidate_authority_vocabulary(root, candidate_specs)
+        return []
+
+    canonical_policy_path = root / AUTHORITY_CONSTITUTION_POLICY_PATH
+    canonical_policy_bytes = read_canonical_repository_file(
+        root,
+        AUTHORITY_CONSTITUTION_POLICY_PATH,
+        label="authority constitution policy",
+    )
+    if constitution.source.resolve() != canonical_policy_path.resolve() or (
+        constitution.digest != hashlib.sha256(canonical_policy_bytes).hexdigest()
+    ):
+        raise ValueError(
+            "authority conformance requires the canonical regular constitution policy"
+        )
+    receipt_path = canonical_repository_output_path(
+        root,
+        AUTHORITY_CONFORMANCE_RECEIPT_PATH,
+        label="authority conformance receipt",
+    )
+    receipt_required = authority_spec.status in AUTHORITY_IMPLEMENTED_STATUSES
+
+    if authority_spec.status in AUTHORITY_PREIMPLEMENTATION_STATUSES:
+        registry = load_candidate_authority_vocabulary(root, candidate_specs)
+        if registry is None:
+            raise ValueError("SPEC-000 revision 2 requires the canonical authority registry")
+        if write:
+            raise ValueError(
+                "authority-vocabulary conformance --write requires SPEC-000 "
+                "to be implemented, verified, or operational"
+            )
+        return []
+
+    if write and not receipt_required:
+        raise ValueError(
+            "authority-vocabulary conformance --write requires SPEC-000 "
+            "to be implemented, verified, or operational"
+        )
+    evaluator_component_bytes = _load_authority_evaluator_component_bytes(root)
+    if write:
+        if receipt_path.is_symlink():
+            raise ValueError("authority conformance receipt cannot be a symlink")
+        registry = _load_authority_design(root, authority_spec)
+        rendered = render_authority_conformance(
+            registry,
+            constitution,
+            evaluator_component_bytes,
+        )
+        parse_authority_policy_conformance(
+            rendered.encode("utf-8"),
+            registry=registry,
+            constitution=constitution,
+            evaluator_component_bytes=evaluator_component_bytes,
+        )
+        atomic_write(receipt_path, rendered)
+
+    registry = load_candidate_authority_vocabulary(root, candidate_specs)
+    if registry is None:
+        raise ValueError("SPEC-000 revision 2 requires the canonical authority registry")
+    if not receipt_path.exists():
+        if not receipt_required:
+            return []
+        return [
+            "implemented SPEC-000 revision 2 requires the canonical "
+            "authority-vocabulary conformance receipt"
+        ]
+    if registry.policy_conformance is None:
+        return ["authority-vocabulary conformance receipt was not validated"]
+    expected = render_authority_conformance(
+        registry,
+        constitution,
+        evaluator_component_bytes,
+    )
+    if receipt_path.read_text(encoding="utf-8") != expected:
+        return [
+            "authority-vocabulary conformance receipt is stale: run "
+            f"{Path(__file__).name} --write"
+        ]
+    return []
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="validate policy, fixtures, and generated view")
     mode.add_argument("--write", action="store_true", help="validate and atomically refresh generated view")
     mode.add_argument("--decision", action="store_true", help="print one machine-readable policy decision")
-    parser.add_argument("--constitution", type=Path, default=DEFAULT_CONSTITUTION)
-    parser.add_argument("--view", type=Path, default=DEFAULT_VIEW)
-    parser.add_argument("--fixtures", type=Path, default=DEFAULT_FIXTURES)
+    parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--constitution", type=Path)
+    parser.add_argument("--view", type=Path)
+    parser.add_argument("--fixtures", type=Path)
     parser.add_argument("--expected-digest")
     parser.add_argument("--actor")
     parser.add_argument("--action")
@@ -194,7 +487,18 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        constitution = Constitution.load(args.constitution, expected_digest=args.expected_digest)
+        root = args.root.resolve()
+        constitution_path = args.constitution or (
+            root / AUTHORITY_CONSTITUTION_POLICY_PATH
+        )
+        view_path = args.view or (root / "governance/generated/authority-table.md")
+        fixtures_path = args.fixtures or (
+            root / "governance/fixtures/authority-decisions.jsonl"
+        )
+        constitution = Constitution.load(
+            constitution_path,
+            expected_digest=args.expected_digest,
+        )
         if args.decision:
             if not all([args.actor, args.action, args.resource]):
                 parser.error("--decision requires --actor, --action, and --resource")
@@ -211,13 +515,21 @@ def main() -> int:
             return 0
 
         errors = validate_invariants(constitution)
-        errors.extend(validate_fixtures(constitution, args.fixtures))
+        errors.extend(validate_fixtures(constitution, fixtures_path))
+        if not errors:
+            errors.extend(
+                validate_authority_conformance(
+                    root,
+                    constitution,
+                    write=args.write,
+                )
+            )
         rendered = render_authority_table(constitution)
         if args.write:
-            atomic_write(args.view, rendered)
-        elif not args.view.exists():
-            errors.append(f"generated view is missing: {args.view}")
-        elif args.view.read_text(encoding="utf-8") != rendered:
+            atomic_write(view_path, rendered)
+        elif not view_path.exists():
+            errors.append(f"generated view is missing: {view_path}")
+        elif view_path.read_text(encoding="utf-8") != rendered:
             errors.append(f"generated view is stale: run {Path(__file__).name} --write")
         if errors:
             for error in errors:
@@ -234,7 +546,7 @@ def main() -> int:
             f"digest {constitution.digest[:12]}"
         )
         return 0
-    except (ConstitutionError, OSError, json.JSONDecodeError) as exc:
+    except (ValueError, OSError) as exc:
         print(f"[error] {exc}", file=sys.stderr)
         return 1
 
