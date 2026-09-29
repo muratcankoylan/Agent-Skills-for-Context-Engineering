@@ -1,6 +1,6 @@
 # ADR-0002: Treat the corpus inventory as a checked derived view
 
-- Status: accepted for proposal
+- Status: accepted
 - Date: 2026-08-10
 - Spec: SPEC-001
 

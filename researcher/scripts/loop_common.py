@@ -1,24 +1,32 @@
 #!/usr/bin/env python3
 """Shared helpers for the continuous research loop scripts.
 
-All queue mutations go through atomic writes (`write_json`, `write_jsonl`) and
-optional file locks (`queue_lock`). The lock uses fcntl exclusive flock so
-concurrent loop_step + loop_discover invocations cannot race on the inbox or
-parked queue.
+Read helpers remain importable when Unix locking is unavailable. Operations
+requiring process exclusion (`queue_lock`, `append_jsonl`) then fail before
+creating paths. Generic atomic writers still require their caller's queue lock.
+This is advisory locking for cooperating processes on trusted local filesystems,
+not a Windows mutation backend, distributed lock or crash-recovery journal.
+Append sidecars protect target creation; the ledger-inode flock is retained to
+coordinate with older writers and path aliases. Do not unlink live lock files.
 """
 
 from __future__ import annotations
 
-import errno
-import fcntl
 import hashlib
 import json
 import os
+import re
+import stat
 import tempfile
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any, Iterable, Iterator, TextIO
+
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,6 +38,61 @@ RUNS_DIR = RESEARCHER / "runs"
 SNAPSHOTS_DIR = REPORTS_DIR / "snapshots"
 LOCK_DIR = QUEUE_DIR / ".locks"
 JSONL_QUARANTINE_DIR = REPORTS_DIR / "jsonl-quarantine"
+
+
+class LockingUnavailableError(RuntimeError):
+    """The platform cannot supply the required process-wide lock."""
+
+
+class LockReleaseOutcomeUncertainError(RuntimeError):
+    """The body finished but unlocking failed; do not blindly repeat effects."""
+
+    effects_may_have_committed = True
+
+
+def _require_fcntl() -> Any:
+    if fcntl is None:
+        raise LockingUnavailableError("queue mutation requires Unix fcntl.flock")
+    return fcntl
+
+
+@contextmanager
+def _exclusive_flock(handle: TextIO) -> Iterator[None]:
+    backend = _require_fcntl()
+    backend.flock(handle.fileno(), backend.LOCK_EX)
+    try:
+        yield
+    except BaseException:
+        try:
+            backend.flock(handle.fileno(), backend.LOCK_UN)
+        except OSError:
+            pass  # Preserve the original body failure; closing still releases the descriptor.
+        raise
+    else:
+        try:
+            backend.flock(handle.fileno(), backend.LOCK_UN)
+        except OSError as exc:
+            raise LockReleaseOutcomeUncertainError(
+                "protected effects may have committed before lock release failed"
+            ) from exc
+
+
+@contextmanager
+def _lock_file(path: Path) -> Iterator[None]:
+    _require_fcntl()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor = os.open(path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
+    try:
+        info = os.fstat(descriptor)
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+            raise ValueError("lock must be a single-link regular file")
+        with os.fdopen(descriptor, "a+", encoding="utf-8") as handle:
+            descriptor = -1
+            with _exclusive_flock(handle):
+                yield
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
 
 
 def utc_now() -> str:
@@ -106,40 +169,29 @@ def write_jsonl(path: Path, records: Iterable[dict[str, Any]]) -> None:
 
 
 def append_jsonl(path: Path, record: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as handle:
-        try:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-        except OSError:
-            pass
-        handle.write(json.dumps(record, sort_keys=True) + "\n")
-        handle.flush()
-        try:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
-        except OSError:
-            pass
+    _require_fcntl()
+    payload = json.dumps(record, sort_keys=True) + "\n"
+    # A denied sidecar lock must not create an empty ledger. The target lock is
+    # still needed for old writers and hardlink/case aliases; a later target-lock
+    # failure can leave an empty new file, which must not be treated as a receipt.
+    identity = hashlib.sha256(str(path.resolve()).encode("utf-8")).hexdigest()
+    with _lock_file(LOCK_DIR / f"append-{identity}.lock"):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as handle:
+            with _exclusive_flock(handle):
+                handle.write(payload)
+                handle.flush()
 
 
 @contextmanager
 def queue_lock(name: str) -> Iterator[None]:
     """Exclusive lock for queue mutations. Use one lock per queue file family."""
 
-    LOCK_DIR.mkdir(parents=True, exist_ok=True)
-    lock_path = LOCK_DIR / f"{name}.lock"
-    handle = open(lock_path, "a+")
-    try:
-        try:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-        except OSError as exc:
-            if exc.errno not in {errno.EACCES, errno.EAGAIN}:
-                raise
+    _require_fcntl()
+    if not isinstance(name, str) or re.fullmatch(r"[a-z0-9][a-z0-9_.-]{0,127}", name) is None:
+        raise ValueError("invalid queue lock name")
+    with _lock_file(LOCK_DIR / f"{name}.lock"):
         yield
-    finally:
-        try:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
-        except OSError:
-            pass
-        handle.close()
 
 
 def load_config() -> dict[str, Any]:

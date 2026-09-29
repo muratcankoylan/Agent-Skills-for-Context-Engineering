@@ -1,9 +1,16 @@
 # SPEC-000: Program constitution and authority model
 
-- Status: implementing
-- Wave: 0
-- Classification: public
-- Depends on: none
+Status: amended
+Revision: 1
+Revises: none
+Wave: 0
+Classification: public
+Owners: human maintainer; governance agent
+Depends on: none
+Dependency revisions: none
+Adoption decision: ADR-0005
+Lifecycle decision: ADR-0008
+Replacement: SPEC-000@2
 
 ## Decision
 
