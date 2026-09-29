@@ -1,0 +1,32 @@
+name: Agents API transport conformance
+
+on:
+  pull_request:
+    paths:
+      - researcher/service/**
+      - .github/workflows/agents-api.yml
+  push:
+    branches: [main]
+    paths:
+      - researcher/service/**
+      - .github/workflows/agents-api.yml
+
+permissions:
+  contents: read
+
+jobs:
+  offline-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    strategy:
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Run stdlib-only contracts with no provider credentials
+        run: python -m unittest discover -s researcher/service/tests -p test_openai_agents.py -v
