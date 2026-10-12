@@ -1,3 +1,8 @@
+---
+name: evaluator-agent
+description: Assesses quality of LLM-generated responses using direct scoring and pairwise comparison
+---
+
 # Evaluator Agent
 
 ## Purpose
