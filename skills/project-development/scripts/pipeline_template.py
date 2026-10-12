@@ -37,6 +37,9 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+# Strict allow-list for batch identifiers to prevent path traversal.
+_BATCH_ID_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+
 __all__ = [
     "Item",
     "ParsedResult",
@@ -129,12 +132,48 @@ class ParsedResult:
 # Path Utilities
 # -----------------------------------------------------------------------------
 
+def _validate_batch_id(batch_id: str) -> str:
+    """Validate and normalize a batch identifier.
+
+    Rejects empty values, non-string values, and any characters outside the
+    strict allow-list of alphanumerics, underscore, and hyphen. This prevents
+    path traversal via batch IDs such as ``../../etc``.
+    """
+    if not isinstance(batch_id, str):
+        raise ValueError(f"batch_id must be a string, got {type(batch_id).__name__}")
+    if not batch_id:
+        raise ValueError("batch_id must not be empty")
+    if not _BATCH_ID_RE.match(batch_id):
+        raise ValueError(
+            f"batch_id contains invalid characters: {batch_id!r}. "
+            "Only A-Z, a-z, 0-9, underscore, and hyphen are allowed."
+        )
+    return batch_id
+
+
+def _resolve_within(root: Path, subpath: Path) -> Path:
+    """Resolve ``subpath`` and verify it is contained within ``root``.
+
+    Raises ``ValueError`` if the resolved path escapes ``root``.
+    """
+    root_resolved = root.resolve()
+    target_resolved = subpath.resolve()
+    try:
+        target_resolved.relative_to(root_resolved)
+    except ValueError as exc:
+        raise ValueError(
+            f"Resolved path {target_resolved} is outside allowed root {root_resolved}"
+        ) from exc
+    return target_resolved
+
+
 def get_batch_dir(batch_id: str) -> Path:
     """Get the data directory for a batch.
 
     Use when: resolving the root directory for a specific batch run.
     """
-    return DATA_DIR / batch_id
+    batch_id = _validate_batch_id(batch_id)
+    return _resolve_within(DATA_DIR, DATA_DIR / batch_id)
 
 
 def get_item_dir(batch_id: str, item_id: str) -> Path:
@@ -150,7 +189,8 @@ def get_output_dir(batch_id: str) -> Path:
 
     Use when: writing final rendered outputs (HTML, reports, etc.).
     """
-    return OUTPUT_DIR / batch_id
+    batch_id = _validate_batch_id(batch_id)
+    return _resolve_within(OUTPUT_DIR, OUTPUT_DIR / batch_id)
 
 
 # -----------------------------------------------------------------------------
