@@ -18,9 +18,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 import re
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -52,9 +54,13 @@ PARKED_FILE = QUEUE_DIR / "parked.jsonl"
 DONE_FILE = QUEUE_DIR / "done.jsonl"
 QUARANTINE_FILE = QUEUE_DIR / "quarantine.jsonl"
 INBOX_FILE = QUEUE_DIR / "inbox.jsonl"
+HTTP_REQUESTS_FILE = REPORTS_DIR / "http-requests.jsonl"
 RESEARCH_LOOP = RESEARCHER / "scripts" / "research_loop.py"
 USER_AGENT = "context-engineering-researcher/0.1 (+https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering)"
 MAX_FETCH_BYTES = 1_500_000
+DEFAULT_HTTP_RETRY_MAX = 3
+DEFAULT_HTTP_RETRY_BASE_DELAY = 1.0
+DEFAULT_HTTP_RETRY_MAX_DELAY = 60.0
 
 
 def record_event(event: dict[str, Any]) -> None:
@@ -67,6 +73,29 @@ def record_failure(event: dict[str, Any]) -> None:
     event = dict(event)
     event["timestamp"] = utc_now()
     append_jsonl(FAILURE_LOG, event)
+
+
+def record_http_request(event: dict[str, Any]) -> None:
+    event = dict(event)
+    event["timestamp"] = utc_now()
+    append_jsonl(HTTP_REQUESTS_FILE, event)
+
+
+def http_requests_today() -> int:
+    if not HTTP_REQUESTS_FILE.exists():
+        return 0
+    today = today_utc()
+    count = 0
+    for line in HTTP_REQUESTS_FILE.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if record.get("timestamp", "").startswith(today):
+            count += 1
+    return count
 
 
 def failures_today() -> int:
@@ -185,15 +214,54 @@ def normalize_source_type(value: str | None) -> str:
     return "other"
 
 
-def fetch_url(url: str, dest_dir: Path) -> dict[str, Any]:
+def _http_request_with_retry(
+    request: urllib.request.Request,
+    max_retries: int = DEFAULT_HTTP_RETRY_MAX,
+    base_delay: float = DEFAULT_HTTP_RETRY_BASE_DELAY,
+    max_delay: float = DEFAULT_HTTP_RETRY_MAX_DELAY,
+) -> urllib.request.addinfourl:
+    """Open a URL with exponential backoff on 429 / 5xx / transient errors."""
+    last_error: Exception | None = None
+    for attempt in range(max_retries + 1):
+        try:
+            return urllib.request.urlopen(request, timeout=30)
+        except urllib.error.HTTPError as exc:
+            last_error = exc
+            if attempt >= max_retries or exc.code not in {429, 500, 502, 503, 504}:
+                raise
+            delay = min(base_delay * (2 ** attempt), max_delay)
+            delay = random.uniform(0.0, delay)
+            time.sleep(delay)
+        except urllib.error.URLError as exc:
+            last_error = exc
+            if attempt >= max_retries:
+                raise
+            delay = min(base_delay * (2 ** attempt), max_delay)
+            delay = random.uniform(0.0, delay)
+            time.sleep(delay)
+    raise last_error or RuntimeError("HTTP retry loop exited without result")
+
+
+def fetch_url(
+    url: str,
+    dest_dir: Path,
+    dry_run: bool = False,
+    max_retries: int = DEFAULT_HTTP_RETRY_MAX,
+) -> dict[str, Any]:
     if not url.lower().startswith(("http://", "https://")):
         return {"ok": False, "error": f"unsupported url scheme: {url[:32]}", "url": url}
+
+    record_http_request({"url": url, "dry_run": dry_run})
+
+    if dry_run:
+        return {"ok": False, "error": "dry-run: HTTP retrieval disabled", "url": url}
+
     dest_dir.mkdir(parents=True, exist_ok=True)
     safe_name = re.sub(r"[^A-Za-z0-9._-]+", "-", url).strip("-")[:120] or "source"
     target = dest_dir / f"{safe_name}.html"
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,*/*"})
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with _http_request_with_retry(request, max_retries=max_retries) as response:
             final_url = getattr(response, "url", url)
             if not final_url.lower().startswith(("http://", "https://")):
                 return {"ok": False, "error": "redirect changed scheme", "url": final_url}
@@ -218,9 +286,14 @@ def fetch_url(url: str, dest_dir: Path) -> dict[str, Any]:
         return {"ok": False, "error": "timeout", "url": url}
 
 
-def attempt_retrieval(run_dir: Path, url: str) -> dict[str, Any]:
+def attempt_retrieval(
+    run_dir: Path,
+    url: str,
+    dry_run: bool = False,
+    max_retries: int = DEFAULT_HTTP_RETRY_MAX,
+) -> dict[str, Any]:
     raw_dir = run_dir / "sources" / "evidence" / "raw"
-    return fetch_url(url, raw_dir)
+    return fetch_url(url, raw_dir, dry_run=dry_run, max_retries=max_retries)
 
 
 def append_evidence_pointer(run_dir: Path, raw_record: dict[str, Any]) -> None:
@@ -252,7 +325,13 @@ def update_run_queue_retrieval(run_dir: Path, status: str, raw_paths: list[str],
     queue.write_text("\n".join(json.dumps(record, sort_keys=True) for record in records) + "\n", encoding="utf-8")
 
 
-def advance_initialized(run_dir: Path, state: dict[str, Any], allow_fetch: bool) -> dict[str, Any]:
+def advance_initialized(
+    run_dir: Path,
+    state: dict[str, Any],
+    allow_fetch: bool,
+    dry_run: bool = False,
+    max_retries: int = DEFAULT_HTTP_RETRY_MAX,
+) -> dict[str, Any]:
     url = state.get("source_url")
     run_id = run_dir.name
     if not url:
@@ -261,7 +340,7 @@ def advance_initialized(run_dir: Path, state: dict[str, Any], allow_fetch: bool)
     if not allow_fetch:
         park_run(run_id, "automatic retrieval disabled; needs manual retrieve")
         return {"action": "parked", "run_id": run_id, "reason": "fetch disabled"}
-    fetched = attempt_retrieval(run_dir, url)
+    fetched = attempt_retrieval(run_dir, url, dry_run=dry_run, max_retries=max_retries)
     if not fetched.get("ok"):
         park_run(run_id, f"retrieval failed: {fetched.get('error')}")
         record_failure({"phase": "retrieval", "run_id": run_id, "url": url, "error": fetched.get("error")})
@@ -303,14 +382,19 @@ def advance_retrieved(run_dir: Path) -> dict[str, Any]:
     return {"action": "parked", "run_id": run_id, "reason": "needs evaluation"}
 
 
-def advance_run(run_dir: Path, allow_fetch: bool) -> dict[str, Any]:
+def advance_run(
+    run_dir: Path,
+    allow_fetch: bool,
+    dry_run: bool = False,
+    max_retries: int = DEFAULT_HTTP_RETRY_MAX,
+) -> dict[str, Any]:
     state = load_run_state(run_dir)
     if not state:
         park_run(run_dir.name, "missing run-state.json")
         return {"action": "parked", "run_id": run_dir.name, "reason": "missing state"}
     current = state.get("current_state")
     if current == "initialized":
-        return advance_initialized(run_dir, state, allow_fetch)
+        return advance_initialized(run_dir, state, allow_fetch, dry_run=dry_run, max_retries=max_retries)
     if current == "retrieved":
         return advance_retrieved(run_dir)
     if current in {"evaluated", "proposed", "novelty_checked", "validated"}:
@@ -331,13 +415,19 @@ def advance_run(run_dir: Path, allow_fetch: bool) -> dict[str, Any]:
     return {"action": "parked", "run_id": run_dir.name, "reason": f"unknown state {current}"}
 
 
-def loop_step(config: dict[str, Any], allow_fetch: bool) -> dict[str, Any]:
+def loop_step(
+    config: dict[str, Any],
+    allow_fetch: bool,
+    dry_run: bool = False,
+    max_retries: int = DEFAULT_HTTP_RETRY_MAX,
+) -> dict[str, Any]:
     budgets = config.get("budgets", {})
     max_active = budgets.get("max_active_runs", 3)
     max_runs_today = budgets.get("max_runs_per_day", 6)
     max_failures = budgets.get("max_failures_per_day", 5)
     max_parked = budgets.get("max_parked", 12)
-    # `mode` governs future LLM-judge feeds, not stdlib HTTP retrieval. Retrieval is
+    max_http_requests = budgets.get("max_http_requests_per_day")
+    # `mode` governs future paid-LLM feeds, not stdlib HTTP retrieval. Retrieval is
     # controlled by --allow-fetch alone so the daemon can stage evidence without
     # incurring paid-API spend.
 
@@ -348,6 +438,15 @@ def loop_step(config: dict[str, Any], allow_fetch: bool) -> dict[str, Any]:
     if failures_today() >= max_failures:
         record_event({"action": "stop", "reason": "failure budget exceeded"})
         return {"ok": True, "action": "stop", "reason": "failure budget exceeded"}
+
+    if max_http_requests is not None and http_requests_today() >= max_http_requests:
+        record_event({"action": "stop", "reason": "HTTP request budget exceeded"})
+        return {"ok": True, "action": "stop", "reason": "HTTP request budget exceeded"}
+
+    if dry_run:
+        # In dry-run mode we still park initialized runs so the state machine
+        # advances, but we do not perform real HTTP retrieval.
+        pass
 
     buckets = categorize_runs()
     active = buckets["active"]
@@ -398,7 +497,7 @@ def loop_step(config: dict[str, Any], allow_fetch: bool) -> dict[str, Any]:
 
     active.sort(key=lambda path: load_run_state(path).get("updated_at", "") if load_run_state(path) else "")
     target = active[0]
-    result = advance_run(target, allow_fetch)
+    result = advance_run(target, allow_fetch, dry_run=dry_run, max_retries=max_retries)
     record_event({"phase": "advance", **result})
     return {"ok": True, **result}
 
@@ -406,11 +505,12 @@ def loop_step(config: dict[str, Any], allow_fetch: bool) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Advance the continuous research loop by one step")
     parser.add_argument("--allow-fetch", action="store_true", help="permit HTTP GET retrieval of source URLs")
+    parser.add_argument("--dry-run", action="store_true", help="do not make real HTTP requests or spend budget")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
     config = load_config()
-    result = loop_step(config, args.allow_fetch)
+    result = loop_step(config, args.allow_fetch, dry_run=args.dry_run)
     if args.json:
         print(json.dumps(result, indent=2))
     else:

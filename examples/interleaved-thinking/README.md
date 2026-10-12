@@ -438,6 +438,26 @@ result = loop.run(task, initial_prompt, tools, tool_executor)
 - **Best Prompt Tracking**: Keeps the prompt that produced the highest score
 - **Prompt Growth Limiting**: Prevents prompt bloat by limiting size expansion
 - **Regression Detection**: Warns on score drops, stops after consecutive regressions
+- **Budget Guards**: Optional caps on total tokens, API requests, and estimated spend
+- **Rate-Limit Retry**: Automatic exponential backoff for Anthropic/MiniMax rate limits
+- **Dry Run Mode**: Skip paid API calls and produce stub output for testing
+
+**Budget Configuration:**
+
+```python
+config = LoopConfig(
+    max_iterations=5,
+    # Hard stop when any of these is reached
+    max_total_tokens=100_000,    # cumulative tokens across all loop calls
+    max_requests=30,             # capture + analyze + optimize calls
+    max_cost_usd=1.00,           # estimated spend cap
+    cost_per_1m_tokens_usd=3.0,  # blended rate for cost estimates
+    dry_run=False,               # set True to skip paid API calls
+    max_retries=3,               # Anthropic rate-limit retries
+)
+```
+
+> ⚠️ **Cost Warning**: The optimization loop invokes a paid LLM multiple times per iteration (capture, analysis, and optimization). Set `max_total_tokens`, `max_requests`, and `max_cost_usd` to avoid runaway spending, and use `dry_run=True` when testing integrations.
 
 **Score Expectations:**
 
