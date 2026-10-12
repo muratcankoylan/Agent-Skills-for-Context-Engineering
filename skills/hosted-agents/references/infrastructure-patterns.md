@@ -10,6 +10,12 @@ Modal provides the sandbox infrastructure with near-instant startup and filesyst
 
 ```python
 import modal
+import os
+import re
+import subprocess
+
+# Validate repository identifiers before passing them to git or shell commands.
+REPO_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 # Define the base image with all dependencies
 image = modal.Image.debian_slim().pip_install([
@@ -27,7 +33,7 @@ class AgentSandbox:
     def __init__(self, repo_url: str, snapshot_id: str = None):
         self.repo_url = repo_url
         self.snapshot_id = snapshot_id
-    
+
     @modal.enter()
     def setup(self):
         if self.snapshot_id:
@@ -36,13 +42,31 @@ class AgentSandbox:
         else:
             # Fresh setup from image
             self._clone_and_setup()
-    
+
     def _clone_and_setup(self):
-        """Clone repo and run initial setup."""
+        """Clone repo and run initial setup.
+
+        Security note: This example demonstrates sandbox secret handling patterns.
+        Review and harden for your production environment before use.
+        """
+        if not REPO_PATTERN.fullmatch(self.repo_url):
+            raise ValueError(f"Invalid repository identifier: {self.repo_url}")
+
         token = self._get_github_app_token()
-        os.system(f"git clone https://x-access-token:{token}@github.com/{self.repo_url}")
-        os.system("npm install")
-        os.system("npm run build")
+        env = os.environ.copy()
+        env["GITHUB_APP_TOKEN"] = token
+
+        subprocess.run(
+            [
+                "git",
+                "-c", "credential.helper=!f() { echo 'username=x-access-token'; echo 'password='$GITHUB_APP_TOKEN; }; f",
+                "clone", f"https://github.com/{self.repo_url}",
+            ],
+            env=env,
+            check=True,
+        )
+        subprocess.run(["npm", "install"], check=True)
+        subprocess.run(["npm", "run", "build"], check=True)
     
     @modal.method()
     def execute_prompt(self, prompt: str, user_identity: dict) -> dict:
@@ -65,9 +89,13 @@ class AgentSandbox:
 Build images on a schedule to keep them fresh:
 
 ```python
+import re
 import schedule
 import time
 from datetime import datetime
+
+# Validate repository identifiers before passing them to git or shell commands.
+REPO_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 class ImageBuilder:
     def __init__(self, repositories: list[str]):
@@ -89,24 +117,38 @@ class ImageBuilder:
                 log.error(f"Failed to build image for {repo}: {e}")
     
     def _build_image(self, repo: str) -> str:
-        """Build a single repository image."""
-        sandbox = modal.Sandbox.create()
-        
-        # Clone with app token
-        token = get_app_installation_token(repo)
-        sandbox.exec(f"git clone https://x-access-token:{token}@github.com/{repo} /workspace")
-        
+        """Build a single repository image.
+
+        Security note: This example demonstrates sandbox secret handling patterns.
+        Review and harden for your production environment before use.
+        """
+        if not REPO_PATTERN.fullmatch(repo):
+            raise ValueError(f"Invalid repository identifier: {repo}")
+
+        # Supply the GitHub App token via Modal secret mount, never in a URL.
+        sandbox = modal.Sandbox.create(
+            secrets=[modal.Secret.from_name("github-app-token")]
+        )
+
+        # Clone using a git credential helper that reads the token from the
+        # environment. This avoids embedding credentials in the clone URL.
+        sandbox.exec([
+            "git",
+            "-c", "credential.helper=!f() { echo 'username=x-access-token'; echo 'password='$GITHUB_APP_TOKEN; }; f",
+            "clone", f"https://github.com/{repo}", "/workspace",
+        ])
+
         # Install dependencies
-        sandbox.exec("cd /workspace && npm install")
-        
+        sandbox.exec(["bash", "-c", "cd /workspace && npm install"])
+
         # Run build
-        sandbox.exec("cd /workspace && npm run build")
-        
+        sandbox.exec(["bash", "-c", "cd /workspace && npm run build"])
+
         # Warm caches
-        sandbox.exec("cd /workspace && npm run dev &")
+        sandbox.exec(["bash", "-c", "cd /workspace && npm run dev &"])
         time.sleep(5)  # Let dev server start
-        sandbox.exec("cd /workspace && npm test -- --run")
-        
+        sandbox.exec(["bash", "-c", "cd /workspace && npm test -- --run"])
+
         # Create snapshot
         return sandbox.snapshot()
     
