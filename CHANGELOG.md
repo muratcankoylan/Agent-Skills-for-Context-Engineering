@@ -4,6 +4,24 @@ All notable changes to this project are documented here. Versions follow semanti
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-10-23
+
+### Added
+
+#### New skill: agents-md-generator
+
+- `skills/agents-md-generator/SKILL.md`: nineteenth skill, covering creation, audit, and compaction of repository instruction files (AGENTS.md, scoped overrides, requested tool compatibility files) for any language or stack. Core technique is the router-only file: persist only verified, non-obvious, durable rules and conditional links to the documents that own procedures, examples, and architecture, so the file needs no hand edits when those documents change.
+- Five reference files: `discovery.md` (detector fields, evidence priority, command verification), `output-template.md` (compact root, nested, and compatibility templates with a filled TypeScript example), `examples.md` (compaction, scoped file, preserved shared source, unverifiable command), `merge-and-verify.md` (semantic reconciliation, removal criteria, verification checklist), and `tool-compatibility.md` (loading order and layout across coding agents).
+- One platform-neutral script, `scripts/detect-agent-context.py` (stdlib Python, read-only): indexes instruction paths, manifests, CI, and declared technology signals without reading credentials, environment files, or instruction contents.
+- Explicit boundaries: the repository's own documentation keeps procedures and architecture, `tool-design` keeps tool schemas and descriptions, `context-fundamentals` keeps general context theory, and `project-development` keeps project-shape decisions.
+
+#### Corpus wiring
+
+- 1 new mechanism in `researcher/mechanisms/registry.jsonl`: `router-only-instruction-file` (29 total). Its accepted-ledger `promotion` event is pending until the skill commit exists, because durable events must carry `source_commit`.
+- 2 new activation cases (29 total): one routing instruction-file audit and compaction to `agents-md-generator`, and an inverse case that routes tool description and schema work to `tool-design` and rejects `agents-md-generator`.
+- No new claims (the skill contains no numeric, benchmark, or vendor-performance claims) and no new router-benchmark prompts; the router dry-run cap in `.github/workflows/validate.yml` is unchanged.
+- Manifests bumped to 2.7.0; README, root SKILL.md, CLAUDE.md, and AGENTS.md updated for 19 skills. `researcher/corpus/inventory.json` and `researcher/generated/corpus-summary.md` still need regeneration on a checkout with LF line endings.
+
 ### Changed
 
 #### long-horizon-prompting 1.1.0: handoff contracts and evidenced blocking review

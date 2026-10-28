@@ -6,12 +6,12 @@
   },
   "metadata": {
     "description": "Context engineering and harness engineering skills plus a file-based autonomous research-to-skill operating system with measured router-benchmark results across four frontier models",
-    "version": "2.6.0"
+    "version": "2.7.0"
   },
   "plugins": [
     {
       "name": "context-engineering",
-      "description": "Comprehensive context engineering and harness engineering skills for production-grade AI agent systems: fundamentals, degradation patterns, compression, optimization, self-managed context (model-controlled live context editing), multi-agent coordination, long-horizon prompting (pseudo-formal task briefs for long-running and parallel agents), memory systems, tool design, filesystem context, hosted agents, evaluation, autonomous harnesses, self-improvement loops (RSI, meta-harnesses, evolutionary scaffold search), latent briefing (KV cache sharing between agents), project development, and cognitive architecture. Ships with a researcher operating system (rubrics, mechanism registry, claim provenance, run state machine, adversarial benchmarks, continuous loop).",
+      "description": "Comprehensive context engineering and harness engineering skills for production-grade AI agent systems: fundamentals, degradation patterns, compression, optimization, self-managed context (model-controlled live context editing), multi-agent coordination, long-horizon prompting (pseudo-formal task briefs for long-running and parallel agents), memory systems, tool design, filesystem context, hosted agents, evaluation, autonomous harnesses, self-improvement loops (RSI, meta-harnesses, evolutionary scaffold search), repository instruction files (router-only AGENTS.md generation and compaction), latent briefing (KV cache sharing between agents), project development, and cognitive architecture. Ships with a researcher operating system (rubrics, mechanism registry, claim provenance, run state machine, adversarial benchmarks, continuous loop).",
       "source": "./",
       "strict": false,
       "skills": [
@@ -32,7 +32,8 @@
         "./skills/project-development",
         "./skills/bdi-mental-states",
         "./skills/latent-briefing",
-        "./skills/self-improvement-loops"
+        "./skills/self-improvement-loops",
+        "./skills/agents-md-generator"
       ]
     }
   ]
