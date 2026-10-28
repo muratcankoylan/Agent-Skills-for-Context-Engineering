@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "generated_by": "manual-breakthrough-roadmap-seed",
-  "updated_at": "2026-10-11",
+  "updated_at": "2026-10-23",
   "purpose": "Canonical machine-readable map for skills, mechanisms, claims, and activation scenarios.",
   "skills": [
     {
@@ -10,6 +10,13 @@
       "activation_scenarios": ["LLM-as-judge design", "pairwise comparison", "judge calibration", "bias mitigation"],
       "mechanism_ids": ["pairwise-skill-revision"],
       "claim_ids": ["claim-advanced-evaluation-position-swap"]
+    },
+    {
+      "name": "agents-md-generator",
+      "path": "skills/agents-md-generator/SKILL.md",
+      "activation_scenarios": ["AGENTS.md creation or audit", "repository instruction compaction", "scoped instruction overrides", "tool compatibility instruction files"],
+      "mechanism_ids": ["router-only-instruction-file"],
+      "claim_ids": []
     },
     {
       "name": "bdi-mental-states",

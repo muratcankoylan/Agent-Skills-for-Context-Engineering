@@ -71,6 +71,9 @@ Reliable autonomous agents need explicit operating loops around the model: locke
 **Self-Improvement Loops**
 When the harness itself becomes the optimization target, a different discipline applies: recursive self-improvement, meta-harness search, failure-driven bounded self-edits, evolutionary scaffold search, and context mechanism evolution. The controlling constraints are empirical two-split acceptance gates, filesystem experience archives with raw traces, runtime-enforced constraints outside every editable surface, and diversity preservation to prevent collapse.
 
+**Agent Instruction Files**
+Repository instruction files such as AGENTS.md work best as a small router: durable, verified rules plus conditional links to the documents that own procedures, examples, and architecture. The generator audits, compacts, and creates them for any stack without copying content that would force hand edits.
+
 ### Development Methodology
 
 **Project Development**
@@ -114,6 +117,7 @@ Internal skills in this collection:
 - [advanced-evaluation](skills/advanced-evaluation/SKILL.md)
 - [harness-engineering](skills/harness-engineering/SKILL.md)
 - [self-improvement-loops](skills/self-improvement-loops/SKILL.md)
+- [agents-md-generator](skills/agents-md-generator/SKILL.md)
 - [project-development](skills/project-development/SKILL.md)
 - [bdi-mental-states](skills/bdi-mental-states/SKILL.md)
 
@@ -127,6 +131,6 @@ External resources on context engineering:
 ## Skill Metadata
 
 **Created**: 2025-12-20
-**Last Updated**: 2026-10-01
+**Last Updated**: 2026-10-23
 **Author**: Agent Skills for Context Engineering Contributors
-**Version**: 2.6.0
+**Version**: 2.7.0
