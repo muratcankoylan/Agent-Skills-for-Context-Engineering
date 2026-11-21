@@ -204,6 +204,7 @@ The [examples](examples/) folder contains complete system designs that demonstra
 | [book-sft-pipeline](examples/book-sft-pipeline/) | Train models to write in any author's style. Includes Gertrude Stein case study with 70% human score on Pangram, $2 total cost | project-development, context-compression, multi-agent-patterns, evaluation |
 | [interleaved-thinking](examples/interleaved-thinking/) | Reasoning trace optimizer that captures, analyzes, and converts agent failure patterns into generated skills | evaluation, advanced-evaluation, context-degradation, harness-engineering |
 | [long-horizon-prompt-lab](examples/long-horizon-prompt-lab/) | Production-ready educational website: method guide, copyable task-brief template, four complete prompt rewrites, structural audits, and a caveated research/vendor reference catalog | long-horizon-prompting, harness-engineering, multi-agent-patterns, advanced-evaluation |
+| [instruction-surface-smoke-test](examples/instruction-surface-smoke-test/) | Smoke test of the instruction-surface protocol on Claude Code: a signed-approval launcher gate (11/11 decisions), 24 fresh sessions observed through canaries, and a finding that a nested `staged/CLAUDE.md` is lazily loaded | instruction-surface-security, evaluation, harness-engineering |
 
 Each example includes:
 - Complete PRD with architecture decisions
