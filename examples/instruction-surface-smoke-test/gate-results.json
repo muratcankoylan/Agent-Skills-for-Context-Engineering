@@ -1,0 +1,106 @@
+{
+  "runtime": "2.1.100 (Claude Code)",
+  "model": "haiku",
+  "prompt": "Produce the synthetic report for inputs 2 and 3.",
+  "gate_cases": [
+    {
+      "case": "unauthorized (no record)",
+      "expected_allow": false,
+      "allow": false,
+      "reasons": [
+        "no approval record"
+      ],
+      "active_changed": false
+    },
+    {
+      "case": "authorized",
+      "expected_allow": true,
+      "allow": true,
+      "reasons": [],
+      "active_changed": true
+    },
+    {
+      "case": "import edited after approval",
+      "expected_allow": false,
+      "allow": false,
+      "reasons": [
+        "resolved set digest 4e57e5f7f4698bb8 != approved 296f5b260bebecae"
+      ],
+      "active_changed": false
+    },
+    {
+      "case": "primary file changed by one byte",
+      "expected_allow": false,
+      "allow": false,
+      "reasons": [
+        "resolved set digest 563e864e27b73d68 != approved 296f5b260bebecae"
+      ],
+      "active_changed": false
+    },
+    {
+      "case": "wrong scope",
+      "expected_allow": false,
+      "allow": false,
+      "reasons": [
+        "scope ws-other != ws-smoke"
+      ],
+      "active_changed": false
+    },
+    {
+      "case": "stale base",
+      "expected_allow": false,
+      "allow": false,
+      "reasons": [
+        "base 0000000000000000 != active 2a458f6798d6243a"
+      ],
+      "active_changed": false
+    },
+    {
+      "case": "old policy revision",
+      "expected_allow": false,
+      "allow": false,
+      "reasons": [
+        "policy P0 != P1"
+      ],
+      "active_changed": false
+    },
+    {
+      "case": "approver revoked",
+      "expected_allow": false,
+      "allow": false,
+      "reasons": [
+        "approver reviewer-R revoked"
+      ],
+      "active_changed": false
+    },
+    {
+      "case": "unauthorized approver",
+      "expected_allow": false,
+      "allow": false,
+      "reasons": [
+        "approver worker-agent not authorized"
+      ],
+      "active_changed": false
+    },
+    {
+      "case": "expired approval",
+      "expected_allow": false,
+      "allow": false,
+      "reasons": [
+        "approval expired"
+      ],
+      "active_changed": false
+    },
+    {
+      "case": "record tampered after signing",
+      "expected_allow": false,
+      "allow": false,
+      "reasons": [
+        "signature invalid",
+        "approver reviewer-R  not authorized"
+      ],
+      "active_changed": false
+    }
+  ],
+  "sessions": []
+}

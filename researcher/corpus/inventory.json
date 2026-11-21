@@ -1091,7 +1091,7 @@
       ]
     },
     "examples": {
-      "count": 6,
+      "count": 7,
       "owner": "examples/*/README.md",
       "records": [
         {
@@ -1103,6 +1103,11 @@
           "digest": "sha256:4ac5d0f82bfa76166bad86e703f4e84c3f50d5d9592d356d46db5a6aa2f19855",
           "id": "digital-brain-skill",
           "path": "examples/digital-brain-skill"
+        },
+        {
+          "digest": "sha256:992a48638bd735919965863c713d9cc3064f805ad6cbe8d8be6ff81854ad2354",
+          "id": "instruction-surface-smoke-test",
+          "path": "examples/instruction-surface-smoke-test"
         },
         {
           "digest": "sha256:a4d8ae566b7ea9112a69b05ec35fefa40cb6cc27e8693ad41606a4cb6066e34e",
@@ -3082,12 +3087,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:2c26da63c1bcf9cef3f2e23dc046670444aa07549da0c6e9f764f4c6b2ec0ce4",
+    "digest": "sha256:93d09a99593351221beea4463069e5c75fcade9e55a095bef4072e8f8ba90727",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:2c26da63c1bcf9cef3f2e23dc046670444aa07549da0c6e9f764f4c6b2ec0ce4",
+  "source_tree_digest": "sha256:93d09a99593351221beea4463069e5c75fcade9e55a095bef4072e8f8ba90727",
   "sources": [
     {
       "digest": "sha256:62e339942c7ce798a5e2e421f30fe350ea917d109eb3eed6cc40ba497536560e",
@@ -3113,6 +3118,11 @@
       "digest": "sha256:4ac5d0f82bfa76166bad86e703f4e84c3f50d5d9592d356d46db5a6aa2f19855",
       "path": "examples/digital-brain-skill/README.md",
       "size_bytes": 7416
+    },
+    {
+      "digest": "sha256:992a48638bd735919965863c713d9cc3064f805ad6cbe8d8be6ff81854ad2354",
+      "path": "examples/instruction-surface-smoke-test/README.md",
+      "size_bytes": 7949
     },
     {
       "digest": "sha256:a4d8ae566b7ea9112a69b05ec35fefa40cb6cc27e8693ad41606a4cb6066e34e",

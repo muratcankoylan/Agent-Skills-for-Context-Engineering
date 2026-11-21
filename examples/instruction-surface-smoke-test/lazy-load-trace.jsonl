@@ -1,0 +1,5 @@
+{"type": "system_init", "model": "claude-haiku-4-5-20251001", "tools": ["Read"], "claude_code_version": "2.1.100"}
+{"type": "tool_use", "name": "Read", "input": {"file_path": "<root>/s0-lazy-wc/staged/notes.txt"}}
+{"type": "tool_result", "content": "1\tStaged notes. No instructions here.\n2"}
+{"type": "assistant_text", "text": "```\ntemplate: TPL-2\n## Sum\n5\n## Inputs\n2\n3\nstyle: STY-1\n```"}
+{"type": "result", "result": "```\ntemplate: TPL-2\n## Sum\n5\n## Inputs\n2\n3\nstyle: STY-1\n```", "num_turns": 2, "total_cost_usd": 0.00635635}
