@@ -68,6 +68,9 @@ Production agent evaluation requires deterministic checks and multi-dimensional 
 **Harness Engineering**
 Reliable autonomous agents need explicit operating loops around the model: locked metrics, editable surfaces, durable logs, novelty checks, rollback rules, and human approval boundaries. Harnesses prevent agents from weakening the evaluator, losing state across compaction, or turning ambiguous goals into unreviewable changes.
 
+**Instruction-Surface Security**
+Inventory what a runtime loads as instructions and what grants capabilities. Keep proposed changes outside active loaders, require independent authorization for the exact effective change, and test a fresh session for unauthorized state or capability changes alongside legitimate task completion.
+
 **Self-Improvement Loops**
 When the harness itself becomes the optimization target, a different discipline applies: recursive self-improvement, meta-harness search, failure-driven bounded self-edits, evolutionary scaffold search, and context mechanism evolution. The controlling constraints are empirical two-split acceptance gates, filesystem experience archives with raw traces, runtime-enforced constraints outside every editable surface, and diversity preservation to prevent collapse.
 
@@ -113,6 +116,7 @@ Internal skills in this collection:
 - [evaluation](skills/evaluation/SKILL.md)
 - [advanced-evaluation](skills/advanced-evaluation/SKILL.md)
 - [harness-engineering](skills/harness-engineering/SKILL.md)
+- [instruction-surface-security](skills/instruction-surface-security/SKILL.md)
 - [self-improvement-loops](skills/self-improvement-loops/SKILL.md)
 - [project-development](skills/project-development/SKILL.md)
 - [bdi-mental-states](skills/bdi-mental-states/SKILL.md)

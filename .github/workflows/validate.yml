@@ -100,7 +100,7 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm run typecheck
-          npm run router:dry-run -- --models gpt-5.5 --reps 1 --max-runs 118 --max-budget-usd 2
+          npm run router:dry-run -- --models gpt-5.5 --reps 1 --max-runs 120 --max-budget-usd 2
           npm run effectiveness:dry-run -- --models gpt-5.5 --reps 1 --max-runs 12 --max-budget-usd 2
 
       - name: Build and validate long-horizon prompting site

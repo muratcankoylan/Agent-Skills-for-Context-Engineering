@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "context-engineering",
-      "description": "Comprehensive context engineering and harness engineering skills for production-grade AI agent systems: fundamentals, degradation patterns, compression, optimization, self-managed context (model-controlled live context editing), multi-agent coordination, long-horizon prompting (pseudo-formal task briefs for long-running and parallel agents), memory systems, tool design, filesystem context, hosted agents, evaluation, autonomous harnesses, self-improvement loops (RSI, meta-harnesses, evolutionary scaffold search), latent briefing (KV cache sharing between agents), project development, and cognitive architecture. Ships with a researcher operating system (rubrics, mechanism registry, claim provenance, run state machine, adversarial benchmarks, continuous loop).",
+      "description": "Comprehensive context engineering and harness engineering skills for production-grade AI agent systems: fundamentals, degradation patterns, compression, optimization, self-managed context (model-controlled live context editing), multi-agent coordination, long-horizon prompting (pseudo-formal task briefs for long-running and parallel agents), memory systems, tool design, filesystem context, hosted agents, evaluation, autonomous harnesses, instruction-surface security, self-improvement loops (RSI, meta-harnesses, evolutionary scaffold search), latent briefing (KV cache sharing between agents), project development, and cognitive architecture. Ships with a researcher operating system (rubrics, mechanism registry, claim provenance, run state machine, adversarial benchmarks, continuous loop).",
       "source": "./",
       "strict": false,
       "skills": [
@@ -29,6 +29,7 @@
         "./skills/evaluation",
         "./skills/advanced-evaluation",
         "./skills/harness-engineering",
+        "./skills/instruction-surface-security",
         "./skills/project-development",
         "./skills/bdi-mental-states",
         "./skills/latent-briefing",
