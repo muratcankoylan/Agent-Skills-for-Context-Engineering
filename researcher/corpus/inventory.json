@@ -1,7 +1,7 @@
 {
   "artifacts": {
     "activation_cases": {
-      "count": 27,
+      "count": 30,
       "owner": "researcher/fixtures/activation-cases.jsonl",
       "records": [
         {
@@ -75,6 +75,24 @@
           "expected_primary_skill": "hosted-agents",
           "id": "activation-hosted-vs-harness",
           "line": 17
+        },
+        {
+          "digest": "sha256:5b5a05c4e1881ca4580b21d5c8376a1e4907334234cd8e0aaa54c9c32268a934",
+          "expected_primary_skill": "instruction-surface-security",
+          "id": "activation-instruction-surface-fresh-session-evaluation",
+          "line": 29
+        },
+        {
+          "digest": "sha256:0406144478b7376b2c3bdcc180856b865d17f30fcdd3f6c5b002c4c80a4cbea3",
+          "expected_primary_skill": "instruction-surface-security",
+          "id": "activation-instruction-surface-reviewed-activation",
+          "line": 28
+        },
+        {
+          "digest": "sha256:a49a86bfc8f1d25c2e951619cc37f2613d77f415ae2ad086524fe7822fc54e19",
+          "expected_primary_skill": "context-degradation",
+          "id": "activation-instruction-surface-vs-context-degradation",
+          "line": 30
         },
         {
           "digest": "sha256:42cfcae3dc69ea624c9231063f71c825b9fe819a29c33e8dc33e90515abb5476",
@@ -311,7 +329,7 @@
       }
     },
     "claims": {
-      "count": 43,
+      "count": 45,
       "owner": "researcher/claims/index.jsonl",
       "records": [
         {
@@ -361,6 +379,20 @@
           "id": "claim-harness-locked-evaluator",
           "line": 6,
           "owning_skill": "harness-engineering",
+          "volatility": "low"
+        },
+        {
+          "digest": "sha256:1e4e65c291429a78790cfed50be91a4034677b99add61d58e40534b3ae213518",
+          "id": "claim-instruction-surface-storage-observation",
+          "line": 44,
+          "owning_skill": "instruction-surface-security",
+          "volatility": "low"
+        },
+        {
+          "digest": "sha256:edea63ab19df55ab4a9b430962f038ac24d8078181d7970707951685021ac801",
+          "id": "claim-instruction-surface-warning-scope",
+          "line": 45,
+          "owning_skill": "instruction-surface-security",
           "volatility": "low"
         },
         {
@@ -618,7 +650,7 @@
       ]
     },
     "corpus_index": {
-      "count": 18,
+      "count": 19,
       "owner": "researcher/corpus/index.json",
       "records": [
         {
@@ -798,6 +830,22 @@
             "prebuilt-warm-sandbox-pool"
           ],
           "path": "skills/hosted-agents/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "persistent instruction integrity",
+            "loader and capability boundary review",
+            "reviewed activation and rollback",
+            "fresh-session security regression"
+          ],
+          "claim_ids": [
+            "claim-instruction-surface-storage-observation",
+            "claim-instruction-surface-warning-scope"
+          ],
+          "explicit_body_claim_ids": [],
+          "id": "instruction-surface-security",
+          "mechanism_ids": [],
+          "path": "skills/instruction-surface-security/SKILL.md"
         },
         {
           "activation_scenarios": [
@@ -1147,7 +1195,7 @@
           "version": "2.6.0"
         },
         {
-          "digest": "sha256:edce54caa04c3718fd210e0fbce225a6038bc5363af7b8961fef6e391a6e4c6f",
+          "digest": "sha256:57939316b01c344df11f879f2686a6586d3752048a9cfb67a38ce11d43f511c1",
           "id": "collection-skill",
           "path": "SKILL.md",
           "version": "2.6.0"
@@ -1165,6 +1213,7 @@
           "filesystem-context",
           "harness-engineering",
           "hosted-agents",
+          "instruction-surface-security",
           "latent-briefing",
           "long-horizon-prompting",
           "memory-systems",
@@ -1185,6 +1234,7 @@
           "filesystem-context",
           "harness-engineering",
           "hosted-agents",
+          "instruction-surface-security",
           "latent-briefing",
           "long-horizon-prompting",
           "memory-systems",
@@ -1693,7 +1743,7 @@
       ]
     },
     "router_prompts": {
-      "count": 59,
+      "count": 60,
       "owner": "researcher/benchmarks/router/prompts.jsonl",
       "records": [
         {
@@ -2049,6 +2099,12 @@
           "expected_primary_skill": "self-managed-context",
           "id": "p059",
           "line": 59
+        },
+        {
+          "digest": "sha256:5fcebc6b1ce56727a0a56356d8fa81f026aa805e63d651eba6b6f4936e814ad3",
+          "expected_primary_skill": "instruction-surface-security",
+          "id": "p060",
+          "line": 60
         }
       ]
     },
@@ -2293,7 +2349,7 @@
       ]
     },
     "skills": {
-      "count": 18,
+      "count": 19,
       "owner": "skills/*/SKILL.md",
       "records": [
         {
@@ -2345,6 +2401,11 @@
           "digest": "sha256:4786dad600b063378410de444a77f4b22cc80e673b5cd6e426cbe9d6fb2c0273",
           "id": "hosted-agents",
           "path": "skills/hosted-agents/SKILL.md"
+        },
+        {
+          "digest": "sha256:fdf948a6f17c6791821d84a76f5713d5fa01604960fd710fd78fdc7e358dc201",
+          "id": "instruction-surface-security",
+          "path": "skills/instruction-surface-security/SKILL.md"
         },
         {
           "digest": "sha256:d84e7abe51f037a353dc3ccf18498498099fc633373a0d223bd6cc45277fd0bd",
@@ -2502,6 +2563,7 @@
         "filesystem-context",
         "harness-engineering",
         "hosted-agents",
+        "instruction-surface-security",
         "latent-briefing",
         "long-horizon-prompting",
         "memory-systems",
@@ -2522,6 +2584,7 @@
         "filesystem-context",
         "harness-engineering",
         "hosted-agents",
+        "instruction-surface-security",
         "latent-briefing",
         "long-horizon-prompting",
         "memory-systems",
@@ -2561,6 +2624,10 @@
         "skill_id": "context-degradation"
       },
       {
+        "case_id": "activation-instruction-surface-vs-context-degradation",
+        "skill_id": "context-degradation"
+      },
+      {
         "case_id": "activation-fundamentals-onboarding",
         "skill_id": "context-fundamentals"
       },
@@ -2591,6 +2658,14 @@
       {
         "case_id": "activation-hosted-vs-harness",
         "skill_id": "hosted-agents"
+      },
+      {
+        "case_id": "activation-instruction-surface-fresh-session-evaluation",
+        "skill_id": "instruction-surface-security"
+      },
+      {
+        "case_id": "activation-instruction-surface-reviewed-activation",
+        "skill_id": "instruction-surface-security"
       },
       {
         "case_id": "activation-latent-briefing-vs-memory",
@@ -2694,6 +2769,16 @@
         "claim_id": "claim-harness-locked-evaluator",
         "relationship": "owned",
         "skill_id": "harness-engineering"
+      },
+      {
+        "claim_id": "claim-instruction-surface-storage-observation",
+        "relationship": "owned",
+        "skill_id": "instruction-surface-security"
+      },
+      {
+        "claim_id": "claim-instruction-surface-warning-scope",
+        "relationship": "owned",
+        "skill_id": "instruction-surface-security"
       },
       {
         "claim_id": "claim-latent-briefing-public-results",
@@ -2997,27 +3082,27 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:1379b49b6e384b8302fae9a463d26233cc9b1566fa17213d71a5084d264260be",
+    "digest": "sha256:2c26da63c1bcf9cef3f2e23dc046670444aa07549da0c6e9f764f4c6b2ec0ce4",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:1379b49b6e384b8302fae9a463d26233cc9b1566fa17213d71a5084d264260be",
+  "source_tree_digest": "sha256:2c26da63c1bcf9cef3f2e23dc046670444aa07549da0c6e9f764f4c6b2ec0ce4",
   "sources": [
     {
-      "digest": "sha256:f924467d535c67ddc43c747d6b3361469414ca8c5d15c2e8b406d4bbb7c7ca1e",
+      "digest": "sha256:62e339942c7ce798a5e2e421f30fe350ea917d109eb3eed6cc40ba497536560e",
       "path": ".claude-plugin/marketplace.json",
-      "size_bytes": 2014
+      "size_bytes": 2093
     },
     {
-      "digest": "sha256:e9a029bd6f3e8c16a2e55c536bf1ba4a0a9fb3ecd84da41056b51465f05c8018",
+      "digest": "sha256:57c9a45c8e8e87a7062e71a68b9a47eaea9545f5b381686ee8396df6cc6f5a2d",
       "path": ".plugin/plugin.json",
-      "size_bytes": 829
+      "size_bytes": 859
     },
     {
-      "digest": "sha256:edce54caa04c3718fd210e0fbce225a6038bc5363af7b8961fef6e391a6e4c6f",
+      "digest": "sha256:57939316b01c344df11f879f2686a6586d3752048a9cfb67a38ce11d43f511c1",
       "path": "SKILL.md",
-      "size_bytes": 11210
+      "size_bytes": 11620
     },
     {
       "digest": "sha256:e80dc5fe7391c3a5745c574814a1502d24ba9acea91fcbb5dc7ec7d38eb43545",
@@ -3100,9 +3185,9 @@
       "size_bytes": 591
     },
     {
-      "digest": "sha256:3bdabae8a9fe76a4f8beca686f43923637e26881e928dc60f2033ec11e7bc503",
+      "digest": "sha256:df449df80e45fa956a512a8a56f7af7cf6fcd2f19e3bbd5ff5302198ce03b2ce",
       "path": "researcher/benchmarks/router/prompts.jsonl",
-      "size_bytes": 24542
+      "size_bytes": 25238
     },
     {
       "digest": "sha256:aed93585626ea824524bd555cc459d95604b541ea8862f1e7e31a9d822b29a85",
@@ -3140,14 +3225,14 @@
       "size_bytes": 611
     },
     {
-      "digest": "sha256:fa29eb8277526e66b70821eff4949ca659752a3860fa13640757be911f67642a",
+      "digest": "sha256:e22e8e0c228d910a711fd11b36d7cc2f1f2dabf13cb59f89e3b187b87f30d683",
       "path": "researcher/claims/index.jsonl",
-      "size_bytes": 26455
+      "size_bytes": 27773
     },
     {
-      "digest": "sha256:ab90a17b81665d53649373772bf91529002e5b92f5cadd3fe4308b57733fece7",
+      "digest": "sha256:f449b86eb8e549642387520eb2956767e6e199695b9818a751b48859561e813f",
       "path": "researcher/corpus/index.json",
-      "size_bytes": 8790
+      "size_bytes": 9232
     },
     {
       "digest": "sha256:a8a2d73c1d22f496702737d572dedadfc63298fd4e658d9a5574d58690fba0e5",
@@ -3170,9 +3255,9 @@
       "size_bytes": 7258
     },
     {
-      "digest": "sha256:b45c63d58514e1c6f7fc52fe28e7837e14dceec81a5d976225f31f3b820fa83a",
+      "digest": "sha256:415cb61e2819e5bbe2b1aa4d32e879f2c390a16fe3d5daadaaf1d4f206b5fd2d",
       "path": "researcher/fixtures/activation-cases.jsonl",
-      "size_bytes": 14447
+      "size_bytes": 16437
     },
     {
       "digest": "sha256:6a0ee2e312f7798802bbc159120c8b621edc3cb0b52d17c9f337a8f61bfbf33b",
@@ -3335,14 +3420,14 @@
       "size_bytes": 2240
     },
     {
-      "digest": "sha256:f3d87e95d64cc1c388c2afb17425f0bfca73d94f38578b7798df59c2792f2376",
+      "digest": "sha256:3ed5ebde1fc953a0c2eccf65e8a624c27da18260727eae1d2f5b12bbe63cce5c",
       "path": "researcher/schemas/generated/current-artifacts-report.json",
       "size_bytes": 603
     },
     {
-      "digest": "sha256:a4f52003245956c0b4e102d85e738bfd4651fc4be85808c614acabced8aa715e",
+      "digest": "sha256:d7a62e8dd2901e0f817f5411a1515754fe813ba55f21945810bb7a94c62f13a8",
       "path": "researcher/schemas/generated/migration-dry-run.json",
-      "size_bytes": 40452
+      "size_bytes": 41554
     },
     {
       "digest": "sha256:38983589a7cb0d6763831d6c842b5c97d5b519393637e620ed3b454cc4d86d69",
@@ -3603,6 +3688,11 @@
       "digest": "sha256:4786dad600b063378410de444a77f4b22cc80e673b5cd6e426cbe9d6fb2c0273",
       "path": "skills/hosted-agents/SKILL.md",
       "size_bytes": 17717
+    },
+    {
+      "digest": "sha256:fdf948a6f17c6791821d84a76f5713d5fa01604960fd710fd78fdc7e358dc201",
+      "path": "skills/instruction-surface-security/SKILL.md",
+      "size_bytes": 7820
     },
     {
       "digest": "sha256:d84e7abe51f037a353dc3ccf18498498099fc633373a0d223bd6cc45277fd0bd",

@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "generated_by": "manual-breakthrough-roadmap-seed",
-  "updated_at": "2026-10-11",
+  "updated_at": "2026-11-20",
   "purpose": "Canonical machine-readable map for skills, mechanisms, claims, and activation scenarios.",
   "skills": [
     {
@@ -73,6 +73,13 @@
       "activation_scenarios": ["background agents", "remote sandboxed execution", "warm pools", "multiplayer agent infrastructure"],
       "mechanism_ids": ["prebuilt-warm-sandbox-pool"],
       "claim_ids": []
+    },
+    {
+      "name": "instruction-surface-security",
+      "path": "skills/instruction-surface-security/SKILL.md",
+      "activation_scenarios": ["persistent instruction integrity", "loader and capability boundary review", "reviewed activation and rollback", "fresh-session security regression"],
+      "mechanism_ids": [],
+      "claim_ids": ["claim-instruction-surface-storage-observation", "claim-instruction-surface-warning-scope"]
     },
     {
       "name": "latent-briefing",

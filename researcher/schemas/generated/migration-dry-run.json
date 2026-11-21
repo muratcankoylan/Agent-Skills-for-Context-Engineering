@@ -1,7 +1,7 @@
 {
   "deduplicated": [],
   "deduplicated_count": 0,
-  "input_count": 73,
+  "input_count": 75,
   "migrated": [
     {
       "kind": "LegacyClaim",
@@ -72,6 +72,26 @@
       "source_bytes_digest": "sha256:83f3c65582418812a45d1c105d8c3be9e5f07a9ef3d5c0f53163bc848ea6ffcb",
       "source_path": "researcher/claims/index.jsonl",
       "source_record_digest": "sha256:e9b98fba8ec5445a62696ac4aab2b19f7482f8858901aeff2c6caa93c740e28d"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-instruction-surface-storage-observation",
+      "new_digest": "sha256:7d0544e8314cdb2dce9fffc83e82265978232e8d56f70d44854f80d8c709ede8",
+      "new_id": "rec_8cb9f63f-c86d-5b37-8d2e-8eb5948d1053",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:f2359fd7cdeee9e2fe6dec12ed64c30494bc47990c26cfb31be8ef1514166a1f",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:1e4e65c291429a78790cfed50be91a4034677b99add61d58e40534b3ae213518"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-instruction-surface-warning-scope",
+      "new_digest": "sha256:bd4098eb07ef073d7f944a3c41c8e53a1a9a409f7f0a39211e2a594312b26eff",
+      "new_id": "rec_6c06a456-19e1-58b2-a3a9-c1c36bbf7572",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:9be4fe5973c24670cef9086f6d078b965b11a80335834eec135cdb4764554679",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:edea63ab19df55ab4a9b430962f038ac24d8078181d7970707951685021ac801"
     },
     {
       "kind": "LegacyClaim",
@@ -734,10 +754,10 @@
       "source_record_digest": "sha256:e8ccf12edd075a1e634708a9d11351ad89dd8aa8ac71562e705298541ee4dbc0"
     }
   ],
-  "migrated_count": 73,
+  "migrated_count": 75,
   "mode": "dry-run",
   "quarantined": [],
   "quarantined_count": 0,
-  "report_digest": "sha256:bfc826feed0b8ba7214097cf807edd4922379dae4b314524a6975a41af445392",
+  "report_digest": "sha256:22abd0192ef84a4b83315070f7d8adb2f17a5eae6f1bb6d790369cb7265f1573",
   "schema_version": "1.0.0"
 }
