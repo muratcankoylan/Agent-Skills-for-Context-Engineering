@@ -1,3 +1,8 @@
+---
+name: llm-as-judge-agents
+description: Index of available LLM-as-a-Judge agents: evaluator, researcher, and orchestrator
+---
+
 # Agents Index
 
 Agents are reusable AI components with defined capabilities, tools, and instructions.
