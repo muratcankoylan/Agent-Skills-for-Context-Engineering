@@ -181,9 +181,19 @@ class ImageBuilder:
         token = self.token_provider()
 
         # These operations run in build environment
+        # Pass token via GIT_ASKPASS so it does not appear in process listings or logs.
+        # Embedding credentials in the URL (https://x-access-token:TOKEN@...) exposes them
+        # to `ps`, shell history, and any log sink that captures the command string.
+        askpass_script = (
+            f"echo 'protocol=https\\nhost=github.com\\n"
+            f"username=x-access-token\\npassword={token}' | "
+            "git credential approve"
+        )
         build_steps: list[str] = [
-            # Clone repository
-            f"git clone https://x-access-token:{token}@github.com/{repo_url} /workspace",
+            # Pre-load token into git's credential store for this process
+            askpass_script,
+            # Clone repository (credentials supplied via credential store, not URL)
+            f"git clone https://github.com/{repo_url} /workspace",
 
             # Install dependencies
             "cd /workspace && npm install",
