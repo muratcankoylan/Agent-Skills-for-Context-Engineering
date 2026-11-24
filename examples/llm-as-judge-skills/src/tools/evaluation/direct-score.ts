@@ -2,7 +2,7 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
-import { config } from '../../config/index.js';
+import { checkBudget, config, recordUsage, withRetries } from '../../config/index.js';
 
 const CriterionSchema = z.object({
   name: z.string().describe('Name of the criterion'),
@@ -57,6 +57,55 @@ export async function executeDirectScore(input: DirectScoreInput): Promise<Direc
   const scale = input.rubric?.scale || '1-5';
   const maxScore = parseInt(scale.split('-')[1]);
 
+  const budgetCheck = checkBudget('executeDirectScore');
+  if (!budgetCheck.ok) {
+    return {
+      success: false,
+      scores: [],
+      overallScore: 0,
+      weightedScore: 0,
+      summary: {
+        assessment: `Evaluation blocked by budget guard: ${budgetCheck.reason}`,
+        strengths: [],
+        weaknesses: [],
+        priorities: []
+      },
+      metadata: {
+        evaluationTimeMs: Date.now() - startTime,
+        model: config.openai.model,
+        criteriaCount: input.criteria.length
+      }
+    };
+  }
+
+  if (config.budgets.dryRun) {
+    recordUsage();
+    return {
+      success: true,
+      scores: input.criteria.map(c => ({
+        criterion: c.name,
+        score: Math.ceil(maxScore / 2),
+        maxScore,
+        justification: '[dry-run] No live evaluation performed.',
+        evidence: ['[dry-run] stub evidence'],
+        improvement: 'Re-run with JUDGE_DRY_RUN=false for a real evaluation.'
+      })),
+      overallScore: Math.ceil(maxScore / 2),
+      weightedScore: Math.ceil(maxScore / 2),
+      summary: {
+        assessment: '[dry-run] Evaluation stub returned because JUDGE_DRY_RUN is enabled.',
+        strengths: ['[dry-run] No paid API call was made.'],
+        weaknesses: [],
+        priorities: ['Disable JUDGE_DRY_RUN to perform a real evaluation.']
+      },
+      metadata: {
+        evaluationTimeMs: Date.now() - startTime,
+        model: config.openai.model,
+        criteriaCount: input.criteria.length
+      }
+    };
+  }
+
   const systemPrompt = `You are an expert evaluator. Assess the response against each criterion.
 For each criterion:
 1. Find specific evidence in the response
@@ -98,22 +147,24 @@ Respond with valid JSON matching this structure:
 }`;
 
   try {
-    const result = await generateText({
+    const result = await withRetries('directScore', () => generateText({
       model: openai(config.openai.model),
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.3
-    });
+    }));
+
+    recordUsage(result.usage);
 
     const parsed = JSON.parse(result.text);
-    
+
     // Calculate scores
     const totalWeight = input.criteria.reduce((sum, c) => sum + c.weight, 0);
     const weightedSum = parsed.scores.reduce((sum: number, s: { criterion: string; score: number }) => {
       const criterion = input.criteria.find(c => c.name === s.criterion);
       return sum + (s.score * (criterion?.weight || 1));
     }, 0);
-    
+
     const overallScore = parsed.scores.reduce((sum: number, s: { score: number }) => sum + s.score, 0) / parsed.scores.length;
     const weightedScore = weightedSum / totalWeight;
 

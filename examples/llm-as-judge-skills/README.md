@@ -503,8 +503,31 @@ Create a `.env` file:
 
 ```bash
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-5.2  
+OPENAI_MODEL=gpt-5.2
 ```
+
+### Cost & Budget Safeguards
+
+These tools call paid LLM APIs on every evaluation. The following guards help prevent runaway spend:
+
+| Environment Variable | Purpose |
+| --- | --- |
+| `JUDGE_MAX_CALLS` | Hard cap on total LLM calls across the process |
+| `JUDGE_MAX_TOKENS` | Hard cap on cumulative prompt + completion tokens |
+| `JUDGE_MAX_COST_USD` | Hard cap on estimated spend |
+| `JUDGE_COST_PER_1K_INPUT_USD` | Input token cost for spend estimates (default: $0.005) |
+| `JUDGE_COST_PER_1K_OUTPUT_USD` | Output token cost for spend estimates (default: $0.015) |
+| `JUDGE_DRY_RUN` | Set to `true` to return stub output without calling the API |
+| `JUDGE_MAX_RETRIES` | Max retries on rate-limit / transient errors (default: 3) |
+
+```bash
+# Example: evaluate no more than 50 responses and spend no more than $5
+JUDGE_MAX_CALLS=50
+JUDGE_MAX_COST_USD=5.00
+JUDGE_DRY_RUN=false
+```
+
+> ⚠️ **Cost Warning**: Pairwise comparison with `swapPositions=true` makes **two** LLM calls per evaluation. Rubric generation makes one call per criterion. Use `JUDGE_DRY_RUN=true` and the budget variables when testing or running large batches.
 
 ### Run Tests
 

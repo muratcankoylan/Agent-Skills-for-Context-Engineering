@@ -1,9 +1,9 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
-import { config } from '../config/index.js';
-import { 
-  executeDirectScore, 
-  executePairwiseCompare, 
+import { checkBudget, config, recordUsage, withRetries } from '../config/index.js';
+import {
+  executeDirectScore,
+  executePairwiseCompare,
   executeGenerateRubric,
   type DirectScoreInput,
   type PairwiseCompareInput,
@@ -91,14 +91,32 @@ export class EvaluatorAgent {
    * Chat-based evaluation for custom queries
    */
   async chat(userMessage: string) {
-    const result = await generateText({
+    const budgetCheck = checkBudget('EvaluatorAgent.chat');
+    if (!budgetCheck.ok) {
+      return {
+        text: `Evaluation blocked by budget guard: ${budgetCheck.reason}`,
+        usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
+      };
+    }
+
+    if (config.budgets.dryRun) {
+      recordUsage();
+      return {
+        text: '[dry-run] EvaluatorAgent.chat returned a stub because JUDGE_DRY_RUN is enabled.',
+        usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
+      };
+    }
+
+    const result = await withRetries('EvaluatorAgent.chat', () => generateText({
       model: openai(this.model),
       system: `You are an expert evaluator of AI-generated content.
 Your role is to assess quality, identify issues, and provide actionable feedback.
 Be objective, specific, and constructive in your evaluations.`,
       prompt: userMessage,
       temperature: this.temperature
-    });
+    }));
+
+    recordUsage(result.usage);
 
     return {
       text: result.text,

@@ -2,7 +2,7 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
-import { config } from '../../config/index.js';
+import { checkBudget, config, recordUsage, withRetries } from '../../config/index.js';
 
 export const GenerateRubricInputSchema = z.object({
   criterionName: z.string().describe('Name of the criterion'),
@@ -51,6 +51,50 @@ export async function executeGenerateRubric(input: GenerateRubricInput): Promise
   const startTime = Date.now();
   const [minScore, maxScore] = input.scale.split('-').map(Number);
 
+  const budgetCheck = checkBudget('executeGenerateRubric');
+  if (!budgetCheck.ok) {
+    return {
+      success: false,
+      criterion: { name: input.criterionName, description: input.criterionDescription },
+      scale: { min: minScore, max: maxScore, type: input.scale },
+      levels: [],
+      scoringGuidelines: [],
+      edgeCases: [],
+      metadata: {
+        domain: input.domain || null,
+        strictness: input.strictness,
+        generationTimeMs: Date.now() - startTime
+      }
+    };
+  }
+
+  if (config.budgets.dryRun) {
+    recordUsage();
+    const levels = [];
+    for (let score = minScore; score <= maxScore; score += 1) {
+      levels.push({
+        score,
+        label: `[dry-run] Level ${score}`,
+        description: '[dry-run] No live rubric generation performed.',
+        characteristics: ['[dry-run] stub characteristic'],
+        example: input.includeExamples ? '[dry-run] stub example' : undefined
+      });
+    }
+    return {
+      success: true,
+      criterion: { name: input.criterionName, description: input.criterionDescription },
+      scale: { min: minScore, max: maxScore, type: input.scale },
+      levels,
+      scoringGuidelines: ['[dry-run] Disable JUDGE_DRY_RUN to generate real rubrics.'],
+      edgeCases: [{ situation: '[dry-run] Dry run mode', guidance: 'Set JUDGE_DRY_RUN=false for real output.' }],
+      metadata: {
+        domain: input.domain || null,
+        strictness: input.strictness,
+        generationTimeMs: Date.now() - startTime
+      }
+    };
+  }
+
   const systemPrompt = `You are an expert in creating evaluation rubrics.
 Create clear, actionable rubrics with distinct boundaries between levels.
 Strictness: ${input.strictness}
@@ -98,12 +142,14 @@ Respond with valid JSON:
 }`;
 
   try {
-    const result = await generateText({
+    const result = await withRetries('generateRubric', () => generateText({
       model: openai(config.openai.model),
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.4
-    });
+    }));
+
+    recordUsage(result.usage);
 
     const parsed = JSON.parse(result.text);
 
@@ -127,7 +173,7 @@ Respond with valid JSON:
         generationTimeMs: Date.now() - startTime
       }
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       criterion: {
