@@ -1,12 +1,12 @@
 {
   "counts_by_adapter": {
-    "LegacyClaim": 45,
-    "LegacyMechanism": 28,
+    "LegacyClaim": 56,
+    "LegacyMechanism": 32,
     "LegacyQueueRecord": 1,
     "LegacyRunState": 1
   },
-  "record_count": 75,
-  "records_digest": "sha256:037e88fea604117eb073e54cf8d7aef68abe7b227c6fdb99020309d87be3459a",
+  "record_count": 90,
+  "records_digest": "sha256:56de2a571a8544693cd9e42d6a2e4fa9a0c097c6e455135cddc68605cd448a74",
   "result": "pass",
   "schema_version": "1.0.0",
   "source_paths": [

@@ -23,6 +23,7 @@ Do not activate this skill for adjacent work owned by other skills:
 - Writing raw outputs, logs, or plans to files without summarizing them: `filesystem-context`.
 - Designing long-term semantic memory across sessions: `memory-systems`.
 - The model deciding when and where to rewrite its own context: `self-managed-context`. This skill still owns what the replacement text must preserve.
+- Deciding whether a given model or the harness should trigger compaction, and measuring that behavior across context budgets: `compaction-control-profiling`.
 
 ## Core Concepts
 
@@ -255,6 +256,7 @@ This skill connects to several others in the collection:
 - evaluation - Probe-based evaluation applies to compression testing
 - memory-systems - Compression relates to scratchpad and summary memory patterns
 - self-managed-context - When the model triggers and places its own compaction edits, this skill supplies what the replacement note preserves
+- compaction-control-profiling - Decides per model who triggers compaction; this skill supplies what the collapse summary preserves
 
 ## References
 

@@ -4,7 +4,27 @@ All notable changes to this project are documented here. Versions follow semanti
 
 ## [Unreleased]
 
+### Added
+
+#### New skill: compaction-control-profiling
+
+- `skills/compaction-control-profiling/SKILL.md`: twentieth skill, covering the decision that precedes any self-compacting agent design: for a specific model and workload, should the harness or the model trigger compaction. The procedure is a qualification, not an assumption: estimate context pressure, run harness-driven and model-driven compaction on one harness across a ladder of hard context budgets, log a five-metric behavior profile (interface uptake, compression factor per call, reopen rate of archived content, context fill at first compaction, first-warning resolution), ablate the timing instruction in both directions, and assign control per model and pressure regime. Also covers the reversible collapse-and-archive interface that makes aggressive compaction recoverable and observable, pressure-warning wording, hybrid trigger ordering, and token versus prefill accounting. Anchored on Devoto et al., "Letting Models Manage Their Own Context: Where We Stand" (NVIDIA technical report, arXiv 2611.34147, 2026-11-25), its companion dev-notes post, and the public NOOA harness code (`NVIDIA-NeMo/labs-OO-Agents`, Apache-2.0), with interface details verified against source.
+- Two reference files: `evidence.md` (dated per-claim numbers with setup, a list of what is and is not citable from a figure-heavy report, the authors' limitations, and the limits of this skill's own derived rules) and `profiling-protocol.md` (pressure estimate, condition definitions, budget ladder, trace schema, metric formulas, timing ablation design, comparison-based classification criteria, hybrid layering, interface contract and edge cases, cost accounting, report template, re-qualification triggers).
+- Explicit boundaries: `self-managed-context` keeps the editable-file protocol, harness invariants, edit-position cost, and strategy training; `context-compression` keeps summary content; `context-optimization` keeps harness thresholds and cache layout; `evaluation` keeps general experiment design. Each of those four skills gained reciprocal routing and integration lines. `self-managed-context` 1.0.1 also notes in Capability Dependence that disposition toward compaction differed among the four models of the source study, not only by model size.
+- Scope notes recorded in the skill: the study's timing instruction and warning text are not reproduced in the report, so example wording is authored here and labelled; the signal table, control-assignment table, hybrid layering, and the re-qualification rule are operating rules derived from the results and were not evaluated as interventions; per-budget scores that exist only as plots are not cited, and the one per-model split read from a bar chart is marked as such. An independent fact-check of every number against the saved paper text and harness source found no wrong values and led to these labels.
+
+#### Corpus wiring
+
+- 4 new mechanisms in `researcher/mechanisms/registry.jsonl`: `cross-policy-context-budget-sweep`, `compaction-behavior-profile`, `bidirectional-timing-instruction-calibration`, `reversible-collapse-archive-interface` (32 total), each with an accepted-ledger `promotion` event carrying `source_commit` and `source_path`. Review is recorded as pending human PR review.
+- 11 new provenance-tracked claims in `researcher/claims/index.jsonl` (56 total), all `claim-compaction-control-*`.
+- 3 new activation cases (33 total), including an inverse case that routes context-editing strategy training to `self-managed-context` and rejects `compaction-control-profiling`.
+- 3 new router-benchmark prompts (p061-p063, 63 total); the next paid router sweep should publish the delta per the benchmark policy.
+- Manifests list the new skill; plugin version stays 2.6.0 pending a release decision. README, root SKILL.md, and AGENTS.md updated for 20 skills.
+- Regenerated `researcher/corpus/inventory.json`, `researcher/generated/corpus-summary.md`, and schema evidence under `researcher/schemas/generated/`.
+
 ### Changed
+
+- CI router dry-run cap raised from `--max-runs 120` to `--max-runs 126` (63 router prompts times two attempts); the 2 USD budget gate is unchanged.
 
 #### long-horizon-prompting 1.1.0: handoff contracts and evidenced blocking review
 

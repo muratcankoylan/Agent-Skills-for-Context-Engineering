@@ -1,7 +1,7 @@
 {
   "artifacts": {
     "activation_cases": {
-      "count": 30,
+      "count": 33,
       "owner": "researcher/fixtures/activation-cases.jsonl",
       "records": [
         {
@@ -9,6 +9,18 @@
           "expected_primary_skill": "bdi-mental-states",
           "id": "activation-bdi-vs-memory",
           "line": 15
+        },
+        {
+          "digest": "sha256:e5d5968468e7fad0009731ced8e5066b1cd136a25746d15ae560bbffb6c18b6d",
+          "expected_primary_skill": "compaction-control-profiling",
+          "id": "activation-compaction-control-context-anxiety",
+          "line": 32
+        },
+        {
+          "digest": "sha256:e66e3790ad89da2e4372f48a4f51d6e48c99f5003e5ebf37ad6999879a511943",
+          "expected_primary_skill": "compaction-control-profiling",
+          "id": "activation-compaction-control-qualify-model",
+          "line": 31
         },
         {
           "digest": "sha256:e41f7ac28af4e25a06f9f21cf33b1d5bb394e3c28f861826c77e3f044c83b3c2",
@@ -165,6 +177,12 @@
           "expected_primary_skill": "self-managed-context",
           "id": "activation-self-managed-context-editable-file",
           "line": 24
+        },
+        {
+          "digest": "sha256:fd0db4efb49e5250781f4d2484541fa90b55b810c6c79502243f982dc3f40bc2",
+          "expected_primary_skill": "self-managed-context",
+          "id": "activation-self-managed-vs-compaction-control",
+          "line": 33
         },
         {
           "digest": "sha256:569c70d63ac3f53acb93400db87bc099bfb1521a86df16d1bf72f155bb42cf29",
@@ -329,7 +347,7 @@
       }
     },
     "claims": {
-      "count": 45,
+      "count": 56,
       "owner": "researcher/claims/index.jsonl",
       "records": [
         {
@@ -338,6 +356,83 @@
           "line": 5,
           "owning_skill": "advanced-evaluation",
           "volatility": "medium"
+        },
+        {
+          "digest": "sha256:b3cc8ed27be1b170f3f9157a454222626869b1687a0ddc77ce25dcfcdd60a02e",
+          "id": "claim-compaction-control-compression-reopen",
+          "line": 50,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:ed1fc7e63b7217fd0deb7625fad25651fe229143eabf09b3bcb0fa2aea89d3b0",
+          "id": "claim-compaction-control-context-anxiety",
+          "line": 52,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:3e84ee550d27be00e9df201bab6b523f8eb8fc4393c554e24ab7b7e4691162fe",
+          "id": "claim-compaction-control-low-demand-benchmark",
+          "line": 48,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:ad3a5a906f0d41beb7610e680825a0eb77c588f6683c43342c62d4deff91ac6c",
+          "id": "claim-compaction-control-reference-interface",
+          "line": 56,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:df6a1d8305b593414453b3f4b0b1bcca1842ba94c746cbebcd40c18886e09f99",
+          "id": "claim-compaction-control-rollout-penalty",
+          "line": 53,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:ca5a82478f190972a01e7a3eed725ae6b1c6e725515c2180a5af23a058b0ff19",
+          "id": "claim-compaction-control-study-setup",
+          "line": 46,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "medium"
+        },
+        {
+          "digest": "sha256:a34f5fba4dfad542358031d2af7272714da991e83ca1fd5847806cdd86ecd6ab",
+          "id": "claim-compaction-control-suffix-kv-reuse",
+          "line": 55,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:32c7cc3a5ac77d50269c6642399a731be1364a8914a30a7dbbc3ccdffd8d7286",
+          "id": "claim-compaction-control-tight-budget-gain",
+          "line": 47,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:8af28c334a12dd3e21f907c5dcdbbfed2577701f56ebb47af912ca1a7874f0b9",
+          "id": "claim-compaction-control-token-savings",
+          "line": 54,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:4e69de01e9305529a5adb27878ccdddd1d724478b7c759f80d5ff1ce4327897a",
+          "id": "claim-compaction-control-uptake-variance",
+          "line": 49,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "high"
+        },
+        {
+          "digest": "sha256:e1f506c90f8eb5454c3e1df61b3bd599bc0c306066a9bf0ba2555930f208c064",
+          "id": "claim-compaction-control-warning-response",
+          "line": 51,
+          "owning_skill": "compaction-control-profiling",
+          "volatility": "high"
         },
         {
           "digest": "sha256:e0204364c0078631a8484c1cb9eeb53bf8197a3278d292a6f7e88df2f04f768f",
@@ -650,7 +745,7 @@
       ]
     },
     "corpus_index": {
-      "count": 19,
+      "count": 20,
       "owner": "researcher/corpus/index.json",
       "records": [
         {
@@ -685,6 +780,50 @@
             "world-state-grounded-bdi-chain"
           ],
           "path": "skills/bdi-mental-states/SKILL.md"
+        },
+        {
+          "activation_scenarios": [
+            "per-model compaction control assignment",
+            "cross-policy context-budget sweep",
+            "compaction behavior profiling",
+            "context anxiety and timing-instruction calibration",
+            "reversible collapse-and-archive interface telemetry",
+            "re-qualification after model or prompt change"
+          ],
+          "claim_ids": [
+            "claim-compaction-control-compression-reopen",
+            "claim-compaction-control-context-anxiety",
+            "claim-compaction-control-low-demand-benchmark",
+            "claim-compaction-control-reference-interface",
+            "claim-compaction-control-rollout-penalty",
+            "claim-compaction-control-study-setup",
+            "claim-compaction-control-suffix-kv-reuse",
+            "claim-compaction-control-tight-budget-gain",
+            "claim-compaction-control-token-savings",
+            "claim-compaction-control-uptake-variance",
+            "claim-compaction-control-warning-response"
+          ],
+          "explicit_body_claim_ids": [
+            "claim-compaction-control-compression-reopen",
+            "claim-compaction-control-context-anxiety",
+            "claim-compaction-control-low-demand-benchmark",
+            "claim-compaction-control-reference-interface",
+            "claim-compaction-control-rollout-penalty",
+            "claim-compaction-control-study-setup",
+            "claim-compaction-control-suffix-kv-reuse",
+            "claim-compaction-control-tight-budget-gain",
+            "claim-compaction-control-token-savings",
+            "claim-compaction-control-uptake-variance",
+            "claim-compaction-control-warning-response"
+          ],
+          "id": "compaction-control-profiling",
+          "mechanism_ids": [
+            "bidirectional-timing-instruction-calibration",
+            "compaction-behavior-profile",
+            "cross-policy-context-budget-sweep",
+            "reversible-collapse-archive-interface"
+          ],
+          "path": "skills/compaction-control-profiling/SKILL.md"
         },
         {
           "activation_scenarios": [
@@ -1030,6 +1169,8 @@
             "claim-self-managed-context-zero-shot-results"
           ],
           "explicit_body_claim_ids": [
+            "claim-compaction-control-uptake-variance",
+            "claim-compaction-control-warning-response",
             "claim-self-managed-context-capability-gap",
             "claim-self-managed-context-contextbench-pilot",
             "claim-self-managed-context-edit-cost",
@@ -1200,7 +1341,7 @@
           "version": "2.6.0"
         },
         {
-          "digest": "sha256:57939316b01c344df11f879f2686a6586d3752048a9cfb67a38ce11d43f511c1",
+          "digest": "sha256:4ee7df9d5f191f4a7234fb384b2f8eea3dad4fef41c769aa1bcf208be283bc5b",
           "id": "collection-skill",
           "path": "SKILL.md",
           "version": "2.6.0"
@@ -1210,6 +1351,7 @@
         "marketplace": [
           "advanced-evaluation",
           "bdi-mental-states",
+          "compaction-control-profiling",
           "context-compression",
           "context-degradation",
           "context-fundamentals",
@@ -1231,6 +1373,7 @@
         "published": [
           "advanced-evaluation",
           "bdi-mental-states",
+          "compaction-control-profiling",
           "context-compression",
           "context-degradation",
           "context-fundamentals",
@@ -1257,9 +1400,9 @@
       }
     },
     "mechanism_ledgers": {
-      "accepted_event_count": 34,
-      "accepted_mechanism_count": 28,
-      "count": 35,
+      "accepted_event_count": 38,
+      "accepted_mechanism_count": 32,
+      "count": 39,
       "owner": "researcher/mechanisms/ledgers/*.jsonl",
       "records": [
         {
@@ -1535,6 +1678,38 @@
           "mechanism_id": "evidenced-blocking-review"
         },
         {
+          "digest": "sha256:ef0198bb69d001cd73a59b4cba8bc184f833ed6c8d29d0739f4548eb47fdfd61",
+          "event_id": "promote-cross-policy-context-budget-sweep",
+          "event_type": "promotion",
+          "ledger": "accepted",
+          "line": 35,
+          "mechanism_id": "cross-policy-context-budget-sweep"
+        },
+        {
+          "digest": "sha256:720104ddbf5f4decd93007ebb496f5d58298b7ddd8cb725c8c4ecae60ec7cba9",
+          "event_id": "promote-compaction-behavior-profile",
+          "event_type": "promotion",
+          "ledger": "accepted",
+          "line": 36,
+          "mechanism_id": "compaction-behavior-profile"
+        },
+        {
+          "digest": "sha256:7f405525f5ff10ed6a62c0b031081336ee5a5d9f138b26bffce7ea5027d22f67",
+          "event_id": "promote-bidirectional-timing-instruction-calibration",
+          "event_type": "promotion",
+          "ledger": "accepted",
+          "line": 37,
+          "mechanism_id": "bidirectional-timing-instruction-calibration"
+        },
+        {
+          "digest": "sha256:de1b14088f4f089d69d961a0011da8e1f9c076801375f36f91eaaf24f5a868b0",
+          "event_id": "promote-reversible-collapse-archive-interface",
+          "event_type": "promotion",
+          "ledger": "accepted",
+          "line": 38,
+          "mechanism_id": "reversible-collapse-archive-interface"
+        },
+        {
           "digest": "sha256:aae0055e5aa409e789d5701dd1e8fd13ea21bdd3082994dc660786520090324c",
           "event_id": null,
           "event_type": "legacy",
@@ -1546,7 +1721,7 @@
       "rejected_event_count": 1
     },
     "mechanisms": {
-      "count": 28,
+      "count": 32,
       "owner": "researcher/mechanisms/registry.jsonl",
       "records": [
         {
@@ -1561,6 +1736,20 @@
           "id": "audit-gated-return-condition",
           "line": 21,
           "owning_skill": "long-horizon-prompting",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:d01777782651d2a3db68f16a67f13cff4c43b330878c7aed2aad1c2d14cc3f70",
+          "id": "bidirectional-timing-instruction-calibration",
+          "line": 31,
+          "owning_skill": "compaction-control-profiling",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:4664680e3daf73c1520f66cfaf5f907e199c9ed9984d2435505a0d5c6db0432f",
+          "id": "compaction-behavior-profile",
+          "line": 30,
+          "owning_skill": "compaction-control-profiling",
           "status": "accepted"
         },
         {
@@ -1582,6 +1771,13 @@
           "id": "context-poisoning-circuit-breaker",
           "line": 8,
           "owning_skill": "context-degradation",
+          "status": "accepted"
+        },
+        {
+          "digest": "sha256:3a43e15fd502f73ebe08a8d706c345616a460ed54f0480a45422c2d7a781ea7c",
+          "id": "cross-policy-context-budget-sweep",
+          "line": 29,
+          "owning_skill": "compaction-control-profiling",
           "status": "accepted"
         },
         {
@@ -1690,6 +1886,13 @@
           "status": "accepted"
         },
         {
+          "digest": "sha256:804a4e4ece9bcc7a216b05c102da5849e07b7a6027101507bc130fb35711d5bd",
+          "id": "reversible-collapse-archive-interface",
+          "line": 32,
+          "owning_skill": "compaction-control-profiling",
+          "status": "accepted"
+        },
+        {
           "digest": "sha256:e8379986979d5a8b7fe9cf6f99eea3d38577a13144c7dbd32625606a6711b3e7",
           "id": "runtime-enforced-loop-constraints",
           "line": 19,
@@ -1748,7 +1951,7 @@
       ]
     },
     "router_prompts": {
-      "count": 60,
+      "count": 63,
       "owner": "researcher/benchmarks/router/prompts.jsonl",
       "records": [
         {
@@ -2110,6 +2313,24 @@
           "expected_primary_skill": "instruction-surface-security",
           "id": "p060",
           "line": 60
+        },
+        {
+          "digest": "sha256:bf4c82b5e759db1c5f4e1732d9fdcabf6f374b4ec1bec3851ecd0411a92bcbd7",
+          "expected_primary_skill": "compaction-control-profiling",
+          "id": "p061",
+          "line": 61
+        },
+        {
+          "digest": "sha256:b3df73a92daec5f97fd08cb589a290e8d8cb0ec93446636265717929723ab8fa",
+          "expected_primary_skill": "compaction-control-profiling",
+          "id": "p062",
+          "line": 62
+        },
+        {
+          "digest": "sha256:7d3b09a167bb589a780de8ca4fb2ff4c8c84b45ef3362321788bbb9a23fa5845",
+          "expected_primary_skill": "compaction-control-profiling",
+          "id": "p063",
+          "line": 63
         }
       ]
     },
@@ -2354,7 +2575,7 @@
       ]
     },
     "skills": {
-      "count": 19,
+      "count": 20,
       "owner": "skills/*/SKILL.md",
       "records": [
         {
@@ -2368,7 +2589,12 @@
           "path": "skills/bdi-mental-states/SKILL.md"
         },
         {
-          "digest": "sha256:ab4fd1e1046db339d83ead5089d4cb9d9c487232945d4ff6be90e08a03f6cfea",
+          "digest": "sha256:f253830753ee8a778f77b623bbf67297328aeef9095fd43c59d5de851b27b89a",
+          "id": "compaction-control-profiling",
+          "path": "skills/compaction-control-profiling/SKILL.md"
+        },
+        {
+          "digest": "sha256:0af9be7b7f837997ab127fcecf1c8a62f1ae0116e0028e04f2b5b7ec72e84f15",
           "id": "context-compression",
           "path": "skills/context-compression/SKILL.md"
         },
@@ -2383,12 +2609,12 @@
           "path": "skills/context-fundamentals/SKILL.md"
         },
         {
-          "digest": "sha256:96fbd47c16d163857b92d477ba5c7ec3ae947127772e327b8236d05d64d5b123",
+          "digest": "sha256:f89cb27df4f6f517ff915c0489975eae79a26ca8649febda495b2be62d383341",
           "id": "context-optimization",
           "path": "skills/context-optimization/SKILL.md"
         },
         {
-          "digest": "sha256:1f31cda0910dfd48d928e1485b303b739608ceeb0babca0e9a6f821cbf4320ff",
+          "digest": "sha256:e87dcb36c7a6521b1f8a006cae0aa34d7f374081f317cbf8feff0b3dd730edc1",
           "id": "evaluation",
           "path": "skills/evaluation/SKILL.md"
         },
@@ -2443,7 +2669,7 @@
           "path": "skills/self-improvement-loops/SKILL.md"
         },
         {
-          "digest": "sha256:0b077da6d7725af414a42a627321a11ce9ffc90b4c3e583a1ae126968a8bbd26",
+          "digest": "sha256:49104f9b93e4885cb4e9179877d0c1a0b21214cf508b3a446e5d9f01ac049a0f",
           "id": "self-managed-context",
           "path": "skills/self-managed-context/SKILL.md"
         },
@@ -2560,6 +2786,7 @@
       "marketplace": [
         "advanced-evaluation",
         "bdi-mental-states",
+        "compaction-control-profiling",
         "context-compression",
         "context-degradation",
         "context-fundamentals",
@@ -2581,6 +2808,7 @@
       "published": [
         "advanced-evaluation",
         "bdi-mental-states",
+        "compaction-control-profiling",
         "context-compression",
         "context-degradation",
         "context-fundamentals",
@@ -2615,6 +2843,14 @@
       {
         "case_id": "activation-bdi-vs-memory",
         "skill_id": "bdi-mental-states"
+      },
+      {
+        "case_id": "activation-compaction-control-context-anxiety",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "case_id": "activation-compaction-control-qualify-model",
+        "skill_id": "compaction-control-profiling"
       },
       {
         "case_id": "activation-compression-summary-vs-self-managed",
@@ -2721,6 +2957,10 @@
         "skill_id": "self-managed-context"
       },
       {
+        "case_id": "activation-self-managed-vs-compaction-control",
+        "skill_id": "self-managed-context"
+      },
+      {
         "case_id": "activation-tool-consolidation",
         "skill_id": "tool-design"
       },
@@ -2734,6 +2974,61 @@
         "claim_id": "claim-advanced-evaluation-position-swap",
         "relationship": "owned",
         "skill_id": "advanced-evaluation"
+      },
+      {
+        "claim_id": "claim-compaction-control-compression-reopen",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "claim_id": "claim-compaction-control-context-anxiety",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "claim_id": "claim-compaction-control-low-demand-benchmark",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "claim_id": "claim-compaction-control-reference-interface",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "claim_id": "claim-compaction-control-rollout-penalty",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "claim_id": "claim-compaction-control-study-setup",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "claim_id": "claim-compaction-control-suffix-kv-reuse",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "claim_id": "claim-compaction-control-tight-budget-gain",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "claim_id": "claim-compaction-control-token-savings",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "claim_id": "claim-compaction-control-uptake-variance",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "claim_id": "claim-compaction-control-warning-response",
+        "relationship": "owned",
+        "skill_id": "compaction-control-profiling"
       },
       {
         "claim_id": "claim-context-compression-factory-benchmark",
@@ -2981,6 +3276,22 @@
         "skill_id": "bdi-mental-states"
       },
       {
+        "mechanism_id": "bidirectional-timing-instruction-calibration",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "mechanism_id": "compaction-behavior-profile",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "mechanism_id": "cross-policy-context-budget-sweep",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
+        "mechanism_id": "reversible-collapse-archive-interface",
+        "skill_id": "compaction-control-profiling"
+      },
+      {
         "mechanism_id": "anchored-iterative-summary",
         "skill_id": "context-compression"
       },
@@ -3087,27 +3398,27 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:93d09a99593351221beea4463069e5c75fcade9e55a095bef4072e8f8ba90727",
+    "digest": "sha256:580ca8b7a9651ce46ce6e5a382e04425249e064c831430de78732a326d32a854",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:93d09a99593351221beea4463069e5c75fcade9e55a095bef4072e8f8ba90727",
+  "source_tree_digest": "sha256:580ca8b7a9651ce46ce6e5a382e04425249e064c831430de78732a326d32a854",
   "sources": [
     {
-      "digest": "sha256:62e339942c7ce798a5e2e421f30fe350ea917d109eb3eed6cc40ba497536560e",
+      "digest": "sha256:c7e1b683a02d425fe3fc05fb3ab1b0d4a7ee81d4349647d7aacd7110f7c83060",
       "path": ".claude-plugin/marketplace.json",
-      "size_bytes": 2093
+      "size_bytes": 2231
     },
     {
-      "digest": "sha256:57c9a45c8e8e87a7062e71a68b9a47eaea9545f5b381686ee8396df6cc6f5a2d",
+      "digest": "sha256:1f8a6ad42916a2f7183794e15dc73ac4eb1a7010e5580e328d0e5bf1726ca190",
       "path": ".plugin/plugin.json",
-      "size_bytes": 859
+      "size_bytes": 948
     },
     {
-      "digest": "sha256:57939316b01c344df11f879f2686a6586d3752048a9cfb67a38ce11d43f511c1",
+      "digest": "sha256:4ee7df9d5f191f4a7234fb384b2f8eea3dad4fef41c769aa1bcf208be283bc5b",
       "path": "SKILL.md",
-      "size_bytes": 11620
+      "size_bytes": 12441
     },
     {
       "digest": "sha256:e80dc5fe7391c3a5745c574814a1502d24ba9acea91fcbb5dc7ec7d38eb43545",
@@ -3195,9 +3506,9 @@
       "size_bytes": 591
     },
     {
-      "digest": "sha256:df449df80e45fa956a512a8a56f7af7cf6fcd2f19e3bbd5ff5302198ce03b2ce",
+      "digest": "sha256:ce079ed0f2c077784e28017ada1ca764f72f6c613e650fc106df502bc06aa17e",
       "path": "researcher/benchmarks/router/prompts.jsonl",
-      "size_bytes": 25238
+      "size_bytes": 27456
     },
     {
       "digest": "sha256:aed93585626ea824524bd555cc459d95604b541ea8862f1e7e31a9d822b29a85",
@@ -3235,14 +3546,14 @@
       "size_bytes": 611
     },
     {
-      "digest": "sha256:e22e8e0c228d910a711fd11b36d7cc2f1f2dabf13cb59f89e3b187b87f30d683",
+      "digest": "sha256:a00e2f79abb1a55008dc4670f66cac73defa46d33438ef3a3789f069d9a743d3",
       "path": "researcher/claims/index.jsonl",
-      "size_bytes": 27773
+      "size_bytes": 37119
     },
     {
-      "digest": "sha256:f449b86eb8e549642387520eb2956767e6e199695b9818a751b48859561e813f",
+      "digest": "sha256:5ee2d19d972a52c9baab487430b926ffa1ad3eac3e46555ff65989fc410a52ad",
       "path": "researcher/corpus/index.json",
-      "size_bytes": 9232
+      "size_bytes": 10351
     },
     {
       "digest": "sha256:a8a2d73c1d22f496702737d572dedadfc63298fd4e658d9a5574d58690fba0e5",
@@ -3265,9 +3576,9 @@
       "size_bytes": 7258
     },
     {
-      "digest": "sha256:415cb61e2819e5bbe2b1aa4d32e879f2c390a16fe3d5daadaaf1d4f206b5fd2d",
+      "digest": "sha256:17a5e60c82b460868e029abf0f5f14360ee01567cc1d08ee7f7a96b179675c4c",
       "path": "researcher/fixtures/activation-cases.jsonl",
-      "size_bytes": 16437
+      "size_bytes": 18772
     },
     {
       "digest": "sha256:6a0ee2e312f7798802bbc159120c8b621edc3cb0b52d17c9f337a8f61bfbf33b",
@@ -3280,9 +3591,9 @@
       "size_bytes": 553
     },
     {
-      "digest": "sha256:2801c461d4dadb9470811ba4d68337a806f9d20eb86291aa9a7b41bcf7471ed8",
+      "digest": "sha256:c8d0006fd36b08ebd6570c3d2476f3de22e232a39e7e771191a5be2c1ec788d0",
       "path": "researcher/mechanisms/ledgers/accepted.jsonl",
-      "size_bytes": 16694
+      "size_bytes": 19604
     },
     {
       "digest": "sha256:1dba51f3178d0497b69d9b25dd0bfecc894552b56056d33281e981eeb45db8c5",
@@ -3290,9 +3601,9 @@
       "size_bytes": 302
     },
     {
-      "digest": "sha256:e39d1d9c7d333971485a2cc161ddd3977918b7713cd7db03fa51445383c6fa32",
+      "digest": "sha256:bf78ffd16012540319e35cb31a9c771d3c25b6692d7ab9fdb9fda75718f9db6c",
       "path": "researcher/mechanisms/registry.jsonl",
-      "size_bytes": 22688
+      "size_bytes": 28097
     },
     {
       "digest": "sha256:0ac5456af9a440308082b4f730cb69f5a4bbfc9cb32928db1f8d4c656243e7ba",
@@ -3430,14 +3741,14 @@
       "size_bytes": 2240
     },
     {
-      "digest": "sha256:3ed5ebde1fc953a0c2eccf65e8a624c27da18260727eae1d2f5b12bbe63cce5c",
+      "digest": "sha256:db1017975db9e0644e7fb2f43ac3da1faac4692f6fae13602f090faecd32f84d",
       "path": "researcher/schemas/generated/current-artifacts-report.json",
       "size_bytes": 603
     },
     {
-      "digest": "sha256:d7a62e8dd2901e0f817f5411a1515754fe813ba55f21945810bb7a94c62f13a8",
+      "digest": "sha256:1fdb535815c137050569435c32294d6ee4e57b6953ffd8f94e7a780b83d23ea5",
       "path": "researcher/schemas/generated/migration-dry-run.json",
-      "size_bytes": 41554
+      "size_bytes": 49823
     },
     {
       "digest": "sha256:38983589a7cb0d6763831d6c842b5c97d5b519393637e620ed3b454cc4d86d69",
@@ -3660,9 +3971,14 @@
       "size_bytes": 17738
     },
     {
-      "digest": "sha256:ab4fd1e1046db339d83ead5089d4cb9d9c487232945d4ff6be90e08a03f6cfea",
+      "digest": "sha256:f253830753ee8a778f77b623bbf67297328aeef9095fd43c59d5de851b27b89a",
+      "path": "skills/compaction-control-profiling/SKILL.md",
+      "size_bytes": 25569
+    },
+    {
+      "digest": "sha256:0af9be7b7f837997ab127fcecf1c8a62f1ae0116e0028e04f2b5b7ec72e84f15",
       "path": "skills/context-compression/SKILL.md",
-      "size_bytes": 18507
+      "size_bytes": 18798
     },
     {
       "digest": "sha256:4e1896f641ddc99cc9cb14322606c6133b9fd520c84d3af0541e64f553c7f928",
@@ -3675,14 +3991,14 @@
       "size_bytes": 17013
     },
     {
-      "digest": "sha256:96fbd47c16d163857b92d477ba5c7ec3ae947127772e327b8236d05d64d5b123",
+      "digest": "sha256:f89cb27df4f6f517ff915c0489975eae79a26ca8649febda495b2be62d383341",
       "path": "skills/context-optimization/SKILL.md",
-      "size_bytes": 16052
+      "size_bytes": 16305
     },
     {
-      "digest": "sha256:1f31cda0910dfd48d928e1485b303b739608ceeb0babca0e9a6f821cbf4320ff",
+      "digest": "sha256:e87dcb36c7a6521b1f8a006cae0aa34d7f374081f317cbf8feff0b3dd730edc1",
       "path": "skills/evaluation/SKILL.md",
-      "size_bytes": 16829
+      "size_bytes": 17109
     },
     {
       "digest": "sha256:91cd7f071e38dbeee15dbebd9dd549c9116affae939702f05409ed1952355f50",
@@ -3735,9 +4051,9 @@
       "size_bytes": 22494
     },
     {
-      "digest": "sha256:0b077da6d7725af414a42a627321a11ce9ffc90b4c3e583a1ae126968a8bbd26",
+      "digest": "sha256:49104f9b93e4885cb4e9179877d0c1a0b21214cf508b3a446e5d9f01ac049a0f",
       "path": "skills/self-managed-context/SKILL.md",
-      "size_bytes": 24111
+      "size_bytes": 25207
     },
     {
       "digest": "sha256:14f5a12b69113bc6450da69c5b4d408fe91601832ab1055ae25311339c84a06b",

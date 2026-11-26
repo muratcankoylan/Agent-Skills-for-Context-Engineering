@@ -23,6 +23,7 @@ Do not activate this skill for adjacent work owned by other skills:
 - Designing a structured handoff summary for a long conversation: `context-compression`.
 - Storing large outputs, plans, or logs as files: `filesystem-context`.
 - Model-initiated rewrites of its own context and their re-prefill cost: `self-managed-context`.
+- Qualifying a specific model to trigger its own compaction instead of a harness threshold: `compaction-control-profiling`.
 
 ## Core Concepts
 
@@ -193,6 +194,7 @@ This skill owns token-efficiency tactics and budget policy. Adjacent skills own 
 - `multi-agent-patterns`: partitioning work across isolated agent contexts.
 - `latent-briefing`: selective KV retention across orchestrator-worker boundaries in compatible runtimes.
 - `self-managed-context`: the model, not the harness, decides when and what to edit in its live context.
+- `compaction-control-profiling`: per-model measurement of whether the harness threshold or the model should trigger compaction.
 - `evaluation`: measuring whether the optimization improved quality, cost, or latency.
 - `memory-systems`: persistent retrieval layers that feed context just in time.
 

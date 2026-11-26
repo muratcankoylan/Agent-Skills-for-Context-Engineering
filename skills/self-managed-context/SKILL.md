@@ -29,6 +29,7 @@ Do not activate this skill for adjacent work owned by other skills:
 - Latent KV transfer between agents: `latent-briefing`.
 - Cross-session stores: `memory-systems`.
 - Loop governance and acceptance gates: `self-improvement-loops`. This skill supplies the context-editing signal; that skill governs the loop.
+- Deciding per model whether to delegate compaction at all, cross-policy sweeps over context budgets, and compaction behavior profiling: `compaction-control-profiling`. This skill builds the harness once a model qualifies.
 
 ## Core Concepts
 
@@ -109,6 +110,8 @@ When the serving stack is under your control, Suffix Cache Reuse (SCR) relocates
 ### Capability Dependence
 
 Self-management delegates a decision, so gains scale with the model's ability to make it. A smaller model edited less often, skipped editing entirely on many tasks, and ran near the limit, while the larger model kept substantial headroom (claim-self-managed-context-capability-gap). Untrained small models can trail a harness-scheduled baseline until RL closes the gap (claim-self-managed-context-rl). For weak models, a hybrid works: keep a harness-scheduled fallback beneath the self-managed layer, or steer with explicit thresholds.
+
+Model size is not the only axis. In a separate cross-model study on a reversible collapse interface, four models were given identical instructions; three compacted in roughly half of their tasks and the fourth in an order of magnitude fewer, mostly returning an answer when warned that context was filling (claim-compaction-control-uptake-variance, claim-compaction-control-warning-response). Qualify each model, model version, and prompt with compaction-control-profiling before relying on self-management.
 
 ### Editable Context as a Persistence Channel
 
@@ -249,6 +252,7 @@ This skill connects to:
 - self-improvement-loops - Governs the evolution loop and acceptance gates when the context-editing skill is optimized
 - multi-agent-patterns - Subagent and swarm designs where each agent manages its own context file
 - latent-briefing - The latent alternative: compacting KV state passed between agents instead of editing text
+- compaction-control-profiling - Qualifies a specific model for this control with a budget sweep and behavior profile, and calibrates the timing instruction per model, before this harness is adopted
 
 ## References
 
@@ -260,6 +264,7 @@ Related skills in this collection:
 - context-compression - Read when: designing the content of replacement notes
 - context-optimization - Read when: the harness, not the model, controls the context
 - self-improvement-loops - Read when: wrapping strategy evolution or RL in acceptance gates and archives
+- compaction-control-profiling - Read when: deciding whether a given model should control compaction, or diagnosing early, absent, or abandoned compaction per model
 
 External resources:
 - Paper: [Context Language Models](https://arxiv.org/abs/2609.37725)
@@ -271,6 +276,6 @@ External resources:
 ## Skill Metadata
 
 **Created**: 2026-10-01
-**Last Updated**: 2026-10-01
+**Last Updated**: 2026-11-26
 **Author**: Agent Skills for Context Engineering Contributors; primary technical source Shao et al., Context Language Models (arXiv 2609.37725) and its released code
-**Version**: 1.0.0
+**Version**: 1.0.1

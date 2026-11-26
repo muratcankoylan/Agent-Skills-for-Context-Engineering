@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "generated_by": "manual-breakthrough-roadmap-seed",
-  "updated_at": "2026-11-20",
+  "updated_at": "2026-11-26",
   "purpose": "Canonical machine-readable map for skills, mechanisms, claims, and activation scenarios.",
   "skills": [
     {
@@ -17,6 +17,13 @@
       "activation_scenarios": ["belief-desire-intention modeling", "rational agency traces", "neuro-symbolic state transformations"],
       "mechanism_ids": ["world-state-grounded-bdi-chain"],
       "claim_ids": []
+    },
+    {
+      "name": "compaction-control-profiling",
+      "path": "skills/compaction-control-profiling/SKILL.md",
+      "activation_scenarios": ["per-model compaction control assignment", "cross-policy context-budget sweep", "compaction behavior profiling", "context anxiety and timing-instruction calibration", "reversible collapse-and-archive interface telemetry", "re-qualification after model or prompt change"],
+      "mechanism_ids": ["cross-policy-context-budget-sweep", "compaction-behavior-profile", "bidirectional-timing-instruction-calibration", "reversible-collapse-archive-interface"],
+      "claim_ids": ["claim-compaction-control-study-setup", "claim-compaction-control-tight-budget-gain", "claim-compaction-control-low-demand-benchmark", "claim-compaction-control-uptake-variance", "claim-compaction-control-compression-reopen", "claim-compaction-control-warning-response", "claim-compaction-control-context-anxiety", "claim-compaction-control-rollout-penalty", "claim-compaction-control-token-savings", "claim-compaction-control-suffix-kv-reuse", "claim-compaction-control-reference-interface"]
     },
     {
       "name": "context-compression",

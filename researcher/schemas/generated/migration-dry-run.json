@@ -1,7 +1,7 @@
 {
   "deduplicated": [],
   "deduplicated_count": 0,
-  "input_count": 75,
+  "input_count": 90,
   "migrated": [
     {
       "kind": "LegacyClaim",
@@ -12,6 +12,116 @@
       "source_bytes_digest": "sha256:ff86a2aa2dbeab30063f0acfaf5a9fb08780f1d691cc94b9dc820a0d60edffb0",
       "source_path": "researcher/claims/index.jsonl",
       "source_record_digest": "sha256:0e44b638988b12477c1f9446842db5aeec0b25ef95be058bead68dc9c1efe28e"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-compression-reopen",
+      "new_digest": "sha256:a34d8adc08291a703b5db83f3e039730d3ddbe4831cfb2db3fd60c3f5fd57c6c",
+      "new_id": "rec_61943957-aa81-5245-9010-9bb0d9cf6a5f",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:b253a8b277ba9dfc9b966e07e914fcd066179f8e324a9654551a0a7eec9f20ee",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:b3cc8ed27be1b170f3f9157a454222626869b1687a0ddc77ce25dcfcdd60a02e"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-context-anxiety",
+      "new_digest": "sha256:95c73455fe43bc62e1780bbe2915cdfc13b7ff41a8e5fc2a29446dd0224c47b2",
+      "new_id": "rec_1c316c22-388a-580f-9c0c-92865bb5a8a6",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:625f7ac1fd36a774f8ca4346db0528c838aac30161f40c5914a7d1d4859e1cbe",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:ed1fc7e63b7217fd0deb7625fad25651fe229143eabf09b3bcb0fa2aea89d3b0"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-low-demand-benchmark",
+      "new_digest": "sha256:ce8b4ba0c840633c823c75cff3098a9716a28b93eecbf069cd08a589999a3dce",
+      "new_id": "rec_2d9b6ce6-fe08-55a8-b9ad-1f037c834656",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:25792162980ca7dabb0c57b397e5a9528f99c3d3afbb8160d2e8de47717498fd",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:3e84ee550d27be00e9df201bab6b523f8eb8fc4393c554e24ab7b7e4691162fe"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-reference-interface",
+      "new_digest": "sha256:7ddf229b3c27b09c30413b878aa6816c1bbff976fc4c0d77d9439eb2a529c500",
+      "new_id": "rec_459a6b77-ebf1-523e-8929-d9be9cad58cd",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:0ab420b42472cdb93166d5bacad21899df1921ef65adb190849a64fccc3386cf",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:ad3a5a906f0d41beb7610e680825a0eb77c588f6683c43342c62d4deff91ac6c"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-rollout-penalty",
+      "new_digest": "sha256:a10c816b062ee2fd0e745cf7bb9518d7c5656f562800029212a75e83cd1178ab",
+      "new_id": "rec_b2183832-7558-58a7-a462-d23dac342740",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:083a8a13a579418faf70c69b4c7e5373daf1b25d0452b401f5d906ad9e67a77b",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:df6a1d8305b593414453b3f4b0b1bcca1842ba94c746cbebcd40c18886e09f99"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-study-setup",
+      "new_digest": "sha256:44f276f03ec7f218b41dd69903666a8c6ec7ac216ee80c476f25885a089df1fe",
+      "new_id": "rec_f986ed9c-ea84-5718-bcb2-081a277f4a03",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:b179387308561a8d40f3daf221ed9203e9a3c15f06069b40f5edc2372142c020",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:ca5a82478f190972a01e7a3eed725ae6b1c6e725515c2180a5af23a058b0ff19"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-suffix-kv-reuse",
+      "new_digest": "sha256:f64fd92d19d2b7f0b5d16cb7020f5f77fab17961ae2de4684b2dd7d1ccfa68b3",
+      "new_id": "rec_9a68fdfc-e09d-5304-b297-a547ce5a49c2",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:2f42efc02d664ed977dd9756b1dfa7adc0cf6f0136c801d093231d85cbfd8041",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:a34f5fba4dfad542358031d2af7272714da991e83ca1fd5847806cdd86ecd6ab"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-tight-budget-gain",
+      "new_digest": "sha256:20d1aad741210b8a9683c3cf72a65118f099fc976904976078441188d4afccfb",
+      "new_id": "rec_b059f778-3064-516b-9e3e-7611f983ba69",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:f01712f7e623c347231a88c545bdbecf56bea88bc58400c45836609213d4c414",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:32c7cc3a5ac77d50269c6642399a731be1364a8914a30a7dbbc3ccdffd8d7286"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-token-savings",
+      "new_digest": "sha256:62f9e6970445308fb65291e7fe5da390618d2bd53285a22e44c5a48c1b396485",
+      "new_id": "rec_680980f4-5544-5685-b76b-198a7a65346b",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:fc1ff94784b0b19f538ad5793ef2f9d0433fa0435e43cad6afe9edb5c2965d47",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:8af28c334a12dd3e21f907c5dcdbbfed2577701f56ebb47af912ca1a7874f0b9"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-uptake-variance",
+      "new_digest": "sha256:108ca98346fbf0f0c3c5c3e098edda7c8be6ee65c8a39a92f33b8d0e8e0e8dce",
+      "new_id": "rec_28da453c-e468-5a27-a422-0ba60449b004",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:a88d56e66711f824d3df677897697e569e73696f0d5bd6c4711f8445aa9d356f",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:4e69de01e9305529a5adb27878ccdddd1d724478b7c759f80d5ff1ce4327897a"
+    },
+    {
+      "kind": "LegacyClaim",
+      "legacy_key": "claim-compaction-control-warning-response",
+      "new_digest": "sha256:1b35bf5c01eb1d55070182491e02aba0f165070915122c4fae243002247f1046",
+      "new_id": "rec_e71e803d-1d5a-5dea-bc9a-1a47b8615156",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:fbd31fc72845af41aadc873f89c12c28b46039b5593ac0642559f928c6125435",
+      "source_path": "researcher/claims/index.jsonl",
+      "source_record_digest": "sha256:e1f506c90f8eb5454c3e1df61b3bd599bc0c306066a9bf0ba2555930f208c064"
     },
     {
       "kind": "LegacyClaim",
@@ -475,6 +585,26 @@
     },
     {
       "kind": "LegacyMechanism",
+      "legacy_key": "bidirectional-timing-instruction-calibration",
+      "new_digest": "sha256:5b7e579a1dd9410b750f07637c0d6c97e5c577776b1d8fe568fb7ad211ec56e9",
+      "new_id": "rec_35de62cd-51fd-500e-9e50-5c1e7178deea",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:8a8ecbe8ce14269f6bac2096beee4ea5a09013496fd502b9c3747062a00d17b7",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:d01777782651d2a3db68f16a67f13cff4c43b330878c7aed2aad1c2d14cc3f70"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "compaction-behavior-profile",
+      "new_digest": "sha256:65f04b6a7246dad69c55c5013106c1deeaaede2ea7675734cdfe18f731a06676",
+      "new_id": "rec_1ed618b0-592f-5b64-a2dd-cf66ba5cb18e",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:736acb8b2dcdedbf284ed1bc13adfab6d75a52294556f401ae67787f1d323e53",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:4664680e3daf73c1520f66cfaf5f907e199c9ed9984d2435505a0d5c6db0432f"
+    },
+    {
+      "kind": "LegacyMechanism",
       "legacy_key": "context-budget-readout-nudges",
       "new_digest": "sha256:e5cb9dfb0e1c50da33a5bc07eb0aebeeb48c8dd51d3c04b362b54cb735a4e2e9",
       "new_id": "rec_10871e3a-61b6-5be2-930e-e6f28a83d989",
@@ -502,6 +632,16 @@
       "source_bytes_digest": "sha256:021d1143f4a9ad31c07a650a20ef85aa7b9eea79d01e0f8fdebe7436e1ae8c65",
       "source_path": "researcher/mechanisms/registry.jsonl",
       "source_record_digest": "sha256:cd98f8eb355df5cfc5cfc7774d9ab71a622ea6e61045a80ee7c284c70321c93e"
+    },
+    {
+      "kind": "LegacyMechanism",
+      "legacy_key": "cross-policy-context-budget-sweep",
+      "new_digest": "sha256:a74374edb34bf756f9e469a36dec592643b38a22f0da1890f5c0c0122ee3c09e",
+      "new_id": "rec_dde9cb99-c164-56e9-aa3e-f87803cfe645",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:00eddcff2a8552c8dea53420780ccb35e5e67ed8fb8fc44f216aa9ecdda7620b",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:3a43e15fd502f73ebe08a8d706c345616a460ed54f0480a45422c2d7a781ea7c"
     },
     {
       "kind": "LegacyMechanism",
@@ -655,6 +795,16 @@
     },
     {
       "kind": "LegacyMechanism",
+      "legacy_key": "reversible-collapse-archive-interface",
+      "new_digest": "sha256:caa33449eb9017ba4f920374ddccce628c38eb69086fdc31db17daea7776ec16",
+      "new_id": "rec_d4b0f76f-d19a-53a5-930d-1093f68810ee",
+      "rollback": "pass",
+      "source_bytes_digest": "sha256:76b73b12fc6caa6551a63a7ef18554c74318b91ede8f7345bf306f0b1cedf81e",
+      "source_path": "researcher/mechanisms/registry.jsonl",
+      "source_record_digest": "sha256:804a4e4ece9bcc7a216b05c102da5849e07b7a6027101507bc130fb35711d5bd"
+    },
+    {
+      "kind": "LegacyMechanism",
       "legacy_key": "runtime-enforced-loop-constraints",
       "new_digest": "sha256:b134615b296af320e8b2c3475b868469bbaa8a157e2339cd318de05c9f8b1085",
       "new_id": "rec_34f4ba6f-bb8d-5ed2-b912-f5856744e4d4",
@@ -754,10 +904,10 @@
       "source_record_digest": "sha256:e8ccf12edd075a1e634708a9d11351ad89dd8aa8ac71562e705298541ee4dbc0"
     }
   ],
-  "migrated_count": 75,
+  "migrated_count": 90,
   "mode": "dry-run",
   "quarantined": [],
   "quarantined_count": 0,
-  "report_digest": "sha256:22abd0192ef84a4b83315070f7d8adb2f17a5eae6f1bb6d790369cb7265f1573",
+  "report_digest": "sha256:422c0832ef11406db6ee1674615c03285dead6e96246662544a16e9b63cf4fe5",
   "schema_version": "1.0.0"
 }

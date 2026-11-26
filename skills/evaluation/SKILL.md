@@ -22,6 +22,7 @@ Do not activate this skill for adjacent work owned by other skills:
 - Designing the LLM judge itself, pairwise comparison, judge calibration, or bias mitigation: `advanced-evaluation`.
 - Designing autonomous control surfaces, novelty gates, rollback, or PR approval boundaries: `harness-engineering`.
 - Debugging a specific context failure mode before measuring it: `context-degradation`.
+- Comparing harness-driven and model-driven compaction across context budgets, or profiling a model's compaction behavior: `compaction-control-profiling`.
 
 ## Core Concepts
 
@@ -257,6 +258,7 @@ This skill owns outcome measurement and quality gates. Adjacent skills own speci
 - `harness-engineering`: locked evaluators, editable surfaces, rollback, and human approval boundaries.
 - `context-degradation`: detecting and measuring degradation patterns.
 - `context-optimization`: measuring token, cost, latency, and quality effects of optimizations.
+- `compaction-control-profiling`: compaction-specific conditions and metrics for deciding who controls compaction per model.
 - `multi-agent-patterns`: evaluating coordination quality and parallelization trade-offs.
 - `tool-design`: evaluating tool selection and recovery effectiveness.
 - `memory-systems`: evaluating memory retrieval and retention quality.
