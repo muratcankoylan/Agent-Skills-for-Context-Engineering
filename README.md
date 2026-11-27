@@ -51,6 +51,7 @@ These skills address the ongoing operation and optimization of agent systems.
 |-------|-------------|
 | [context-optimization](skills/context-optimization/) | Apply compaction, masking, and caching strategies |
 | [self-managed-context](skills/self-managed-context/) | **NEW** Give the model read-write control over its own live context: context as an editable file, harness invariants (pinned prefix, edit gate, receipts, budget readouts, rollback), edit-position cache cost and suffix cache reuse, and steering or training context-editing strategy, based on Context Language Models |
+| [compaction-control-profiling](skills/compaction-control-profiling/) | **NEW** Qualify a model before it controls its own compaction: cross-policy context-budget sweeps, a five-metric compaction behavior profile, context anxiety and timing-instruction calibration, and per-model control assignment, based on NVIDIA's cross-model study of model-driven context management |
 | [latent-briefing](skills/latent-briefing/) | Share task-relevant orchestrator state with workers via task-guided KV cache compaction when the worker runtime is controllable |
 | [evaluation](skills/evaluation/) | Build evaluation frameworks for agent systems |
 | [advanced-evaluation](skills/advanced-evaluation/) | Master LLM-as-a-Judge techniques: direct scoring, pairwise comparison, rubric generation, and bias mitigation |
@@ -129,6 +130,7 @@ This installs all published skills in a single plugin. Skills are activated auto
 | `context-compression` | Preserving useful state while reducing conversation, tool-output, or trajectory size under context pressure |
 | `context-optimization` | Improving token efficiency, retrieval precision, prefix reuse, masking, partitioning, or budget allocation for agent systems |
 | `self-managed-context` | Letting the model decide what stays in its live context: context-as-a-file editing, self-editing harness invariants, mid-context edit cost under prefix caching, budget readouts and nudges, and steering or training context-editing strategy |
+| `compaction-control-profiling` | Deciding per model whether the harness or the model should trigger compaction: budget sweeps comparing both policies, compaction behavior metrics (uptake, compression factor, reopen rate, first-compaction fill, warning response), context anxiety, and timing-instruction calibration |
 | `latent-briefing` | Sharing orchestrator trajectory with workers via task-guided KV cache compaction when the worker runtime is controllable and the models are compatible |
 | `multi-agent-patterns` | Choosing coordination patterns, isolating context across agents, designing handoffs, or evaluating whether parallel agents are justified |
 | `long-horizon-prompting` | Writing or evaluating the launch prompt for a long-running autonomous agent or parallel orchestration: success predicates, non-counting outcomes, persistence and stop rules, adversarial audit gates, per-worker output contracts, and portfolio diversity policies |
@@ -186,7 +188,7 @@ cp -R skills/context-fundamentals .agents/skills/
 
 Do not flatten `SKILL.md` into a single file at `.claude/skills/context-fundamentals.md`. That breaks relative `references/` paths and violates the Agent Skills directory spec used by Cursor, Claude Code, and Codex.
 
-Available skills: `context-fundamentals`, `context-degradation`, `context-compression`, `context-optimization`, `self-managed-context`, `latent-briefing`, `multi-agent-patterns`, `long-horizon-prompting`, `memory-systems`, `tool-design`, `filesystem-context`, `hosted-agents`, `evaluation`, `advanced-evaluation`, `harness-engineering`, `instruction-surface-security`, `self-improvement-loops`, `project-development`, `bdi-mental-states`
+Available skills: `context-fundamentals`, `context-degradation`, `context-compression`, `context-optimization`, `self-managed-context`, `compaction-control-profiling`, `latent-briefing`, `multi-agent-patterns`, `long-horizon-prompting`, `memory-systems`, `tool-design`, `filesystem-context`, `hosted-agents`, `evaluation`, `advanced-evaluation`, `harness-engineering`, `instruction-surface-security`, `self-improvement-loops`, `project-development`, `bdi-mental-states`
 
 ### For Custom Implementations
 

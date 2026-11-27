@@ -59,6 +59,9 @@ Techniques include compaction (summarizing context near limits), observation mas
 **Self-Managed Context**
 The model, not the harness, decides what stays in its live context: the editable region is exposed as a file the model rewrites with code tools and re-parsed each turn. The harness keeps the invariants (pinned system and task prefix, role folding, edit gate, receipts, deterministic budget readouts, rollback on overflow). Edit cost scales with the text after the edit under prefix caching, so edits are batched and placed with the tail in mind; strategy can be steered by instruction, evolved as a skill, or trained with a success-gated efficiency reward.
 
+**Compaction Control Profiling**
+Whether a model should control its own compaction is measured per model, not assumed. Run harness-driven and model-driven compaction on one harness across a ladder of hard context budgets, log a behavior profile (interface uptake, compression factor per call, reopen rate of archived content, context fill at first compaction, response to pressure warnings), and calibrate the timing instruction in both directions, because the same instruction that restrains an early-compacting model can coincide with another model not compacting at all. Assign control per model and pressure regime, expose compaction as a reversible collapse with archived originals, and re-qualify when the model or the prompt changes.
+
 **Latent Briefing (KV Memory Sharing)**
 Orchestrator-worker systems can compound tokens when supervisors accumulate long trajectories but workers see only narrow text slices. Latent Briefing compacts the orchestrator trajectory in the worker model's KV cache using task-guided attention (Attention Matching-style compaction) so workers receive relevant latent state without full-text replay when the stack exposes worker KV state and the models are compatible.
 
@@ -112,6 +115,7 @@ Internal skills in this collection:
 - [hosted-agents](skills/hosted-agents/SKILL.md)
 - [context-optimization](skills/context-optimization/SKILL.md)
 - [self-managed-context](skills/self-managed-context/SKILL.md)
+- [compaction-control-profiling](skills/compaction-control-profiling/SKILL.md)
 - [latent-briefing](skills/latent-briefing/SKILL.md)
 - [evaluation](skills/evaluation/SKILL.md)
 - [advanced-evaluation](skills/advanced-evaluation/SKILL.md)
