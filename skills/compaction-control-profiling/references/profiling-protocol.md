@@ -82,12 +82,13 @@ Minimum design: two budgets (one tight, one loose) by two arms (timing instructi
 
 | Observation | Conclusion | Next arm |
 | --- | --- | --- |
-| Absent arm compacts at much lower fill, loose-budget score drops | Context anxiety; the floor is needed | Keep the floor; try one lower threshold to see where the score recovers |
+| Absent arm compacts at much lower fill, loose-budget score drops | Context anxiety with an accuracy cost; the floor is needed | Keep the floor; try one lower threshold to see where the score recovers |
+| Absent arm compacts at much lower fill, loose-budget score holds | Context anxiety without a measured accuracy cost | The floor is optional; compare cumulative input and prefill between arms before keeping early compaction |
 | Present arm has near-zero uptake, absent arm compacts | The instruction may be suppressing use; confirm that present-arm tasks reach the warning or the fallback | Test a lower threshold and the paired floor-plus-expectation wording |
 | Both arms compact near the same fill | Model is insensitive to the instruction | Drop it; fewer prompt surfaces to maintain |
 | Neither arm compacts and tasks reach the fallback | Model declines control | Harness-driven, or test a reworded warning |
 
-The study observed the first-row and second-row patterns in different models, plus one model that was less sensitive to the instruction (claim-compaction-control-context-anxiety). For the second-row model it reports no accuracy change between arms, and its companion post notes that model often finishes before compaction is needed, so the conclusion column is this skill's reading, not the study's.
+The study observed the first-row pattern in two models. A third model compacted early without the instruction and showed no comparable accuracy change, the second-row pattern; with the instruction it almost never compacted, the third-row pattern. The companion post notes that this model often finishes before compaction is needed, so reading its third-row behavior as suppression is this skill's inference, not the study's. A fourth model was less sensitive to the instruction (claim-compaction-control-context-anxiety).
 
 ## 7. Classification Criteria
 
@@ -97,7 +98,8 @@ Criteria for the signal table in SKILL.md. Each is a comparison between arms or 
 | --- | --- |
 | Declining control | At budgets where `peak_pressure` exceeds one, `declined` is non-trivial and the model-driven score is at or below the harness-driven score beyond spread |
 | Never needed | Zero-compaction tasks are `never_needed`, and `peak_pressure` is below one for those tasks |
-| Context anxiety | `first_compaction_fill` in the no-instruction arm is lower than in the instructed arm beyond spread, or sits far below the level at which the fallback would act, and the loose-budget score is below the harness baseline beyond spread |
+| Context anxiety | `first_compaction_fill` in the no-instruction arm is lower than in the instructed arm beyond spread, or the first compaction sits far below the level at which the fallback would act. This is a timing signal and needs no score change |
+| Costly context anxiety | Context anxiety, and the loose-budget score of the early-compacting arm is below the harness baseline beyond spread. This is the case that requires a timing floor |
 | Suppression | Uptake in the instructed arm is lower than in the no-instruction arm beyond spread, at a budget where tasks reach the warning |
 | Aggressive calls | Median `compression_factor` is high relative to other models profiled on the same harness |
 | Unrecovered loss | Aggressive calls, a low `reopen_rate`, few repeated tool calls after compaction, and a score drop beyond spread |
@@ -113,7 +115,11 @@ Not evaluated in the study. Order the triggers by fill so each layer acts only i
 timing floor  <  pressure warning  <  harness fallback threshold  <  hard limit
 ```
 
-Starting points: floor at the calibrated per-model value, warning one large tool output below the fallback threshold, fallback threshold one large tool output below the hard limit. Size "one large tool output" from the recent maximum, as the self-managed-context skill describes for urgent bands. Log which layer fired; a harness layer that fires in most tasks means the model has not taken control and the assignment should revert to harness-driven.
+Starting points, derived from the top down: fallback threshold one large tool output below the hard limit, warning one large tool output below the fallback threshold, and floor at the calibrated per-model value, capped so that it stays below the warning with room for at least one ordinary turn. Size "one large tool output" from the recent maximum, as the self-managed-context skill describes for urgent bands.
+
+Check the order at every budget, not once. The warning and fallback are sized in tokens from the hard limit, while a calibrated floor is usually a fraction of the budget. At tight budgets one large tool output is a large share of the window, so an uncapped floor can land above the warning or the fallback and the layers race instead of stacking. Validate `floor < warning < fallback < hard limit` when the run is configured and refuse to start otherwise. If the cap pushes the floor so low that it invites early compaction, that budget is too tight for a hybrid: cap tool output size or run a single policy there.
+
+Log which layer fired; a harness layer that fires in most tasks means the model has not taken control and the assignment should revert to harness-driven.
 
 ## 9. Interface Contract
 

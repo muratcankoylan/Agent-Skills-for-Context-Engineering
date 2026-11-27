@@ -1739,7 +1739,7 @@
           "status": "accepted"
         },
         {
-          "digest": "sha256:d01777782651d2a3db68f16a67f13cff4c43b330878c7aed2aad1c2d14cc3f70",
+          "digest": "sha256:13c37152d041b089be26d5435278759dddb62135be4481d907b7100fcd4ff4d0",
           "id": "bidirectional-timing-instruction-calibration",
           "line": 31,
           "owning_skill": "compaction-control-profiling",
@@ -2589,7 +2589,7 @@
           "path": "skills/bdi-mental-states/SKILL.md"
         },
         {
-          "digest": "sha256:f253830753ee8a778f77b623bbf67297328aeef9095fd43c59d5de851b27b89a",
+          "digest": "sha256:8e85f608fdd731ce8b1e18a2868a8a879a9df0123251e8931a08797a1931efb2",
           "id": "compaction-control-profiling",
           "path": "skills/compaction-control-profiling/SKILL.md"
         },
@@ -3398,12 +3398,12 @@
     ]
   },
   "repository_revision": {
-    "digest": "sha256:580ca8b7a9651ce46ce6e5a382e04425249e064c831430de78732a326d32a854",
+    "digest": "sha256:aeb3eae7f461c32f9587f1d989d847a3c282e1361399847fe5a9a47e20dd1d60",
     "git_commit_excluded_to_avoid_self_reference": true,
     "kind": "canonical_source_tree"
   },
   "schema_version": "1.0.0",
-  "source_tree_digest": "sha256:580ca8b7a9651ce46ce6e5a382e04425249e064c831430de78732a326d32a854",
+  "source_tree_digest": "sha256:aeb3eae7f461c32f9587f1d989d847a3c282e1361399847fe5a9a47e20dd1d60",
   "sources": [
     {
       "digest": "sha256:c7e1b683a02d425fe3fc05fb3ab1b0d4a7ee81d4349647d7aacd7110f7c83060",
@@ -3601,9 +3601,9 @@
       "size_bytes": 302
     },
     {
-      "digest": "sha256:bf78ffd16012540319e35cb31a9c771d3c25b6692d7ab9fdb9fda75718f9db6c",
+      "digest": "sha256:1e80261e9707c2121895ba75c3628f198ef1e81946f6e1312a51c1586a3acbb0",
       "path": "researcher/mechanisms/registry.jsonl",
-      "size_bytes": 28097
+      "size_bytes": 28221
     },
     {
       "digest": "sha256:0ac5456af9a440308082b4f730cb69f5a4bbfc9cb32928db1f8d4c656243e7ba",
@@ -3741,12 +3741,12 @@
       "size_bytes": 2240
     },
     {
-      "digest": "sha256:db1017975db9e0644e7fb2f43ac3da1faac4692f6fae13602f090faecd32f84d",
+      "digest": "sha256:b91048d5b1a9576565ce021c4acb4715a8a743d6dcc2df677c62c43eaf0e6977",
       "path": "researcher/schemas/generated/current-artifacts-report.json",
       "size_bytes": 603
     },
     {
-      "digest": "sha256:1fdb535815c137050569435c32294d6ee4e57b6953ffd8f94e7a780b83d23ea5",
+      "digest": "sha256:004694f955342b25723afd3c3584eee3945fb5bd8005fd0de66a3c065ddbe439",
       "path": "researcher/schemas/generated/migration-dry-run.json",
       "size_bytes": 49823
     },
@@ -3971,9 +3971,9 @@
       "size_bytes": 17738
     },
     {
-      "digest": "sha256:f253830753ee8a778f77b623bbf67297328aeef9095fd43c59d5de851b27b89a",
+      "digest": "sha256:8e85f608fdd731ce8b1e18a2868a8a879a9df0123251e8931a08797a1931efb2",
       "path": "skills/compaction-control-profiling/SKILL.md",
-      "size_bytes": 25569
+      "size_bytes": 26356
     },
     {
       "digest": "sha256:0af9be7b7f837997ab127fcecf1c8a62f1ae0116e0028e04f2b5b7ec72e84f15",

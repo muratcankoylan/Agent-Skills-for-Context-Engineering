@@ -42,7 +42,7 @@ The table below is an operating rule derived from those results. The study obser
 | --- | --- | --- |
 | Low uptake, score at or below the harness baseline at tight budgets | The model is declining control | Keep harness-driven, or hybrid with a harness fallback |
 | Low uptake, tasks end below the timing threshold | Compaction was never needed | Not a failure; the budget is loose for this task |
-| First compaction far below the instructed threshold, or at low fill with no instruction | Context anxiety | Add or raise a timing floor; compare accuracy at large budgets |
+| First compaction far below the instructed threshold, or at low fill with no instruction | Context anxiety | Compare accuracy at large budgets with and without a timing floor. Add or raise the floor where early compaction costs accuracy; where accuracy holds, the floor is optional |
 | Uptake collapses when a timing instruction is added | The instruction may be suppressing use | Check whether those tasks reach the warning or the fallback; if they do, lower the threshold or pair the floor with an explicit expectation to act |
 | Large shrink per call with a high reopen rate | Aggressive, recovering through the archive | Acceptable; count the tokens spent on reopens |
 | Large shrink per call, low reopen rate, score drop | State lost and not recovered | Require richer summaries; route summary content to context-compression |
@@ -78,7 +78,7 @@ Log five metrics per budget. Definitions follow the study so results stay compar
 
 ### Context Anxiety and the Timing Instruction
 
-Calibrate the timing instruction per model, in both directions. Context anxiety is compaction that starts while ample space remains. With an instruction to consider compacting only past a high usage threshold, most models in the study waited until near it. Without it, two models started at under half of the budget and scored below the harness baseline at large budgets, and a third, which almost never compacted with the instruction, compacted early and regularly (claim-compaction-control-context-anxiety). The timing instruction is therefore a per-model dial that can err in two directions: absent, some models over-compact; present, one model in the study all but stopped compacting. The study reports no accuracy change for that model either way, so treat suppressed uptake as a signal to investigate, not as a demonstrated loss. One hypothesized cause of early compaction is training that penalizes long rollouts (claim-compaction-control-rollout-penalty). Treat the cause as conjecture and the behavior as measurable.
+Calibrate the timing instruction per model, in both directions. Context anxiety is compaction that starts while ample space remains. With an instruction to consider compacting only past a high usage threshold, most models in the study waited until near it. Without it, two models started at under half of the budget and scored below the harness baseline at large budgets, and a third, which almost never compacted with the instruction, compacted early and regularly (claim-compaction-control-context-anxiety). The timing instruction is therefore a per-model dial that can err in two directions: absent, some models over-compact; present, one model in the study all but stopped compacting. The study reports no accuracy change for that model either way, so treat suppressed uptake as a signal to investigate, not as a demonstrated loss. One hypothesized cause of early compaction is training that penalizes long rollouts (claim-compaction-control-rollout-penalty). Treat the cause as conjecture and the behavior as measurable. Early compaction is the signal; its accuracy cost is a separate measurement, and the study found that cost in two of the three models that compacted early.
 
 ### Reversible Collapse Is the Interface Under Test
 
@@ -119,9 +119,9 @@ These assignments, including hybrid layering, are design inferences from the stu
 | Low pressure | Any | Harness threshold as backstop; if the interface is exposed, keep a timing floor so an anxious model does not compact needlessly |
 | High pressure | Calls the interface near the threshold and recovers what it needs | Model-driven, with the overflow fallback kept |
 | High pressure | Declines control or wraps up on the warning | Harness-driven, or hybrid once a reworded warning restores uptake |
-| Any | Compacts early without a timing instruction | Model-driven only with a calibrated timing floor, verified at large budgets |
+| Any | Compacts early without a timing instruction | Model-driven with a calibrated timing floor wherever early compaction costs accuracy at large budgets; where accuracy holds, the floor is optional and the extra edits are priced instead |
 
-For a hybrid, order the triggers so they cannot race: the model's timing threshold sits below the pressure warning, the warning below the harness fallback threshold, and the fallback below the hard limit. The harness then acts only when the model has declined to.
+For a hybrid, order the triggers so they cannot race: the model's timing threshold sits below the pressure warning, the warning below the harness fallback threshold, and the fallback below the hard limit. The harness then acts only when the model has declined to. Check that order at every budget: at tight budgets one large tool output is a large share of the window, which can push the warning and the fallback below a floor calibrated as a fraction of the budget. Lower the floor, cap tool output size, or run a single policy at that budget.
 
 ### Wording Under Test
 
@@ -147,16 +147,19 @@ The study's instruction and warning text are not reproduced in the report or its
 def behavior_profile(tasks, budget):
     calls = [c for t in tasks for c in t.compactions]
     idle = [t for t in tasks if not t.compactions]
+    med = lambda values: median(values) if values else None   # no calls at a budget is a result
     return {
         "uptake": len([t for t in tasks if t.compactions]) / len(tasks),
         "declined": len([t for t in idle if t.warned or t.fallback_fired]) / len(tasks),
         "never_needed": len([t for t in idle if not (t.warned or t.fallback_fired)]) / len(tasks),
-        "compression_factor": median(
-            c.input_tokens_at_decision / c.input_tokens_next_request for c in calls
+        "compression_factor": med(
+            [c.input_tokens_at_decision / c.input_tokens_next_request for c in calls]
         ),
-        "reopen_rate": len([c for c in calls if c.archived_tags & c.tags_retrieved_later]) / max(len(calls), 1),
-        "first_compaction_fill": median(
-            t.compactions[0].input_tokens_at_decision / budget for t in tasks if t.compactions
+        "reopen_rate": (
+            len([c for c in calls if c.archived_tags & c.tags_retrieved_later]) / len(calls) if calls else None
+        ),
+        "first_compaction_fill": med(
+            [t.compactions[0].input_tokens_at_decision / budget for t in tasks if t.compactions]
         ),
         "warning_resolution": Counter(t.first_warning_outcome for t in tasks if t.warned),
         "fallback_firings": sum(t.fallback_count for t in tasks),

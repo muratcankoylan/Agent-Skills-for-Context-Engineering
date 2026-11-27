@@ -586,12 +586,12 @@
     {
       "kind": "LegacyMechanism",
       "legacy_key": "bidirectional-timing-instruction-calibration",
-      "new_digest": "sha256:5b7e579a1dd9410b750f07637c0d6c97e5c577776b1d8fe568fb7ad211ec56e9",
+      "new_digest": "sha256:fbe91234e3d3780e903159871725e9afca3469cb679b1e9d232a0e03f31a2340",
       "new_id": "rec_35de62cd-51fd-500e-9e50-5c1e7178deea",
       "rollback": "pass",
-      "source_bytes_digest": "sha256:8a8ecbe8ce14269f6bac2096beee4ea5a09013496fd502b9c3747062a00d17b7",
+      "source_bytes_digest": "sha256:7075c8974a94a60df17c7199dfc8813cf9ba96e55a101b2e772c5c60003f3289",
       "source_path": "researcher/mechanisms/registry.jsonl",
-      "source_record_digest": "sha256:d01777782651d2a3db68f16a67f13cff4c43b330878c7aed2aad1c2d14cc3f70"
+      "source_record_digest": "sha256:13c37152d041b089be26d5435278759dddb62135be4481d907b7100fcd4ff4d0"
     },
     {
       "kind": "LegacyMechanism",
@@ -908,6 +908,6 @@
   "mode": "dry-run",
   "quarantined": [],
   "quarantined_count": 0,
-  "report_digest": "sha256:422c0832ef11406db6ee1674615c03285dead6e96246662544a16e9b63cf4fe5",
+  "report_digest": "sha256:67e036a265a5da2404b5417f8edd2f457ccfce3893354f42e4ac38c4bacb0a03",
   "schema_version": "1.0.0"
 }
